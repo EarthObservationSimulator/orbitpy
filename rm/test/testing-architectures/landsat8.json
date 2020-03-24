@@ -1,0 +1,152 @@
+{
+  "mission": {
+    "name": "Sustainable Land Imaging - Landsat 8",
+    "acronym": "SLI-Landsat8",
+    "agency": {
+      "agencyType": "GOVERNMENT",
+      "@type": "Agency"
+    },
+    "start": "2017-08-01T00:00:00Z",
+    "duration": "P0Y0M90D",
+    "target": {
+      "latitude": {
+        "minValue": 35,
+        "maxValue": 45,
+        "@type": "QuantitativeValue"
+      },
+      "longitude": {
+        "minValue": -115,
+        "maxValue": -100,
+        "@type": "QuantitativeValue"
+      },
+      "@type": "Region"
+    },
+    "@type": "MissionConcept"
+  },
+  "designSpace": {
+    "spaceSegment": [
+      {
+        "constellationType": "DELTA_HOMOGENOUS",
+        "numberSatellites": [
+          1,
+          2
+        ],
+        "numberPlanes": [
+          1,
+          2
+        ],
+        "orbit": {
+          "orbitType": "SUN_SYNCHRONOUS",
+          "altitude": 705,
+          "inclination": 98.20807124037059,
+          "eccentricity": 0.0,
+          "@type": "Orbit"
+        },
+        "@type": "Constellation"
+      }
+    ],
+    "launchers": [
+      {
+        "name": "AtlasV",
+        "acronym": "AtlasV",
+        "dryMass": 2316,
+        "propellantMass": 20830,
+        "specificImpulse": 450.5,
+        "massToLEO": 9800,
+        "reliability": 1,
+        "cost": 130,
+        "meanTimeBetweenLaunches": "P0Y0M133D",
+        "@type": "LaunchVehicle"
+      },
+      {
+        "name": "Vega",
+        "acronym": "Vega",
+        "dryMass": 147,
+        "propellantMass": 550,
+        "specificImpulse": 315.5,
+        "massToLEO": 1450,
+        "reliability": 1,
+        "cost": 37,
+        "meanTimeBetweenLaunches": "P0Y0M221D",
+        "@type": "LaunchVehicle"
+      }
+    ],
+    "satellites": [
+      {
+        "name": "Landsat 8",
+        "acronym": "Landsat 8",
+        "mass": 2750,
+        "volume": 43.2,
+        "power": 1550,
+        "commBand": [
+          "X"
+        ],
+        "payload": {
+          "name": "Operational Land Imager/Thermal Infrared Sensor",
+          "acronym": "OLI/TIRS",
+          "agency": {
+            "agencyType": "GOVERNMENT",
+            "@type": "Agency"
+          },
+          "mass": 657,
+          "volume": 10.016,
+          "power": 319,
+          "orientation": {
+            "convention": "XYZ",
+            "xRotation": 0,
+            "yRotation": 0,
+            "zRotation": 0,
+            "@type": "Orientation"
+          },
+          "fieldOfView": {
+            "sensorGeometry": "CONICAL",
+            "fullConeAngle": 30,
+            "@type": "FieldOfView"
+          },
+          "techReadinessLevel": 9,
+          "mountType": "BODY",
+          "@type": "Basic Sensor"
+        },
+        "techReadinessLevel": 9,
+        "isGroundCommand": true,
+        "isSpare": false,
+        "propellantType": "MONO_PROP",
+        "stabilizationType": "AXIS_3",
+        "@type": "Satellite"
+      }
+    ],
+    "groundSegment": [
+      {
+        "numberStations": 1,
+        "@type": "GroundNetwork"
+      }
+    ],
+    "groundStations": [
+      {
+        "latitude": 40.5974791834978,
+        "longitude": -104.83875274658203,
+        "elevation": 1570,
+        "commBand": [
+          "X"
+        ],
+        "@type": "GroundStation"
+      }
+    ],
+    "@type": "DesignSpace"
+  },
+  "settings": {
+    "includePropulsion": false,
+    "outputs": {
+      "obsTimeStep": true,
+      "@type": "AnalysisOutputs"
+    },
+    "searchStrategy": "FF",
+    "proxyInstrument": true,
+    "proxyCostRisk": true,
+    "proxyLaunch": true,
+    "proxyOrbits": true,
+    "proxyValue": true,
+    "@type": "AnalysisSettings"
+  },
+  "@type": "TradespaceSearch"
+}
