@@ -1,1 +1,11 @@
-.o
+*.o
+*.exe
+core
+*.a
+*.pyc
+/*.egg-info
+*.csv
+
+orbitpy/oci/bin/genCovGrid
+oc/tests/bin/SystemTest_Analysis
+orbitpy/oci/bin/orbitpropcov

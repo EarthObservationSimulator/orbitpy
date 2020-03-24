@@ -18,7 +18,7 @@ def main(user_dir):
     with open(usf, 'r') as orbit_specs_file:
             miss_specs = util.FileUtilityFunctions.from_json(orbit_specs_file)  
     
-    DEBUG = 1
+    DEBUG = 0
     if DEBUG:
         state_dir = user_dir + 'state/'
         access_dir = user_dir + 'access/'
