@@ -1,0 +1,7 @@
+``orbit.intersatellitecomm`` --- Preprocess User Inputs
+================================================
+
+.. automodule:: orbitpy.intersatellitecomm
+   :members:
+   :undoc-members:
+   :show-inheritance:

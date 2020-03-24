@@ -1,0 +1,354 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>orbit.preprocess — Preprocess User Inputs &mdash; OrbitPy 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="orbit.communications — Communications" href="orbitpy.communications.html" />
+    <link rel="prev" title="orbitpy.orbitpropcov — Orbit Propagation and Coverage" href="orbitpy.orbitpropcov.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> OrbitPy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user_json_desc.html">User JSON Input Description</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api_reference.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.html"><code class="docutils literal notranslate"><span class="pre">orbitpy</span></code> — Package overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.orbitpropcov.html"><code class="docutils literal notranslate"><span class="pre">orbitpy.orbitpropcov</span></code> — Orbit Propagation and Coverage</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">orbit.preprocess</span></code> — Preprocess User Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.communications.html"><code class="docutils literal notranslate"><span class="pre">orbit.communications</span></code> — Communications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.util.html"><code class="docutils literal notranslate"><span class="pre">orbitpy.util</span></code> — Utility functions, classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html"><code class="docutils literal notranslate"><span class="pre">tests</span></code> — Tests</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OrbitPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="api_reference.html">API Reference</a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">orbit.preprocess</span></code> — Preprocess User Inputs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/orbitpy.preprocess.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-orbitpy.preprocess">
+<span id="orbit-preprocess-preprocess-user-inputs"></span><h1><code class="docutils literal notranslate"><span class="pre">orbit.preprocess</span></code> — Preprocess User Inputs<a class="headerlink" href="#module-orbitpy.preprocess" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-preprocess"></span><dl class="field-list simple">
+<dt class="field-odd">synopsis</dt>
+<dd class="field-odd"><p><em>Module to handle pre-processing of user inputs.</em></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Lat must be in the range -pi/2 to pi/2, while lon must be in the range -pi to pi</p></li>
+</ul>
+</div>
+<dl class="class">
+<dt id="orbitpy.preprocess.ConstellationType">
+<em class="property">class </em><code class="sig-prename descclassname">orbitpy.preprocess.</code><code class="sig-name descname">ConstellationType</code><a class="reference internal" href="_modules/orbitpy/preprocess.html#ConstellationType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.ConstellationType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="orbitpy.util.html#orbitpy.util.EnumEntity" title="orbitpy.util.EnumEntity"><code class="xref py py-class docutils literal notranslate"><span class="pre">orbitpy.util.EnumEntity</span></code></a></p>
+<p>Enumeration of recognized constellation types</p>
+<dl class="attribute">
+<dt id="orbitpy.preprocess.ConstellationType.CUSTOM">
+<code class="sig-name descname">CUSTOM</code><em class="property"> = 'CUSTOM'</em><a class="headerlink" href="#orbitpy.preprocess.ConstellationType.CUSTOM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="orbitpy.preprocess.ConstellationType.WALKERDELTA">
+<code class="sig-name descname">WALKERDELTA</code><em class="property"> = 'WALKERDELTA'</em><a class="headerlink" href="#orbitpy.preprocess.ConstellationType.WALKERDELTA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="orbitpy.preprocess.FOVGeometry">
+<em class="property">class </em><code class="sig-prename descclassname">orbitpy.preprocess.</code><code class="sig-name descname">FOVGeometry</code><a class="reference internal" href="_modules/orbitpy/preprocess.html#FOVGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.FOVGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="orbitpy.util.html#orbitpy.util.EnumEntity" title="orbitpy.util.EnumEntity"><code class="xref py py-class docutils literal notranslate"><span class="pre">orbitpy.util.EnumEntity</span></code></a></p>
+<p>Enumeration of recognized instrument sensor geometries.</p>
+<dl class="attribute">
+<dt id="orbitpy.preprocess.FOVGeometry.CONICAL">
+<code class="sig-name descname">CONICAL</code><em class="property"> = 'CONICAL'</em><a class="headerlink" href="#orbitpy.preprocess.FOVGeometry.CONICAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="orbitpy.preprocess.FOVGeometry.CUSTOM">
+<code class="sig-name descname">CUSTOM</code><em class="property"> = 'CUSTOM'</em><a class="headerlink" href="#orbitpy.preprocess.FOVGeometry.CUSTOM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="orbitpy.preprocess.FOVGeometry.RECTANGULAR">
+<code class="sig-name descname">RECTANGULAR</code><em class="property"> = 'RECTANGULAR'</em><a class="headerlink" href="#orbitpy.preprocess.FOVGeometry.RECTANGULAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="orbitpy.preprocess.InstrumentCoverageParameters">
+<em class="property">class </em><code class="sig-prename descclassname">orbitpy.preprocess.</code><code class="sig-name descname">InstrumentCoverageParameters</code><span class="sig-paren">(</span><em class="sig-param">fov_geom=None</em>, <em class="sig-param">fov_cone=None</em>, <em class="sig-param">fov_clock=None</em>, <em class="sig-param">fov_at=None</em>, <em class="sig-param">fov_ct=None</em>, <em class="sig-param">orien_eu_seq1=None</em>, <em class="sig-param">orien_eu_seq2=None</em>, <em class="sig-param">orien_eu_seq3=None</em>, <em class="sig-param">orien_eu_ang1=None</em>, <em class="sig-param">orien_eu_ang2=None</em>, <em class="sig-param">orien_eu_ang3=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#InstrumentCoverageParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.InstrumentCoverageParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Data structure to hold instrument coverage related parameters 
+(field-of-view and orientation)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="orbitpy.preprocess.OrbitParameters">
+<em class="property">class </em><code class="sig-prename descclassname">orbitpy.preprocess.</code><code class="sig-name descname">OrbitParameters</code><span class="sig-paren">(</span><em class="sig-param">id=None</em>, <em class="sig-param">sma=None</em>, <em class="sig-param">ecc=None</em>, <em class="sig-param">inc=None</em>, <em class="sig-param">raan=None</em>, <em class="sig-param">aop=None</em>, <em class="sig-param">ta=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#OrbitParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.OrbitParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Data structure to hold orbit parameters</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="orbitpy.preprocess.PreProcess">
+<em class="property">class </em><code class="sig-prename descclassname">orbitpy.preprocess.</code><code class="sig-name descname">PreProcess</code><span class="sig-paren">(</span><em class="sig-param">specs={}</em>, <em class="sig-param">user_dir=None</em>, <em class="sig-param">oci_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.8/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class to handle pre-processing of user inputs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>epoch</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Mission epoch in Gregorian UTC format</p></li>
+<li><p><strong>covGridFn</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – Coverage grid filename (output file)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="orbitpy.preprocess.PreProcess.compute_grid_res">
+<em class="property">static </em><code class="sig-name descname">compute_grid_res</code><span class="sig-paren">(</span><em class="sig-param">orbits</em>, <em class="sig-param">instru</em>, <em class="sig-param">grid_res_fac</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess.compute_grid_res"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess.compute_grid_res" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute grid resolution to be used for coverage grid generation.
+See SMAD 3rd ed Pg 113. Fig 8-13.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="orbitpy.preprocess.PreProcess.compute_time_step">
+<em class="property">static </em><code class="sig-name descname">compute_time_step</code><span class="sig-paren">(</span><em class="sig-param">orbits</em>, <em class="sig-param">instru</em>, <em class="sig-param">time_res_fac</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess.compute_time_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess.compute_time_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute time step to be used for orbit propagation based on 
+the satelllite orbit and sensor specs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="orbitpy.preprocess.PreProcess.custom_orbits">
+<em class="property">static </em><code class="sig-name descname">custom_orbits</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess.custom_orbits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess.custom_orbits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="orbitpy.preprocess.PreProcess.enumerate_orbits">
+<em class="property">static </em><code class="sig-name descname">enumerate_orbits</code><span class="sig-paren">(</span><em class="sig-param">constel={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess.enumerate_orbits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess.enumerate_orbits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enumerate all the orbits (corresponding to unique satellites) in the constellation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>constel</strong> (<a class="reference external" href="https://docs.python.org/3.8/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Constellation specifications (Custom or Walker Delta)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Orbits (parameters) in the constellation</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list, <a class="reference internal" href="#orbitpy.preprocess.OrbitParameters" title="orbitpy.preprocess.OrbitParameters"><code class="xref py py-class docutils literal notranslate"><span class="pre">orbitpy.preprocess.OrbitParameters</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="orbitpy.preprocess.PreProcess.generate_prop_cov_param">
+<code class="sig-name descname">generate_prop_cov_param</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess.generate_prop_cov_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess.generate_prop_cov_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate propagation and coverage parameters. Each enumerated orbit (in the constellation) 
+corresponds to one set of propagation and coverage parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="orbitpy.preprocess.PreProcess.process_cov_grid">
+<em class="property">static </em><code class="sig-name descname">process_cov_grid</code><span class="sig-paren">(</span><em class="sig-param">user_dir</em>, <em class="sig-param">grid</em>, <em class="sig-param">grid_res</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess.process_cov_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess.process_cov_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process coverage grid (auto or custom) and return the filename with path
+containing the grid info.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="orbitpy.preprocess.PreProcess.process_instru_cov_specs">
+<em class="property">static </em><code class="sig-name descname">process_instru_cov_specs</code><span class="sig-paren">(</span><em class="sig-param">ics={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess.process_instru_cov_specs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess.process_instru_cov_specs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="orbitpy.preprocess.PreProcess.walker_orbits">
+<em class="property">static </em><code class="sig-name descname">walker_orbits</code><span class="sig-paren">(</span><em class="sig-param">data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/orbitpy/preprocess.html#PreProcess.walker_orbits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#orbitpy.preprocess.PreProcess.walker_orbits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="orbitpy.communications.html" class="btn btn-neutral float-right" title="orbit.communications — Communications" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="orbitpy.orbitpropcov.html" class="btn btn-neutral float-left" title="orbitpy.orbitpropcov — Orbit Propagation and Coverage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, BAERI
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

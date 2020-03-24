@@ -1,0 +1,43 @@
+{
+    "epoch": "2017, 1, 15, 22, 30, 20.111",
+    "duration": 0.1,
+    "constellation":{
+        "type": "Walkerdelta",
+        "numberSatellites": 4,
+        "numberPlanes": 1,
+        "relativeSpacing":1,
+        "inc":56,
+        "alt": 700,
+        "ecc": 0.0001,
+        "aop": 0
+    }, 
+    "instrument":{        
+        "@type": "Basic Sensor",
+        "name": "Atom",  
+        "mass": 28, 
+        "volume": 0.12, 
+        "power": 32, 
+        "bitsPerPixel": 8, 
+        "fieldOfView": {
+            "sensorGeometry": "RECTANGULAR",
+            "alongTrackFieldOfView": 2,
+            "crossTrackFieldOfView": 25
+        },
+        "orientation": {
+            "convention": "SIDE_LOOK",
+            "sideLookAngle": 30
+        }        
+    },
+    "groundStations":{
+        "gndStnFn":"groundStations"
+    },
+    "grid":{
+        "customGrid":{
+            "covGridFn": "covGridUSA"
+        }
+    },
+    "settings":{        
+        "customTimeStep": 1
+    }
+
+}

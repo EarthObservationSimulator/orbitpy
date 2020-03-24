@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/mnt/hgfs/Dropbox/my_workspace/dshield/code/oc/GMATsrc/include",
+                "/mnt/hgfs/Dropbox/my_workspace/dshield/code/oc/GMATsrc/console",
+                "/mnt/hgfs/Dropbox/my_workspace/dshield/code/oc/GMATsrc/base",
+                "/mnt/hgfs/Dropbox/my_workspace/dshield/code/oc/src",
+                "/mnt/hgfs/Dropbox/my_workspace/dshield/code/oc/GMATsrc/util",
+                "/mnt/hgfs/Dropbox/my_workspace/dshield/code/third-party-tools/boost_1_63_0",
+                "/mnt/hgfs/Dropbox/my_workspace/dshield/code/oc/GMATsrc/util/interpolator"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}

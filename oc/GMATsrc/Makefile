@@ -83,7 +83,7 @@ OBJECTS = \
 ###############################################################################################
 # Target definitions
 #
-all: $(LIB) install
+all: bare $(LIB) install
 
 $(LIB): $(OBJECTS)
 	@if [ ! -x $(LIB_DIR) ]; then mkdir $(LIB_DIR); fi 

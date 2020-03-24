@@ -1,0 +1,369 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>orbitpy.communications &mdash; OrbitPy 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> OrbitPy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../user_json_desc.html">User JSON Input Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OrbitPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>orbitpy.communications</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for orbitpy.communications</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">.. module:: intersatellitecomm</span>
+
+<span class="sd">:synopsis: *Module to handle computation of inter-satellite communications periods.*</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">Constants</span><span class="p">,</span> <span class="n">MathOperations</span>
+
+<div class="viewcode-block" id="InterSatelliteComm"><a class="viewcode-back" href="../../orbitpy.communications.html#orbitpy.communications.InterSatelliteComm">[docs]</a><span class="k">class</span> <span class="nc">InterSatelliteComm</span><span class="p">:</span>
+   <span class="sd">&quot;&quot;&quot; Class to handle computation of inter-satellite communication periods.</span>
+<span class="sd">       The class takes as input, a directory path containing satellite states </span>
+<span class="sd">       present in separate files. As output, it produces periods of contact</span>
+<span class="sd">       between any two satellites (in separate files for each possible pair </span>
+<span class="sd">       of satellites). </span>
+<span class="sd">   &quot;&quot;&quot;</span>
+   <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_dir</span><span class="p">,</span> <span class="n">sats_state_dir</span><span class="p">,</span> <span class="n">opaque_atmos_height_km</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">user_dir</span> <span class="o">=</span> <span class="n">user_dir</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sats_state_dir</span> <span class="o">=</span> <span class="n">sats_state_dir</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">opaque_atmos_height_km</span> <span class="o">=</span> <span class="n">opaque_atmos_height_km</span>
+      <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comm_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_dir</span> <span class="o">+</span> <span class="s1">&#39;comm/&#39;</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm_dir</span><span class="p">):</span>
+               <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm_dir</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm_dir</span><span class="p">)</span> 
+      <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error in removing and/or creating comm directory.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+<div class="viewcode-block" id="InterSatelliteComm.compute_contacts"><a class="viewcode-back" href="../../orbitpy.communications.html#orbitpy.communications.InterSatelliteComm.compute_contacts">[docs]</a>   <span class="k">def</span> <span class="nf">compute_contacts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">try</span><span class="p">:</span>
+         <span class="n">_path</span><span class="p">,</span> <span class="n">_dirs</span><span class="p">,</span> <span class="n">filenames</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sats_state_dir</span><span class="p">))</span>
+      <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+         <span class="k">pass</span>
+
+      <span class="n">number_of_files</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span>
+
+
+      <span class="k">for</span> <span class="n">indx1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">number_of_files</span><span class="p">):</span>
+
+            <span class="n">sat1_filename</span> <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="n">indx1</span><span class="p">]</span>
+            <span class="n">sat1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sats_state_dir</span><span class="o">+</span><span class="n">sat1_filename</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="n">sat1</span> <span class="o">=</span> <span class="n">sat1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">indx2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">indx1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">number_of_files</span><span class="p">):</span>
+                  
+                  <span class="n">sat2_filename</span> <span class="o">=</span> <span class="n">filenames</span><span class="p">[</span><span class="n">indx2</span><span class="p">]</span>
+
+                  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sats_state_dir</span><span class="o">+</span><span class="n">sat1_filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+                     <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+                     <span class="n">epoch</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+                     <span class="n">epoch</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch</span><span class="p">)[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+
+                  <span class="n">sat2</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sats_state_dir</span><span class="o">+</span><span class="n">sat2_filename</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                  <span class="n">sat2</span> <span class="o">=</span> <span class="n">sat2</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                  
+                  <span class="n">time_s</span> <span class="o">=</span> <span class="n">sat1</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+
+                  <span class="n">sat1_x_km</span> <span class="o">=</span> <span class="n">sat1</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+                  <span class="n">sat1_y_km</span> <span class="o">=</span> <span class="n">sat1</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+                  <span class="n">sat1_z_km</span> <span class="o">=</span> <span class="n">sat1</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+
+                  <span class="n">sat2_x_km</span> <span class="o">=</span> <span class="n">sat2</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+                  <span class="n">sat2_y_km</span> <span class="o">=</span> <span class="n">sat2</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+                  <span class="n">sat2_z_km</span> <span class="o">=</span> <span class="n">sat2</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+
+                  <span class="c1"># Loop over entire mission duration</span>
+                  <span class="n">numTimeSteps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_s</span><span class="p">)</span>
+                  <span class="n">access_log</span> <span class="o">=</span> <span class="p">[]</span>
+                  <span class="n">range_log</span> <span class="o">=</span> <span class="p">[]</span>
+                  <span class="k">for</span> <span class="n">indx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">numTimeSteps</span><span class="p">):</span>
+                     <span class="c1"># Get satellite coordinates in ECI coordinate frame</span>
+                     <span class="n">sat1_position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sat1_x_km</span><span class="p">[</span><span class="n">indx</span><span class="p">],</span> <span class="n">sat1_y_km</span><span class="p">[</span><span class="n">indx</span><span class="p">],</span> <span class="n">sat1_z_km</span><span class="p">[</span><span class="n">indx</span><span class="p">]])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                     <span class="n">sat2_position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sat2_x_km</span><span class="p">[</span><span class="n">indx</span><span class="p">],</span> <span class="n">sat2_y_km</span><span class="p">[</span><span class="n">indx</span><span class="p">],</span> <span class="n">sat2_z_km</span><span class="p">[</span><span class="n">indx</span><span class="p">]])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+                     <span class="n">access_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">InterSatelliteComm</span><span class="o">.</span><span class="n">los_access</span><span class="p">(</span><span class="n">sat1_position</span><span class="p">,</span> <span class="n">sat2_position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opaque_atmos_height_km</span><span class="p">))</span>
+
+                     <span class="n">sat21_km</span> <span class="o">=</span> <span class="n">sat2_position</span> <span class="o">-</span> <span class="n">sat1_position</span>
+                     <span class="n">r_sat21_km</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sat21_km</span><span class="p">,</span> <span class="n">sat21_km</span><span class="p">))</span>
+                     <span class="n">range_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r_sat21_km</span><span class="p">)</span>
+                     
+                  <span class="c1"># Post process to create intervals</span>
+                  <span class="n">interval_boundary</span> <span class="o">=</span> <span class="p">[]</span>
+                  <span class="n">flag</span> <span class="o">=</span> <span class="n">access_log</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                  <span class="k">for</span> <span class="n">indx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">numTimeSteps</span><span class="p">):</span>
+                     <span class="k">if</span> <span class="n">flag</span><span class="o">!=</span><span class="n">access_log</span><span class="p">[</span><span class="n">indx</span><span class="p">]:</span>
+                        <span class="n">interval_boundary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time_s</span><span class="p">[</span><span class="n">indx</span><span class="p">])</span>
+                        <span class="n">flag</span> <span class="o">=</span> <span class="n">access_log</span><span class="p">[</span><span class="n">indx</span><span class="p">]</span>
+
+                  <span class="k">if</span> <span class="n">access_log</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span> <span class="c1"># Means the mission startes off with the satellite seeing each other</span>
+                     <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interval_boundary</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">interval_boundary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time_s</span><span class="p">[</span><span class="n">numTimeSteps</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># There is LOS for complete mission duration</span>
+                     <span class="n">interval_boundary</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">interval_boundary</span>  <span class="c1"># append start of LOS, which is start of mission</span>
+                     
+                  <span class="c1"># interval_boundary should be even, else add the end of mission time to the interval boundary</span>
+                  <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interval_boundary</span><span class="p">)</span><span class="o">%</span><span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                     <span class="n">interval_boundary</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time_s</span><span class="p">[</span><span class="n">numTimeSteps</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+         
+                  <span class="c1"># Write detailed output file</span>
+                  <span class="n">output_detailed_filename</span> <span class="o">=</span> <span class="n">sat1_filename</span><span class="o">+</span><span class="s2">&quot;_to_&quot;</span><span class="o">+</span><span class="n">sat2_filename</span><span class="o">+</span><span class="s2">&quot;_detailed.csv&quot;</span>
+                  <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm_dir</span> <span class="o">+</span> <span class="n">output_detailed_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+                  <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+                  <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                  <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm_dir</span> <span class="o">+</span> <span class="n">output_detailed_filename</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+                     <span class="n">fwriter</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">quoting</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_MINIMAL</span><span class="p">)</span>
+                     <span class="n">fwriter</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;Time [s]&#39;</span><span class="p">,</span> <span class="s1">&#39;Access or No Access&#39;</span><span class="p">,</span> <span class="s1">&#39;Range [km]&#39;</span><span class="p">])</span>
+                     <span class="n">indx</span> <span class="o">=</span> <span class="mi">0</span>
+                     <span class="k">for</span> <span class="n">indx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">time_s</span><span class="p">)):</span>
+                        <span class="n">fwriter</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">time_s</span><span class="p">[</span><span class="n">indx</span><span class="p">],</span> <span class="n">access_log</span><span class="p">[</span><span class="n">indx</span><span class="p">],</span> <span class="n">range_log</span><span class="p">[</span><span class="n">indx</span><span class="p">]])</span>
+                        
+
+                  <span class="n">output_concise_filename</span> <span class="o">=</span> <span class="n">sat1_filename</span><span class="o">+</span><span class="s2">&quot;_to_&quot;</span><span class="o">+</span><span class="n">sat2_filename</span><span class="o">+</span><span class="s2">&quot;_concise.csv&quot;</span>
+                  <span class="c1"># Concise file        </span>
+                  <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm_dir</span> <span class="o">+</span> <span class="n">output_concise_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+                  <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+                  <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                  <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm_dir</span> <span class="o">+</span> <span class="n">output_concise_filename</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">csvfile</span><span class="p">:</span>
+                     <span class="n">fwriter</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">csvfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">quoting</span><span class="o">=</span><span class="n">csv</span><span class="o">.</span><span class="n">QUOTE_MINIMAL</span><span class="p">)</span>
+                     <span class="n">fwriter</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s1">&#39;Access From [s]&#39;</span><span class="p">,</span> <span class="s1">&#39;Access To [s]&#39;</span><span class="p">])</span>
+                     <span class="n">indx</span> <span class="o">=</span> <span class="mi">0</span>
+                     <span class="k">while</span> <span class="n">indx</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">interval_boundary</span><span class="p">):</span>
+                        <span class="n">fwriter</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">interval_boundary</span><span class="p">[</span><span class="n">indx</span><span class="p">],</span> <span class="n">interval_boundary</span><span class="p">[</span><span class="n">indx</span><span class="o">+</span><span class="mi">1</span><span class="p">]])</span>
+                        <span class="n">indx</span> <span class="o">=</span> <span class="n">indx</span> <span class="o">+</span> <span class="mi">2</span></div>
+   
+<div class="viewcode-block" id="InterSatelliteComm.los_access"><a class="viewcode-back" href="../../orbitpy.communications.html#orbitpy.communications.InterSatelliteComm.los_access">[docs]</a>   <span class="nd">@staticmethod</span>
+   <span class="k">def</span> <span class="nf">los_access</span><span class="p">(</span><span class="n">sat1_position_km</span><span class="p">,</span> <span class="n">sat2_position_km</span><span class="p">,</span> <span class="n">opaque_atmos_height_km</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot; Algorithm from Page 198 Fundamental of Astrodynamics and Applications, David A.Vallado is used. The first algorithm</span>
+<span class="sd">          described is used. theta, theta1, theta2 are as defined in the algorithm. The function returns True if LOS exists</span>
+<span class="sd">          between the two satellites, else False.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">r_sat1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sat1_position_km</span><span class="p">,</span> <span class="n">sat1_position_km</span><span class="p">))</span>
+      <span class="n">unit_sat1_position</span> <span class="o">=</span> <span class="n">MathOperations</span><span class="o">.</span><span class="n">vector_normalize</span><span class="p">(</span><span class="n">sat1_position_km</span><span class="p">)</span>
+      
+      <span class="n">r_sat2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">sat2_position_km</span><span class="p">,</span> <span class="n">sat2_position_km</span><span class="p">))</span>    
+      <span class="n">unit_sat2_position</span> <span class="o">=</span> <span class="n">MathOperations</span><span class="o">.</span><span class="n">vector_normalize</span><span class="p">(</span><span class="n">sat2_position_km</span><span class="p">)</span>
+      
+      <span class="c1"># Check if the satellties are on opposite sides of Earth, in which case there is no LOS, and theta = 180 deg</span>
+      <span class="c1"># THis condition tends to give a numerical error, so solve for it independently</span>
+      <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.001</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">unit_sat2_position</span><span class="p">,</span> <span class="n">unit_sat1_position</span><span class="p">)</span>
+      <span class="k">if</span><span class="p">(</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="n">eps</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="n">eps</span><span class="p">):</span>
+         <span class="k">return</span> <span class="kc">False</span>
+      <span class="k">else</span><span class="p">:</span>
+         <span class="n">theta</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+      
+      <span class="n">theta1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">((</span><span class="n">Constants</span><span class="o">.</span><span class="n">radiusOfEarthInKM</span> <span class="o">+</span> <span class="n">opaque_atmos_height_km</span><span class="p">)</span><span class="o">/</span><span class="n">r_sat1</span><span class="p">)</span>
+      <span class="n">theta2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">((</span><span class="n">Constants</span><span class="o">.</span><span class="n">radiusOfEarthInKM</span> <span class="o">+</span> <span class="n">opaque_atmos_height_km</span><span class="p">)</span><span class="o">/</span><span class="n">r_sat2</span><span class="p">)</span>
+      
+      <span class="k">if</span> <span class="p">(</span><span class="n">theta1</span> <span class="o">+</span> <span class="n">theta2</span> <span class="o">&lt;=</span> <span class="n">theta</span><span class="p">):</span>
+         <span class="k">return</span> <span class="kc">False</span>
+      <span class="k">else</span><span class="p">:</span>
+         <span class="k">return</span> <span class="kc">True</span></div></div>
+
+
+<div class="viewcode-block" id="GroundStationComm"><a class="viewcode-back" href="../../orbitpy.communications.html#orbitpy.communications.GroundStationComm">[docs]</a><span class="k">class</span> <span class="nc">GroundStationComm</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Class to handle computation of contact periods between </span>
+<span class="sd">        satellites and ground stations. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_dir</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sats_state_dir</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">gnd_stn_fl</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user_dir</span> <span class="o">=</span> <span class="n">user_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sats_state_dir</span> <span class="o">=</span> <span class="n">sats_state_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gnd_stn_fl</span> <span class="o">=</span> <span class="n">gnd_stn_fl</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gndStn_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user_dir</span> <span class="o">+</span> <span class="s1">&#39;gndStn/&#39;</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gndStn_dir</span><span class="p">):</span>
+               <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gndStn_dir</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gndStn_dir</span><span class="p">)</span> 
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error in removing and/or creating ground station directory.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+<div class="viewcode-block" id="GroundStationComm.compute_contacts"><a class="viewcode-back" href="../../orbitpy.communications.html#orbitpy.communications.GroundStationComm.compute_contacts">[docs]</a>    <span class="k">def</span> <span class="nf">compute_contacts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, BAERI
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

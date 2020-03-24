@@ -4,7 +4,7 @@
 
 
 # Define macros for locations
-SUBS = GMATsrc src test
+SUBS = GMATsrc src tests
 
 all install clean bare runtest:
 	-X=`pwd`; \

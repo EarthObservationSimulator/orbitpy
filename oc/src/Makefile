@@ -6,12 +6,12 @@
 .DEFAULT_GOAL := all
 
 # Define macros for locations
-THIRD_PARTY_DIR = ../../../third-party-tools
+THIRD_PARTY_DIR = ../../third-party-tools
 BASE_ROOT = ..
 GMAT_DIR = $(BASE_ROOT)/GMATsrc
 LIB_DIR = $(BASE_ROOT)/lib
 
-BOOST_ROOT = $(THIRD_PARTY_DIR)/boost_1_63_0
+BOOST_ROOT = $(THIRD_PARTY_DIR)/boost_1_72_0
 
 # Program to make library
 LIB = liboc.a
@@ -64,7 +64,7 @@ OBJECTS = \
 ###############################################################################################
 # Target definitions
 #
-all: $(LIB) install
+all: bare $(LIB) install
 
 $(LIB): $(OBJECTS)
 	@if [ ! -x $(LIB_DIR) ]; then mkdir $(LIB_DIR); fi 

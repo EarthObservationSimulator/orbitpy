@@ -1,0 +1,72 @@
+{
+    "epoch": "2017, 1, 15, 22, 30, 20.111",
+    "duration": 0.2,
+    "constellation":{
+        "type": "Custom",
+        "orbits":[{
+            "id": 11,
+            "sma": 6678.137,
+            "ecc": 0.0,
+            "inc": 96.67657116,
+            "raan": 327.55,
+            "aop": 0,
+            "ta": 0
+        },
+        {
+            "id": 12,
+            "sma": 7678.137,
+            "ecc": 0.0,
+            "inc": 98.67657116,
+            "raan": 327.55,
+            "aop": 0,
+            "ta": 0
+        }]
+    }, 
+    "instrument":{        
+        "@type": "Basic Sensor",
+        "name": "Atom",  
+        "mass": 28, 
+        "volume": 0.12, 
+        "power": 32, 
+        "bitsPerPixel": 8, 
+        "fieldOfView": {
+            "sensorGeometry": "CONICAL",
+            "fullConeAngle": 10
+        },
+        "orientation": {
+            "convention": "SIDE_LOOK",
+            "sideLookAngle": 30
+        }        
+    },
+    "power":{
+    },
+    "grid":{
+        "autoGrid":{
+            "regions":[{
+                "id":1,
+                "latUpper":10,
+                "latLower":1,
+                "lonUpper":45,
+                "lonLower":20                
+            },
+            {
+                "id":2,
+                "latUpper":-30,
+                "latLower":-50,
+                "lonUpper":45,
+                "lonLower":20
+            }
+            ],
+            "covGridFn": "covGrid"
+        }
+    },
+    "settings":{
+        "customTimeStep": 5      
+                     
+    },
+    "_debug":{
+        
+        "customGridRes":1
+    }
+
+}

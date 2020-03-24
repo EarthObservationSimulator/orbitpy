@@ -1,0 +1,247 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>orbitpy.orbitpropcov &mdash; OrbitPy 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> OrbitPy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../user_json_desc.html">User JSON Input Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_reference.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">OrbitPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>orbitpy.orbitpropcov</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for orbitpy.orbitpropcov</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">.. module:: orbitpropcov</span>
+
+<span class="sd">:synopsis: *Module to produce overall mission related information.*</span>
+
+<span class="sd">.. note::  - The pointing of the satellite is fixed to be Nadir-pointing.</span>
+
+<span class="sd">   - Lat must be in the range -pi/2 to pi/2, while lon must be in the range -pi to pi</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">.util</span> <span class="kn">import</span> <span class="n">PropagationCoverageParameters</span>
+
+<div class="viewcode-block" id="OrbitPropCov"><a class="viewcode-back" href="../../orbitpy.orbitpropcov.html#orbitpy.orbitpropcov.OrbitPropCov">[docs]</a><span class="k">class</span> <span class="nc">OrbitPropCov</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Class to handle propagation and coverage of a satellite</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar sat_id: Mission epoch in Gregorian UTC format</span>
+<span class="sd">    :vartype sat_id: int</span>
+<span class="sd">    </span>
+<span class="sd">    :ivar covGridFn: Coverage grid filename (output file)</span>
+<span class="sd">    :vartype _type: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_cov_param</span> <span class="o">=</span> <span class="n">PropagationCoverageParameters</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sat_id</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">sat_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sma</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">sma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ecc</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">ecc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inc</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">inc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raan</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">raan</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aop</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">aop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ta</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">ta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">duration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov_grid_fl</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">cov_grid_fl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sen_type</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">sen_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sen_orien</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">sen_orien</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sen_clock</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">sen_clock</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sen_cone</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">sen_cone</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">step_size</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">step_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sat_state_fl</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">sat_state_fl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sat_acc_fl</span> <span class="o">=</span> <span class="n">prop_cov_param</span><span class="o">.</span><span class="n">sat_acc_fl</span>
+
+<div class="viewcode-block" id="OrbitPropCov.run"><a class="viewcode-back" href="../../orbitpy.orbitpropcov.html#orbitpy.orbitpropcov.OrbitPropCov.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+
+        <span class="c1"># get path to *this* file</span>
+        <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;oci&#39;</span><span class="p">,</span> <span class="s1">&#39;bin&#39;</span><span class="p">,</span> <span class="s1">&#39;orbitpropcov&#39;</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ecc</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raan</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ta</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">),</span> 
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cov_grid_fl</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sen_type</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sen_orien</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sen_clock</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sen_cone</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_size</span><span class="p">),</span> 
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sat_state_fl</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sat_acc_fl</span><span class="p">)</span>
+            <span class="p">],</span> <span class="n">check</span><span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Error executing &quot;orbitpropcov&quot; OC script&#39;</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, BAERI
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
