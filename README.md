@@ -1,7 +1,7 @@
 <h2>Updated the orbits for new GMAT OC module and Reduction & Metrics module.</h2>
 <br/>
 
-Boost was updated from 1.63.0 to 1.72.0 Makefiles need to be changed.
+<b><i>Boost was updated from 1.63.0 to 1.72.0 Makefiles need to be changed.</b></i>
 
 <b>Building the oc and rm:</b>
 
