@@ -2,7 +2,7 @@
     "epoch": "2017, 1, 15, 22, 30, 20.111",
     "duration": 0.1,
     "constellation":{
-        "type": "Walkerdelta",
+        "@type": "Walkerdelta",
         "numberSatellites": 4,
         "numberPlanes": 1,
         "relativeSpacing":1,
@@ -27,6 +27,11 @@
             "convention": "SIDE_LOOK",
             "sideLookAngle": 30
         }        
+    },
+    "maneuverability":{
+        "@type": "ROLLONLY",
+        "rollMin": 15,
+        "rollMax": 35
     },
     "groundStations":{
         "gndStnFn":"groundStations"

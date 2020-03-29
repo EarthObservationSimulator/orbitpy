@@ -1,3 +1,4 @@
+****************************
 User JSON Input Description
 ****************************
 
@@ -31,4 +32,28 @@ Example    2
 Required?  No
 Default    none
 =========  =====
+
+maneuverability
+################
+*Total maneuverability of payload pointing (combining satellite and payload maneuverability)*
+
+@type
+******
+*Only 'FIXED' or 'CONE' or 'ROLLONLY' types are supported*
+
+=========  =====
+Data Type  str
+Format     'FIXED' or 'CONE' or 'ROLLONLY' value
+Example    CONE
+Required?  Yes
+Default    none
+=========  =====
+
+@type = FIXED
+^^^^^^^^^^^^^^
+'FIXED' implies that the payload pointing cannot be changed. 
+No other fields are necessary.
+
+
+
 

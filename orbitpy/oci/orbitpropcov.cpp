@@ -318,13 +318,19 @@ int main(int argc, char *argv[])
    
       // Add sensor to satellite
       if(senType == "CONICAL"){
-         conicalSensor = new ConicalSensor(senCone[0]);
-         conicalSensor->SetSensorBodyOffsetAngles(senOrien[3], senOrien[4], senOrien[5], senOrien[0], senOrien[1], senOrien[2]);
+         conicalSensor = new ConicalSensor(senCone[0]*RAD_PER_DEG);
+         conicalSensor->SetSensorBodyOffsetAngles(senOrien[3]*RAD_PER_DEG, senOrien[4]*RAD_PER_DEG, senOrien[5]*RAD_PER_DEG, senOrien[0], senOrien[1], senOrien[2]);
          sat1->AddSensor(conicalSensor);
 
       }else if(senType == "CUSTOM"){
-         customSensor =  new CustomSensor(senCone, senClock);
-         customSensor->SetSensorBodyOffsetAngles(senOrien[3], senOrien[4], senOrien[5], senOrien[0], senOrien[1], senOrien[2]);
+
+         std::vector<double> senCone_r(senCone.size()); 
+         std::transform(senCone.begin(), senCone.end(), senCone_r.begin(),[](double i){ return i * RAD_PER_DEG; });
+         std::vector<double> senClock_r(senClock.size()); 
+         std::transform(senClock.begin(), senClock.end(), senClock_r.begin(),[](double i){ return i * RAD_PER_DEG; });
+
+         customSensor =  new CustomSensor(senCone_r, senClock_r);
+         customSensor->SetSensorBodyOffsetAngles(senOrien[3]*RAD_PER_DEG, senOrien[4]*RAD_PER_DEG, senOrien[5]*RAD_PER_DEG, senOrien[0], senOrien[1], senOrien[2]);
          sat1->AddSensor(customSensor);
       }
 

@@ -1,8 +1,8 @@
 {
     "epoch": "2017, 1, 15, 22, 30, 20.111",
-    "duration": 0.2,
+    "duration": 1,
     "constellation":{
-        "type": "Custom",
+        "@type": "Custom",
         "orbits":[{
             "id": 11,
             "sma": 6678.137,
@@ -17,7 +17,7 @@
             "sma": 7678.137,
             "ecc": 0.0,
             "inc": 98.67657116,
-            "raan": 327.55,
+            "raan": 45,
             "aop": 0,
             "ta": 0
         }]
@@ -31,23 +31,31 @@
         "bitsPerPixel": 8, 
         "fieldOfView": {
             "sensorGeometry": "CONICAL",
-            "fullConeAngle": 10
+            "fullConeAngle": 50
         },
         "orientation": {
             "convention": "SIDE_LOOK",
-            "sideLookAngle": 30
+            "sideLookAngle": 10
         }        
     },
+    "maneuverability":{
+        "@type": "CONE",
+        "fullConeAngle": "1"
+
+    },
+    "groundStations":{
+        "gndStnFn":"groundStations"
+    },   
     "power":{
     },
     "grid":{
         "autoGrid":{
             "regions":[{
                 "id":1,
-                "latUpper":10,
+                "latUpper":20,
                 "latLower":1,
-                "lonUpper":45,
-                "lonLower":20                
+                "lonUpper":360,
+                "lonLower":0                
             },
             {
                 "id":2,
@@ -66,7 +74,16 @@
     },
     "_debug":{
         
-        "customGridRes":1
+        "customGridRes":0.25,
+        "fieldOfView": {
+            "sensorGeometry": "CONICAL",
+            "fullConeAngle": 10
+        },
+        "1fieldOfView": {
+            "sensorGeometry": "RECTANGULAR",
+            "alongTrackFieldOfView": 2,
+            "crossTrackFieldOfView": 25
+        }
     }
 
 }

@@ -14,11 +14,18 @@ import shutil
 import warnings
 from .util import EnumEntity, PropagationCoverageParameters, FileUtilityFunctions, Constants
 from instrupy.public_library import Instrument
+import instrupy
 
 class ConstellationType(EnumEntity):
     """Enumeration of recognized constellation types"""
     CUSTOM = "CUSTOM",
     WALKERDELTA = "WALKERDELTA"
+
+class ManueverType(EnumEntity):
+    """Enumeration of recognized manuvever types"""
+    FIXED = "FIXED"
+    CONE = "CONE",
+    ROLLONLY = "ROLLONLY"
 
 class FOVGeometry(EnumEntity):
     """Enumeration of recognized instrument sensor geometries."""
@@ -122,8 +129,11 @@ class PreProcess():
                 raise
             try:
                 o = Instrument.from_json(specs["instrument"])
-                [self.instru, self.sen_type, self.sen_orien, self.sen_clock, self.sen_cone] = \
-                    PreProcess.process_instru_cov_specs(FileUtilityFunctions.from_json(o.get_coverage_specs()))     
+                manuv = specs["maneuverability"]
+                #[self.instru, self.sen_type, self.sen_orien, self.sen_clock, self.sen_cone] = \
+                    #PreProcess.process_instru_cov_specs(FileUtilityFunctions.from_json(o.get_coverage_specs()))   
+                [self.instru, self.sen_type, self.sen_orien, self.sen_clock, self.sen_cone] =  \
+                    PreProcess.process_field_of_regard(FileUtilityFunctions.from_json(o.get_coverage_specs()), manuv)  
             except:
                 print('Error in obtaining instrument specifications')
                 raise 
@@ -190,6 +200,104 @@ class PreProcess():
 
 
     @staticmethod
+    def process_field_of_regard(ics = dict(), manuv = dict()):
+        """ Compute field of regard (FOR) for a given manuverability and field-of-view (FOV) specs ad dictionaries"""
+        try:
+            b = InstrumentCoverageParameters(ics["fieldOfView"]["geometry"], 
+                                            ics["fieldOfView"]["coneAnglesVector"], ics["fieldOfView"]["clockAnglesVector"],
+                                            ics["fieldOfView"]["AlongTrackFov"], ics["fieldOfView"]["CrossTrackFov"],
+                                            ics["Orientation"]["eulerSeq1"], ics["Orientation"]["eulerSeq2"], ics["Orientation"]["eulerSeq3"],
+                                            ics["Orientation"]["eulerAngle1"], ics["Orientation"]["eulerAngle2"], ics["Orientation"]["eulerAngle3"]
+                                            )
+        except:
+            print("Error in obtaining instrument coverage specifications. Perhaps required dict field missing.")
+            raise      
+
+        try:
+            mv_type = ManueverType.get(manuv["@type"])
+            if(mv_type is None):
+                raise Exception('No manuever type specified. Specify either "CONE" or "ROLLONLY".')
+            if(mv_type == 'FIXED'):
+                pass
+            elif(mv_type == 'CONE'):
+                mv_cone = 0.5 * float(manuv["fullConeAngle"])
+            elif(mv_type == 'ROLLONLY'):
+                mv_ct_range = float(manuv["rollMax"]) - float(manuv["rollMin"])
+            else:
+                raise Exception('Invalid manuver type. Specify either "CONE" or "ROLLONLY".')                
+        except:
+            print("Error in obtaining manuever specifications.")
+            raise
+
+        if(mv_type == 'FIXED'):
+            pxysen_type = b.fov_geom.name
+            pxysen_at = b.fov_at
+            pxysen_ct = b.fov_ct
+
+        elif(mv_type == 'CONE'):
+            if(b.fov_geom.name == 'CONICAL'):
+                pxysen_type = 'CONICAL'
+                pxysen_at =2*(mv_cone + b.fov_cone[0])
+                pxysen_ct = pxysen_at
+
+            elif(b.fov_geom.name == 'RECTANGULAR'):
+                pxysen_type = 'CONICAL'
+                diag_half_angle = np.rad2deg(np.arccos(np.cos(np.deg2rad(0.5*b.fov_at))*np.cos(np.deg2rad(0.5*b.fov_ct))))
+                pxysen_at = 2*(mv_cone +  diag_half_angle)
+                pxysen_ct = pxysen_at
+
+            else:
+                raise Exception('Invalid FOV geometry')                
+        elif(mv_type == 'ROLLONLY'):
+            if(b.fov_geom.name == 'CONICAL'):
+                print("Approximating FOR as rectangular shape")
+                pxysen_type = 'RECTANGULAR'
+                pxysen_at = 2*(b.fov_cone[0])
+                pxysen_ct = 2*(0.5*mv_ct_range + b.fov_cone[0])
+
+            elif(b.fov_geom.name == 'RECTANGULAR'):
+                pxysen_type = 'RECTANGULAR'
+                pxysen_at = b.fov_at
+                pxysen_ct = mv_ct_range + b.fov_ct
+            else:
+                raise Exception('Invalid FOV geometry')
+        
+        print(pxysen_type)
+        print(pxysen_at)
+        print(pxysen_ct)
+
+        if(pxysen_type == 'CONICAL'):
+            cone = [pxysen_at]
+            clk = [0]
+        elif(pxysen_type == 'RECTANGULAR'):
+            # Get the cone and clock angles from the rectangular FOV specifications.
+            [cone, clk] = instrupy.util.FieldOfView.from_rectangularFOV(pxysen_at, pxysen_ct).get_cone_clock_fov_specs()
+
+        pxysen_clock = [str(i) for i in clk]        
+        pxysen_clock = ','.join(pxysen_clock)        
+        pxysen_cone = [str(i) for i in cone]        
+        pxysen_cone = ','.join(pxysen_cone)
+
+        print(pxysen_cone)
+        print(pxysen_clock)
+
+        # The proxy sensor (sensor with its field-of-view = field-of-regard) has the same oreintation as the actual sensor
+        pxysen_orien = str(b.orien_eu_seq1) + ',' + str(b.orien_eu_seq2) + ',' + str(b.orien_eu_seq3) + ',' + \
+                   str(b.orien_eu_ang1) + ',' + str(b.orien_eu_ang2) + ',' + str(b.orien_eu_ang3)
+
+        proxy_sen = InstrumentCoverageParameters(pxysen_type, 
+                                            cone, clk,
+                                            pxysen_at, pxysen_ct,
+                                            b.orien_eu_seq1, b.orien_eu_seq2, b.orien_eu_seq3,
+                                            b.orien_eu_ang1, b.orien_eu_ang2, b.orien_eu_ang3
+                                            )
+    
+        return [proxy_sen, pxysen_type, pxysen_orien, pxysen_clock, pxysen_cone]
+
+
+
+
+    @staticmethod
     def enumerate_orbits(constel=dict()):
         """ Enumerate all the orbits (corresponding to unique satellites) in the constellation.
         
@@ -202,7 +310,7 @@ class PreProcess():
         
         """
         
-        constel_type = ConstellationType.get(constel['type'])        
+        constel_type = ConstellationType.get(constel['@type'])        
         
         if(constel_type is None):
             raise Exception("Invalid constellation type.")
