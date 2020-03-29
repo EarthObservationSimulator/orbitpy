@@ -1,10 +1,22 @@
+
+
+
+# objects, executables, core dumps
 *.o
 *.exe
 core
 *.a
-*.pyc
-/*.egg-info
+
 *.csv
+
+# compiled Python
+*.pyc
+
+# Python egg metadata, regenerated from source files by setuptools.
+*.egg-info
+
+# Setuptools distribution folder.
+/dist/
 
 # untracked subdirectories
 .vscode
