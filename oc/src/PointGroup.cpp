@@ -61,8 +61,8 @@ PointGroup::PointGroup() :
    numRequestedPoints (0),
    latUpper           (PI_OVER_TWO),
    latLower           (-PI_OVER_TWO),
-   lonUpper           (PI),
-   lonLower           (-PI)
+   lonUpper           (PI), //Vinay TODO: CORRECT THIS. LEADS TO VALID POINTS NOT BEING ADDED.
+   lonLower           (-PI) //Vinay TODO: CORRECT THIS. LEADS TO VALID POINTS NOT BEING ADDED.
 {
    // lat, lon, and coords are all empty at the start
 }
