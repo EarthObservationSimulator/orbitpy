@@ -56,7 +56,7 @@
 #include "oci_utils.h"
 
 #define DEBUG_CONSISE
-//#define DEBUG_CHK_INPS
+//define DEBUG_CHK_INPS
 
 using namespace std;
 using namespace GmatMathUtil;
@@ -74,6 +74,7 @@ int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
     }
 
     string line;
+    getline(in,line); // skip header
     while (getline(in,line))
     {
       stringstream ss(line);
@@ -83,10 +84,6 @@ int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
          string substr;
          std::getline( ss, substr, ',' );
          vecStrOut.push_back( substr );
-      }
-     
-      if(vecStrOut[0] == "" or vecStrOut[0] == "regi"){
-         continue;
       }
       // The first two entries in the file are the region index and grid point index
       Real lat = stod(vecStrOut[2]);
@@ -113,7 +110,7 @@ int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
  * @param duration mission duration in days
  * @param covGridFp coverage grid file path and name
  * @param senType sensor type
- * @param senOrien sensor orientation (euler angles and sequence)
+ * @param senOrien sensor orientation (euler angles in degrees and sequence)
  * @param senClock sensor clock angles in degrees
  * @param senCone sensor cone angles in degrees
  * @param stepSize propagation step size
@@ -319,18 +316,16 @@ int main(int argc, char *argv[])
       // Add sensor to satellite
       if(senType == "CONICAL"){
          conicalSensor = new ConicalSensor(senCone[0]*RAD_PER_DEG);
-         conicalSensor->SetSensorBodyOffsetAngles(senOrien[3]*RAD_PER_DEG, senOrien[4]*RAD_PER_DEG, senOrien[5]*RAD_PER_DEG, senOrien[0], senOrien[1], senOrien[2]);
+         conicalSensor->SetSensorBodyOffsetAngles(senOrien[3], senOrien[4], senOrien[5], senOrien[0], senOrien[1], senOrien[2]); // careful: angle in degrees
          sat1->AddSensor(conicalSensor);
-
-      }else if(senType == "CUSTOM"){
+      }else if(senType == "RECTANGULAR" || senType == "CUSTOM"){
 
          std::vector<double> senCone_r(senCone.size()); 
          std::transform(senCone.begin(), senCone.end(), senCone_r.begin(),[](double i){ return i * RAD_PER_DEG; });
          std::vector<double> senClock_r(senClock.size()); 
          std::transform(senClock.begin(), senClock.end(), senClock_r.begin(),[](double i){ return i * RAD_PER_DEG; });
-
          customSensor =  new CustomSensor(senCone_r, senClock_r);
-         customSensor->SetSensorBodyOffsetAngles(senOrien[3]*RAD_PER_DEG, senOrien[4]*RAD_PER_DEG, senOrien[5]*RAD_PER_DEG, senOrien[0], senOrien[1], senOrien[2]);
+         customSensor->SetSensorBodyOffsetAngles(senOrien[3], senOrien[4], senOrien[5], senOrien[0], senOrien[1], senOrien[2]); // careful: angle in degrees
          sat1->AddSensor(customSensor);
       }
 
@@ -348,7 +343,7 @@ int main(int argc, char *argv[])
      
       // Initialize the coverage checker
       covChecker = new CoverageChecker(pGroup,sat1);
-      covChecker->SetComputePOIGeometryData(true);
+      covChecker->SetComputePOIGeometryData(true); //TODO: Check if this can be set to false. 
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("*** Coverage Checker created!!!!\n");
       #endif
@@ -422,7 +417,7 @@ int main(int argc, char *argv[])
       
       if(senType == "Conical"){
          delete    conicalSensor;
-      }else if(senType == "Custom"){
+      }else if(senType == "Custom" || senType=="Rectangular"){
          delete    customSensor;
       }      
       delete    earth;
@@ -469,7 +464,7 @@ int main(int argc, char *argv[])
             satAcc << std::setprecision(prc) << ev.GetObsPosInertial()[2] << "," ;
             satAcc << std::setprecision(prc) << ev.GetObsVelInertial()[0] << "," ;
             satAcc << std::setprecision(prc) << ev.GetObsVelInertial()[1] << "," ;
-            satAcc << std::setprecision(prc) << ev.GetObsVelInertial()[2] << "\n" ;     
+            satAcc << std::setprecision(prc) << ev.GetObsVelInertial()[2] << "\n" ;    
       }
       satAcc.close();  
       

@@ -1,5 +1,5 @@
 {
-    "epoch": "2018, 1, 15, 12, 0, 0",
+    "epoch": "2017, 1, 15, 22, 30, 20.111",
     "duration": 0.1,
     "constellation":{
         "@type": "Custom",
@@ -22,21 +22,36 @@
             "ta": 0
         }]
     }, 
-    "instrument":    {        
-        "@type": "Basic Sensor",
-        "name": "Atom",  
-        "mass": 28, 
-        "volume": 0.12, 
-        "power": 32, 
-        "bitsPerPixel": 8, 
-        "fieldOfView": {
-            "sensorGeometry": "CONICAL",
-            "fullConeAngle": 10
-        },
+    "instrument":{
+        "@type": "Synthetic Aperture Radar",
+        "name": "Seasat-A",  
+        "mass": 243, 
+        "volume": 2.5, 
+        "power": 500, 
         "orientation": {
             "convention": "SIDE_LOOK",
-            "sideLookAngle": 0
-        }        
+            "sideLookAngle": 20.5
+        },
+        "dataRate": 110,
+        "pulseWidth": 33.4e-6,
+        "antennaAlongTrackDim": 10.7,
+        "antennaCrossTrackDim": 2.16, 
+        "antennaApertureEfficiency": 0.6, 
+        "operatingFrequency": 1.2757e9, 
+        "peakTransmitPower": 1000, 
+        "chirpBandwidth": 19e6,      
+        "minimumPRF": 1463, 
+        "maximumPRF": 1640, 
+        "radarLosses": 3.5, 
+        "sceneNoiseTemp": 290, 
+        "bitsPerPixel": 5, 
+        "systemNoiseFigure": 5.11,
+        "sigmaNEZ0threshold": -10, 
+        "_references":  ["The Seasat-A Synthetic Aperture Radar System, Rolando L.Jordan 1980",
+                         "Spaceborne SAR Study: LDRD ’92 Final Report",
+                         "https://directory.eoportal.org/web/eoportal/satellite-missions/s/seasat"
+                        ]
+          
     }
     ,
     "maneuverability":{
@@ -70,7 +85,7 @@
         }
     },
     "settings":{
-        "customTimeStep": 0.5     
+        "customTimeStep": 0.1     
                      
     },
     "_debug":{

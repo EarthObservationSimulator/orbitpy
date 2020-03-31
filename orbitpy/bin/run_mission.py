@@ -24,7 +24,7 @@ def main(user_dir):
         access_dir = user_dir + 'access/'
         comm_dir = user_dir + 'comm/'
         gndstn_dir = user_dir + 'gndstn/'
-        cov_grid_fl = user_dir + 'covGridUSA'
+        cov_grid_fl = user_dir + 'covGrid'
         gnd_stn_fl = user_dir + str(miss_specs['groundStations']['gndStnFn'])
     else:
         # Preprocess

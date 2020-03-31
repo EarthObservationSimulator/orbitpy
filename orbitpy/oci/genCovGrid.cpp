@@ -122,6 +122,13 @@ int main(int argc, char *argv[])
       lat_deg = latArray[gpi] * DEG_PER_RAD;
       lon_deg = lonArray[gpi] * DEG_PER_RAD;
 
+      // Bring the longitude value in the range -180 to +!80 deg.
+      if(lon_deg>180){
+        lon_deg = lon_deg - 360;
+      }else if(lon_deg<-180){
+        lon_deg = lon_deg + 360;
+      }
+
       covGrid << rgi << ",";
       covGrid << gpi << ",";
       covGrid << lat_deg << ",";

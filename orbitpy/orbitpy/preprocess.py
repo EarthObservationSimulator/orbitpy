@@ -262,12 +262,9 @@ class PreProcess():
             else:
                 raise Exception('Invalid FOV geometry')
         
-        print(pxysen_type)
-        print(pxysen_at)
-        print(pxysen_ct)
 
         if(pxysen_type == 'CONICAL'):
-            cone = [pxysen_at]
+            cone = [0.5*pxysen_at]
             clk = [0]
         elif(pxysen_type == 'RECTANGULAR'):
             # Get the cone and clock angles from the rectangular FOV specifications.
@@ -277,9 +274,6 @@ class PreProcess():
         pxysen_clock = ','.join(pxysen_clock)        
         pxysen_cone = [str(i) for i in cone]        
         pxysen_cone = ','.join(pxysen_cone)
-
-        print(pxysen_cone)
-        print(pxysen_clock)
 
         # The proxy sensor (sensor with its field-of-view = field-of-regard) has the same oreintation as the actual sensor
         pxysen_orien = str(b.orien_eu_seq1) + ',' + str(b.orien_eu_seq2) + ',' + str(b.orien_eu_seq3) + ',' + \
