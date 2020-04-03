@@ -129,10 +129,8 @@ class PreProcess():
                 raise
             try:
                 o = Instrument.from_json(specs["instrument"])
-                manuv = specs["maneuverability"]
-                #[self.instru, self.sen_type, self.sen_orien, self.sen_clock, self.sen_cone] = \
-                    #PreProcess.process_instru_cov_specs(FileUtilityFunctions.from_json(o.get_coverage_specs()))   
-                [self.instru, self.sen_type, self.sen_orien, self.sen_clock, self.sen_cone] =  \
+                manuv = specs["maneuverability"]  
+                [self.instru, self.prxy_sen, self.prxy_sen_type, self.prxy_sen_orien, self.prxy_sen_clock, self.prxy_sen_cone] =  \
                     PreProcess.process_field_of_regard(FileUtilityFunctions.from_json(o.get_coverage_specs()), manuv)  
             except:
                 print('Error in obtaining instrument specifications')
@@ -275,7 +273,7 @@ class PreProcess():
         pxysen_cone = [str(i) for i in cone]        
         pxysen_cone = ','.join(pxysen_cone)
 
-        # The proxy sensor (sensor with its field-of-view = field-of-regard) has the same oreintation as the actual sensor
+        # The proxy sensor (sensor with its field-of-view = field-of-regard) has the same orientation as the actual sensor
         pxysen_orien = str(b.orien_eu_seq1) + ',' + str(b.orien_eu_seq2) + ',' + str(b.orien_eu_seq3) + ',' + \
                    str(b.orien_eu_ang1) + ',' + str(b.orien_eu_ang2) + ',' + str(b.orien_eu_ang3)
 
@@ -286,7 +284,13 @@ class PreProcess():
                                             b.orien_eu_ang1, b.orien_eu_ang2, b.orien_eu_ang3
                                             )
     
-        return [proxy_sen, pxysen_type, pxysen_orien, pxysen_clock, pxysen_cone]
+        print(pxysen_type)
+        print(pxysen_at)
+        print(pxysen_ct)
+        print(pxysen_clock)
+        print(pxysen_cone)
+        
+        return [b, proxy_sen, pxysen_type, pxysen_orien, pxysen_clock, pxysen_cone]
 
 
 
@@ -368,7 +372,6 @@ class PreProcess():
                 print(orb_id, sma, ecc, inc, raan, aop, ta)
 
         return orbits
-        #raise Exception("Sorry! Walker Delta constellation type not yet supported!")
 
 
     def generate_prop_cov_param(self):
@@ -383,7 +386,7 @@ class PreProcess():
             sat_acc_fl = self.access_dir +'sat'+str(orb.id)+'_accessInfo'
             pcp = PropagationCoverageParameters(sat_id=orb.id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                      raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
-                     sen_type=self.sen_type, sen_orien=self.sen_orien, sen_clock=self.sen_clock, sen_cone=self.sen_cone, 
+                     sen_type=self.prxy_sen_type, sen_orien=self.prxy_sen_orien, sen_clock=self.prxy_sen_clock, sen_cone=self.prxy_sen_cone, 
                      step_size=self.time_step, sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl)
 
             prop_cov_param.append(pcp)
