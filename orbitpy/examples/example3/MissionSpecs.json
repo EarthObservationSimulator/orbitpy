@@ -14,7 +14,7 @@
         },
         {
             "id": 12,
-            "sma": 7678.137,
+            "sma": 6678.137,
             "ecc": 0.0,
             "inc": 98.67657116,
             "raan": 45,
@@ -47,6 +47,7 @@
         "bitsPerPixel": 5, 
         "systemNoiseFigure": 5.11,
         "sigmaNEZ0threshold": -10, 
+        "sceneLength2AltRatio":0.0714,
         "_references":  ["The Seasat-A Synthetic Aperture Radar System, Rolando L.Jordan 1980",
                          "Spaceborne SAR Study: LDRD ’92 Final Report",
                          "https://directory.eoportal.org/web/eoportal/satellite-missions/s/seasat"
@@ -69,14 +70,14 @@
             "regions":[{
                 "id":1,
                 "latUpper":20,
-                "latLower":1,
+                "latLower":15,
                 "lonUpper":360,
                 "lonLower":0                
             },
             {
                 "id":2,
                 "latUpper":-30,
-                "latLower":-50,
+                "latLower":-35,
                 "lonUpper":45,
                 "lonLower":20
             }
@@ -85,7 +86,7 @@
         }
     },
     "settings":{
-        "customTimeStep": 0.1     
+        "customTimeStep": 1     
                      
     },
     "_debug":{

@@ -31,7 +31,7 @@
         "bitsPerPixel": 8, 
         "fieldOfView": {
             "sensorGeometry": "CONICAL",
-            "fullConeAngle": 10
+            "fullConeAngle": 20
         },
         "orientation": {
             "convention": "SIDE_LOOK",
@@ -41,7 +41,7 @@
     ,
     "maneuverability":{
         "@type": "FIXED",
-        "fullConeAngle": "1"
+        "fullConeAngle": "120"
 
     },
     "groundStations":{
@@ -55,22 +55,15 @@
                 "id":1,
                 "latUpper":20,
                 "latLower":1,
-                "lonUpper":360,
+                "lonUpper":260,
                 "lonLower":0                
-            },
-            {
-                "id":2,
-                "latUpper":-30,
-                "latLower":-50,
-                "lonUpper":45,
-                "lonLower":20
             }
             ],
             "covGridFn": "covGrid"
         }
     },
     "settings":{
-        "customTimeStep": 0.5     
+        "customTimeStep": 1     
                      
     },
     "_debug":{

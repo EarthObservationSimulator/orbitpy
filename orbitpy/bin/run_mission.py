@@ -57,6 +57,7 @@ def main(user_dir):
         gnd_stn_comm = communications.GroundStationComm(user_dir, state_dir, gndstn_dir, gnd_stn_fl)
         gnd_stn_comm.compute_all_contacts()
 
+    '''
     # Compute observational data-metrics
     print("Computing observational data metrics") 
 
@@ -80,7 +81,7 @@ def main(user_dir):
 
         accessInfo_fl = os.path.join(access_dir, AccessInfo_file)
 
-        ''' Extract the satellite index as written in the Access filename. '''
+        # Extract the satellite index as written in the Access filename. 
         temp_AccessInfo_filepath = accessInfo_fl.split(os.path.sep)
         temp_last_index = len(temp_AccessInfo_filepath) - 1
         satIndx = temp_AccessInfo_filepath[temp_last_index].split('_')[0]
@@ -89,6 +90,7 @@ def main(user_dir):
         x.dshield_generate_level0_data_metrics(cov_grid_fl, accessInfo_fl,
                                        level0dataMetrics_filepath[indx])
         indx = indx + 1
+    '''
 
 
 

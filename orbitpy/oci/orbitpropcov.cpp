@@ -57,6 +57,7 @@
 
 #define DEBUG_CONSISE
 //define DEBUG_CHK_INPS
+#define COMPUTE_AND_STORE_POI_GEOMETRY
 
 using namespace std;
 using namespace GmatMathUtil;
@@ -233,6 +234,7 @@ int main(int argc, char *argv[])
    readCovGridFile(covGridFp, lats, lons);  
    PointGroup               *pGroup = new PointGroup();
    pGroup->AddUserDefinedPoints(lats, lons);
+   Integer numGridPoints = lats.size();
    #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("**** Finished reading in Coverage grid ******\n");
    #endif
@@ -272,8 +274,11 @@ int main(int argc, char *argv[])
                                              "TATCLagrangeInterpolator", 6, 7);
 
 
-      // Create the container to hold the coverage events
-      std::vector<IntervalEventReport> coverageEvents;
+      #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
+         // Create the container to hold the coverage events
+         std::vector<IntervalEventReport> coverageEvents;
+      #endif
+      
       
       clock_t t0 = clock(); // for timing
 
@@ -343,7 +348,15 @@ int main(int argc, char *argv[])
      
       // Initialize the coverage checker
       covChecker = new CoverageChecker(pGroup,sat1);
-      covChecker->SetComputePOIGeometryData(true); //TODO: Check if this can be set to false. 
+      
+      #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
+         covChecker->SetComputePOIGeometryData(true); 
+      #else
+         covChecker->SetComputePOIGeometryData(false); 
+      #endif
+      
+      
+      
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("*** Coverage Checker created!!!!\n");
       #endif
@@ -352,9 +365,10 @@ int main(int argc, char *argv[])
       Real           startDate   = date->GetJulianDate();
       IntegerArray   loopPoints;
 
-      /** Write satellite access files **/
+      /** Write satellite states and access files **/
       const int prc = std::numeric_limits<double>::digits10 + 1; // set to maximum precision
 
+      // Satellite state file initialization
       ofstream satOut; 
       satOut.open(satFn.c_str(),ios::binary | ios::out);
       satOut << "Satellite states are in Earth-Centered-Inertial equatorial plane.\n";
@@ -362,6 +376,16 @@ int main(int argc, char *argv[])
       satOut << "All time is referenced to the Epoch.\n";
       satOut << "Mission Duration [Days] is "<< duration << "\n";
       satOut << "Time[s],X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]\n";
+
+
+      // Write the access file in matrix format with rows as the time and columns as ground-points. 
+      // Each entry in a cell of the matrix corresponds to 0 (No Access) or 1 (Access).
+      ofstream satAcc; 
+      satAcc.open(satAccFn.c_str(),ios::binary | ios::out);
+      satAcc << "Satellite states are in Earth-Centered-Inertial equatorial plane.\n";
+      satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
+      satAcc << "All time is referenced to the Epoch.\n";
+      satAcc << "Mission Duration [Days] is "<< duration << "\n";
       
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("*** About to Propagate!!!!\n");
@@ -389,23 +413,47 @@ int main(int argc, char *argv[])
          satOut << std::setprecision(prc) << cartState[0] << "," ;
          satOut << std::setprecision(prc) << cartState[1] << "," ;
          satOut << std::setprecision(prc) << cartState[2] << "\n" ; 
-         
-         nSteps++;
-      
+
+         // Write access data         
+         // Make array with '1' (Access) in the cells corresponding to indices of gp's
+         // accessed, and '0' (No Access) elsewhere.
+         if(loopPoints.size()>0){
+            // If no ground-points are accessed at this time, skip writing the row altogether.
+            IntegerArray accessRow(numGridPoints,0);
+            for(int j = 0; j<loopPoints.size();j++){
+               accessRow[loopPoints[j]] = 1;
+            }
+            satAcc << std::setprecision(prc) << nSteps * stepSize << "," ;
+            for(int k=0; k<numGridPoints; k++){
+               if(accessRow[k] == 1){
+                  satAcc<< "1" << ",";
+               }else{
+                  satAcc<< ",";
+               }
+               
+            }
+            satAcc << "\n";
+            }        
+         nSteps++;      
       }
       satOut.close();
+
+      satAcc.close(); 
+
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage(" --- propagation completed\n");
       #endif
       
+      #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
       // Compute coverage data
       coverageEvents = covChecker->ProcessCoverageData();
       MessageInterface::ShowMessage(" --- ProcessCoverageData completed \n");
       if (coverageEvents.empty())
       {
          MessageInterface::ShowMessage("--- !! No events !!\n");
-         exit(0);
+         //exit(0);
       }
+      #endif
       
       //Delete un-needed objects
       delete    covChecker;
@@ -431,19 +479,24 @@ int main(int argc, char *argv[])
       Real timeSpent = ((Real) (clock() - t0)) / CLOCKS_PER_SEC;
       MessageInterface::ShowMessage("TIME SPENT is %12.10f seconds\n",timeSpent);
 
-      
-      #ifdef DEBUG_CONSISE
-      MessageInterface::ShowMessage("Writing results\n");
-      #endif
-
-      /** Write satellite access files **/
-      ofstream satAcc; 
-      satAcc.open(satAccFn.c_str(),ios::binary | ios::out);
-      satAcc << "Satellite states are in Earth-Centered-Inertial equatorial plane.\n";
-      satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
-      satAcc << "All time is referenced to the Epoch.\n";
-      satAcc << "Mission Duration [Days] is "<< duration << "\n";
-      satAcc << "eventNum,gpi,accessFrom[Days],duration[s],time[Days],x[km],y[km],z[km],vx[km/s],vy[km/s],vz[km/s]\n";
+            
+      #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
+      MessageInterface::ShowMessage("       =======================================================================\n");
+      MessageInterface::ShowMessage("       ==================== Brief POI Geometry Report ========================\n");
+      MessageInterface::ShowMessage("       POI index: Ground point index                               \n");
+      MessageInterface::ShowMessage("       lat: Latitude of point in degrees                     \n");
+      MessageInterface::ShowMessage("       lon: Longitude of point in degrees                    \n");
+      MessageInterface::ShowMessage("       Mid access date: Date of the middle of the access (Julian Day UT1) \n");
+      MessageInterface::ShowMessage("       Access duration: Access duration in seconds                 \n");
+      MessageInterface::ShowMessage("       obsZenith: Satellite zenith in degrees                      \n");
+      MessageInterface::ShowMessage("       obsAzimuth : Satellite azimuth in degrees                   \n");
+      MessageInterface::ShowMessage("       obsRange   : Satellite range in kilometers                  \n");
+      MessageInterface::ShowMessage("       sunZenith   : Satellite zenith in degrees                   \n");
+      MessageInterface::ShowMessage("       sunAzimuth   : Satellite azimuth in degrees                 \n");
+      MessageInterface::ShowMessage("       =======================================================================\n");
+      MessageInterface::ShowMessage("       =======================================================================\n");
+      MessageInterface::ShowMessage("  ");
+      satAcc << "    POI index    lat      lon      obsZenith      obsAzimuth     obsRange    SunZenith      SunAzimuth\n";
 
       for (UnsignedInt eventIdx = 0; eventIdx < coverageEvents.size(); eventIdx++)
       {
@@ -454,21 +507,27 @@ int main(int argc, char *argv[])
                                              currEvent.GetStartDate().GetJulianDate()) * GmatTimeConstants::SECS_PER_DAY;
             VisiblePOIReport ev = discreteEvents[int(discreteEvents.size()/2)]; // The 1/2 factor allows to access the middle of the access period.
      
-            satAcc << eventIdx << "," ;
-            satAcc << poiIndex << "," ;
-            satAcc << std::setprecision(prc) << currEvent.GetStartDate().GetJulianDate() - startDate << "," ;
-            satAcc << std::setprecision(prc) << eventDuration << "," ;
-            satAcc << std::setprecision(prc) << (ev.GetStartDate().GetJulianDate() - startDate) << "," ;
-            satAcc << std::setprecision(prc) << ev.GetObsPosInertial()[0] << "," ;
-            satAcc << std::setprecision(prc) << ev.GetObsPosInertial()[1] << "," ;
-            satAcc << std::setprecision(prc) << ev.GetObsPosInertial()[2] << "," ;
-            satAcc << std::setprecision(prc) << ev.GetObsVelInertial()[0] << "," ;
-            satAcc << std::setprecision(prc) << ev.GetObsVelInertial()[1] << "," ;
-            satAcc << std::setprecision(prc) << ev.GetObsVelInertial()[2] << "\n" ;    
+            Rvector3 *vec = pGroup->GetPointPositionVector(poiIndex);
+            Real lon = (ATan(vec->GetElement(1),vec->GetElement(0))
+                           *DEG_PER_RAD);
+            Real lat = (ASin(vec->GetElement(2)/vec->GetMagnitude())
+                           *DEG_PER_RAD);
+
+            MessageInterface::ShowMessage(
+                           "     %d    %le      %le      %le      %le      %le      %le      %le      %le     %le \n",
+                           poiIndex,
+                           lat,
+                           lon,
+                           ev.GetStartDate().GetJulianDate(),
+                           eventDuration,
+                           ev.GetObsZenith()*DEG_PER_RAD,
+                           ev.GetObsAzimuth()*DEG_PER_RAD,
+                           ev.GetObsRange(),
+                           ev.GetSunZenith()*DEG_PER_RAD,
+                           ev.GetSunAzimuth()*DEG_PER_RAD);
       }
-      satAcc.close();  
-      
-      
+
+      #endif       
       
       MessageInterface::ShowMessage("*** END ***\n");
    
