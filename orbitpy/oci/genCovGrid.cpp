@@ -79,8 +79,7 @@ int main(int argc, char *argv[])
     string covGridFn;
     std::vector<std::string> _regionInf(argc-2);
     RealArray regionIDArray, latArray, lonArray;    
-
-    if(argc<4){
+    if(argc<3){
       MessageInterface::ShowMessage("Error inprocessing inputs.\n");
       MessageInterface::ShowMessage("Please make sure to input coverage grid filename and \
                                      atleast one region specifications.\n");
@@ -92,6 +91,7 @@ int main(int argc, char *argv[])
     /** Process each region seperately **/
     for(int i=2; i<argc; i++){
       _regionInf[i-2] = argv[i];
+      
       RealArray x(oci_utils::convertStringVectortoRealVector(oci_utils::extract_dlim_str(_regionInf[i-2], ',')));
 
       /** Extract region specifications **/
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
       lat_deg = latArray[gpi] * DEG_PER_RAD;
       lon_deg = lonArray[gpi] * DEG_PER_RAD;
 
-      // Bring the longitude value in the range -180 to +!80 deg.
+      // Bring the longitude value in the range -180 to +180 deg.
       if(lon_deg>180){
         lon_deg = lon_deg - 360;
       }else if(lon_deg<-180){
