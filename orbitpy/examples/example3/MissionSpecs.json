@@ -5,7 +5,7 @@
         "@type": "Custom",
         "orbits":[{
             "id": 11,
-            "sma": 6678.137,
+            "sma": 6878.137,
             "ecc": 0.0,
             "inc": 96.67657116,
             "raan": 327.55,
@@ -14,10 +14,10 @@
         },
         {
             "id": 12,
-            "sma": 6678.137,
+            "sma": 6878.137,
             "ecc": 0.0,
-            "inc": 98.67657116,
-            "raan": 45,
+            "inc": 88.67657116,
+            "raan": 127.55,
             "aop": 0,
             "ta": 0
         }]
@@ -56,8 +56,9 @@
     }
     ,
     "maneuverability":{
-        "@type": "FIXED",
-        "fullConeAngle": "1"
+        "@type": "ROLLONLY",
+        "rollMin": 25,
+        "rollMax": 45
 
     },
     "groundStations":{

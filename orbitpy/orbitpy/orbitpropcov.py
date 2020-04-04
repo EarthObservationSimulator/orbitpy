@@ -11,9 +11,11 @@
 
 import numpy as np
 import os
+import shutil
 import subprocess
+import pandas as pd
 from .util import PropagationCoverageParameters
-
+from instrupy.public_library import Instrument
 class OrbitPropCov:
     """ Class to handle propagation and coverage of a satellite
     
@@ -55,4 +57,82 @@ class OrbitPropCov:
             ], check= True)
         except:
             raise RuntimeError('Error executing "orbitpropcov" OC script')
+
+    @staticmethod
+    def correct_access_files(access_dir, step_size):
+        """ When the instrument takes observations at purely side-looking geometry (no quint),
+            post-process the access files to indicate access at middle of access-interval. 
+            The middle of access-interval is approximately the time at which the instrument shall
+            be at side-looking geometry to the target ground-point.
+        """              
+        # rename access_dir
+        old_access_dir = access_dir[0:-1]+'old/'
+        if os.path.exists(old_access_dir):
+                    shutil.rmtree(old_access_dir)        
+        os.rename(access_dir, old_access_dir) 
+        # make empty access_dir to store the corrected access data
+        new_access_dir = access_dir
+        os.makedirs(new_access_dir)
+
+        try:
+            _path, _dirs, _OldAccessInfo_files = next(os.walk(old_access_dir))
+        except StopIteration:
+            pass
+
+        for OldAccessInfo_file in _OldAccessInfo_files:
+
+            old_accessInfo_fl = os.path.join(old_access_dir, OldAccessInfo_file)
+            new_accessInfo_fl = os.path.join(new_access_dir, OldAccessInfo_file)
+
+            df = pd.read_csv(old_accessInfo_fl, skiprows = 4)
+            df = df.set_index('Time[s]')
+            dfnew =  pd.DataFrame(np.nan, index=df.index, columns=df.columns)
+            # iterate over all the columns (ground-points)
+            for gpi in range(0, df.shape[1]):
+                # Select column by index position using iloc[]
+                gp_acc = df.iloc[: , gpi]
+                gp_acc = gp_acc.dropna()
+                #print(gp_acc.index)
+                # search for consequitive (in time) access, and replace by access 
+                # at (approximately) the middel of the access period
+                mid_access = []
+                if(gp_acc.index.size>0): 
+                    acc_evt = []                 
+                    t0 = gp_acc.index[0]
+                    acc_evt.append(t0)
+                    for j in range(1,len(gp_acc.index)):
+                        if(gp_acc.index[j] == t0 + step_size):
+                            # same access event                            
+                            t0 = gp_acc.index[j]
+                            acc_evt.append(t0)
+                        else:
+                            # new access event
+                            mid_access.append(acc_evt[int(0.5*len(acc_evt))])
+                            acc_evt = []
+                            t0 = gp_acc.index[j]
+                            acc_evt.append(t0)
+                    # append the mid access time of the final access event
+                    mid_access.append(acc_evt[int(0.5*len(acc_evt))])
+                    
+                    for j in range(0,len(mid_access)):
+                        dfnew.loc[mid_access[j]][gpi] = 1
+                    #print(dfnew.iloc[:,gpi])
+                #print(mid_access)
+
+            with open(old_accessInfo_fl, 'r') as f1:
+                head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
+            
+                with open(new_accessInfo_fl, 'w') as f2:
+                    for r in head:
+                        f2.write(str(r))
+
+            with open(new_accessInfo_fl, 'a') as f2:
+                dfnew.to_csv(f2, header=True)
+
+
+                
+
+
+
+          
 

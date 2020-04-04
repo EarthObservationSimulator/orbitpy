@@ -57,7 +57,7 @@
 
 #define DEBUG_CONSISE
 //define DEBUG_CHK_INPS
-#define COMPUTE_AND_STORE_POI_GEOMETRY
+//#define COMPUTE_AND_STORE_POI_GEOMETRY
 
 using namespace std;
 using namespace GmatMathUtil;
@@ -110,7 +110,7 @@ int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
  * @param ta true anomaly in degrees
  * @param duration mission duration in days
  * @param covGridFp coverage grid file path and name
- * @param senType sensor type
+ * @param senType sensor FOV geometry type
  * @param senOrien sensor orientation (euler angles in degrees and sequence)
  * @param senClock sensor clock angles in degrees
  * @param senCone sensor cone angles in degrees
@@ -386,6 +386,11 @@ int main(int argc, char *argv[])
       satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satAcc << "All time is referenced to the Epoch.\n";
       satAcc << "Mission Duration [Days] is "<< duration << "\n";
+      satAcc << "Time[s],";
+      for(int i=0;i<numGridPoints;i++){
+         satAcc<<"GP"<<i<<",";
+      }
+      satAcc << "\n";
       
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("*** About to Propagate!!!!\n");

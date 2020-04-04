@@ -26,6 +26,12 @@ def main(user_dir):
         gndstn_dir = user_dir + 'gndstn/'
         cov_grid_fl = user_dir + 'covGrid'
         gnd_stn_fl = user_dir + str(miss_specs['groundStations']['gndStnFn'])
+
+
+        print(".......Correcting access files......")
+        orbitpropcov.OrbitPropCov.correct_access_files(access_dir, 1)
+        print(".......Done.......")
+
     else:
         # Preprocess
         pi = preprocess.PreProcess(miss_specs, user_dir) # generates grid if-needed, calculates propagation 
@@ -36,8 +42,9 @@ def main(user_dir):
         for orb_indx in range(0,len(prop_cov_param)):
             pcp = prop_cov_param[orb_indx]
             opc = orbitpropcov.OrbitPropCov(pcp)
-            print("Running Orbit Propagation and Coverage for satellite", pcp.sat_id)
-            opc.run()
+            print(".......Running Orbit Propagation and Coverage for satellite.......", pcp.sat_id)
+            opc.run()        
+            print(".......Done.......")
 
         state_dir = pi.state_dir
         access_dir = pi.access_dir    
@@ -46,16 +53,24 @@ def main(user_dir):
         gnd_stn_fl = pi.gnd_stn_fl
         cov_grid_fl = pi.cov_grid_fl
 
+        # correct access files for purely side-looking instruments if necessary
+        if(pi.instru.purely_side_look):
+            print(".......Correcting access files......")
+            orbitpropcov.OrbitPropCov.correct_access_files(access_dir, pi.time_step)
+            print(".......Done.......")
+
         # Compute satellite-to-satellite contacts
-        print("Computing satellite-to-satellite contact periods")
+        print(".......Computing satellite-to-satellite contact periods.......")
         opaque_atmos_height_km = 30
         inter_sat_comm = communications.InterSatelliteComm(user_dir, state_dir, comm_dir, opaque_atmos_height_km)
         inter_sat_comm.compute_all_contacts()    
+        print(".......Done.......")
 
         # Compute satellite-to-ground-station contacts
-        print("Computing satellite-to-ground-station contact periods")
+        print(".......Computing satellite-to-ground-station contact periods.......")
         gnd_stn_comm = communications.GroundStationComm(user_dir, state_dir, gndstn_dir, gnd_stn_fl)
         gnd_stn_comm.compute_all_contacts()
+        print(".......Done.......")
 
     '''
     # Compute observational data-metrics

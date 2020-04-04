@@ -50,7 +50,8 @@ class InstrumentCoverageParameters():
     """
     def __init__(self, fov_geom=None, fov_cone=None, fov_clock=None, fov_at = None, fov_ct = None, 
                  orien_eu_seq1=None, orien_eu_seq2=None, orien_eu_seq3=None, 
-                 orien_eu_ang1=None, orien_eu_ang2=None, orien_eu_ang3=None):
+                 orien_eu_ang1=None, orien_eu_ang2=None, orien_eu_ang3=None,
+                 purely_side_look = bool()):
         
         try:
             self.fov_geom = FOVGeometry.get(fov_geom)
@@ -70,6 +71,7 @@ class InstrumentCoverageParameters():
             self.orien_eu_ang1 = float(orien_eu_ang1)
             self.orien_eu_ang2 = float(orien_eu_ang2)
             self.orien_eu_ang3 = float(orien_eu_ang3)
+            self.purely_side_look = bool(purely_side_look)
         except:
             raise
 
@@ -131,7 +133,7 @@ class PreProcess():
                 o = Instrument.from_json(specs["instrument"])
                 manuv = specs["maneuverability"]  
                 [self.instru, self.prxy_sen, self.prxy_sen_type, self.prxy_sen_orien, self.prxy_sen_clock, self.prxy_sen_cone] =  \
-                    PreProcess.process_field_of_regard(FileUtilityFunctions.from_json(o.get_coverage_specs()), manuv)  
+                    PreProcess.process_field_of_regard(o, manuv)
             except:
                 print('Error in obtaining instrument specifications')
                 raise 
@@ -171,14 +173,16 @@ class PreProcess():
 
     
     @staticmethod
-    def process_instru_cov_specs(ics = dict()):
+    def process_instru_cov_specs(o = None):
 
         try:
+            ics = FileUtilityFunctions.from_json(o.get_coverage_specs())
             m = InstrumentCoverageParameters(ics["fieldOfView"]["geometry"], 
                                             ics["fieldOfView"]["coneAnglesVector"], ics["fieldOfView"]["clockAnglesVector"],
                                             ics["fieldOfView"]["AlongTrackFov"], ics["fieldOfView"]["CrossTrackFov"],
                                             ics["Orientation"]["eulerSeq1"], ics["Orientation"]["eulerSeq2"], ics["Orientation"]["eulerSeq3"],
-                                            ics["Orientation"]["eulerAngle1"], ics["Orientation"]["eulerAngle2"], ics["Orientation"]["eulerAngle3"]
+                                            ics["Orientation"]["eulerAngle1"], ics["Orientation"]["eulerAngle2"], ics["Orientation"]["eulerAngle3"],
+                                            ics["purely_side_look"]
                                             )
         except:
             print("Error in obtaining instrument coverage specifications. Perhaps required dict field missing.")
@@ -198,14 +202,16 @@ class PreProcess():
 
 
     @staticmethod
-    def process_field_of_regard(ics = dict(), manuv = dict()):
+    def process_field_of_regard(o = None, manuv = dict()):
         """ Compute field of regard (FOR) for a given manuverability and field-of-view (FOV) specs ad dictionaries"""
         try:
+            ics = FileUtilityFunctions.from_json(o.get_coverage_specs())
             b = InstrumentCoverageParameters(ics["fieldOfView"]["geometry"], 
                                             ics["fieldOfView"]["coneAnglesVector"], ics["fieldOfView"]["clockAnglesVector"],
                                             ics["fieldOfView"]["AlongTrackFov"], ics["fieldOfView"]["CrossTrackFov"],
                                             ics["Orientation"]["eulerSeq1"], ics["Orientation"]["eulerSeq2"], ics["Orientation"]["eulerSeq3"],
-                                            ics["Orientation"]["eulerAngle1"], ics["Orientation"]["eulerAngle2"], ics["Orientation"]["eulerAngle3"]
+                                            ics["Orientation"]["eulerAngle1"], ics["Orientation"]["eulerAngle2"], ics["Orientation"]["eulerAngle3"],
+                                            ics["purely_side_look"]
                                             )
         except:
             print("Error in obtaining instrument coverage specifications. Perhaps required dict field missing.")
@@ -315,7 +321,7 @@ class PreProcess():
 
         elif(constel_type == 'CUSTOM'):
             # read in the list of orbits
-             if isinstance(constel['orbits'], list) and len(constel['orbits']) > 1:
+             if isinstance(constel['orbits'], list) and len(constel['orbits']) >= 1:
                  orbits = PreProcess.custom_orbits(constel['orbits'])
 
         elif(constel_type == 'WALKERDELTA'):

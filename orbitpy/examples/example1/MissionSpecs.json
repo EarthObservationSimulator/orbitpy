@@ -11,15 +11,6 @@
             "raan": 327.55,
             "aop": 0,
             "ta": 0
-        },
-        {
-            "id": 12,
-            "sma": 7678.137,
-            "ecc": 0.0,
-            "inc": 98.67657116,
-            "raan": 45,
-            "aop": 0,
-            "ta": 0
         }]
     }, 
     "instrument":    {        
@@ -31,7 +22,7 @@
         "bitsPerPixel": 8, 
         "fieldOfView": {
             "sensorGeometry": "CONICAL",
-            "fullConeAngle": 20
+            "fullConeAngle": 40
         },
         "orientation": {
             "convention": "SIDE_LOOK",
@@ -40,7 +31,7 @@
     }
     ,
     "maneuverability":{
-        "@type": "FIXED",
+        "@type": "CONE",
         "fullConeAngle": "120"
 
     },
@@ -55,7 +46,7 @@
                 "id":1,
                 "latUpper":20,
                 "latLower":1,
-                "lonUpper":260,
+                "lonUpper":360,
                 "lonLower":0                
             }
             ],
