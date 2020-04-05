@@ -415,9 +415,9 @@ int main(int argc, char *argv[])
          satOut << std::setprecision(prc) << cartState[0] << "," ;
          satOut << std::setprecision(prc) << cartState[1] << "," ;
          satOut << std::setprecision(prc) << cartState[2] << "," ;
-         satOut << std::setprecision(prc) << cartState[0] << "," ;
-         satOut << std::setprecision(prc) << cartState[1] << "," ;
-         satOut << std::setprecision(prc) << cartState[2] << "\n" ; 
+         satOut << std::setprecision(prc) << cartState[3] << "," ;
+         satOut << std::setprecision(prc) << cartState[4] << "," ;
+         satOut << std::setprecision(prc) << cartState[5] << "\n" ; 
 
          // Write access data         
          // Make array with '1' (Access) in the cells corresponding to indices of gp's
