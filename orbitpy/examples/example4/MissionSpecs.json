@@ -31,10 +31,7 @@
     }
     ,
     "maneuverability":{
-        "@type": "YAW180ROLL",
-        "rollMin": 0,
-        "rollMax": 0
-
+        "@type": "YAW180"
     },
     "groundStations":{
         "gndStnFn":"groundStations"

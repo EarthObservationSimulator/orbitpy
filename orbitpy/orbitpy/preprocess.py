@@ -26,6 +26,7 @@ class ManueverType(EnumEntity):
     FIXED = "FIXED"
     CONE = "CONE",
     ROLLONLY = "ROLLONLY",
+    YAW180 = "YAW180"
     YAW180ROLL = "YAW180ROLL" 
 
 class FOVGeometry(EnumEntity):
@@ -208,19 +209,24 @@ class PreProcess():
             mv_type = ManueverType.get(manuv["@type"])
             if(mv_type is None):
                 raise Exception('No manuever type specified. Specify either "CONE" or "ROLLONLY".')
-            if(mv_type == 'FIXED'):
+            if(mv_type == 'FIXED' or mv_type == 'YAW180'):
                 pass
             elif(mv_type == 'CONE'):
                 mv_cone = 0.5 * float(manuv["fullConeAngle"])
             elif(mv_type == 'ROLLONLY' or mv_type=='YAW180ROLL'):
                 mv_ct_range = float(manuv["rollMax"]) - float(manuv["rollMin"])
             else:
-                raise Exception('Invalid manuver type. Specify either "CONE" or "ROLLONLY".')                
+                raise Exception('Invalid manuver type.')                
         except:
             print("Error in obtaining manuever specifications.")
             raise
 
         if(mv_type == 'FIXED'):
+            fr_geom = ics.fov_geom.name
+            fr_at = ics.fov_at
+            fr_ct = ics.fov_ct
+        
+        elif(mv_type == 'YAW180'):
             fr_geom = ics.fov_geom.name
             fr_at = ics.fov_at
             fr_ct = ics.fov_ct
@@ -253,7 +259,7 @@ class PreProcess():
             else:
                 raise Exception('Invalid FOV geometry')
 
-        if(mv_type=='YAW180ROLL'):
+        if(mv_type=='YAW180ROLL' or mv_type=='YAW180'):
             fr_yaw180_flag = 1
         else:
             fr_yaw180_flag = 0
