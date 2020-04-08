@@ -1,9 +1,26 @@
-GMAT Build Date: Mar 29 2020 23:31:06
+GMAT Build Date: Apr  7 2020 18:03:08
 
 GMAT Log file set to ./OClog.txt
 The log file mode is create
-Fri Apr  3 17:20:55 2020
+Tue Apr  7 19:28:31 2020
 
+epoch is   2018.000000000 year,      1.000000000 month,     15.000000000 day,     12.000000000 hour,      0.000000000 min,      0.000000000 second 
+SMA is   6678.137000000 
+ECC is      0.000000000 
+INC is     96.676571160 
+RAAN is    327.550000000 
+AOP is      0.000000000 
+TA is      0.000000000 
+Mission Duration is      0.100000000 
+Coverage grid file path is examples/example4/covGrid 
+Sensor type is RECTANGULAR 
+Sensor Orientation is      1.000000000,      2.000000000,      3.000000000,     0.000000000,     17.000000000,      0.000000000 
+Sensor cone angle vector is:      17.606966987      17.606966987      17.606966987      17.606966987 
+Sensor clock angle vector is:      45.687181284     134.312818716     225.687181284     314.312818716 
+yaw180_flag is 1 
+Step size is      1.000000000 
+Satellite states file path, name is: examples/example4/state/sat11 
+Satellite access file path, name is: examples/example4/access/sat11_accessInfo 
 **** About to read in Coverage grid ******
 **** Finished reading in Coverage grid ******
 Buffer is NULL
@@ -18,5 +35,5 @@ Buffer is NULL
 *** About to Propagate!!!!
  --- propagation completed
  --- Done deleting old pointers
-TIME SPENT is 2.8847850000 seconds
+TIME SPENT is 2.9687310000 seconds
 *** END ***

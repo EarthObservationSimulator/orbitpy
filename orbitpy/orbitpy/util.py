@@ -46,10 +46,9 @@ class EnumEntity(str, Enum):
 
 class PropagationCoverageParameters():
     """ Data structure holding propagation and coverage parameters."""
-    def __init__(self, sat_id=None, epoch=None, sma=None, ecc=None, inc=None, 
-                 raan=None, aop=None, ta=None, duration=None, cov_grid_fl=None, 
-                 sen_type=None, sen_orien=None, sen_clock=None, sen_cone=None, 
-                 step_size=None, sat_state_fl=None, sat_acc_fl=None, gnd_stn_fl = None):
+    def __init__(self, sat_id=None, epoch=None, sma=None, ecc=None, inc=None, raan=None, aop=None, ta=None, 
+                 duration=None, cov_grid_fl=None, sen_fov_geom=None, sen_orien=None, sen_clock=None, 
+                 sen_cone=None, yaw180_flag = None, step_size=None, sat_state_fl=None, sat_acc_fl=None, gnd_stn_fl = None):
         self.sat_id = sat_id # satellite/ orbit id
         self.epoch = epoch # mission epoch in UTCGregorian [year, month, day, hr, min, secs] 
         self.sma = sma # semi-major axis in kilometers
@@ -60,10 +59,12 @@ class PropagationCoverageParameters():
         self.ta = ta # true anomaly in degrees
         self.duration = duration # mission duration in days
         self.cov_grid_fl = cov_grid_fl # coverage grid file path and name
-        self.sen_type = sen_type # sensor type
+        self.sen_fov_geom = sen_fov_geom # sensor type
         self.sen_orien = sen_orien # sensor orientation
         self.sen_clock = sen_clock# sensor clock angles in degrees
         self.sen_cone = sen_cone # sensor cone angles in degrees
+        self.yaw180_flag = yaw180_flag # flag to indicate if coverage is to be calculated 
+                                       # with sensor rotated by 180 deg along the yaw axis
         self.step_size = step_size # propagation step size seconds
         self.sat_state_fl = sat_state_fl # output satellite states file path, name
         self.sat_acc_fl = sat_acc_fl # output satellite access file path, name

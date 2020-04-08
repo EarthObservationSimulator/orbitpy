@@ -26,13 +26,14 @@
         },
         "orientation": {
             "convention": "SIDE_LOOK",
-            "sideLookAngle": 0
+            "sideLookAngle": 17
         }        
     }
     ,
     "maneuverability":{
-        "@type": "CONE",
-        "fullConeAngle": "1"
+        "@type": "YAW180ROLL",
+        "rollMin": 0,
+        "rollMax": 0
 
     },
     "groundStations":{

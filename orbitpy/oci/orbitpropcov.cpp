@@ -56,14 +56,12 @@
 #include "oci_utils.h"
 
 #define DEBUG_CONSISE
-//define DEBUG_CHK_INPS
-//#define COMPUTE_AND_STORE_POI_GEOMETRY
+#define DEBUG_CHK_INPS
+// #define COMPUTE_AND_STORE_POI_GEOMETRY
 
 using namespace std;
 using namespace GmatMathUtil;
 using namespace GmatMathConstants;
-
-
 
 int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
 {
@@ -147,12 +145,13 @@ int main(int argc, char *argv[])
   string senType; 
   string _senOrien; 
   string _senClock; 
-  string _senCone; 
+  string _senCone;
+  bool yaw180_flag; 
   Real stepSize; 
   string satFn;
   string satAccFn;
 
-  if(argc==17){            
+  if(argc==18){            
       _epoch = argv[1];
       sma = Real(stod(argv[2]));
       ecc = Real(stod(argv[3]));
@@ -166,9 +165,10 @@ int main(int argc, char *argv[])
       _senOrien = argv[11];
       _senClock = argv[12];
       _senCone = argv[13];
-      stepSize = Real(stod(argv[14]));
-      satFn = argv[15];
-      satAccFn = argv[16];
+      yaw180_flag = bool(stoi(argv[14]));
+      stepSize = Real(stod(argv[15]));
+      satFn = argv[16];
+      satAccFn = argv[17];
    }else{
       MessageInterface::ShowMessage("Please input right number of arguments.\n");
       exit(1);
@@ -221,6 +221,7 @@ int main(int argc, char *argv[])
          MessageInterface::ShowMessage(" %16.9f ", senClock[i]);
       }
       MessageInterface::ShowMessage("\n");
+      MessageInterface::ShowMessage("yaw180_flag is %d \n", yaw180_flag);
       MessageInterface::ShowMessage("Step size is %16.9f \n", stepSize);
       MessageInterface::ShowMessage("Satellite states file path, name is: %s \n", satFn.c_str());
       MessageInterface::ShowMessage("Satellite access file path, name is: %s \n", satAccFn.c_str());
@@ -272,7 +273,6 @@ int main(int argc, char *argv[])
       NadirPointingAttitude    *attitude;
       LagrangeInterpolator     *interp = new LagrangeInterpolator( // Not used really.
                                              "TATCLagrangeInterpolator", 6, 7);
-
 
       #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
          // Create the container to hold the coverage events
@@ -364,6 +364,7 @@ int main(int argc, char *argv[])
       // Propagate for a duration and collect data
       Real           startDate   = date->GetJulianDate();
       IntegerArray   loopPoints;
+      IntegerArray   loopPoints_yaw180;
 
       /** Write satellite states and access files **/
       const int prc = std::numeric_limits<double>::digits10 + 1; // set to maximum precision
@@ -388,10 +389,13 @@ int main(int argc, char *argv[])
       satAcc << "Mission Duration [Days] is "<< duration << "\n";
       satAcc << "Time[s],";
       for(int i=0;i<numGridPoints;i++){
-         satAcc<<"GP"<<i<<",";
+         satAcc<<"GP"<<i;
+         if(i<numGridPoints-1){
+            satAcc<<",";
+         }
       }
       satAcc << "\n";
-      
+
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("*** About to Propagate!!!!\n");
       #endif
@@ -401,7 +405,18 @@ int main(int argc, char *argv[])
       while (date->GetJulianDate() < ((Real)startDate +
                                        duration))
       {
-         loopPoints = covChecker->AccumulateCoverageData();
+         loopPoints = covChecker->CheckPointCoverage();
+
+         if(yaw180_flag == true){
+            // Rotate satellite around yaw axis by 180 deg and calculate coverage
+            sat1->SetBodyNadirOffsetAngles(0,0,180,1,2,3);
+            loopPoints_yaw180 = covChecker->CheckPointCoverage();        
+            sat1->SetBodyNadirOffsetAngles(0,0,0,1,2,3); // Reset the satellite attitude to Nadir-pointing
+            // Add the points to the list of points seen. Sort and remove possible duplicates (in case of overlap)
+            loopPoints.insert( loopPoints.end(), loopPoints_yaw180.begin(), loopPoints_yaw180.end() );
+            sort( loopPoints.begin(), loopPoints.end() );
+            loopPoints.erase( unique( loopPoints.begin(), loopPoints.end() ), loopPoints.end() );
+         }
 
          // Propagate
          date->Advance(stepSize);
@@ -428,10 +443,10 @@ int main(int argc, char *argv[])
             for(int j = 0; j<loopPoints.size();j++){
                accessRow[loopPoints[j]] = 1;
             }
-            satAcc << std::setprecision(prc) << nSteps * stepSize << "," ;
+            satAcc << std::setprecision(prc) << nSteps * stepSize ;
             for(int k=0; k<numGridPoints; k++){
                if(accessRow[k] == 1){
-                  satAcc<< "1" << ",";
+                  satAcc<< ",1";
                }else{
                   satAcc<< ",";
                }
@@ -486,6 +501,7 @@ int main(int argc, char *argv[])
 
             
       #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
+      // TODO: Need to reqrite since accumulation of coverage is not performed previously.
       MessageInterface::ShowMessage("       =======================================================================\n");
       MessageInterface::ShowMessage("       ==================== Brief POI Geometry Report ========================\n");
       MessageInterface::ShowMessage("       POI index: Ground point index                               \n");

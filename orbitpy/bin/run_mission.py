@@ -27,11 +27,6 @@ def main(user_dir):
         cov_grid_fl = user_dir + 'covGrid'
         gnd_stn_fl = user_dir + str(miss_specs['groundStations']['gndStnFn'])
 
-
-        print(".......Correcting access files......")
-        orbitpropcov.OrbitPropCov.correct_access_files(access_dir, 1)
-        print(".......Done.......")
-
     else:
         # Preprocess
         pi = preprocess.PreProcess(miss_specs, user_dir) # generates grid if-needed, calculates propagation 
@@ -72,7 +67,7 @@ def main(user_dir):
         gnd_stn_comm.compute_all_contacts()
         print(".......Done.......")
 
-    '''
+    
     # Compute observational data-metrics
     print("Computing observational data metrics") 
 
@@ -85,6 +80,7 @@ def main(user_dir):
         _path, _dirs, _AccessInfo_files = next(os.walk(access_dir))
     except StopIteration:
         pass
+
     instru_specs = miss_specs['instrument']
 
     indx = 0
@@ -100,12 +96,15 @@ def main(user_dir):
         temp_AccessInfo_filepath = accessInfo_fl.split(os.path.sep)
         temp_last_index = len(temp_AccessInfo_filepath) - 1
         satIndx = temp_AccessInfo_filepath[temp_last_index].split('_')[0]
+        sat_state_filename = str(satIndx)
+        sat_state_fl = os.path.join(state_dir, sat_state_filename)
+
         obsmetrics_filename = str(satIndx) + '_level0_data_metrics.csv'
         level0dataMetrics_filepath.append(os.path.join(obsmetrics_dir, obsmetrics_filename))
-        x.dshield_generate_level0_data_metrics(cov_grid_fl, accessInfo_fl,
+        x.dshield_generate_level0_data_metrics(cov_grid_fl, sat_state_fl, accessInfo_fl,
                                        level0dataMetrics_filepath[indx])
         indx = indx + 1
-    '''
+    
 
 
 

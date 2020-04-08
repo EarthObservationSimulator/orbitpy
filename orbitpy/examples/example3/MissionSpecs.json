@@ -5,7 +5,7 @@
         "@type": "Custom",
         "orbits":[{
             "id": 11,
-            "sma": 6878.137,
+            "sma": 7078.137,
             "ecc": 0.0,
             "inc": 96.67657116,
             "raan": 327.55,
@@ -57,8 +57,8 @@
     ,
     "maneuverability":{
         "@type": "ROLLONLY",
-        "rollMin": 25,
-        "rollMax": 45
+        "rollMin": -5,
+        "rollMax": 5
 
     },
     "groundStations":{

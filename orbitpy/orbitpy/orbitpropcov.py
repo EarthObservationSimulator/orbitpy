@@ -10,6 +10,7 @@
 """
 
 import numpy as np
+import copy
 import os
 import shutil
 import subprocess
@@ -24,25 +25,11 @@ class OrbitPropCov:
     
     :ivar covGridFn: Coverage grid filename (output file)
     :vartype _type: str
+
     """
     def __init__(self, prop_cov_param = PropagationCoverageParameters()):
-        self.sat_id = prop_cov_param.sat_id
-        self.epoch = prop_cov_param.epoch
-        self.sma = prop_cov_param.sma
-        self.ecc = prop_cov_param.ecc
-        self.inc = prop_cov_param.inc
-        self.raan = prop_cov_param.raan
-        self.aop = prop_cov_param.aop
-        self.ta = prop_cov_param.ta
-        self.duration = prop_cov_param.duration
-        self.cov_grid_fl = prop_cov_param.cov_grid_fl
-        self.sen_type = prop_cov_param.sen_type
-        self.sen_orien = prop_cov_param.sen_orien
-        self.sen_clock = prop_cov_param.sen_clock
-        self.sen_cone = prop_cov_param.sen_cone
-        self.step_size = prop_cov_param.step_size
-        self.sat_state_fl = prop_cov_param.sat_state_fl
-        self.sat_acc_fl = prop_cov_param.sat_acc_fl
+        self.params = copy.deepcopy(prop_cov_param)
+
 
     def run(self): 
 
@@ -50,11 +37,13 @@ class OrbitPropCov:
         dir_path = os.path.dirname(os.path.realpath(__file__))
         try:
             result = subprocess.run([
-            os.path.join(dir_path, '..', 'oci', 'bin', 'orbitpropcov'),
-            str(self.epoch), str(self.sma), str(self.ecc), str(self.inc), str(self.raan), str(self.aop), str(self.ta), str(self.duration), 
-            str(self.cov_grid_fl), str(self.sen_type), str(self.sen_orien), str(self.sen_clock), str(self.sen_cone), str(self.step_size), 
-            str(self.sat_state_fl), str(self.sat_acc_fl)
-            ], check= True)
+                        os.path.join(dir_path, '..', 'oci', 'bin', 'orbitpropcov'),
+                        str(self.params.epoch), str(self.params.sma), str(self.params.ecc), str(self.params.inc), 
+                        str(self.params.raan), str(self.params.aop), str(self.params.ta), str(self.params.duration), 
+                        str(self.params.cov_grid_fl), str(self.params.sen_fov_geom.value), str(self.params.sen_orien), 
+                        str(self.params.sen_clock), str(self.params.sen_cone), str(self.params.yaw180_flag), 
+                        str(self.params.step_size), str(self.params.sat_state_fl), str(self.params.sat_acc_fl)
+                        ], check= True)
         except:
             raise RuntimeError('Error executing "orbitpropcov" OC script')
 
@@ -92,7 +81,6 @@ class OrbitPropCov:
                 # Select column by index position using iloc[]
                 gp_acc = df.iloc[: , gpi]
                 gp_acc = gp_acc.dropna()
-                #print(gp_acc.index)
                 # search for consequitive (in time) access, and replace by access 
                 # at (approximately) the middel of the access period
                 mid_access = []
@@ -116,8 +104,7 @@ class OrbitPropCov:
                     
                     for j in range(0,len(mid_access)):
                         dfnew.loc[mid_access[j]][gpi] = 1
-                    #print(dfnew.iloc[:,gpi])
-                #print(mid_access)
+
 
             with open(old_accessInfo_fl, 'r') as f1:
                 head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
