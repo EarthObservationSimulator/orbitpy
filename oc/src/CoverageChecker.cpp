@@ -446,6 +446,26 @@ IntegerArray CoverageChecker::AccumulateCoverageData()
 }
 
 //------------------------------------------------------------------------------
+// IntegerArray AccumulateCoverageDataAtPreviousTimeIndex()
+//------------------------------------------------------------------------------
+/**
+ * Accumulates the coverage data, but do not update the corresponding time index
+ * TODO: Not tested thoroughly
+ * @return  array of indexes
+ *
+ */
+//------------------------------------------------------------------------------
+IntegerArray CoverageChecker::AccumulateCoverageDataAtPreviousTimeIndex()
+{
+   // Accumulates coverage data after propagation update
+   // Get the state and date here
+   Real     theDate   = sc->GetJulianDate();
+   Rvector6 cartState = sc->GetCartesianState();
+   Rvector6 theState  = GetEarthFixedSatState(theDate, cartState);;
+   return CheckPointCoverage(theState, theDate, cartState);
+}
+
+//------------------------------------------------------------------------------
 // IntegerArray AccumulateCoverageData()
 //------------------------------------------------------------------------------
 /**

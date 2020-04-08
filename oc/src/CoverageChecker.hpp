@@ -56,6 +56,8 @@ public:
                                                 const Rvector6 &cartState);
    /// Accumulate the coverage data at the current propagated time
    virtual IntegerArray      AccumulateCoverageData();
+   /// Accumulate the coverage data at the previous time index
+   virtual IntegerArray      AccumulateCoverageDataAtPreviousTimeIndex();
    /// Accumulate the coverage data at the input time
    virtual IntegerArray      AccumulateCoverageData(Real atTime);
    /// Process the coverate data, create reports

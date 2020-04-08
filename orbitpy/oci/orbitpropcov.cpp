@@ -56,8 +56,8 @@
 #include "oci_utils.h"
 
 #define DEBUG_CONSISE
-#define DEBUG_CHK_INPS
-// #define COMPUTE_AND_STORE_POI_GEOMETRY
+//#define DEBUG_CHK_INPS
+//#define COMPUTE_AND_STORE_POI_GEOMETRY
 
 using namespace std;
 using namespace GmatMathUtil;
@@ -405,12 +405,21 @@ int main(int argc, char *argv[])
       while (date->GetJulianDate() < ((Real)startDate +
                                        duration))
       {
-         loopPoints = covChecker->CheckPointCoverage();
+         #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
+            loopPoints = covChecker->AccumulateCoverageData();
+         #else
+            loopPoints = covChecker->CheckPointCoverage();
+         #endif
 
          if(yaw180_flag == true){
             // Rotate satellite around yaw axis by 180 deg and calculate coverage
             sat1->SetBodyNadirOffsetAngles(0,0,180,1,2,3);
-            loopPoints_yaw180 = covChecker->CheckPointCoverage();        
+            #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
+               loopPoints_yaw180 = covChecker->AccumulateCoverageDataAtPreviousTimeIndex();
+            #else
+               loopPoints_yaw180 = covChecker->CheckPointCoverage();
+            #endif
+
             sat1->SetBodyNadirOffsetAngles(0,0,0,1,2,3); // Reset the satellite attitude to Nadir-pointing
             // Add the points to the list of points seen. Sort and remove possible duplicates (in case of overlap)
             loopPoints.insert( loopPoints.end(), loopPoints_yaw180.begin(), loopPoints_yaw180.end() );
