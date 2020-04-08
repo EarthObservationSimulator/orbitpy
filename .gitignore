@@ -22,7 +22,6 @@ core
 .vscode
 .ipynb_checkpoints
 orbitpy/docs/_build/*
-orbitpy/docs/_static/*
 !orbitpy/docs/_static/.gitkeep
 orbitpy/docs/_templates/*
 !orbitpy/docs/_templates/.gitkeep
