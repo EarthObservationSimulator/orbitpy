@@ -446,6 +446,26 @@ IntegerArray CoverageChecker::AccumulateCoverageData()
 }
 
 //------------------------------------------------------------------------------
+// IntegerArray AccumulateCoverageData()
+//------------------------------------------------------------------------------
+/**
+ * Check point coverage at the current date and spacecraft state.
+ *
+ * @return  array of indexes
+ *
+ */
+//------------------------------------------------------------------------------
+IntegerArray CoverageChecker::CheckPointCoverage()
+{
+   // Accumulates coverage data after propagation update
+   // Get the state and date here
+   Real     theDate   = sc->GetJulianDate();
+   Rvector6 cartState = sc->GetCartesianState();
+   Rvector6 theState  = GetEarthFixedSatState(theDate, cartState);
+   return CheckPointCoverage(theState, theDate, cartState);
+}
+
+//------------------------------------------------------------------------------
 // IntegerArray AccumulateCoverageData(Real atTime)
 //------------------------------------------------------------------------------
 /**
