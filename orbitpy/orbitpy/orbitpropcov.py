@@ -40,7 +40,7 @@ class OrbitPropCov:
                         os.path.join(dir_path, '..', 'oci', 'bin', 'orbitpropcov'),
                         str(self.params.epoch), str(self.params.sma), str(self.params.ecc), str(self.params.inc), 
                         str(self.params.raan), str(self.params.aop), str(self.params.ta), str(self.params.duration), 
-                        str(self.params.cov_grid_fl), str(self.params.sen_fov_geom.value), str(self.params.sen_orien), 
+                        str(self.params.cov_grid_fl), str(self.params.sen_fov_geom), str(self.params.sen_orien), 
                         str(self.params.sen_clock), str(self.params.sen_cone), str(self.params.yaw180_flag), 
                         str(self.params.step_size), str(self.params.sat_state_fl), str(self.params.sat_acc_fl)
                         ], check= True)
@@ -49,7 +49,7 @@ class OrbitPropCov:
 
     @staticmethod
     def correct_access_files(access_dir, step_size):
-        """ When the instrument takes observations at purely side-looking geometry (no quint),
+        """ When the instrument takes observations at purely side-looking geometry (no squint),
             post-process the access files to indicate access at middle of access-interval. 
             The middle of access-interval is approximately the time at which the instrument shall
             be at side-looking geometry to the target ground-point.

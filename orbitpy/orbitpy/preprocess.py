@@ -36,19 +36,89 @@ class FOVGeometry(EnumEntity):
     CUSTOM = "CUSTOM"
 
 class OrbitParameters():
-    """ Data structure to hold orbit parameters """
+    """ Data structure to hold parameters defining the orbit of a satellite in the constellation. An orbit is 
+        assumed to be unique for a satellite.
+
+    .. note:: Epoch is defined to be common for all the orbits in the mission and is hence defined separately.
+    
+    :ivar id: Identifier of the orbit (satellite)
+    :vartype id: str
+
+    :ivar sma: Semi-major axis in kilometers
+    :vartype sma: float
+
+    :ivar ecc: Eccentricity
+    :vartype ecc: float
+
+    :ivar inc: Inclination in degrees
+    :vartype inc: float
+
+    :ivar raan: Right Ascension of Ascending Node in degrees
+    :vartype raan: float
+
+    :ivar aop: Argument of Perigee in degrees
+    :vartype aop: float
+
+    :ivar ta: True Anomaly in degrees
+    :vartype ta: float
+    
+    """
     def __init__(self, id=None, sma=None, ecc=None, inc=None, raan=None, aop=None, ta=None):
-        self.id = id
-        self.sma = sma
-        self.ecc = ecc
-        self.inc = inc
-        self.raan = raan
-        self.aop = aop
-        self.ta = ta
+        try:
+            self.id = str(id)
+            self.sma = float(sma)
+            self.ecc = float(ecc)
+            self.inc = float(inc)
+            self.raan = float(raan)
+            self.aop = float(aop)
+            self.ta = float(ta)
+        except:
+            raise Exception("Error in initialization of OrbitParameters object.")
+            
 
 class InstrumentCoverageParameters():
-    """ Data structure to hold instrument coverage related parameters 
-        (field-of-view and orientation) 
+    """ Data structure to hold instrument coverage related parameters. For a more detailed description of the representation
+    of the FOV in terms of clock, cone angles and the orientation in terms of Euler sequences, angles, please refer to the
+    Appendix.
+
+    .. todo:: Make description in another section.
+
+    :ivar fov_geom: Geometry of the field of view
+    :vartype fov_geom: :class:`FOVGeometry`
+
+    :ivar fov_cone: List of cone angles in degrees
+    :vartype fov_cone: list, float
+
+    :ivar fov_clock: List of clock angles in degrees
+    :vartype fov_clock: list, float
+
+    :ivar fov_at: Along-track FOV in degrees
+    :vartype fov_at: float
+
+    :ivar fov_ct: Cross-track FOV in degrees
+    :vartype fov_ct: float
+
+    :ivar orien_eu_seq1: Euler sequence 1
+    :vartype orien_eu_seq1: int
+
+    :ivar orien_eu_seq2: Euler sequence 2
+    :vartype orien_eu_seq2: int
+
+    :ivar orien_eu_seq3: Euler sequence 3
+    :vartype orien_eu_seq3: int
+
+    :ivar orien_eu_ang1: Euler angle 1 in degrees
+    :vartype orien_eu_ang1: float
+
+    :ivar orien_eu_ang2: Euler angle 2 in degrees
+    :vartype orien_eu_ang2: float
+
+    :ivar orien_eu_ang3: Euler angle 3 in degrees
+    :vartype orien_eu_ang3: float
+
+    :ivar purely_side_look: Flag to specify if instrument operates in a strictly side-looking viewing geometry.
+    :vartype purely_side_look: bool
+    
     """
     def __init__(self, fov_geom=None, fov_cone=None, fov_clock=None, fov_at = None, fov_ct = None, 
                  orien_eu_seq1=None, orien_eu_seq2=None, orien_eu_seq3=None, 
@@ -75,23 +145,41 @@ class InstrumentCoverageParameters():
             self.orien_eu_ang3 = float(orien_eu_ang3)
             self.purely_side_look = bool(purely_side_look)
         except:
-            raise
+            raise Exception("Error in initilization of InstrumentCoverageParameters object.")
+            
 
 class FieldOfRegard():
     """ Data structure to hold the field-of-regard related parameters.
-        Note that all the memebers are of type string so that it can be
-        directly passed on as arguments to the `orbitpropcov.cpp` program.
+    Note that all the memebers are of type string so that it can be
+    directly passed on as arguments to the `orbitpropcov.cpp` program.
+    
+    :ivar geom: Geometry of the field-of-regard
+    :vartype geom: :class:`FieldOfRegard`
+
+    :ivar orien: Orientation
+    :vartype orien: str
+
+    :ivar cone:
+    :vartype cone: str
+
+    :ivar clock:
+    :vartype clock: str
+
+    :ivar yaw180_flag:
+    :vartype yaw180_flag: str
+
     """
     def __init__(self, geom=None, orien = None, cone=None, clock=None, yaw180_flag = None):
         
         try:
-            self.geom = FOVGeometry.get(geom)
+            self.geom = FOVGeometry.get(geom).value
             self.orien = str(orien)
             self.cone = str(cone)
             self.clock = str(clock)            
             self.yaw180_flag = str(yaw180_flag)            
         except:
-            raise
+            raise Exception("Error in initilization of FieldOfRegard object.")
+            
 
 class PreProcess(): 
     """ Class to handle pre-processing of user inputs.
@@ -99,11 +187,63 @@ class PreProcess():
     :ivar epoch: Mission epoch in Gregorian UTC format
     :vartype epoch: str
     
-    :ivar covGridFn: Coverage grid filename (output file)
-    :vartype covGridFn: str
+    :ivar user_dir: User directory path
+    :vartype user_dir: str
+
+    :ivar user_dir: User directory path
+    :vartype user_dir: str
+
+    :ivar state_dir:  Directory path to where comm satellite states are written.
+    :vartype state_dir: str
+
+    :ivar access_dir:  Directory path to where access results are written.
+    :vartype access_dir: str
+
+    :ivar comm_dir: Directory path to where comm results are written.
+    :vartype comm_dir: str
+
+    :ivar gndstn_dir: Directory path to where ground station contacts are written.
+    :vartype gndstn_dir: str
+
+    :ivar duration: Mission duration in days
+    :vartype duration: float
+
+    :ivar orbits: List of orbits (specifications of each orbit) in the constellations.
+    :vartype orbits: list, :class:`orbitpy.preprocess.OrbitParameters`
+
+    :ivar instru: Instrument parameters relating to coverage calculations
+    :vartype instru: :class:`orbitpy.preprocess.InstrumentCoverageParameters`
+
+    :ivar fldofreg: Parameters relating to field-of-regard
+    :vartype fldofreg: :Class:`orbitpy.preprocess.FieldOfRegard`
+
+    :ivar time_step: Time step in seconds to be used in orbit propagation and coverage calculations. Also the time step
+                     of the output satellite states.
+    :vartype time_step: float
+
+    :ivar grid_res: Grid resolution 
+    :vartype grid_res: float
+
+    :ivar cov_grid_fl: Filepath (including filename) of the file containing the coverage grid info.
+    :vartype cov_grid_fl: str
+
+    ivar gnd_stn_fl: Filepath (including filename) of the file containing the ground station info.
+    :vartype gnd_stn_fl: str
     
     """
     def __init__(self, specs=dict(), user_dir=None):
+        """ Initialization function with preprocessing tasks included.
+
+            :param user_dir: User directory path from which files are read, written.
+            :paramtype user_dir: string
+
+            :param specs: Dictionary of the mission specifications.
+            :paramtype specs: dict
+
+            .. note:: Refer to :ref:`User JSON Input Description` for complete desciption of the fields in the specifications
+                      dictionary. 
+
+        """
         
         try:
 
@@ -129,6 +269,9 @@ class PreProcess():
                 if os.path.exists(self.gndstn_dir):
                     shutil.rmtree(self.gndstn_dir)
                 os.makedirs(self.gndstn_dir) 
+                # remove 'accessold' directory. New directory is not created at this stage.
+                if os.path.exists(self.user_dir+'accessold'):
+                    shutil.rmtree(self.user_dir+'accessold')
             except:
                 print('Error in removing and/or creating state, access, comm and gndstn directories.')
                 raise
@@ -171,7 +314,7 @@ class PreProcess():
                 if 'customGridRes' in specs['settings']:
                     self.grid_res = float(specs['settings']['customGridRes'])
                 else:
-                    self.grid_res = PreProcess.compute_grid_res(self.orbits, self.instru, Constants.grid_res_fac)
+                    self.grid_res = PreProcess.compute_grid_res(self.orbits, self.instru, Constants.grid_res_fac) 
             except:
                 print('Error in processing grid resolution')
                 raise
@@ -190,8 +333,19 @@ class PreProcess():
 
 
     @staticmethod
-    def process_field_of_regard(o = None, manuv = dict()):
-        """ Compute field of regard (FOR) for a given manuverability and field-of-view (FOV) specs ad dictionaries"""
+    def process_field_of_regard(o, manuv = dict()):
+        """ Compute field of regard (FOR) for a given manuverability and instrument.
+        
+        :param o: Instrument object from the `instrupy` package.
+        :paramtype: :class:`instrupy.public_library.Instrument`
+
+        :param manuv: Dictionary containing the maneuver specifications.
+        :paramtype: dict
+
+        :returns: Instrument coverage parameters and field of regard parameters.
+        :rtype: :class:`InstrumentCoverageParameters`, :class:`FieldOfRegard`
+        
+        """
         try:
             _ics = FileUtilityFunctions.from_json(o.get_coverage_specs())
             ics = InstrumentCoverageParameters(_ics["fieldOfView"]["geometry"], 
@@ -202,8 +356,8 @@ class PreProcess():
                                              _ics["purely_side_look"]
                                              )
         except:
-            print("Error in obtaining instrument coverage specifications. Perhaps required dict field missing.")
-            raise      
+            raise Exception("Error in obtaining instrument coverage specifications. Perhaps required dict field missing.")
+                  
 
         try:
             mv_type = ManueverType.get(manuv["@type"])
@@ -218,8 +372,8 @@ class PreProcess():
             else:
                 raise Exception('Invalid manuver type.')                
         except:
-            print("Error in obtaining manuever specifications.")
-            raise
+            raise Exception("Error in obtaining manuever specifications.")
+            
 
         if(mv_type == 'FIXED'):
             fr_geom = ics.fov_geom.name
@@ -282,13 +436,6 @@ class PreProcess():
     
         
         fldofreg = FieldOfRegard(fr_geom, fr_orien, fr_cone, fr_clock, fr_yaw180_flag) 
-
-        print(fr_geom)
-        print(fr_at)
-        print(fr_ct)
-        print(fr_clock)
-        print(fr_cone)
-        print(fr_yaw180_flag)
         
         return [ics, fldofreg]
 
@@ -303,11 +450,8 @@ class PreProcess():
             :paramtype constel: dict
 
             :returns: Orbits (parameters) in the constellation 
-            :rtype: list, :class:`orbitpy.preprocess.OrbitParameters`
-
-        
-        """
-        
+            :rtype: list, :class:`orbitpy.preprocess.OrbitParameters`        
+        """       
         constel_type = ConstellationType.get(constel['@type'])        
         
         if(constel_type is None):
@@ -329,6 +473,16 @@ class PreProcess():
 
     @staticmethod
     def custom_orbits(data):
+        """ Make a list of orbits. Convert form list of dictonaries to list of :class:`orbitpy.preprocess.OrbitParameters`.
+
+        :param data: List of dictionaries containing the orbit Keplerian parameters, orbit ID. A common epoch is separately 
+         considered for all orbits.
+        :paramtype data: list, dict
+
+        :returns: List of orbits in the constellation
+        :rtype: list, :class:`orbitpy.preprocess.OrbitParameters` 
+        
+        """
         num_of_orbs = len(data)
         orbits = []
         for orb_i in range(0,num_of_orbs):
@@ -340,6 +494,26 @@ class PreProcess():
 
     @staticmethod
     def walker_orbits(data):
+        """ Process the Walker Delta constellation parameters to generate list of orbits containing their 
+        respective Keplerian elements.
+
+        :param data: Dictionary containing the Walker Delta constellation specifications.
+
+                     Dictionary keys are: 
+                                
+                        * :code:`numberSatellites` (:class:`int`) Number of satellites 
+                        * :code:`numberPlanes` (:class:`int`): Number of orbital planes
+                        * :code:`relativeSpacing` (:class:`float`): Spacing between the satellites in the different planes in degrees
+                        * :code:`alt` (:class:`float`): Altitude
+                        * :code:`ecc`: Eccentricity
+                        * :code:`inc` (:class:`float`): Inclination in degrees
+                        * :code:`aop` (:class:`float`): Argument of perigee in degrees
+        :paramtype: dict
+
+        :returns: List of orbits in the constellation
+        :rtype: list, :class:`orbitpy.preprocess.OrbitParameters` 
+
+        """
         
         try:
             num_sats = data['numberSatellites']
@@ -375,8 +549,11 @@ class PreProcess():
 
 
     def generate_prop_cov_param(self):
-        ''' Generate propagation and coverage parameters. Each enumerated orbit (in the constellation) 
-            corresponds to one set of propagation and coverage parameters. 
+        ''' Generate propagation and coverage parameters from the class instance variables. 
+
+        :returns: List of propagation and coverage parameters with each element of the list corresponding to an orbit in the constellation.
+        :rtype: list, :class:`orbitpy.util.PropagationCoverageParameters`
+
         '''              
         # For each orbit, create and separate PropagationCoverageParameters object and append to a list.
         prop_cov_param = []
@@ -395,8 +572,20 @@ class PreProcess():
 
     @staticmethod
     def process_cov_grid(user_dir, grid, grid_res):
-        """ Process coverage grid (auto or custom) and return the filename with path
-            containing the grid info.
+        """ Process coverage grid (auto or custom) and return the filepath with filename containing the grid info.
+
+        :param user_dir: Path to the user directory where the coverage grid file exists or is to be created.
+        :paramtype user_dir: str
+
+        :param grid: Dictionary containing the specifications of the grid to be generated or the filename with existing grid data (must be inside the user directory).
+        :paramtype grid: dict
+
+        :param grid_res: grid resolution
+        :paramtype grid_res: float
+
+        :returns: Filepath (with filename)
+        :rtype: str
+
         """               
         # get path to *this* file
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -446,8 +635,17 @@ class PreProcess():
 
     @staticmethod
     def compute_time_step(orbits, instru, time_res_fac):
-        """ Compute time step to be used for orbit propagation based on 
-            the satelllite orbit and sensor specs.
+        """ Compute time step to be used for orbit propagation based on the orbits and the sensor field-of-view.
+        
+        :param orbits: List of orbits in the constellation
+        :paramtype orbits: list,:class:`orbitpy:preprocess.OrbitParameters`
+
+        :param instru: Instrument coverage related parameters
+        :paramtype instru: :class:`orbitpy.preprocess.InstrumentCoverageParameters`
+
+        :param time_res_fac: Factor which decides the time resolution of orbit propagation
+        :paramtype time_res_fac: float        
+        
         """
         RE = Constants.radiusOfEarthInKM
         GMe = Constants.GMe
@@ -478,8 +676,17 @@ class PreProcess():
 
     @staticmethod
     def compute_grid_res(orbits, instru, grid_res_fac):
-        """ Compute grid resolution to be used for coverage grid generation.
-            See SMAD 3rd ed Pg 113. Fig 8-13.
+        """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.
+
+        :param orbits: List of orbits in the constellation
+        :paramtype orbits: list,:class:`orbitpy:preprocess.OrbitParameters`
+
+        :param instru: Instrument coverage related parameters
+        :paramtype instru: :class:`orbitpy.preprocess.InstrumentCoverageParameters`
+
+        :param grid_res_fac: Factor which decides the resolution of the generated grid
+        :paramtype grid_res_fac: float    
+
         """
         RE = Constants.radiusOfEarthInKM
         # find the minimum sma of all the orbits
@@ -489,14 +696,14 @@ class PreProcess():
                 min_sma = orbits[indx].sma 
         
         min_alt = min_sma - RE # minimum latitude in km
-        fov_ct = instru.fov_ct # instrument cross-tracj fov in degrees
+        fov_ct = instru.fov_ct # instrument cross-track fov in degrees
 
         sinRho = RE/(RE+min_alt)
         hfov_deg = 0.5*fov_ct
         elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
         lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
         eca_deg = lambda_deg*2 # total earth centric angle
-        grid_res_deg = eca_deg*grid_res_fac # factor 0.9 can be debated
+        grid_res_deg = eca_deg*grid_res_fac 
 
         return grid_res_deg
 

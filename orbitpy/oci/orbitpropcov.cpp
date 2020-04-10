@@ -332,6 +332,8 @@ int main(int argc, char *argv[])
          customSensor =  new CustomSensor(senCone_r, senClock_r);
          customSensor->SetSensorBodyOffsetAngles(senOrien[3], senOrien[4], senOrien[5], senOrien[0], senOrien[1], senOrien[2]); // careful: angle in degrees
          sat1->AddSensor(customSensor);
+      }else{
+         MessageInterface::ShowMessage("**** Warning no Sensor defined!! ****\n");
       }
 
       #ifdef DEBUG_CONSISE

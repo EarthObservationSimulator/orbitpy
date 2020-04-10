@@ -2,7 +2,23 @@
 User JSON Input Description
 ****************************
 
+.. csv-table:: Input parameter description 
+   :header: Parameter, Data type, Units, Description
+   :widths: 10,10,5,40
 
+   epoch, str,"year, month, day, hour, month, seconds", Mission epoch (date and time) in UTC Gregorian. Comma seperated values. 
+   duration, float, days, Length of mission in days. 
+   constellation, :ref:`constellation_json_object`, ,Constellation specifications.
+   
+.. _constellation_json_object:
+
+:code:`constellation` JSON object
+##################################
+Constellation specifications. Two types of constellation are accepted: `custom`, `Walkerdelta`. 
+
+:code:`custom` constellation type
+**********************************
+A list of satellites is to be specified with each satellite orbit described by it's corresponding Keplerian elements.
 
 epoch
 ######
