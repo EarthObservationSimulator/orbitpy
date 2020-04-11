@@ -11,7 +11,6 @@ def main(user_dir):
     """
         example usage: python bin/run_mission.py examples/example1/
     """
-  
     # Read in mssion specifications from user config file, coverage grid file (optional) 
     # and the ground stations specifications file in the user directory.
     usf = user_dir + 'MissionSpecs.json'

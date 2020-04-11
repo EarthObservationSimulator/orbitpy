@@ -149,34 +149,33 @@ class InstrumentCoverageParameters():
             
 
 class FieldOfRegard():
-    """ Data structure to hold the field-of-regard related parameters.
-    Note that all the memebers are of type string so that it can be
-    directly passed on as arguments to the `orbitpropcov.cpp` program.
+    """ Data structure to hold the field-of-regard related parameters. Note that all the memebers are of type 
+    string so that it can be directly passed on as arguments to the `orbitpropcov.cpp` program.
     
-    :ivar geom: Geometry of the field-of-regard
+    :ivar geom: Geometry of the field-of-regard (FOR)
     :vartype geom: :class:`FieldOfRegard`
 
-    :ivar orien: Orientation
+    :ivar orien: Orientation of an equivalent sensor with the corresponding FOR the following CSV string format: :code:`Euler Seq1, Euler Seq2, Euler Seq3, Euler Angle1, Euler Angle2, Euler Angle3`. Angles are specifed in degrees.
     :vartype orien: str
 
-    :ivar cone:
+    :ivar cone: Cone angles (in degrees) of an equivalent sensor with the corresponding FOR in CSV string format.
     :vartype cone: str
 
-    :ivar clock:
+    :ivar clock: Clock angles (in degrees) of an equivalent sensor with the corresponding FOR in CSV string format.
     :vartype clock: str
 
-    :ivar yaw180_flag:
-    :vartype yaw180_flag: str
+    :ivar yaw180_flag: Flag indicating if FOR includes the FOV defined by the above clock, cone angles rotated by 180 deg around the satellite yaw axis.
+    :vartype yaw180_flag: int
 
     """
-    def __init__(self, geom=None, orien = None, cone=None, clock=None, yaw180_flag = None):
+    def __init__(self, geom=None, orien = None, cone=None, clock=None, yaw180_flag = int()):
         
         try:
             self.geom = FOVGeometry.get(geom).value
             self.orien = str(orien)
             self.cone = str(cone)
             self.clock = str(clock)            
-            self.yaw180_flag = str(yaw180_flag)            
+            self.yaw180_flag = int(yaw180_flag)            
         except:
             raise Exception("Error in initilization of FieldOfRegard object.")
             

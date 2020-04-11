@@ -45,32 +45,86 @@ class EnumEntity(str, Enum):
 
 
 class PropagationCoverageParameters():
-    """ Data structure holding propagation and coverage parameters."""
-    def __init__(self, sat_id=None, epoch=None, sma=None, ecc=None, inc=None, raan=None, aop=None, ta=None, 
-                 duration=None, cov_grid_fl=None, sen_fov_geom=None, sen_orien=None, sen_clock=None, 
-                 sen_cone=None, yaw180_flag = None, step_size=None, sat_state_fl=None, sat_acc_fl=None, gnd_stn_fl = None):
-        self.sat_id = sat_id # satellite/ orbit id
-        self.epoch = epoch # mission epoch in UTCGregorian [year, month, day, hr, min, secs] 
-        self.sma = sma # semi-major axis in kilometers
-        self.ecc = ecc # eccentricity
-        self.inc = inc # inclination in degrees
-        self.raan = raan # right ascension of the ascending node in degrees
-        self.aop = aop # argument of perigee in degrees
-        self.ta = ta # true anomaly in degrees
-        self.duration = duration # mission duration in days
-        self.cov_grid_fl = cov_grid_fl # coverage grid file path and name
-        self.sen_fov_geom = sen_fov_geom # sensor type
-        self.sen_orien = sen_orien # sensor orientation
-        self.sen_clock = sen_clock# sensor clock angles in degrees
-        self.sen_cone = sen_cone # sensor cone angles in degrees
-        self.yaw180_flag = yaw180_flag # flag to indicate if coverage is to be calculated 
-                                       # with sensor rotated by 180 deg along the yaw axis
-        self.step_size = step_size # propagation step size seconds
-        self.sat_state_fl = sat_state_fl # output satellite states file path, name
-        self.sat_acc_fl = sat_acc_fl # output satellite access file path, name
+    """ Data structure holding propagation and coverage parameters.
+    
+    :ivar sat_id: Satellite (Orbit) identifier
+    :vartype sat_id: str
+
+    :ivar epoch: Mission epoch in UTC Greogrian in the following CSV format: `'year,month,day,hr,min,secs'`
+    :vartype epoch: str
+
+    :ivar sma: Orbit semi-major axis in kilometers
+    :vartype sma: float
+
+    :ivar ecc: Orbit eccentricity 
+    :vartype ecc: float
+
+    :ivar inc: Orbit inclination in degrees
+    :vartype inc: float
+
+    :ivar raan: Orbit Right Ascension of Ascending Node in degrees
+    :vartype raan: float
+
+    :ivar aop: Orbit Argument of Perigee in degrees
+    :vartype aop: float
+
+    :ivar ta: Orbit True Anomaly in degrees
+    :vartype ta: float
+    
+    :ivar duration: Mission duration in days
+    :vartype duration: float
+
+    :ivar cov_grid_fl: Filepath with name to the coverage grid data
+    :vartype cov_grid_fl: str
+
+    :ivar sen_fov_geom: FOV geometry of the sensor (perhaps corresponding to a Field of Regard)
+    :vartype sen_fov_geom:  str
+
+    :ivar sen_orien: Sensor (perhaps corresponding to a Field of Regard) orientation specification in the following CSV string format: :code:`Euler Seq1, Euler Seq2, Euler Seq3, Euler Angle1, Euler Angle2,, Euler Angle3`. Angles are specifed in degrees.
+    :vartype sen_orien:  str
+
+    :ivar sen_clock: Sensor (perhaps corresponding to a Field of Regard) clock angles in degrees in CSV string format.
+    :vartype sen_clock: str
+
+    :ivar sen_cone: Sensor (perhaps corresponding to a Field of Regard) cone angles in degrees in CSV string format.
+    :vartype sen_cone: str
+
+    :ivar yaw180_flag: Flag indicating if FOR includes the FOV defined by the above clock, cone angles rotated by 180 deg around the satellite yaw axis.
+    :vartype yaw180_flag: int
+
+    :ivar step_size: Propagation step size in seconds.
+    :vartype step_size: float
+
+    :ivar sat_state_fl: Filepath with name to write the resulting satellite states.
+    :vartype sat_state_fl: str
+
+    :ivar sat_acc_fl: Filepath with name to write the resulting satellite access data over the grid of points given in the coverage grid file.
+    :vartype sat_acc_fl: str
+    
+    """
+    def __init__(self, sat_id=str(), epoch=str(), sma=float(), ecc=float(), inc=float(), raan=float(), aop=float(), ta=float(), 
+                 duration=float(), cov_grid_fl=str(), sen_fov_geom=str(), sen_orien=str(), sen_clock=str(), 
+                 sen_cone=str(), yaw180_flag = int(), step_size=float(), sat_state_fl=str(), sat_acc_fl=str()):
+        self.sat_id = str(sat_id) 
+        self.epoch = str(epoch) 
+        self.sma = float(sma) 
+        self.ecc = float(ecc) 
+        self.inc = float(inc)
+        self.raan = float(raan) 
+        self.aop = float(aop) 
+        self.ta = float(ta) 
+        self.duration = float(duration) 
+        self.cov_grid_fl = str(cov_grid_fl)  
+        self.sen_fov_geom = str(sen_fov_geom) 
+        self.sen_orien = str(sen_orien)  
+        self.sen_clock = str(sen_clock)  
+        self.sen_cone = str(sen_cone)  
+        self.yaw180_flag = int(yaw180_flag) 
+        self.step_size = float(step_size)
+        self.sat_state_fl = str(sat_state_fl) 
+        self.sat_acc_fl = str(sat_acc_fl) 
 
 class Constants(object):
-
     """ Enumeration of various constants used by package **OrbitPy**. Unless indicated otherwise, the constants 
         are in S.I. units. 
     """
@@ -138,10 +192,7 @@ class MathUtilityFunctions:
               -3902.9606       5044.5548       0.0000000
         
         (The above is the ECI coordinates of the intersection of the equator and
-        Greenwich's meridian on 2002/03/09 21:21:21.021)
-
-        .. todo:: Verify if geodetic lat/lon is to be used instead of the current geocentric.
-             
+        Greenwich's meridian on 2002/03/09 21:21:21.021)            
         
         """
         lat = numpy.deg2rad(gcoord[0])
@@ -249,11 +300,8 @@ class MathUtilityFunctions:
              :rtype: bool
 
              .. note: The frame of reference for describing the object positions must be centered at spherical obstacle.
-
-             .. todo:: May need to add support for ellipsoidal shape of Earth.
         
-        """
-        
+        """        
         obstacle1_unitVec = MathUtilityFunctions.normalize(object1_pos)
         obstacle2_unitVec = MathUtilityFunctions.normalize(object2_pos)  
 

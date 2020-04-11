@@ -5,7 +5,7 @@
 
 .. note::  - The pointing of the satellite is fixed to be Nadir-pointing.
 
-   - Lat must be in the range -pi/2 to pi/2, while lon must be in the range -pi to pi
+   - The grid points must have latitudes in the range -pi/2 to pi/2, while longitudes in the range -pi to pi
 
 """
 
@@ -20,11 +20,8 @@ from instrupy.public_library import Instrument
 class OrbitPropCov:
     """ Class to handle propagation and coverage of a satellite
     
-    :ivar sat_id: Mission epoch in Gregorian UTC format
-    :vartype sat_id: int
-    
-    :ivar covGridFn: Coverage grid filename (output file)
-    :vartype _type: str
+    :ivar prop_cov_param: Propagation and coverage parameters
+    :vartype prop_cov_param: :class:`orbitpy.util.PropagationCoverageParameters`
 
     """
     def __init__(self, prop_cov_param = PropagationCoverageParameters()):
@@ -32,8 +29,9 @@ class OrbitPropCov:
 
 
     def run(self): 
-
-        # get path to *this* file
+        """ Function which calls the :code:`orbitpropcov` program to propagate and compute coeverage
+        over a given mission duration.
+        """
         dir_path = os.path.dirname(os.path.realpath(__file__))
         try:
             result = subprocess.run([
@@ -50,9 +48,26 @@ class OrbitPropCov:
     @staticmethod
     def correct_access_files(access_dir, step_size):
         """ When the instrument takes observations at purely side-looking geometry (no squint),
-            post-process the access files to indicate access at middle of access-interval. 
+            post-process the access files to indicate access only at middle of access-interval. 
             The middle of access-interval is approximately the time at which the instrument shall
             be at side-looking geometry to the target ground-point.
+            The new access files are written in the same directory (with the same names), while the
+            previous access files are copied to a new directory named as :code:`accessold` under the user-directory.
+
+            :ivar access_dir: Path to :code:`access/` directory containing the access data of the indvidual satellites 
+                              in seperate files. The directory must **not** contain any other type of files.
+
+            The file format is as follows: The first four lines contain auxillary information. The fifth line contains the
+            column headers with the following names: :code:`Time[s],GP0,GP1,.....`. The number of columns depends on the number
+            of gridpoints and can be a varied. 
+
+            :vartype access_dir: str
+
+            :ivar step_size: Step size (time-resolution) at which the access calculations are done.
+            :vartype step_size: float
+
+            :returns: None
+
         """              
         # rename access_dir
         old_access_dir = access_dir[0:-1]+'old/'
