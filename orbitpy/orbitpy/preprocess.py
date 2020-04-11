@@ -504,8 +504,8 @@ class PreProcess():
                         * :code:`numberSatellites` (:class:`int`) Number of satellites 
                         * :code:`numberPlanes` (:class:`int`): Number of orbital planes
                         * :code:`relativeSpacing` (:class:`float`): Spacing between the satellites in the different planes in degrees
-                        * :code:`alt` (:class:`float`): Altitude
-                        * :code:`ecc`: Eccentricity
+                        * :code:`alt` (:class:`float`): Altitude in kilometers
+                        * :code:`ecc`(:class:`float`): Eccentricity
                         * :code:`inc` (:class:`float`): Inclination in degrees
                         * :code:`aop` (:class:`float`): Argument of perigee in degrees
         :paramtype: dict
