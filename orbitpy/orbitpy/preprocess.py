@@ -204,6 +204,9 @@ class PreProcess():
     :ivar gndstn_dir: Directory path to where ground station contacts are written.
     :vartype gndstn_dir: str
 
+    :ivar obsmetrics_dir: Directory path to where observational metrics are written.
+    :vartype obsmetrics_dir: str
+
     :ivar duration: Mission duration in days
     :vartype duration: float
 
@@ -268,6 +271,10 @@ class PreProcess():
                 if os.path.exists(self.gndstn_dir):
                     shutil.rmtree(self.gndstn_dir)
                 os.makedirs(self.gndstn_dir) 
+                self.obsmetrics_dir = user_dir + 'obsMetrics/'
+                if os.path.exists(self.obsmetrics_dir):
+                    shutil.rmtree(self.obsmetrics_dir)
+                os.makedirs(self.obsmetrics_dir)
                 # remove 'accessold' directory. New directory is not created at this stage.
                 if os.path.exists(self.user_dir+'accessold'):
                     shutil.rmtree(self.user_dir+'accessold')
@@ -502,7 +509,7 @@ class PreProcess():
                                 
                         * :code:`numberSatellites` (:class:`int`) Number of satellites 
                         * :code:`numberPlanes` (:class:`int`): Number of orbital planes
-                        * :code:`relativeSpacing` (:class:`float`): Spacing between the satellites in the different planes in degrees
+                        * :code:`relativeSpacing` (:class:`int`): Factor controlling the spacing between the satellites in different planes 
                         * :code:`alt` (:class:`float`): Altitude in kilometers
                         * :code:`ecc`(:class:`float`): Eccentricity
                         * :code:`inc` (:class:`float`): Inclination in degrees
@@ -515,13 +522,13 @@ class PreProcess():
         """
         
         try:
-            num_sats = data['numberSatellites']
-            num_planes = data['numberPlanes']
-            rel_spc = data['relativeSpacing']
+            num_sats = int(data['numberSatellites'])
+            num_planes = int(data['numberPlanes'])
+            rel_spc = int(data['relativeSpacing'])
             sma = Constants.radiusOfEarthInKM + data['alt']
-            ecc = data['ecc']
-            inc = data['inc']
-            aop = data['aop']
+            ecc = float(data['ecc'])
+            inc = float(data['inc'])
+            aop = float(data['aop'])
         except:
             print("Error in parsing Walker Delta constellation specs. Perhaps missing entry?")
             raise

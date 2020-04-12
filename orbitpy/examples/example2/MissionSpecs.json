@@ -4,8 +4,8 @@
     "constellation":{
         "@type": "Walkerdelta",
         "numberSatellites": 4,
-        "numberPlanes": 1,
-        "relativeSpacing":1,
+        "numberPlanes": 2,
+        "relativeSpacing":3,
         "inc":56,
         "alt": 700,
         "ecc": 0.0001,

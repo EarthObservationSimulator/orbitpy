@@ -8,8 +8,21 @@ from orbitpy import preprocess, orbitpropcov, communications, util
 from instrupy.public_library import Instrument     
 
 def main(user_dir):
-    """
-        example usage: python bin/run_mission.py examples/example1/
+    """ This script invokes the relevant classes and functions from the :code:`orbitpy` package to execute
+    a mission. It takes as argument the path to the user directory where it expects a :code:`MissionSpecs.json`
+    user configuration file, a CSV formatted file with ground station information and an optional coverage grid file.    
+
+    The following steps are carried out upon execution of this script:
+        1. Read in the user configuration file.
+        2. Preprocess: Delete existing output directories and create new empty directories, compute field-of-regard,
+           decide propagation time step and grid resolution,  generate coverage grid if needed, compute orbits.
+        3. Run orbit propagation and coverage for each of the satellites in the mission sequentially by invoking the :code:`orbitpropcov` program.
+        4. "Corrrection" of access files if purely side looking instrument.
+        5. Computation of inter-satellite contact periods.
+        6. Computation of ground-station contacts.
+        7. Invoke :code:'instrupy' and compute of observational data metrics. 
+        
+    Example usage: :code:`python bin/run_mission.py examples/example1/`
     """
     # Read in mssion specifications from user config file, coverage grid file (optional) 
     # and the ground stations specifications file in the user directory.
@@ -23,6 +36,7 @@ def main(user_dir):
         access_dir = user_dir + 'access/'
         comm_dir = user_dir + 'comm/'
         gndstn_dir = user_dir + 'gndstn/'
+        obsmetrics_dir = user_dir + 'obsMetrics/'
         cov_grid_fl = user_dir + 'covGrid'
         gnd_stn_fl = user_dir + str(miss_specs['groundStations']['gndStnFn'])
 
@@ -44,10 +58,11 @@ def main(user_dir):
         access_dir = pi.access_dir    
         comm_dir = pi.comm_dir
         gndstn_dir = pi.gndstn_dir
+        obsmetrics_dir = pi.obsmetrics_dir
         gnd_stn_fl = pi.gnd_stn_fl
         cov_grid_fl = pi.cov_grid_fl
 
-        # correct access files for purely side-looking instruments if necessary
+        # Correct access files for purely side-looking instruments if necessary
         if(pi.instru.purely_side_look):
             print(".......Correcting access files......")
             orbitpropcov.OrbitPropCov.correct_access_files(access_dir, pi.time_step)
@@ -67,43 +82,38 @@ def main(user_dir):
         print(".......Done.......")
 
     
-    # Compute observational data-metrics
-    print("Computing observational data metrics") 
+        # Compute observational data-metrics
+        print(".......Computing observational data metrics.......") 
+        try:
+            _path, _dirs, _AccessInfo_files = next(os.walk(access_dir))
+        except StopIteration:
+            pass
 
-    obsmetrics_dir = user_dir + 'obsMetrics/'
-    if os.path.exists(obsmetrics_dir):
-        shutil.rmtree(obsmetrics_dir)
-    os.makedirs(obsmetrics_dir)
+        instru_specs = miss_specs['instrument']
 
-    try:
-        _path, _dirs, _AccessInfo_files = next(os.walk(access_dir))
-    except StopIteration:
-        pass
+        indx = 0
+        level0dataMetrics_filepath = []
+        # process each access file separately
+        for AccessInfo_file in _AccessInfo_files:
 
-    instru_specs = miss_specs['instrument']
+            x = Instrument.from_json(instru_specs)
 
-    indx = 0
-    level0dataMetrics_filepath = []
-     # process each access file separately
-    for AccessInfo_file in _AccessInfo_files:
+            accessInfo_fl = os.path.join(access_dir, AccessInfo_file)
 
-        x = Instrument.from_json(instru_specs)
+            # Extract the satellite index as written in the Access filename. 
+            temp_AccessInfo_filepath = accessInfo_fl.split(os.path.sep)
+            temp_last_index = len(temp_AccessInfo_filepath) - 1
+            satIndx = temp_AccessInfo_filepath[temp_last_index].split('_')[0]
+            sat_state_filename = str(satIndx)
+            sat_state_fl = os.path.join(state_dir, sat_state_filename)
 
-        accessInfo_fl = os.path.join(access_dir, AccessInfo_file)
-
-        # Extract the satellite index as written in the Access filename. 
-        temp_AccessInfo_filepath = accessInfo_fl.split(os.path.sep)
-        temp_last_index = len(temp_AccessInfo_filepath) - 1
-        satIndx = temp_AccessInfo_filepath[temp_last_index].split('_')[0]
-        sat_state_filename = str(satIndx)
-        sat_state_fl = os.path.join(state_dir, sat_state_filename)
-
-        obsmetrics_filename = str(satIndx) + '_level0_data_metrics.csv'
-        level0dataMetrics_filepath.append(os.path.join(obsmetrics_dir, obsmetrics_filename))
-        x.dshield_generate_level0_data_metrics(cov_grid_fl, sat_state_fl, accessInfo_fl,
-                                       level0dataMetrics_filepath[indx])
-        indx = indx + 1
-    
+            obsmetrics_filename = str(satIndx) + '_level0_data_metrics.csv'
+            level0dataMetrics_filepath.append(os.path.join(obsmetrics_dir, obsmetrics_filename))
+            x.dshield_generate_level0_data_metrics(cov_grid_fl, sat_state_fl, accessInfo_fl,
+                                        level0dataMetrics_filepath[indx])
+            indx = indx + 1
+        
+        print(".......DONE.......")
 
 
 
