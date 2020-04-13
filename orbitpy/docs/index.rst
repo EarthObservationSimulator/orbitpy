@@ -22,6 +22,7 @@ To get started see the :ref:`examples` page.
    :caption: Contents:
 
    user_json_desc
+   fov_for_manuv_desc
    api_reference
    examples
 

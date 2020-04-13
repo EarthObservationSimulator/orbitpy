@@ -21,9 +21,9 @@ User JSON Input Description
 :code:`constellation` JSON object
 ##################################
 Constellation specifications. Two types of constellation are accepted: `custom`, `Walkerdelta` and should be indicated 
-in the :code:`@type` name/value pair. 
+in the :code:`@type` name, value pair. 
 
-1. :code:`custom` constellation type
+1. :code:`@type:custom` 
 
 A list of satellites is to be specified with each satellite orbit described by it's corresponding Keplerian elements. 
 The following fields are expected per satellite:
@@ -66,9 +66,9 @@ Example:
         }]
     }
 
-Note that the individual orbits are specified as a list (within square brackets) in the :code:`orbits` name/value pair.
+Note that the individual orbits are specified as a list (within square brackets) in the :code:`orbits` name, value pair.
 
-2. :code:`Walkerdelta` constellation type
+2. :code:`@type:Walkerdelta`
 
 Under this option the user can define parameters of a Walker Delta constellation (as given in SMAD 3rd ed.) and the corresponding 
 satellite orbits shall be auto-generated. The identifier of the satellites is coded as follows: :code:`satxy` where :code:`x` indicates
@@ -89,7 +89,7 @@ The following fields are expected for the definition of the Walker Delta constel
 
 Example:
 
-.. code::javascript
+.. code-block:: javascript
    
    "constellation":{
         "@type": "Walkerdelta",
@@ -106,10 +106,76 @@ Example:
 
 :code:`maneuverability` JSON object
 ####################################
-Total maneuverability of payload pointing (combining satellite and payload maneuverability)
+Total maneuverability of payload pointing (combining satellite and payload maneuverability). Four types of 
+maneuverability are accepted: `Fixed`, `Cone`, `RollOnly`, `Yaw180Roll` and should be indicated in the 
+:code:`@type` name, value pair. Please refer to :ref:`manuv_desc` for a complete description of the options.
+
+1. :code:`@type:Fixed`
+
+This option indicates that the payload shall be fixed at it's nominal orientation (specified inside the :code:`instrument`
+JSON object). There is no maneuverability.
+
+Example:
+
+.. code-block:: javascript
+   
+   "maneuverability":{
+        "@type":"Fixed"
+   }
+
+2. :code:`@type:Cone`
+
+This option indicates that the payload pointing axis can be manuvered inside a conical region of full-cone angle as indicated
+by the :code:`fullConeAngle` name, value pair. The axis of the cone is aligned to the nominal orientation of the instrument specified
+in the :code:`instrument` JSON object.
+
+.. csv-table:: Expected parameters
+   :header: Parameter, Data type, Units, Description
+   :widths: 10,10,5,40
+
+   fullConeAngle, float, degrees, Full cone angle of the maneuverability conical region
+
+Example:
+
+.. code-block:: javascript
+   
+   "maneuverability":{
+        "@type":"Cone",
+        "fullConeAngle": 25
+   }
+
+3. :code:`@type:RollOnly`
+
+This option indicates that the payload can be manuevered only along the roll axis (about the satellite velocity vector in Inertial frame).
+Such an option is expected for instruments which require a pure-side-looking target geometry.
+At a :math:`roll = 0` deg, the payload shall point at the nominal orientation specified in the :code:`instrument` JSON object. 
+The range of possible roll is indicated by the :code:`rollMin` and :code:`rollMax` name, value pairs.
+
+.. csv-table:: Expected parameters
+   :header: Parameter, Data type, Units, Description
+   :widths: 10,10,5,40
+
+   rollMin, float, degrees, minimum roll angle
+   rollMax, float, degrees, maximum roll angle
+
+Example:
+
+.. code-block:: javascript
+   
+   "maneuverability":{
+        "@type":"RollOnly",
+        "rollMin": -5,
+        "rollMax": 5
+   }
+
+4. :code:`@type:Yaw180Roll`
+
 
 
 .. _groundStations_json_object:
+
+
+
 
 :code:`groundStations` JSON object
 ####################################
