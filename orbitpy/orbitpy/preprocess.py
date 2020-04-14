@@ -11,6 +11,7 @@ import os
 import subprocess
 import json
 import shutil
+import glob
 import warnings
 from .util import EnumEntity, PropagationCoverageParameters, FileUtilityFunctions, Constants
 from instrupy.public_library import Instrument
@@ -196,35 +197,14 @@ class PreProcess():
     :ivar user_dir: User directory path
     :vartype user_dir: str
 
-    :ivar user_dir: User directory path
-    :vartype user_dir: str
-
-    :ivar state_dir:  Directory path to where comm satellite states are written.
-    :vartype state_dir: str
-
-    :ivar access_dir:  Directory path to where access results are written.
-    :vartype access_dir: str
-
     :ivar comm_dir: Directory path to where comm results are written.
     :vartype comm_dir: str
-
-    :ivar gndstn_dir: Directory path to where ground station contacts are written.
-    :vartype gndstn_dir: str
-
-    :ivar obsmetrics_dir: Directory path to where observational metrics are written.
-    :vartype obsmetrics_dir: str
 
     :ivar duration: Mission duration in days
     :vartype duration: float
 
-    :ivar orbits: List of orbits (specifications of each orbit) in the constellations.
-    :vartype orbits: list, :class:`orbitpy.preprocess.OrbitParameters`
-
-    :ivar instru: Instrument parameters relating to coverage calculations
-    :vartype instru: :class:`orbitpy.preprocess.InstrumentCoverageParameters`
-
-    :ivar fldofreg: Parameters relating to field-of-regard
-    :vartype fldofreg: :Class:`orbitpy.preprocess.FieldOfRegard`
+    :ivar sats: List of satellites in the mission
+    :vartype sats: list, :class:`orbitpy.preprocess.Satellites`
 
     :ivar time_step: Time step in seconds to be used in orbit propagation and coverage calculations. Also the time step
                      of the output satellite states.
@@ -243,11 +223,11 @@ class PreProcess():
     def __init__(self, specs=dict(), user_dir=None):
         """ Initialization function with preprocessing tasks included.
 
-            :param user_dir: User directory path from which files are read, written.
-            :paramtype user_dir: string
-
             :param specs: Dictionary of the mission specifications.
             :paramtype specs: dict
+
+            :param user_dir: User directory path from which files are read, written.
+            :paramtype user_dir: string
 
             .. note:: Refer to :ref:`User JSON Input Description` for complete desciption of the fields in the specifications
                       dictionary. 
@@ -261,27 +241,18 @@ class PreProcess():
             except ValueError:
                 print('Invalid user_dir')
                 raise            
-            try:
-                self.state_dir = self.user_dir + 'state/'
-                if os.path.exists(self.state_dir):
-                    shutil.rmtree(self.state_dir)
-                os.makedirs(self.state_dir) 
-                self.access_dir = self.user_dir + 'access/pay1/'
-                if os.path.exists(self.user_dir + 'access/'):
-                    shutil.rmtree(self.user_dir + 'access/')
-                os.makedirs(self.access_dir)  
+            try:                
+                # delete any existing satellite directories
+                sat_dirs =  glob.glob(user_dir+'sat*/')
+                for indx in range(0,len(sat_dirs)):
+                   if os.path.exists(sat_dirs[indx]):
+                        shutil.rmtree(sat_dirs[indx])
+                # delete and create empty comm directory
                 self.comm_dir = self.user_dir + 'comm/'
                 if os.path.exists(self.comm_dir):
                    shutil.rmtree(self.comm_dir)
                 os.makedirs(self.comm_dir) 
-                self.gndstn_dir = self.user_dir + 'gndStn/'
-                if os.path.exists(self.gndstn_dir):
-                    shutil.rmtree(self.gndstn_dir)
-                os.makedirs(self.gndstn_dir) 
-                self.obsmetrics_dir = user_dir + 'obsMetrics/pay1/'
-                if os.path.exists(self.user_dir + 'obsMetrics/'):
-                    shutil.rmtree(self.user_dir + 'obsMetrics/')
-                os.makedirs(self.obsmetrics_dir)
+
             except:
                 print('Error in removing and/or creating state, access, comm and gndstn directories.')
                 raise
@@ -580,11 +551,16 @@ class PreProcess():
         '''              
         # For each orbit, create and separate PropagationCoverageParameters object and append to a list.
         prop_cov_param = []
-        for sat_indx in range(0,len(self.sats)):       
+        for sat_indx in range(0,len(self.sats)):  
+
             orb = self.sats[sat_indx].orbit
-            fldofreg =  self.sats[sat_indx].fldofreg         
-            sat_state_fl = self.state_dir +'sat'+str(orb.id)
-            sat_acc_fl = self.access_dir +'sat'+str(orb.id)+'_accessInfo'
+            fldofreg =  self.sats[sat_indx].fldofreg 
+            sat_dir = self.user_dir + 'sat' + str(orb.id) + '/'
+            if os.path.exists(sat_dir):
+                shutil.rmtree(sat_dir)
+            os.makedirs(sat_dir)                  
+            sat_state_fl = sat_dir + 'state'
+            sat_acc_fl = sat_dir +'pay1_access' # hardcoded to 1 instrument
             pcp = PropagationCoverageParameters(sat_id=orb.id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                      raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
                      sen_fov_geom=fldofreg.geom, sen_orien=fldofreg.orien, sen_clock=fldofreg.clock, sen_cone=fldofreg.cone, 
@@ -661,11 +637,8 @@ class PreProcess():
     def compute_time_step(sats, time_res_fac):
         """ Compute time step to be used for orbit propagation based on the orbits and the sensor field-of-view.
         
-        :param orbits: List of orbits in the constellation
-        :paramtype orbits: list,:class:`orbitpy:preprocess.OrbitParameters`
-
-        :param instru: Instrument coverage related parameters
-        :paramtype instru: :class:`orbitpy.preprocess.InstrumentCoverageParameters`
+        :param sats: List of sats in the mission
+        :paramtype sats: list,:class:`orbitpy:preprocess.Satellites`
 
         :param time_res_fac: Factor which decides the time resolution of orbit propagation
         :paramtype time_res_fac: float        
@@ -701,11 +674,8 @@ class PreProcess():
     def compute_grid_res(sats, grid_res_fac):
         """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.
 
-        :param orbits: List of orbits in the constellation
-        :paramtype orbits: list,:class:`orbitpy:preprocess.OrbitParameters`
-
-        :param instru: Instrument coverage related parameters
-        :paramtype instru: :class:`orbitpy.preprocess.InstrumentCoverageParameters`
+        :param sats: List of sats in the mission
+        :paramtype sats: list,:class:`orbitpy:preprocess.Satellites`
 
         :param grid_res_fac: Factor which decides the resolution of the generated grid
         :paramtype grid_res_fac: float    

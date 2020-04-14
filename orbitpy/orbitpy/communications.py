@@ -13,11 +13,8 @@ from orbitpy.util import Constants, MathUtilityFunctions
 class InterSatelliteComm:
    """ Class to handle computation of inter-satellite communication periods.
 
-       :ivar user_dir: User directory path
-       :vartype user_dir: str
-
-       :ivar state_dir: State directory path
-       :vartype state_dir: str
+       :ivar sat_state_fls: Satellite state filepaths with names
+       :vartype sat_state_fls: list, str
 
        :ivar comm_dir: Inter-satellite Comm directory path
        :vartype comm_dir: str
@@ -27,17 +24,14 @@ class InterSatelliteComm:
        :vartype opaque_atmos_height_km: float
 
    """
-   def __init__(self, user_dir, state_dir, comm_dir, opaque_atmos_height_km):
-      self.user_dir = user_dir
-      self.state_dir = state_dir
+   def __init__(self, sat_state_fls, comm_dir, opaque_atmos_height_km):
+      self.sat_state_fls = sat_state_fls
       self.comm_dir = comm_dir
       self.opaque_atmos_height_km = opaque_atmos_height_km     
    
    def compute_all_contacts(self):
-      """ Iterate over all possible satellite pairs, and compute their contact times. Accepts satellite state
-      data from files in the :code:`state/` directory as input. There should **not** be any other files in the directory.
-      The name of the file is taken to be the name of the 
-      satellite. 
+      """ Iterate over all possible satellite pairs, and compute their contact times. Accepts list of satellite state
+      files in the instance variable :code:`sat_state_fls` as input. 
       
       The format of the data in each of the state files is as follows:
       The first four lines contain auxillary information. The second line contains the mission epoch written in
@@ -48,17 +42,12 @@ class InterSatelliteComm:
       
       The states of all the satellites must be synced to the same time-series.
       """
-      try:
-         _path, _dirs, filenames = next(os.walk(self.state_dir))
-      except StopIteration:
-         pass
-
-      number_of_files = len(filenames)
+      number_of_files = len(self.sat_state_fls)
 
       for indx1 in range(0,number_of_files):
 
-         sat1_filename = filenames[indx1]
-         sat1 = pd.read_csv(self.state_dir+sat1_filename, skiprows=5, header=None, delimiter=r",")
+         sat1_fl = self.sat_state_fls[indx1]
+         sat1 = pd.read_csv(sat1_fl, skiprows=5, header=None, delimiter=r",")
          sat1 = sat1[:-1]
          time_s = list(sat1.iloc[:,0])
 
@@ -68,28 +57,28 @@ class InterSatelliteComm:
          
          for indx2 in range(indx1+1,number_of_files):
                
-               sat2_filename = filenames[indx2]
+               sat2_fl = self.sat_state_fls[indx2]
 
-               with open(self.state_dir+sat1_filename) as fd:
+               with open(sat1_fl) as fd:
                   reader = csv.reader(fd)
                   epoch = [row for idx, row in enumerate(reader) if idx == 1]
                   epoch = str(epoch)[3:-3]
 
-               sat2 = pd.read_csv(self.state_dir+sat2_filename, skiprows=5, header=None, delimiter=r",")
+               sat2 = pd.read_csv(sat2_fl, skiprows=5, header=None, delimiter=r",")
                sat2 = sat2[:-1]               
 
                sat2_x_km = list(sat2.iloc[:,1])
                sat2_y_km = list(sat2.iloc[:,2])
                sat2_z_km = list(sat2.iloc[:,3])
-
+               
                # prepare output files
-               output_detailed_fl = self.comm_dir + sat1_filename+"_to_"+sat2_filename+"_detailed.csv"
+               output_detailed_fl = self.comm_dir + sat1_fl.split('/')[-2]+"_to_"+sat2_fl.split('/')[-2]+"_detailed.csv"
                f = open(output_detailed_fl, "w")
                f.write(epoch)
                f.write("\n")
                f.close()
 
-               output_concise_fl = self.comm_dir + sat1_filename+"_to_"+sat2_filename+"_concise.csv"       
+               output_concise_fl = self.comm_dir + sat1_fl.split('/')[-2]+"_to_"+sat2_fl.split('/')[-2]+"_concise.csv"       
                f = open(output_concise_fl, "w")
                f.write(epoch)
                f.write("\n")
@@ -195,23 +184,15 @@ class GroundStationComm:
    :code:`index,name,lat[deg],lon[deg],alt[km],minElevation[deg]`. The rest of the rows contain the corresponding 
    information for each ground-station in the mission. The names of the headers is to be striclty as indicated.
 
-   :ivar user_dir: User directory path
-   :vartype user_dir: str
-
-   :ivar state_dir: State directory path
-   :vartype state_dir: str
-
-   :ivar gndstn_dir: Path to directory where the resultant files are to be written
-   :vartype gndstn_dir: str
+   :ivar sat_dirs: List of all satellite directories
+   :vartype user_dir: list, str
 
    :ivar gnd_stn_specs: Dataframe containing data of all the ground-stations.
    :vartype gnd_stn_specs: :class:`pandas.DataFrame`
 
    """
-   def __init__(self, user_dir = None, state_dir = None, gndstn_dir = None, gnd_stn_fl = None):
-      self.user_dir = user_dir
-      self.state_dir = state_dir
-      self.gndstn_dir = str(gndstn_dir)        
+   def __init__(self, sat_dirs = None, gnd_stn_fl = None):
+      self.sat_dirs = sat_dirs
       try:
          try:
             self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")
@@ -223,9 +204,8 @@ class GroundStationComm:
          
 
    def compute_all_contacts(self):
-      """ Iterate over all possible satellites and ground-stations, and compute their contact times. Accepts satellite state
-      data from files in the :code:`state/` directory as input. There should **not** be any other files in the directory.
-      The name of the file is taken to be the name of the satellite. 
+      """ Iterate over all possible satellites and ground-stations, and compute their contact times. Accepts list of satellite state
+      files in the instance variable :code:`sat_state_fls` as input. 
       
       The format of the data in each of the state files is as follows:
       The first four lines contain auxillary information. The second line contains the mission epoch written in
@@ -236,17 +216,11 @@ class GroundStationComm:
 
       The ground-station coordinates and minimum elelvation requirements is read off the instance variable :code:`gnd_stn_specs`.
       """
-
-      try:
-         _path, _dirs, satfilenames = next(os.walk(self.state_dir))
-      except StopIteration:
-         pass
-
       # Iterate over all satellites
-      for indx1 in range(0,len(satfilenames)):
+      for indx1 in range(0,len(self.sat_dirs)):
 
-         sat_filename = satfilenames[indx1]
-         sat = pd.read_csv(self.state_dir+sat_filename, skiprows=5, header=None, delimiter=r",")
+         sat_fl = self.sat_dirs[indx1] + 'state'
+         sat = pd.read_csv(sat_fl, skiprows=5, header=None, delimiter=r",")
          sat = sat[:-1]
 
          time_s = sat.iloc[:,0]
@@ -254,7 +228,7 @@ class GroundStationComm:
          sat_y_km = sat.iloc[:,2]
          sat_z_km = sat.iloc[:,3]
 
-         with open(self.state_dir+sat_filename) as fd:
+         with open(sat_fl) as fd:
                   reader = csv.reader(fd)
                   epoch = [row for idx, row in enumerate(reader) if idx == 1]
                   epoch = str(epoch)[3:-3]
@@ -271,13 +245,13 @@ class GroundStationComm:
                gnd_stn_minelv_deg = float(self.gnd_stn_specs.iloc[indx2]['minElevation[deg]'])
 
                # prepare output files
-               output_detailed_fl = self.gndstn_dir + sat_filename+"_to_gndSt"+str(gnd_stn_i)+"_detailed.csv"
+               output_detailed_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_detailed.csv"
                f = open(output_detailed_fl, "w")
                f.write(epoch)
                f.write("\n")
                f.close()
 
-               output_concise_fl = self.gndstn_dir + sat_filename+"_to_gndSt"+str(gnd_stn_i)+"_concise.csv"
+               output_concise_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_concise.csv"
                f = open(output_concise_fl, "w")
                f.write(epoch)
                f.write("\n")

@@ -32,11 +32,7 @@ def main(user_dir):
     
     DEBUG = 0
     if DEBUG:
-        state_dir = user_dir + 'state/'
-        access_dir = user_dir + 'access/'
         comm_dir = user_dir + 'comm/'
-        gndstn_dir = user_dir + 'gndstn/'
-        obsmetrics_dir = user_dir + 'obsMetrics/'
         cov_grid_fl = user_dir + 'covGrid'
         gnd_stn_fl = user_dir + str(miss_specs['groundStations']['gndStnFn'])
 
@@ -54,64 +50,49 @@ def main(user_dir):
             opc.run()        
             print(".......Done.......")
 
-        state_dir = pi.state_dir
-        access_dir = pi.access_dir    
         comm_dir = pi.comm_dir
-        gndstn_dir = pi.gndstn_dir
-        obsmetrics_dir = pi.obsmetrics_dir
         gnd_stn_fl = pi.gnd_stn_fl
         cov_grid_fl = pi.cov_grid_fl
 
-        # Correct access files for purely side-looking instruments if necessary
-        if(pi.sats[0].instru.purely_side_look):
+        sat_dirs =  glob.glob(user_dir+'sat*/')
+        sat_state_fls =  glob.glob(user_dir+'sat*/state')
+        sat_access_fls =  glob.glob(user_dir+'sat*/*_access')
+
+        # Correct access files for purely side-looking instruments if necessary        
+        if(pi.sats[0].instru.purely_side_look):            
             print(".......Correcting access files......")
-            orbitpropcov.OrbitPropCov.correct_access_files(access_dir, pi.time_step)
+            orbitpropcov.OrbitPropCov.correct_access_files(sat_access_fls, pi.time_step)
             print(".......Done.......")
 
         # Compute satellite-to-satellite contacts
         print(".......Computing satellite-to-satellite contact periods.......")
+        
         opaque_atmos_height_km = 30
-        inter_sat_comm = communications.InterSatelliteComm(user_dir, state_dir, comm_dir, opaque_atmos_height_km)
+        inter_sat_comm = communications.InterSatelliteComm(sat_state_fls, comm_dir, opaque_atmos_height_km)
         inter_sat_comm.compute_all_contacts()    
         print(".......Done.......")
 
         # Compute satellite-to-ground-station contacts
         print(".......Computing satellite-to-ground-station contact periods.......")
-        gnd_stn_comm = communications.GroundStationComm(user_dir, state_dir, gndstn_dir, gnd_stn_fl)
+        gnd_stn_comm = communications.GroundStationComm(sat_dirs, gnd_stn_fl)
         gnd_stn_comm.compute_all_contacts()
         print(".......Done.......")
 
     
         # Compute observational data-metrics
         print(".......Computing observational data metrics.......") 
-        try:
-            _path, _dirs, _AccessInfo_files = next(os.walk(access_dir))
-        except StopIteration:
-            pass
 
         instru_specs = miss_specs['instrument'][0]
-
-        indx = 0
-        level0dataMetrics_filepath = []
         # process each access file separately
-        for AccessInfo_file in _AccessInfo_files:
+        for _dir in sat_dirs:
 
             x = Instrument.from_json(instru_specs)
-
-            accessInfo_fl = os.path.join(access_dir, AccessInfo_file)
-
-            # Extract the satellite index as written in the Access filename. 
-            temp_AccessInfo_filepath = accessInfo_fl.split(os.path.sep)
-            temp_last_index = len(temp_AccessInfo_filepath) - 1
-            satIndx = temp_AccessInfo_filepath[temp_last_index].split('_')[0]
-            sat_state_filename = str(satIndx)
-            sat_state_fl = os.path.join(state_dir, sat_state_filename)
-
-            obsmetrics_filename = str(satIndx) + '_level0_data_metrics.csv'
-            level0dataMetrics_filepath.append(os.path.join(obsmetrics_dir, obsmetrics_filename))
+            
+            sat_state_fl = os.path.join(_dir, 'state')
+            accessInfo_fl = glob.glob(_dir+'*_access')[0] # hardcoded to 1 instrument          
+            obsMetrics_fl = os.path.join(_dir, 'pay1_obsMetrics')
             x.dshield_generate_level0_data_metrics(cov_grid_fl, sat_state_fl, accessInfo_fl,
-                                        level0dataMetrics_filepath[indx])
-            indx = indx + 1
+                                        obsMetrics_fl)
         
         print(".......DONE.......")
 

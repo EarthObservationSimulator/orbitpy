@@ -46,22 +46,21 @@ class OrbitPropCov:
             raise RuntimeError('Error executing "orbitpropcov" OC script')
 
     @staticmethod
-    def correct_access_files(access_dir, step_size):
+    def correct_access_files(sat_access_fls, step_size):
         """ When the instrument takes observations at purely side-looking geometry (no squint),
             post-process the access files to indicate access only at middle of access-interval. 
             The middle of access-interval is approximately the time at which the instrument shall
             be at side-looking geometry to the target ground-point.
             The new access files are written in the same directory (with the same names), while the
-            previous access files are copied to a new directory named as :code:`accessold` under the user-directory.
+            previous access files are renamed as :code:`xxxx_old` under the same directory.
 
-            :ivar access_dir: Path to :code:`access/` directory containing the access data of the indvidual satellites 
-                              in seperate files. The directory must **not** contain any other type of files.
+            :ivar sat_access_fls: List of access files which need to be corrected
 
             The file format is as follows: The first four lines contain auxillary information. The fifth line contains the
             column headers with the following names: :code:`Time[s],GP0,GP1,.....`. The number of columns depends on the number
             of gridpoints and can be a varied. 
 
-            :vartype access_dir: str
+            :vartype sat_access_fls: str
 
             :ivar step_size: Step size (time-resolution) at which the access calculations are done.
             :vartype step_size: float
@@ -69,24 +68,10 @@ class OrbitPropCov:
             :returns: None
 
         """              
-        # rename access_dir
-        old_access_dir = access_dir[0:-1]+'_old'
-        if os.path.exists(old_access_dir):
-                    shutil.rmtree(old_access_dir)        
-        os.rename(access_dir, old_access_dir) 
-        # make empty access_dir to store the corrected access data
-        new_access_dir = access_dir
-        os.makedirs(new_access_dir)
-
-        try:
-            _path, _dirs, _OldAccessInfo_files = next(os.walk(old_access_dir))
-        except StopIteration:
-            pass
-
-        for OldAccessInfo_file in _OldAccessInfo_files:
-
-            old_accessInfo_fl = os.path.join(old_access_dir, OldAccessInfo_file)
-            new_accessInfo_fl = os.path.join(new_access_dir, OldAccessInfo_file)
+        for acc_fl in sat_access_fls:
+            os.rename(acc_fl, acc_fl+'_old') 
+            old_accessInfo_fl = acc_fl + '_old'
+            new_accessInfo_fl = acc_fl
 
             df = pd.read_csv(old_accessInfo_fl, skiprows = 4)
             df = df.set_index('Time[s]')
