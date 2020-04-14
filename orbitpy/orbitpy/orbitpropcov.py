@@ -70,7 +70,7 @@ class OrbitPropCov:
 
         """              
         # rename access_dir
-        old_access_dir = access_dir[0:-1]+'old/'
+        old_access_dir = access_dir[0:-1]+'_old'
         if os.path.exists(old_access_dir):
                     shutil.rmtree(old_access_dir)        
         os.rename(access_dir, old_access_dir) 

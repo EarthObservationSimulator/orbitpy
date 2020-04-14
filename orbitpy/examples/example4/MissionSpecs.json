@@ -13,7 +13,7 @@
             "ta": 0
         }]
     }, 
-    "instrument":    {        
+    "instrument":    [{        
         "@type": "Basic Sensor",
         "name": "Atom",  
         "mass": 28, 
@@ -27,12 +27,11 @@
         "orientation": {
             "convention": "SIDE_LOOK",
             "sideLookAngle": 17
+        },
+        "maneuverability":{
+            "@type": "YAW180"
         }        
-    }
-    ,
-    "maneuverability":{
-        "@type": "YAW180"
-    },
+    }],    
     "groundStations":{
         "gndStnFn":"groundStations"
     },   

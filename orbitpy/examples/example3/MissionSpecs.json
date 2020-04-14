@@ -22,7 +22,7 @@
             "ta": 0
         }]
     }, 
-    "instrument":{
+    "instrument":[{
         "@type": "Synthetic Aperture Radar",
         "name": "Seasat-A",  
         "mass": 243, 
@@ -51,16 +51,14 @@
         "_references":  ["The Seasat-A Synthetic Aperture Radar System, Rolando L.Jordan 1980",
                          "Spaceborne SAR Study: LDRD ’92 Final Report",
                          "https://directory.eoportal.org/web/eoportal/satellite-missions/s/seasat"
-                        ]
-          
-    }
-    ,
-    "maneuverability":{
-        "@type": "ROLLONLY",
-        "rollMin": -5,
-        "rollMax": 5
-
-    },
+                        ],
+        "maneuverability":{
+            "@type": "ROLLONLY",
+            "rollMin": -5,
+            "rollMax": 5
+    
+        }          
+    }],   
     "groundStations":{
         "gndStnFn":"groundStations"
     },   

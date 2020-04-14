@@ -179,6 +179,13 @@ class FieldOfRegard():
         except:
             raise Exception("Error in initilization of FieldOfRegard object.")
             
+class Satellite():
+
+    def __init__(self, orbit, instru, fldofreg):
+
+        self.orbit = orbit
+        self.instru = instru
+        self.fldofreg = fldofreg
 
 class PreProcess(): 
     """ Class to handle pre-processing of user inputs.
@@ -259,9 +266,9 @@ class PreProcess():
                 if os.path.exists(self.state_dir):
                     shutil.rmtree(self.state_dir)
                 os.makedirs(self.state_dir) 
-                self.access_dir = self.user_dir + 'access/'
-                if os.path.exists(self.access_dir):
-                    shutil.rmtree(self.access_dir)
+                self.access_dir = self.user_dir + 'access/pay1/'
+                if os.path.exists(self.user_dir + 'access/'):
+                    shutil.rmtree(self.user_dir + 'access/')
                 os.makedirs(self.access_dir)  
                 self.comm_dir = self.user_dir + 'comm/'
                 if os.path.exists(self.comm_dir):
@@ -271,13 +278,10 @@ class PreProcess():
                 if os.path.exists(self.gndstn_dir):
                     shutil.rmtree(self.gndstn_dir)
                 os.makedirs(self.gndstn_dir) 
-                self.obsmetrics_dir = user_dir + 'obsMetrics/'
-                if os.path.exists(self.obsmetrics_dir):
-                    shutil.rmtree(self.obsmetrics_dir)
+                self.obsmetrics_dir = user_dir + 'obsMetrics/pay1/'
+                if os.path.exists(self.user_dir + 'obsMetrics/'):
+                    shutil.rmtree(self.user_dir + 'obsMetrics/')
                 os.makedirs(self.obsmetrics_dir)
-                # remove 'accessold' directory. New directory is not created at this stage.
-                if os.path.exists(self.user_dir+'accessold'):
-                    shutil.rmtree(self.user_dir+'accessold')
             except:
                 print('Error in removing and/or creating state, access, comm and gndstn directories.')
                 raise
@@ -292,19 +296,12 @@ class PreProcess():
                 print('Valid duration, please')
                 raise
             try:
-                self.orbits = PreProcess.enumerate_orbits(specs['constellation'])
+                self.sats = PreProcess.enumerate_satellites(specs['constellation'], specs["instrument"])
             except:
-                print('Error in enumerating orbits')
-                raise
+                print('Error in enumerating satellites')
+                raise            
             try:
-                o = Instrument.from_json(specs["instrument"])
-                manuv = specs["maneuverability"]  
-                [self.instru, self.fldofreg] =  PreProcess.process_field_of_regard(o, manuv)
-            except:
-                print('Error in obtaining instrument specifications')
-                raise 
-            try:
-                _time_step = PreProcess.compute_time_step(self.orbits, self.instru, Constants.time_res_fac)
+                _time_step = PreProcess.compute_time_step(self.sats, Constants.time_res_fac)
                 if 'customTimeStep' in specs['settings']:                    
                     self.time_step = float(specs['settings']['customTimeStep'])
                     if(_time_step < self.time_step ):
@@ -320,7 +317,7 @@ class PreProcess():
                 if 'customGridRes' in specs['settings']:
                     self.grid_res = float(specs['settings']['customGridRes'])
                 else:
-                    self.grid_res = PreProcess.compute_grid_res(self.orbits, self.instru, Constants.grid_res_fac) 
+                    self.grid_res = PreProcess.compute_grid_res(self.sats, Constants.grid_res_fac) 
             except:
                 print('Error in processing grid resolution')
                 raise
@@ -553,6 +550,26 @@ class PreProcess():
 
         return orbits
 
+    @staticmethod
+    def enumerate_satellites(orb_specs = dict(), instru_specs = dict()):
+        try:
+            orbits = PreProcess.enumerate_orbits(orb_specs)
+        except:
+            print('Error in enumerating orbits')
+            raise
+        try:
+            o = Instrument.from_json(instru_specs[0])
+            [instru, fldofreg] =  PreProcess.process_field_of_regard(o, instru_specs[0]["maneuverability"])
+        except:
+            print('Error in obtaining instrument specifications')
+            raise 
+
+        sats = []
+        for orb_indx in range(0,len(orbits)): 
+            sats.append(Satellite(orbits[orb_indx], instru, fldofreg))
+        
+        return sats
+
 
     def generate_prop_cov_param(self):
         ''' Generate propagation and coverage parameters from the class instance variables. 
@@ -563,14 +580,15 @@ class PreProcess():
         '''              
         # For each orbit, create and separate PropagationCoverageParameters object and append to a list.
         prop_cov_param = []
-        for orb_indx in range(0,len(self.orbits)):       
-            orb = self.orbits[orb_indx]            
+        for sat_indx in range(0,len(self.sats)):       
+            orb = self.sats[sat_indx].orbit
+            fldofreg =  self.sats[sat_indx].fldofreg         
             sat_state_fl = self.state_dir +'sat'+str(orb.id)
             sat_acc_fl = self.access_dir +'sat'+str(orb.id)+'_accessInfo'
             pcp = PropagationCoverageParameters(sat_id=orb.id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                      raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
-                     sen_fov_geom=self.fldofreg.geom, sen_orien=self.fldofreg.orien, sen_clock=self.fldofreg.clock, sen_cone=self.fldofreg.cone, 
-                     yaw180_flag = self.fldofreg.yaw180_flag, step_size=self.time_step, sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl)
+                     sen_fov_geom=fldofreg.geom, sen_orien=fldofreg.orien, sen_clock=fldofreg.clock, sen_cone=fldofreg.cone, 
+                     yaw180_flag = fldofreg.yaw180_flag, step_size=self.time_step, sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl)
 
             prop_cov_param.append(pcp)
             
@@ -640,7 +658,7 @@ class PreProcess():
         return cov_grid_fl
 
     @staticmethod
-    def compute_time_step(orbits, instru, time_res_fac):
+    def compute_time_step(sats, time_res_fac):
         """ Compute time step to be used for orbit propagation based on the orbits and the sensor field-of-view.
         
         :param orbits: List of orbits in the constellation
@@ -655,33 +673,32 @@ class PreProcess():
         """
         RE = Constants.radiusOfEarthInKM
         GMe = Constants.GMe
-        fov_at = instru.fov_at
+        
+        # find the minimum require time-step over all the satellites
+        min_t_step = 1e1000 # some large number
+        for indx in range(0,len(sats)):
 
-        # find the minimum sma of all the orbits
-        min_sma = orbits[0].sma
-        for indx in range(1,len(orbits)):
-            if(orbits[indx].sma < min_sma):
-                min_sma = orbits[indx].sma 
-        min_alt = min_sma - RE # minimum latitude in km
+            sma = sats[indx].orbit.sma 
+            fov_at = sats[indx].instru.fov_at
+            alt = sma - RE # minimum latitude in km
+            f = RE/(RE+alt)
+            satVel = np.sqrt(GMe/(RE+alt))
+            satGVel = f * satVel
+            sinRho = RE/(RE+alt)
+            hfov_deg = fov_at/2
+            elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
+            lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
+            eca_deg = lambda_deg*2 # total earth centric angle
+            AT_FP_len = RE * np.deg2rad(eca_deg)                
+            t_AT_FP = AT_FP_len / satGVel # find time taken by satellite to go over the along-track length
+            tstep = time_res_fac * t_AT_FP
+            if(tstep < min_t_step):
+                min_t_step = tstep  
 
-        f = RE/(RE+min_alt)
-        satVel = np.sqrt(GMe/(RE+min_alt))
-        satGVel = f * satVel
-        sinRho = RE/(RE+min_alt)
-        hfov_deg = fov_at/2
-        elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
-        lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
-        eca_deg = lambda_deg*2 # total earth centric angle
-
-        AT_FP_len = RE * np.deg2rad(eca_deg)
-
-        t_AT_FP = AT_FP_len / satGVel # find time taken by satellite to go over the along-track length
-        tstep = time_res_fac * t_AT_FP
-
-        return tstep
+        return min_t_step
 
     @staticmethod
-    def compute_grid_res(orbits, instru, grid_res_fac):
+    def compute_grid_res(sats, grid_res_fac):
         """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.
 
         :param orbits: List of orbits in the constellation
@@ -694,24 +711,22 @@ class PreProcess():
         :paramtype grid_res_fac: float    
 
         """
-        RE = Constants.radiusOfEarthInKM
-        # find the minimum sma of all the orbits
-        min_sma = orbits[0].sma
-        for indx in range(1,len(orbits)):
-            if(orbits[indx].sma < min_sma):
-                min_sma = orbits[indx].sma 
-        
-        min_alt = min_sma - RE # minimum latitude in km
-        fov_ct = instru.fov_ct # instrument cross-track fov in degrees
+        RE = Constants.radiusOfEarthInKM        
+        # find the minimum required grid resolution
+        min_grid_res_deg = 1e1000 # some large number
+        for indx in range(0,len(sats)):
+            alt = sats[indx].orbit.sma - RE # altitude
+            fov_ct = sats[indx].instru.fov_ct # instrument cross-track fov in degrees
+            sinRho = RE/(RE+alt)
+            hfov_deg = 0.5*fov_ct
+            elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
+            lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
+            eca_deg = lambda_deg*2 # total earth centric angle
+            grid_res_deg = eca_deg*grid_res_fac 
+            if(grid_res_deg < min_grid_res_deg):
+                min_grid_res_deg = grid_res_deg
 
-        sinRho = RE/(RE+min_alt)
-        hfov_deg = 0.5*fov_ct
-        elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
-        lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
-        eca_deg = lambda_deg*2 # total earth centric angle
-        grid_res_deg = eca_deg*grid_res_fac 
-
-        return grid_res_deg
+        return min_grid_res_deg
 
     ''' delete
     @staticmethod

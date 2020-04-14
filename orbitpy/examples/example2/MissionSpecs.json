@@ -1,6 +1,6 @@
 {
     "epoch": "2017, 1, 15, 22, 30, 20.111",
-    "duration": 0.1,
+    "duration": 0.25,
     "constellation":{
         "@type": "Walkerdelta",
         "numberSatellites": 4,
@@ -11,7 +11,7 @@
         "ecc": 0.0001,
         "aop": 0
     }, 
-    "instrument":{        
+    "instrument":[{        
         "@type": "Basic Sensor",
         "name": "Atom",  
         "mass": 28, 
@@ -26,13 +26,13 @@
         "orientation": {
             "convention": "SIDE_LOOK",
             "sideLookAngle": 30
+        },
+        "maneuverability":{
+            "@type": "ROLLONLY",
+            "rollMin": 15,
+            "rollMax": 35
         }        
-    },
-    "maneuverability":{
-        "@type": "ROLLONLY",
-        "rollMin": 15,
-        "rollMax": 35
-    },
+    }],    
     "groundStations":{
         "gndStnFn":"groundStations"
     },

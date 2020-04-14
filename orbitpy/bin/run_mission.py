@@ -63,7 +63,7 @@ def main(user_dir):
         cov_grid_fl = pi.cov_grid_fl
 
         # Correct access files for purely side-looking instruments if necessary
-        if(pi.instru.purely_side_look):
+        if(pi.sats[0].instru.purely_side_look):
             print(".......Correcting access files......")
             orbitpropcov.OrbitPropCov.correct_access_files(access_dir, pi.time_step)
             print(".......Done.......")
@@ -89,7 +89,7 @@ def main(user_dir):
         except StopIteration:
             pass
 
-        instru_specs = miss_specs['instrument']
+        instru_specs = miss_specs['instrument'][0]
 
         indx = 0
         level0dataMetrics_filepath = []

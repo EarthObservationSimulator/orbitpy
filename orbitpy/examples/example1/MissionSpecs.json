@@ -13,7 +13,7 @@
             "ta": 0
         }]
     }, 
-    "instrument":    {        
+    "instrument":    [{        
         "@type": "Basic Sensor",
         "name": "Atom",  
         "mass": 28, 
@@ -27,14 +27,14 @@
         "orientation": {
             "convention": "SIDE_LOOK",
             "sideLookAngle": 0
+        },
+        "maneuverability":{
+            "@type": "CONE",
+            "fullConeAngle": "1"
+    
         }        
-    }
+    }]
     ,
-    "maneuverability":{
-        "@type": "CONE",
-        "fullConeAngle": "1"
-
-    },
     "groundStations":{
         "gndStnFn":"groundStations"
     },   
