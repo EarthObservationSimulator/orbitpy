@@ -4,7 +4,7 @@
     "constellation":{
         "@type": "Custom",
         "orbits":[{
-            "id": 11,
+            "@id": 11,
             "sma": 7078.137,
             "ecc": 0.0,
             "inc": 96.67657116,
@@ -13,7 +13,7 @@
             "ta": 0
         },
         {
-            "id": 12,
+            "@id": 12,
             "sma": 6878.137,
             "ecc": 0.0,
             "inc": 88.67657116,
@@ -55,8 +55,7 @@
         "maneuverability":{
             "@type": "ROLLONLY",
             "rollMin": -5,
-            "rollMax": 5
-    
+            "rollMax": 5    
         }          
     }],   
     "groundStations":{
@@ -67,14 +66,14 @@
     "grid":{
         "autoGrid":{
             "regions":[{
-                "id":1,
+                "@id":1,
                 "latUpper":20,
                 "latLower":15,
                 "lonUpper":360,
                 "lonLower":0                
             },
             {
-                "id":2,
+                "@id":2,
                 "latUpper":-30,
                 "latLower":-35,
                 "lonUpper":45,

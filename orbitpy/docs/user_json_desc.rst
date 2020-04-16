@@ -10,7 +10,6 @@ User JSON Input Description
    duration, float, days, Length of mission in days. Eg: :code:`0.25`
    constellation, :ref:`constellation_json_object`, ,Constellation specifications.
    instrument, *instrument JSON object*, ,Instrument specifications (please refer :code:`InstruPy` documentation).
-   maneuverability, :ref:`maneuverability_json_object`, ,Maneuverability specifications.
    groundStations, :ref:`groundstations_json_object`, ,Ground station specifications.
    grid, :ref:`grid_json_object`, ,Coverage grid specifications.
    settings, :ref:`settings_json_object`, ,Settings
@@ -32,7 +31,7 @@ The following fields are expected per satellite:
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
-   id, str or int, , Satellite identifier. The names of the output files are based on this field.
+   idn, str or int, , Unique satellite identifier. The names of the output files are based on this field.
    sma,float, kilometers, Length of the orbit semi-major axis
    ecc,float,, Orbit eccentricity
    inc,float,degrees, Orbit inclination
@@ -47,7 +46,7 @@ Example:
    "constellation":{
         "@type": "Custom",
         "orbits":[{
-            "id": 11,
+            "idn": 11,
             "sma": 7078.137,
             "ecc": 0.0,
             "inc": 96.67657116,
@@ -56,7 +55,7 @@ Example:
             "ta": 0
         },
         {
-            "id": 12,
+            "idn": 12,
             "sma": 6878.137,
             "ecc": 0.0,
             "inc": 88.67657116,
@@ -102,73 +101,6 @@ Example:
         "aop": 0
     }
 
-.. _maneuverability_json_object:
-
-:code:`maneuverability` JSON object
-####################################
-Total maneuverability of payload pointing (combining satellite and payload maneuverability). Four types of 
-maneuverability are accepted: `Fixed`, `Cone`, `RollOnly`, `Yaw180Roll` and should be indicated in the 
-:code:`@type` name, value pair. Please refer to :ref:`manuv_desc` for a complete description of the options.
-
-1. :code:`@type:Fixed`
-
-This option indicates that the payload shall be fixed at it's nominal orientation (specified inside the :code:`instrument`
-JSON object). There is no maneuverability.
-
-Example:
-
-.. code-block:: javascript
-   
-   "maneuverability":{
-        "@type":"Fixed"
-   }
-
-2. :code:`@type:Cone`
-
-This option indicates that the payload pointing axis can be manuvered inside a conical region of full-cone angle as indicated
-by the :code:`fullConeAngle` name, value pair. The axis of the cone is aligned to the nominal orientation of the instrument specified
-in the :code:`instrument` JSON object.
-
-.. csv-table:: Expected parameters
-   :header: Parameter, Data type, Units, Description
-   :widths: 10,10,5,40
-
-   fullConeAngle, float, degrees, Full cone angle of the maneuverability conical region
-
-Example:
-
-.. code-block:: javascript
-   
-   "maneuverability":{
-        "@type":"Cone",
-        "fullConeAngle": 25
-   }
-
-3. :code:`@type:RollOnly`
-
-This option indicates that the payload can be manuevered only along the roll axis (about the satellite velocity vector in Inertial frame).
-Such an option is expected for instruments which require a pure-side-looking target geometry.
-At a :math:`roll = 0` deg, the payload shall point at the nominal orientation specified in the :code:`instrument` JSON object. 
-The range of possible roll is indicated by the :code:`rollMin` and :code:`rollMax` name, value pairs.
-
-.. csv-table:: Expected parameters
-   :header: Parameter, Data type, Units, Description
-   :widths: 10,10,5,40
-
-   rollMin, float, degrees, minimum roll angle
-   rollMax, float, degrees, maximum roll angle
-
-Example:
-
-.. code-block:: javascript
-   
-   "maneuverability":{
-        "@type":"RollOnly",
-        "rollMin": -5,
-        "rollMax": 5
-   }
-
-4. :code:`@type:Yaw180Roll`
 
 
 

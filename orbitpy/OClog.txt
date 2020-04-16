@@ -2,7 +2,7 @@ GMAT Build Date: Apr  8 2020 15:41:21
 
 GMAT Log file set to ./OClog.txt
 The log file mode is create
-Mon Apr 13 19:39:37 2020
+Wed Apr 15 10:30:51 2020
 
 **** About to read in Coverage grid ******
 **** Finished reading in Coverage grid ******
@@ -18,5 +18,5 @@ Buffer is NULL
 *** About to Propagate!!!!
  --- propagation completed
  --- Done deleting old pointers
-TIME SPENT is 3.0915390000 seconds
+TIME SPENT is 2.0172280000 seconds
 *** END ***

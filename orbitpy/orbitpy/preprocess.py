@@ -15,20 +15,13 @@ import glob
 import warnings
 from .util import EnumEntity, PropagationCoverageParameters, FileUtilityFunctions, Constants
 from instrupy.public_library import Instrument
+from instrupy.util import FieldOfView
 import instrupy
 
 class ConstellationType(EnumEntity):
     """Enumeration of recognized constellation types"""
     CUSTOM = "CUSTOM",
     WALKERDELTA = "WALKERDELTA"
-
-class ManueverType(EnumEntity):
-    """Enumeration of recognized manuvever types"""
-    FIXED = "FIXED"
-    CONE = "CONE",
-    ROLLONLY = "ROLLONLY",
-    YAW180 = "YAW180"
-    YAW180ROLL = "YAW180ROLL" 
 
 class FOVGeometry(EnumEntity):
     """Enumeration of recognized instrument sensor geometries."""
@@ -42,8 +35,8 @@ class OrbitParameters():
 
     .. note:: Epoch is defined to be common for all the orbits in the mission and is hence defined separately.
     
-    :ivar id: Identifier of the orbit (satellite)
-    :vartype id: str
+    :ivar @_id: Unique identifier of the orbit (satellite)
+    :vartype @_id: str
 
     :ivar sma: Semi-major axis in kilometers
     :vartype sma: float
@@ -64,9 +57,9 @@ class OrbitParameters():
     :vartype ta: float
     
     """
-    def __init__(self, id=None, sma=None, ecc=None, inc=None, raan=None, aop=None, ta=None):
+    def __init__(self, _id=None, sma=None, ecc=None, inc=None, raan=None, aop=None, ta=None):
         try:
-            self.id = str(id)
+            self._id = str(_id)
             self.sma = float(sma)
             self.ecc = float(ecc)
             self.inc = float(inc)
@@ -119,12 +112,15 @@ class InstrumentCoverageParameters():
 
     :ivar purely_side_look: Flag to specify if instrument operates in a strictly side-looking viewing geometry.
     :vartype purely_side_look: bool
+
+    :ivar yaw180_flag: Flag applies in case of field-of-regard. If true ,it signifies that the field-of-regard includes the field-of-view of payload rotated along yaw axis by 180 deg. 
+    :vartype yaw180_flag: bool
     
     """
     def __init__(self, fov_geom=None, fov_cone=None, fov_clock=None, fov_at = None, fov_ct = None, 
                  orien_eu_seq1=None, orien_eu_seq2=None, orien_eu_seq3=None, 
                  orien_eu_ang1=None, orien_eu_ang2=None, orien_eu_ang3=None,
-                 purely_side_look = bool()):
+                 purely_side_look = bool(), yaw180_flag = bool()):
         
         try:
             self.fov_geom = FOVGeometry.get(fov_geom)
@@ -145,48 +141,51 @@ class InstrumentCoverageParameters():
             self.orien_eu_ang2 = float(orien_eu_ang2)
             self.orien_eu_ang3 = float(orien_eu_ang3)
             self.purely_side_look = bool(purely_side_look)
+            self.yaw180_flag = bool(yaw180_flag)
         except:
             raise Exception("Error in initilization of InstrumentCoverageParameters object.")
-            
 
-class FieldOfRegard():
-    """ Data structure to hold the field-of-regard related parameters. Note that all the memebers are of type 
-    string so that it can be directly passed on as arguments to the `orbitpropcov.cpp` program.
-    
-    :ivar geom: Geometry of the field-of-regard (FOR)
-    :vartype geom: :class:`FieldOfRegard`
-
-    :ivar orien: Orientation of an equivalent sensor with the corresponding FOR the following CSV string format: :code:`Euler Seq1, Euler Seq2, Euler Seq3, Euler Angle1, Euler Angle2, Euler Angle3`. Angles are specifed in degrees.
-    :vartype orien: str
-
-    :ivar cone: Cone angles (in degrees) of an equivalent sensor with the corresponding FOR in CSV string format.
-    :vartype cone: str
-
-    :ivar clock: Clock angles (in degrees) of an equivalent sensor with the corresponding FOR in CSV string format.
-    :vartype clock: str
-
-    :ivar yaw180_flag: Flag indicating if FOR includes the FOV defined by the above clock, cone angles rotated by 180 deg around the satellite yaw axis.
-    :vartype yaw180_flag: int
-
-    """
-    def __init__(self, geom=None, orien = None, cone=None, clock=None, yaw180_flag = int()):
-        
-        try:
-            self.geom = FOVGeometry.get(geom).value
-            self.orien = str(orien)
-            self.cone = str(cone)
-            self.clock = str(clock)            
-            self.yaw180_flag = int(yaw180_flag)            
-        except:
-            raise Exception("Error in initilization of FieldOfRegard object.")
-            
+    def get_as_string(self, param):
+        """ Get the necessary instrument coverage specifications in string format so it can be directly passed
+            as arguments to the :code:`orbitpropcov` program.
+        """
+        if(param == 'Geometry'):
+            return self.fov_geom.name
+        elif(param == 'Clock'):
+            clock = [str(i) for i in self.fov_clock] 
+            clock = ','.join(clock) 
+            return clock
+        elif(param == 'Cone'):
+            cone = [str(i) for i in self.fov_cone] 
+            cone = ','.join(cone) 
+            return cone 
+        elif(param == 'Orientation'):
+            orien = str(self.orien_eu_seq1) + ',' + str(self.orien_eu_seq2) + ',' + str(self.orien_eu_seq3) + ',' + \
+                   str(self.orien_eu_ang1) + ',' + str(self.orien_eu_ang2) + ',' + str(self.orien_eu_ang3)
+            return orien
+        elif(param == 'yaw180_flag'):
+            return str(int(self.yaw180_flag))
+        else:
+            raise Exception("Unknown parameter")    
 class Satellite():
 
-    def __init__(self, orbit, instru, fldofreg):
+    """ Data structure holding attributes of a Satellite.
+    
+    :ivar orbit: Orbital parameters of the satellite. 
+    :vartype orbit: :class:`orbitpy.preprocess.OrbitParameters` 
+
+    :ivar ics_fov: Instrument coverage parameters relating to the field-of-view
+    :vartype ics_fov: :class:`orbitpy.preprocess.InstrumentCoverageParameters` 
+
+    :ivar ics_for: Instrument coverage parameters relating to the field-of-regard
+    :vartype ics_for: :class:`orbitpy.preprocess.InstrumentCoverageParameters` 
+
+    """
+    def __init__(self, orbit, ics_fov, ics_for):
 
         self.orbit = orbit
-        self.instru = instru
-        self.fldofreg = fldofreg
+        self.ics_fov = ics_fov
+        self.ics_for = ics_for
 
 class PreProcess(): 
     """ Class to handle pre-processing of user inputs.
@@ -307,111 +306,38 @@ class PreProcess():
 
 
     @staticmethod
-    def process_field_of_regard(o, manuv = dict()):
-        """ Compute field of regard (FOR) for a given manuverability and instrument.
+    def process_FOV_FOR(o):
+        """ Compute field-of-view (FOV), field-of-regard (FOR) for a given instrument and manuverability.
         
         :param o: Instrument object from the `instrupy` package.
         :paramtype: :class:`instrupy.public_library.Instrument`
 
-        :param manuv: Dictionary containing the maneuver specifications.
-        :paramtype: dict
-
-        :returns: Instrument coverage parameters and field of regard parameters.
-        :rtype: :class:`InstrumentCoverageParameters`, :class:`FieldOfRegard`
+        :returns: FOV and FOR related parameters
+        :rtype: list, :class:`InstrumentCoverageParameters`
         
         """
         try:
             _ics = FileUtilityFunctions.from_json(o.get_coverage_specs())
-            ics = InstrumentCoverageParameters(_ics["fieldOfView"]["geometry"], 
+            print(_ics)
+            ics_fldofview = InstrumentCoverageParameters(_ics["fieldOfView"]["geometry"], 
                                              _ics["fieldOfView"]["coneAnglesVector"], _ics["fieldOfView"]["clockAnglesVector"],
                                              _ics["fieldOfView"]["AlongTrackFov"], _ics["fieldOfView"]["CrossTrackFov"],
                                              _ics["Orientation"]["eulerSeq1"], _ics["Orientation"]["eulerSeq2"], _ics["Orientation"]["eulerSeq3"],
                                              _ics["Orientation"]["eulerAngle1"], _ics["Orientation"]["eulerAngle2"], _ics["Orientation"]["eulerAngle3"],
-                                             _ics["purely_side_look"]
-                                             )
+                                             _ics["purely_side_look"], _ics["fieldOfView"]["yaw180_flag"]
+                                             )           
+            ics_fldofreg = InstrumentCoverageParameters(_ics["fieldOfRegard"]["geometry"], 
+                                             _ics["fieldOfRegard"]["coneAnglesVector"], _ics["fieldOfView"]["clockAnglesVector"],
+                                             _ics["fieldOfRegard"]["AlongTrackFov"], _ics["fieldOfView"]["CrossTrackFov"],
+                                             _ics["Orientation"]["eulerSeq1"], _ics["Orientation"]["eulerSeq2"], _ics["Orientation"]["eulerSeq3"],
+                                             _ics["Orientation"]["eulerAngle1"], _ics["Orientation"]["eulerAngle2"], _ics["Orientation"]["eulerAngle3"],
+                                             _ics["purely_side_look"], _ics["fieldOfRegard"]["yaw180_flag"]
+                                             )     
+
         except:
-            raise Exception("Error in obtaining instrument coverage specifications. Perhaps required dict field missing.")
-                  
-
-        try:
-            mv_type = ManueverType.get(manuv["@type"])
-            if(mv_type is None):
-                raise Exception('No manuever type specified. Specify either "CONE" or "ROLLONLY".')
-            if(mv_type == 'FIXED' or mv_type == 'YAW180'):
-                pass
-            elif(mv_type == 'CONE'):
-                mv_cone = 0.5 * float(manuv["fullConeAngle"])
-            elif(mv_type == 'ROLLONLY' or mv_type=='YAW180ROLL'):
-                mv_ct_range = float(manuv["rollMax"]) - float(manuv["rollMin"])
-            else:
-                raise Exception('Invalid manuver type.')                
-        except:
-            raise Exception("Error in obtaining manuever specifications.")
-            
-
-        if(mv_type == 'FIXED'):
-            fr_geom = ics.fov_geom.name
-            fr_at = ics.fov_at
-            fr_ct = ics.fov_ct
+            raise Exception("Error in obtaining instrument coverage specifications. Perhaps required dict field missing.")       
         
-        elif(mv_type == 'YAW180'):
-            fr_geom = ics.fov_geom.name
-            fr_at = ics.fov_at
-            fr_ct = ics.fov_ct
-
-        elif(mv_type == 'CONE'):
-            if(ics.fov_geom.name == 'CONICAL'):
-                fr_geom = 'CONICAL'
-                fr_at =2*(mv_cone + ics.fov_cone[0])
-                fr_ct = fr_at
-
-            elif(ics.fov_geom.name == 'RECTANGULAR'):
-                fr_geom = 'CONICAL'
-                diag_half_angle = np.rad2deg(np.arccos(np.cos(np.deg2rad(0.5*ics.fov_at))*np.cos(np.deg2rad(0.5*ics.fov_ct))))
-                fr_at = 2*(mv_cone +  diag_half_angle)
-                fr_ct = fr_at
-
-            else:
-                raise Exception('Invalid FOV geometry')                
-        elif(mv_type == 'ROLLONLY'  or mv_type=='YAW180ROLL'):
-            if(ics.fov_geom.name == 'CONICAL'):
-                print("Approximating FOR as rectangular shape")
-                fr_geom = 'RECTANGULAR'
-                fr_at = 2*(ics.fov_cone[0])
-                fr_ct = 2*(0.5*mv_ct_range + ics.fov_cone[0])
-
-            elif(ics.fov_geom.name == 'RECTANGULAR'):
-                fr_geom = 'RECTANGULAR'
-                fr_at = ics.fov_at
-                fr_ct = mv_ct_range + ics.fov_ct
-            else:
-                raise Exception('Invalid FOV geometry')
-
-        if(mv_type=='YAW180ROLL' or mv_type=='YAW180'):
-            fr_yaw180_flag = 1
-        else:
-            fr_yaw180_flag = 0
-
-        if(fr_geom == 'CONICAL'):
-            cone = [0.5*fr_at]
-            clk = [0]
-        elif(fr_geom == 'RECTANGULAR'):
-            # Get the cone and clock angles from the rectangular FOV specifications.
-            [cone, clk] = instrupy.util.FieldOfView.from_rectangularFOV(fr_at, fr_ct).get_cone_clock_fov_specs()
-
-        fr_clock = [str(i) for i in clk]        
-        fr_clock = ','.join(fr_clock)        
-        fr_cone = [str(i) for i in cone]        
-        fr_cone = ','.join(fr_cone)
-
-        # The proxy sensor (sensor with its field-of-view = field-of-regard) has the same orientation as the actual sensor
-        fr_orien = str(ics.orien_eu_seq1) + ',' + str(ics.orien_eu_seq2) + ',' + str(ics.orien_eu_seq3) + ',' + \
-                   str(ics.orien_eu_ang1) + ',' + str(ics.orien_eu_ang2) + ',' + str(ics.orien_eu_ang3)
-    
-        
-        fldofreg = FieldOfRegard(fr_geom, fr_orien, fr_cone, fr_clock, fr_yaw180_flag) 
-        
-        return [ics, fldofreg]
+        return [ics_fldofview, ics_fldofreg]
 
 
 
@@ -461,7 +387,7 @@ class PreProcess():
         orbits = []
         for orb_i in range(0,num_of_orbs):
             _orb = data[orb_i]
-            orbits.append(OrbitParameters(_orb['id'], _orb['sma'], _orb['ecc'], _orb['inc'],
+            orbits.append(OrbitParameters(_orb['@id'], _orb['sma'], _orb['ecc'], _orb['inc'],
                                           _orb['raan'], _orb['aop'], _orb['ta']))                   
         return orbits
 
@@ -523,6 +449,18 @@ class PreProcess():
 
     @staticmethod
     def enumerate_satellites(orb_specs = dict(), instru_specs = dict()):
+        """ Enumerate list of satellites in a mission from the user-given specifications.
+
+        :param orb_specs: Specifications of the orbits of the satellites in form of a constellation. :class:`orbitpy.preprocess.ConstellationType` lists the allowed constellation types.
+        :paramtype orb_specs: dict
+
+        :param instru_specs: Specifications of the instrument carried by all the satellites. 
+        :paramtype instru_specs: dict
+
+        :returns: List of Satellites in the mission
+        :rtype: list, :class:`orbitpy.preprocess.Satellite`
+
+        """
         try:
             orbits = PreProcess.enumerate_orbits(orb_specs)
         except:
@@ -530,14 +468,14 @@ class PreProcess():
             raise
         try:
             o = Instrument.from_json(instru_specs[0])
-            [instru, fldofreg] =  PreProcess.process_field_of_regard(o, instru_specs[0]["maneuverability"])
+            [ics_fov, ics_for] =  PreProcess.process_FOV_FOR(o)
         except:
             print('Error in obtaining instrument specifications')
             raise 
 
         sats = []
         for orb_indx in range(0,len(orbits)): 
-            sats.append(Satellite(orbits[orb_indx], instru, fldofreg))
+            sats.append(Satellite(orbits[orb_indx], ics_fov, ics_for))
         
         return sats
 
@@ -554,17 +492,18 @@ class PreProcess():
         for sat_indx in range(0,len(self.sats)):  
 
             orb = self.sats[sat_indx].orbit
-            fldofreg =  self.sats[sat_indx].fldofreg 
-            sat_dir = self.user_dir + 'sat' + str(orb.id) + '/'
+            x =  self.sats[sat_indx].ics_for 
+            sat_dir = self.user_dir + 'sat' + str(orb._id) + '/'
             if os.path.exists(sat_dir):
                 shutil.rmtree(sat_dir)
             os.makedirs(sat_dir)                  
             sat_state_fl = sat_dir + 'state'
             sat_acc_fl = sat_dir +'pay1_access' # hardcoded to 1 instrument
-            pcp = PropagationCoverageParameters(sat_id=orb.id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
+            pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                      raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
-                     sen_fov_geom=fldofreg.geom, sen_orien=fldofreg.orien, sen_clock=fldofreg.clock, sen_cone=fldofreg.cone, 
-                     yaw180_flag = fldofreg.yaw180_flag, step_size=self.time_step, sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl)
+                     sen_fov_geom=x.get_as_string('Geometry'), sen_orien=x.get_as_string('Orientation'), sen_clock=x.get_as_string('Clock'), 
+                     sen_cone=x.get_as_string('Cone'), yaw180_flag = x.get_as_string('yaw180_flag'), step_size=self.time_step, 
+                     sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl)
 
             prop_cov_param.append(pcp)
             
@@ -607,7 +546,7 @@ class PreProcess():
                 # Format: 'region_id, lat_upper, lat_lower, lon_upper, lon_lower, grid_res' 
                 for reg_indx in range(0,len(regions)):
                     _reg = regions[reg_indx]
-                    prc_args.append(str(_reg["id"])+','+str(_reg["latUpper"])+','+str(_reg["latLower"])+
+                    prc_args.append(str(_reg["@id"])+','+str(_reg["latUpper"])+','+str(_reg["latLower"])+
                                     ','+str(_reg["lonUpper"])+','+str(_reg["lonLower"])+','+str(grid_res)
                                     )
             except:
@@ -652,7 +591,7 @@ class PreProcess():
         for indx in range(0,len(sats)):
 
             sma = sats[indx].orbit.sma 
-            fov_at = sats[indx].instru.fov_at
+            fov_at = sats[indx].ics_fov.fov_at
             alt = sma - RE # minimum latitude in km
             f = RE/(RE+alt)
             satVel = np.sqrt(GMe/(RE+alt))
@@ -686,7 +625,7 @@ class PreProcess():
         min_grid_res_deg = 1e1000 # some large number
         for indx in range(0,len(sats)):
             alt = sats[indx].orbit.sma - RE # altitude
-            fov_ct = sats[indx].instru.fov_ct # instrument cross-track fov in degrees
+            fov_ct = sats[indx].ics_fov.fov_ct # instrument cross-track fov in degrees
             sinRho = RE/(RE+alt)
             hfov_deg = 0.5*fov_ct
             elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))

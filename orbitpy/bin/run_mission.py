@@ -59,7 +59,7 @@ def main(user_dir):
         sat_access_fls =  glob.glob(user_dir+'sat*/*_access')
 
         # Correct access files for purely side-looking instruments if necessary        
-        if(pi.sats[0].instru.purely_side_look):            
+        if(pi.sats[0].ics_fov.purely_side_look):            
             print(".......Correcting access files......")
             orbitpropcov.OrbitPropCov.correct_access_files(sat_access_fls, pi.time_step)
             print(".......Done.......")
