@@ -13,9 +13,8 @@ import json
 import shutil
 import glob
 import warnings
-from .util import EnumEntity, PropagationCoverageParameters, FileUtilityFunctions, Constants
+from .util import *
 from instrupy.public_library import Instrument
-from instrupy.util import FieldOfView
 import instrupy
 
 class ConstellationType(EnumEntity):
@@ -271,7 +270,7 @@ class PreProcess():
                 print('Error in enumerating satellites')
                 raise            
             try:
-                _time_step = PreProcess.compute_time_step(self.sats, Constants.time_res_fac)
+                _time_step = PreProcess.compute_time_step(self.sats, OrbitPyDefaults.time_res_fac)
                 if 'customTimeStep' in specs['settings']:                    
                     self.time_step = float(specs['settings']['customTimeStep'])
                     if(_time_step < self.time_step ):
@@ -287,7 +286,7 @@ class PreProcess():
                 if 'customGridRes' in specs['settings']:
                     self.grid_res = float(specs['settings']['customGridRes'])
                 else:
-                    self.grid_res = PreProcess.compute_grid_res(self.sats, Constants.grid_res_fac) 
+                    self.grid_res = PreProcess.compute_grid_res(self.sats, OrbitPyDefaults.grid_res_fac) 
             except:
                 print('Error in processing grid resolution')
                 raise
