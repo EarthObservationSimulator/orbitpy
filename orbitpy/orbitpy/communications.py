@@ -72,13 +72,13 @@ class InterSatelliteComm:
                sat2_z_km = list(sat2.iloc[:,3])
                
                # prepare output files
-               output_detailed_fl = self.comm_dir + sat1_fl.split('/')[-2]+"_to_"+sat2_fl.split('/')[-2]+"_detailed.csv"
+               output_detailed_fl = self.comm_dir + sat1_fl.split('/')[-2]+"_to_"+sat2_fl.split('/')[-2]+"_detailed"
                f = open(output_detailed_fl, "w")
                f.write(epoch)
                f.write("\n")
                f.close()
 
-               output_concise_fl = self.comm_dir + sat1_fl.split('/')[-2]+"_to_"+sat2_fl.split('/')[-2]+"_concise.csv"       
+               output_concise_fl = self.comm_dir + sat1_fl.split('/')[-2]+"_to_"+sat2_fl.split('/')[-2]+"_concise"       
                f = open(output_concise_fl, "w")
                f.write(epoch)
                f.write("\n")
@@ -185,7 +185,7 @@ class GroundStationComm:
    information for each ground-station in the mission. The names of the headers is to be striclty as indicated.
 
    :ivar sat_dirs: List of all satellite directories
-   :vartype user_dir: list, str
+   :vartype sat_dirs: list, str
 
    :ivar gnd_stn_specs: Dataframe containing data of all the ground-stations.
    :vartype gnd_stn_specs: :class:`pandas.DataFrame`
@@ -245,13 +245,13 @@ class GroundStationComm:
                gnd_stn_minelv_deg = float(self.gnd_stn_specs.iloc[indx2]['minElevation[deg]'])
 
                # prepare output files
-               output_detailed_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_detailed.csv"
+               output_detailed_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_detailed"
                f = open(output_detailed_fl, "w")
                f.write(epoch)
                f.write("\n")
                f.close()
 
-               output_concise_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_concise.csv"
+               output_concise_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_concise"
                f = open(output_concise_fl, "w")
                f.write(epoch)
                f.write("\n")

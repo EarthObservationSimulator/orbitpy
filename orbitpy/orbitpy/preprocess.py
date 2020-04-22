@@ -22,6 +22,12 @@ class ConstellationType(EnumEntity):
     CUSTOM = "CUSTOM",
     WALKERDELTA = "WALKERDELTA"
 
+
+class GridType(EnumEntity):
+    """Enumeration of recognized constellation types"""
+    CUSTOM = "CUSTOMGRID",
+    AUTOGRID = "AUTOGRID"
+
 class FOVGeometry(EnumEntity):
     """Enumeration of recognized instrument sensor geometries."""
     CONICAL = "CONICAL",
@@ -529,18 +535,14 @@ class PreProcess():
         dir_path = os.path.dirname(os.path.realpath(__file__))
         prc_args = [os.path.join(dir_path, '..', 'oci', 'bin', 'genCovGrid')]
         
-        if "autoGrid" in grid:
+        grid_type = GridType.get(grid['@type'])     
+        if grid_type == "AUTOGRID":
             # Generate grid based on user input lat, lon bounds
-            autoGrid = grid["autoGrid"]
-            try:
-                cov_grid_fl = user_dir + autoGrid["covGridFn"] # coverage grid file path   
-            except:
-                raise RuntimeError('Grid filename must be specified under the field "covGridFn"')        
+            cov_grid_fl = user_dir + "covGridFn" # coverage grid file path        
             prc_args.append(cov_grid_fl)
-            #reg = [cov_grid_fl] # list of string arguments to be given to the 'genCovGrid' process
 
             try:
-                regions = autoGrid["regions"]            
+                regions = grid["regions"]            
                 # process the dictionary entries of (possibly) multiple regions into strings
                 # Format: 'region_id, lat_upper, lat_lower, lon_upper, lon_lower, grid_res' 
                 for reg_indx in range(0,len(regions)):
@@ -558,9 +560,9 @@ class PreProcess():
                 print('Error executing "genCovGrid" OC script')
                 raise
         
-        elif "customGrid" in grid:
+        elif grid_type == "CUSTOMGRID":
             try:
-                cov_grid_fl = user_dir + grid["customGrid"]["covGridFn"] # coverage grid file path  
+                cov_grid_fl = user_dir + grid["covGridFn"] # coverage grid file path  
             except:
                 print('Error in processing "customGrid" option. Make sure "covGridFn" is specified.')
                 raise

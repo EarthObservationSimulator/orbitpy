@@ -37,9 +37,8 @@
         "gndStnFn":"groundStations"
     },
     "grid":{
-        "customGrid":{
-            "covGridFn": "covGridUSA"
-        }
+        "@type": "customGrid",
+        "covGridFn": "covGridUSA"
     },
     "settings":{        
         "customTimeStep": 1

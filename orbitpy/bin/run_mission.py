@@ -4,8 +4,8 @@ import shutil
 import sys
 import csv
 import glob
-from orbitpy import preprocess, orbitpropcov, communications, util
-from instrupy.public_library import Instrument     
+from orbitpy import preprocess, orbitpropcov, communications, obsdatametrics, util
+ 
 
 def main(user_dir):
     """ This script invokes the relevant classes and functions from the :code:`orbitpy` package to execute
@@ -82,17 +82,9 @@ def main(user_dir):
         # Compute observational data-metrics
         print(".......Computing observational data metrics.......") 
 
-        instru_specs = miss_specs['instrument'][0]
-        # process each access file separately
-        for _dir in sat_dirs:
-
-            x = Instrument.from_json(instru_specs)
-            
-            sat_state_fl = os.path.join(_dir, 'state')
-            accessInfo_fl = glob.glob(_dir+'*_access')[0] # hardcoded to 1 instrument          
-            obsMetrics_fl = os.path.join(_dir, 'pay1_obsMetrics')
-            x.dshield_generate_level0_data_metrics(cov_grid_fl, sat_state_fl, accessInfo_fl,
-                                        obsMetrics_fl)
+        instru_specs = miss_specs['instrument']
+        obs = obsdatametrics.ObsDataMetrics(sat_dirs, cov_grid_fl, instru_specs)
+        obs.compute_all_obs_dmetrics()      
         
         print(".......DONE.......")
 

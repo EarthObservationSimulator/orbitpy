@@ -9,6 +9,7 @@ This API reference provides detailed descriptions of OrbitPy's classes and funct
    orbitpy.orbitpropcov
    orbitpy.preprocess
    orbitpy.communications
+   orbitpy.obsdatametrics
    orbitpy.util
    tests
 

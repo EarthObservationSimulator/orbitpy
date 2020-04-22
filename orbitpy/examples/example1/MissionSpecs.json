@@ -41,17 +41,15 @@
     "power":{
     },
     "grid":{
-        "autoGrid":{
-            "regions":[{
-                "@id":1,
-                "latUpper":20,
-                "latLower":1,
-                "lonUpper":360,
-                "lonLower":0                
-            }
-            ],
-            "covGridFn": "covGrid"
+        "@type": "autoGrid",
+        "regions":[{
+            "@id":1,
+            "latUpper":20,
+            "latLower":1,
+            "lonUpper":60,
+            "lonLower":-90                
         }
+        ]
     },
     "settings":{
         "customTimeStep": 1     
