@@ -14,7 +14,10 @@ This package contain set of modules to compute orbit data of satellites. It perf
 5. Computation of inter-satellite communication time intervals.
 6. Computation of ground-station contact time intervals.
 
-To build and install the package:
+Install
+========
+
+Requires: :code:`python 3.8`, :code:`gcc`, :code:`gfortran`
 
 1. Make sure the :code:`instrupy` package (dependency) has been installed. It can be installed by running :code:`make` in the :code:`instruments/instrupy/` directory.
 2. Navigate to the :code:`orbits/oc/` directory and run :code:`make`. 
@@ -22,6 +25,8 @@ To build and install the package:
 4. Execute :code:`make runtest` to run tests and verify *OK* message. (Currently none.)
 5. Run an example, by running the following command from the :code:`orbits` directory: :code:`python orbitpy/bin/run_mission.py orbitpy/examples/example1/`.
    See the results in the :code:`orbitpy/examples/example1/` folder. Description of the examples in given in :ref:`examples` page. 
+
+Find the documentation in: :code:`orbits/orbitpy/docs/_build/html/user_json_desc.html`
 
 .. toctree::
    :maxdepth: 2

@@ -12,7 +12,9 @@ AUX_DRIVER = mission
 AUX_OBJ = $(AUX_DRIVER).o
 AUX_BIN = $(AUX)/bin
 
-.PHONY: aux aux_clean aux_bare
+DOC = docs
+
+.PHONY: aux aux_clean aux_bare docs docs_clean
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -24,9 +26,9 @@ help:
 	@echo "  clean      to remove *.pyc files and __pycache__ directories"
 	@echo "  bare       to uninstall the package and remove *egg*"
 
-all: aux bare install
+all: bare aux install docs
 
-aux: bare #Build the OC Interface binaries
+aux: aux_bare #Build the OC Interface binaries
 	-X=`pwd`; \
 	do echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make all; done
 
@@ -38,7 +40,15 @@ aux_bare:
 	-X=`pwd`; \
 	do echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make bare; done
 
-install: aux
+docs: docs_clean #Build the documentation
+	-X=`pwd`; \
+	do echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make html; done
+
+docs_clean: 
+	-X=`pwd`; \
+	do echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make clean; done
+
+install: aux 
 	pip install -e .
 
 runtest:
@@ -50,12 +60,12 @@ testlog:
 fulltest:
 	@nosetests --nologcapture -v --exe
 
-clean: aux_clean
+clean: aux_clean docs_clean
 	@echo "Cleaning up..."
 	@find . -name "*.pyc" -delete
 	@find . -type d -name __pycache__ -print0 | xargs -0 rm -rf
 
 
-bare: clean aux_bare
+bare: clean aux_bare docs_clean
 	pip uninstall -y $(PROJECT) 
 	rm -rf $(PROJECT).egg-info .eggs
