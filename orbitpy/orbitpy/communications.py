@@ -34,10 +34,10 @@ class InterSatelliteComm:
       files in the instance variable :code:`sat_state_fls` as input. 
       
       The format of the data in each of the state files is as follows:
-      The first four lines contain auxillary information. The second line contains the mission epoch written in
-      the following format: :code:`Epoch is xxxxxx.xx` which shall be simply copied to the communications results.
+      The first four lines contain auxillary information. The second line contains the mission epoch.
+      The third line contains the step size in seconds.
       The fifth line contains comma seperated coulmn headers as follows:
-      :code:`Time[s],X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]`. 
+      :code:`TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]`. 
       However the headers are ignored and the data is read according to the position of the columns. 
       
       The states of all the satellites must be synced to the same time-series.
@@ -88,13 +88,13 @@ class InterSatelliteComm:
                                                   output_concise_fl, output_detailed_fl, self.opaque_atmos_height_km)
    
    @staticmethod
-   def compute_satA_to_satB_contact(time_s, satA_x_km, satA_y_km, satA_z_km, satB_x_km, satB_y_km, satB_z_km,
+   def compute_satA_to_satB_contact(time_indx, satA_x_km, satA_y_km, satA_z_km, satB_x_km, satB_y_km, satB_z_km,
                                        output_concise_fl, output_detailed_fl, opaque_atmos_height_km):
       """ Compute contact times between two given satellites over a time series. The results are written onto data files,
       one containing contact info per time step along with range information, and the other file containing contact intervals. 
 
-      :param time_s: Time series in seconds
-      :paramtype time_s: list, float
+      :param time_indx: Time index series
+      :paramtype time_indx: list, float
 
       :param satA_x_km: Satellite A X position series in kilometers
       :paramtype satA_x_km: list, float
@@ -127,7 +127,7 @@ class InterSatelliteComm:
 
       """
       # Loop over entire mission duration
-      numTimeSteps = len(time_s)
+      numTimeSteps = len(time_indx)
       access_log = []
       range_log = []
       for indx in range(0,numTimeSteps):
@@ -146,25 +146,25 @@ class InterSatelliteComm:
       flag = access_log[0]
       for indx in range(1,numTimeSteps):
          if flag!=access_log[indx]:
-            interval_boundary.append(time_s[indx])
+            interval_boundary.append(time_indx[indx])
             flag = access_log[indx]
 
       if access_log[0] is True: # Means the mission startes off with the satellite seeing each other
          if(len(interval_boundary) == 0):
-            interval_boundary.append(time_s[numTimeSteps-1]) # There is LOS for complete mission duration
+            interval_boundary.append(time_indx[numTimeSteps-1]) # There is LOS for complete mission duration
          interval_boundary = [0] + interval_boundary  # append start of LOS, which is start of mission
          
       # interval_boundary should be even, else add the end of mission time to the interval boundary
       if(len(interval_boundary)%2 != 0):
-         interval_boundary.append(time_s[numTimeSteps-1])
+         interval_boundary.append(time_indx[numTimeSteps-1])
 
       # Write detailed output file
       with open(output_detailed_fl, 'a', newline='') as csvfile:
          fwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
          fwriter.writerow(['Time[s]', 'AccessOrNoAccess', 'Range[km]'])
          indx = 0
-         for indx in range(0,len(time_s)):
-            fwriter.writerow([time_s[indx], access_log[indx], range_log[indx]])     
+         for indx in range(0,len(time_indx)):
+            fwriter.writerow([time_indx[indx], access_log[indx], range_log[indx]])     
       
       with open(output_concise_fl, 'a', newline='') as csvfile:
          fwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
@@ -208,10 +208,10 @@ class GroundStationComm:
       files in the instance variable :code:`sat_state_fls` as input. 
       
       The format of the data in each of the state files is as follows:
-      The first four lines contain auxillary information. The second line contains the mission epoch written in
-      the following format: :code:`Epoch is xxxxxx.xx` which shall be simply copied to the communications results.
+      The first four lines contain auxillary information. The second line contains the mission epoch. 
+      The third line contains the step size in seconds.
       The fifth line contains comma seperated coulmn headers as follows:
-      :code:`Time[s],X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]`. 
+      :code:`TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]`. 
       However the headers are ignored and the data is read according to the position of the columns. 
 
       The ground-station coordinates and minimum elelvation requirements is read off the instance variable :code:`gnd_stn_specs`.
@@ -220,20 +220,26 @@ class GroundStationComm:
       for indx1 in range(0,len(self.sat_dirs)):
 
          sat_fl = self.sat_dirs[indx1] + 'state'
-         sat = pd.read_csv(sat_fl, skiprows=5, header=None, delimiter=r",")
-         sat = sat[:-1]
-
-         time_s = sat.iloc[:,0]
-         sat_x_km = sat.iloc[:,1]
-         sat_y_km = sat.iloc[:,2]
-         sat_z_km = sat.iloc[:,3]
-
          with open(sat_fl) as fd:
                   reader = csv.reader(fd)
                   epoch = [row for idx, row in enumerate(reader) if idx == 1]
                   epoch = str(epoch)[3:-3]
          __epoch = float(str(epoch).split()[2])
+
+         with open(sat_fl) as fd:
+                  reader = csv.reader(fd)
+                  step_size = [row for idx, row in enumerate(reader) if idx == 2]
+                  step_size = str(step_size)[3:-3]
+         __step_size = float(str(step_size).split()[4])
          
+         sat = pd.read_csv(sat_fl, skiprows=5, header=None, delimiter=r",")
+         sat = sat[:-1]
+
+         time_indx = sat.iloc[:,0]
+         sat_x_km = sat.iloc[:,1]
+         sat_y_km = sat.iloc[:,2]
+         sat_z_km = sat.iloc[:,3]
+                 
          # Iterate over all ground stations
          for indx2 in range(0,self.gnd_stn_specs.shape[0]):
                
@@ -249,27 +255,37 @@ class GroundStationComm:
                f = open(output_detailed_fl, "w")
                f.write(epoch)
                f.write("\n")
+               f.write(step_size)
+               f.write("\n")
                f.close()
 
                output_concise_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_concise"
                f = open(output_concise_fl, "w")
                f.write(epoch)
                f.write("\n")
+               f.write(step_size)
+               f.write("\n")
                f.close()
 
-               GroundStationComm.compute_sat_to_GS_contact(__epoch, time_s, sat_x_km, sat_y_km, sat_z_km, ground_stn_coords,
+               GroundStationComm.compute_sat_to_GS_contact(__epoch, __step_size, time_indx, sat_x_km, sat_y_km, sat_z_km, ground_stn_coords,
                                  output_concise_fl, output_detailed_fl, gnd_stn_minelv_deg)
 
               
 
    @staticmethod
-   def compute_sat_to_GS_contact(epoch, time_s, sat_x_km, sat_y_km, sat_z_km, ground_stn_coords,
+   def compute_sat_to_GS_contact(epoch, step_size, time_indx, sat_x_km, sat_y_km, sat_z_km, ground_stn_coords,
                                  output_concise_fl, output_detailed_fl, gnd_stn_minelv_deg):
       """ Compute contact times between two given satellites over a time series. The results are written onto data files,
       one containing contact info per time step along with range information, and the other file containing contact intervals. 
 
-      :param time_s: Time series in seconds
-      :paramtype time_s: list, float
+      :param epoch: Epoch in Julian Day UT1
+      :paramtype epoch: float
+
+      :param step_size: Step size in seconds
+      :paramtype step_size: float
+
+      :param time_indx: Time index series in seconds
+      :paramtype time_indx: list, int
 
       :param sat_x_km: Satellite X position series in kilometers
       :paramtype satA_x_km: list, float
@@ -296,17 +312,18 @@ class GroundStationComm:
 
       """
       # Loop over entire mission duration
-      numTimeSteps = len(time_s)
+      numTimeSteps = len(time_indx)
       access_log = []
       range_log = []
       elv_log = []
-      for indx in range(0,numTimeSteps):
+      for k in range(0,numTimeSteps):
 
          # Get satellite coordinates in ECI frame
-         sat_position = np.array([sat_x_km[indx], sat_y_km[indx], sat_z_km[indx]]).astype(float)
+         sat_position = np.array([sat_x_km[k], sat_y_km[k], sat_z_km[k]]).astype(float)
          
+         time_s = time_indx[k] * step_size
          # Get ground station coordinates in ECI frame
-         time_JDUT1 = epoch + time_s[indx]*(1.0/(24*60*60))
+         time_JDUT1 = epoch + time_s*(1.0/(24*60*60))
          gnd_stn_coords_eci = MathUtilityFunctions.geo2eci(ground_stn_coords, time_JDUT1)
 
          los = MathUtilityFunctions.checkLOSavailability(sat_position, gnd_stn_coords_eci, Constants.radiusOfEarthInKM)
@@ -330,10 +347,10 @@ class GroundStationComm:
       # Post process to create intervals
       interval_boundary = []
       flag = access_log[0]
-      for indx in range(1,numTimeSteps):
-         if flag!=access_log[indx]:
-            interval_boundary.append(time_s[indx])
-            flag = access_log[indx]
+      for k in range(1,numTimeSteps):
+         if flag!=access_log[k]:
+            interval_boundary.append(time_indx[k])
+            flag = access_log[k]
 
       if access_log[0] is True: # Means the mission startes off with the satellite seeing the ground station
          if(len(interval_boundary) == 0):
@@ -347,19 +364,19 @@ class GroundStationComm:
       # Write detailed output file     
       with open(output_detailed_fl, 'a', newline='') as csvfile:
          fwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-         fwriter.writerow(['Time[s]', 'AccessOrNoAccess', 'Range[km]','Elevation[deg]'])
-         indx = 0
-         for indx in range(0,len(time_s)):
-            fwriter.writerow([time_s[indx], access_log[indx], range_log[indx], elv_log[indx]])
+         fwriter.writerow(['TimeIndex', 'AccessOrNoAccess', 'Range[km]','Elevation[deg]'])
+         k = 0
+         for k in range(0,numTimeSteps):
+            fwriter.writerow([time_indx[k], access_log[k], range_log[k], elv_log[k]])
    
       # Write concise output file
       with open(output_concise_fl, 'a', newline='') as csvfile:
          fwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-         fwriter.writerow(['AccessFrom[s]', 'AccessTo[s]'])
-         indx = 0
-         while indx < len(interval_boundary):
-            fwriter.writerow([interval_boundary[indx], interval_boundary[indx+1]])
-            indx = indx + 2
+         fwriter.writerow(['AccessFromIndex', 'AccessToIndex'])
+         k = 0
+         while k < len(interval_boundary):
+            fwriter.writerow([interval_boundary[k], interval_boundary[k+1]])
+            k = k + 2
 
 
 

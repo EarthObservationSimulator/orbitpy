@@ -1,15 +1,26 @@
 {
     "epoch": "2017, 1, 15, 22, 30, 20.111",
     "duration": 0.25,
-    "constellation":{
-        "@type": "Walkerdelta",
-        "numberSatellites": 4,
-        "numberPlanes": 2,
-        "relativeSpacing":3,
-        "inc":56,
-        "alt": 700,
-        "ecc": 0.0001,
-        "aop": 0
+     "constellation":{
+        "@type": "Custom",
+        "orbits":[{
+            "@id": 11,
+            "sma": 6878.137,
+            "ecc": 0.0,
+            "inc": 96.67657116,
+            "raan": 60,
+            "aop": 0,
+            "ta": 0
+        },
+        {
+            "@id": 12,
+            "sma": 6878.137,
+            "ecc": 0.0,
+            "inc": 96.67657116,
+            "raan": 60,
+            "aop": 0,
+            "ta": 30
+        }]
     }, 
     "instrument":[{        
         "@type": "Basic Sensor",
@@ -25,12 +36,12 @@
         },
         "orientation": {
             "convention": "SIDE_LOOK",
-            "sideLookAngle": 30
+            "sideLookAngle": 12.5
         },
         "maneuverability":{
             "@type": "ROLLONLY",
-            "rollMin": 15,
-            "rollMax": 35
+            "rollMin": -5,
+            "rollMax": 5
         }        
     }],    
     "groundStations":{

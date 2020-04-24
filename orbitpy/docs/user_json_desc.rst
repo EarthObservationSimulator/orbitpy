@@ -222,8 +222,8 @@ This JSON object contains items which can be used to configure some of the orbit
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
-   customTimeStep, float, seconds, (Optional) Orbit propagation time-step. A warning is issued if the internal computed time-step is smaller than the user specified time-step.
-   customGridRes, float, degrees, (Optional) Grid resolution 
+   customTimeStep, float, seconds, (Optional) Orbit propagation time-step. A warning is issued if the internal computed time-step is coarser than the user specified time-step.
+   customGridRes, float, degrees, (Optional) Grid resolution. A warning is issued if the internal computed grid resolution is coarser than the user specified grid resolution. 
 
 
 

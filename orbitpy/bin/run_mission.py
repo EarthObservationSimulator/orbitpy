@@ -20,9 +20,23 @@ def main(user_dir):
         4. "Corrrection" of access files if purely side looking instrument.
         5. Computation of inter-satellite contact periods.
         6. Computation of ground-station contacts.
-        7. Invoke :code:'instrupy' and compute of observational data metrics. 
+        7. Invoke :code:`instrupy` and compute of observational data metrics. 
         
     Example usage: :code:`python bin/run_mission.py examples/example1/`
+
+    Directory structure (input files are starred):
+
+    .. code-block:: bash
+
+        example1/
+            ├── comm/
+            ├── sat11/
+            ├── sat12/
+            ├── covGrid
+            ├── groundStations*
+            ├── MissionSpecs.json*
+
+
     """
     # Read in mssion specifications from user config file, coverage grid file (optional) 
     # and the ground stations specifications file in the user directory.

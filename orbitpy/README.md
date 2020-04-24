@@ -1,3 +1,5 @@
+# OrbitPy
+
 This package contain set of modules to compute orbit data of satellites. It performs the following functions:
 
 1. Computation of satellite state (position and velocity) data.
@@ -16,7 +18,7 @@ Requires: `python 3.8`, `gcc`, `gfortran`
 3. Navigate to the `orbits/orbitpy/` directory and run `make`.
 4. Execute `make runtest` to run tests and verify *OK* message. (Currently none.)
 5. Run an example, by running the following command from the `orbits` directory: `python orbitpy/bin/run_mission.py orbitpy/examples/example1/`.
-   See the results in the `orbitpy/examples/example1/` folder. Description of the examples in given in :ref:`examples` page. 
+   See the results in the `orbitpy/examples/example1/` folder. More description of the examples is given in the documentation.
 
 Find the documentation in: `orbits/orbitpy/docs/_build/html/user_json_desc.html`
 

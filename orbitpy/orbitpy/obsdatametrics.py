@@ -67,32 +67,32 @@ class ObsDataMetrics():
 
              
             :param SatelliteState_filepath: Filepath to CSV file containing data satellite states at fixed time-step.
-                    First four rows convey general information. The second row conveys the Epoch in Julian Days UT1.
+                    First four rows convey general information. The second row conveys the Epoch in Julian Days UT1. The third row contains the step size in seconds.
                     The fifth row  contains the following header elements, and the following rows contain the data corresponding to these headers.
 
                     Description of the header elements:
                     
-                    * :code:`Time[s]`,  Time referenced to epoch.
+                    * :code:`TimeIndex`,  Time Index, where time (seconds) = TImeIndex * step size 
                     * :code:`X[km]`, :code:`Y[km]` :code:`Z[km]`, cartesian spatial coordinates of satellite in Earth Centered Inertial frame with equatorial plane.
                     * :code:`VX[km/s]`, :code:`VY[km/s]`, :code:`VZ[km/s]`, velocity of spacecraft in Earth Centered Inertial frame with equatorial plane.
 
             :paramtype SatelliteState_filepath: str
 
             :param AccessInfo_filepath: Filepath to CSV file containing data of access events and their time-intervals.
-                               First three rows convey general information. The second row conveys the Epoch in Julian Days UT1.
+                               First three rows convey general information. The second row conveys the Epoch in Julian Days UT1. The third row contains the step size in seconds.
                                The fifth row  contains the following header elements, and the following rows contain the data corresponding to these headers.
 
                                Description of the header elements:
                                 
-                               * :code:`Time[s]`,  The time at which access starts in seconds, referenced to epoch.
+                               * :code:`TimeIndex`,  Time Index, where time (seconds) = TimeIndex * step size 
                                * :code:`GP0, GP1, GP2, ....` Columns specific to each ground-point.
 
             :paramtype AccessInfo_filepath: str
 
-            :param Result_filepath: Filepath to CSV file in which the results are written. First row contains the epoch in Julian Day UT1.
+            :param Result_filepath: Filepath to CSV file in which the results are written. First row contains the epoch in Julian Day UT1. The second row contains the step size in seconds.
                                 The third row contains the column header elements. Description of the header elements:
                                 
-                               * :code:`observationTime[s]`,  The time at which the observation is made in seconds referenced to the epoch.
+                               * :code:`observationTimeIndex`,  The time index at which the observation is made.  
                                * :code:`gpi` indicating index of ground-point.
                                * + other header elements containing data-metrics specific to the instrument type
 
@@ -103,17 +103,20 @@ class ObsDataMetrics():
         '''
         epoch_JDUT1 = pd.read_csv(AccessInfo_filepath, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[2])
+
+        step_size = pd.read_csv(AccessInfo_filepath, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        step_size = float(step_size[0][0].split()[4])
                 
         poi_info_df = pd.read_csv(POI_filepath)
         poi_info_df = poi_info_df.set_index('gpi')
 
         # Read the access file
         access_info_df = pd.read_csv(AccessInfo_filepath,skiprows = [0,1,2,3]) # read the access times (corresponding to the DSM in which the instrument was used)
-        access_info_df = access_info_df.set_index('Time[s]')
+        access_info_df = access_info_df.set_index('TimeIndex')
 
         # Read the satellite state file
         sat_state_df = pd.read_csv(SatelliteState_filepath,skiprows = [0,1,2,3]) 
-        sat_state_df = sat_state_df.set_index('Time[s]')
+        sat_state_df = sat_state_df.set_index('TimeIndex')
         sat_state_df = sat_state_df.loc[access_info_df.index] # retain states at only those times in which there are accesses
 
         # copy second and third row from the original access file
@@ -135,7 +138,7 @@ class ObsDataMetrics():
             idx = 0
             for indx in acc_indx:
 
-                time = float(indx[0])
+                time_i = float(indx[0])
                 poi_indx = int(indx[1][2:])
 
                 TargetCoords = dict()                
@@ -143,16 +146,16 @@ class ObsDataMetrics():
                 TargetCoords["Lon [deg]"] = poi_info_df.loc[poi_indx]["lon[deg]"]
 
                 SpacecraftOrbitState = dict()
-                SpacecraftOrbitState["Time[JDUT1]"] = epoch_JDUT1 + time*1.0/86400.0 
-                SpacecraftOrbitState["x[km]"] = sat_state_df.loc[time]["X[km]"] 
-                SpacecraftOrbitState["y[km]"] = sat_state_df.loc[time]["Y[km]"] 
-                SpacecraftOrbitState["z[km]"] = sat_state_df.loc[time]["Z[km]"] 
-                SpacecraftOrbitState["vx[km/s]"] = sat_state_df.loc[time]["VX[km/s]"] 
-                SpacecraftOrbitState["vy[km/s]"] = sat_state_df.loc[time]["VY[km/s]"] 
-                SpacecraftOrbitState["vz[km/s]"] = sat_state_df.loc[time]["VZ[km/s]"] 
+                SpacecraftOrbitState["Time[JDUT1]"] = epoch_JDUT1 + time_i*step_size*1.0/86400.0 
+                SpacecraftOrbitState["x[km]"] = sat_state_df.loc[time_i]["X[km]"] 
+                SpacecraftOrbitState["y[km]"] = sat_state_df.loc[time_i]["Y[km]"] 
+                SpacecraftOrbitState["z[km]"] = sat_state_df.loc[time_i]["Z[km]"] 
+                SpacecraftOrbitState["vx[km/s]"] = sat_state_df.loc[time_i]["VX[km/s]"] 
+                SpacecraftOrbitState["vy[km/s]"] = sat_state_df.loc[time_i]["VY[km/s]"] 
+                SpacecraftOrbitState["vz[km/s]"] = sat_state_df.loc[time_i]["VZ[km/s]"] 
 
                 obsv_metrics = instru.calc_typ_data_metrics(SpacecraftOrbitState, TargetCoords) # calculate the data metrics specific to the instrument type
-                _v = dict({'observationTime[s]':time, 'gpi': poi_indx}, **obsv_metrics)
+                _v = dict({'observationTimeIndex':time_i, 'gpi': poi_indx}, **obsv_metrics)
                 if idx==0: #1st iteration
                     w.writerow(_v.keys())    
                 w.writerow(_v.values())

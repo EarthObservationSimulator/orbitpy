@@ -44,3 +44,7 @@ is seen with no squint angle. The orbit propagation and coverage calculations ta
 to show access only at approximately the middle of the access interval. For example if the access data has been registered at t = 104s, 106s, 108s, 110s
 (with the propagation time-step as 2 seconds), the times between and including 104s and 110s is treated as a access interval and the corrected
 access data shall show access only at t=108s.   
+
+The correction of the access files is handled by the :class:`orbitpy.orbitpropcov` module which requires as inputs list of access files (to be corrected)
+and the time-step at which there are produced. The original access files are renamed to :code:`...._old` and the corrected access files are
+produced with the same name as the original access files at the same location.

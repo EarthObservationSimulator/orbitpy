@@ -2,25 +2,14 @@
     "epoch": "2017, 1, 15, 22, 30, 20.111",
     "duration": 0.1,
     "constellation":{
-        "@type": "Custom",
-        "orbits":[{
-            "@id": 11,
-            "sma": 7078.137,
-            "ecc": 0.0,
-            "inc": 96.67657116,
-            "raan": 327.55,
-            "aop": 0,
-            "ta": 0
-        },
-        {
-            "@id": 12,
-            "sma": 6878.137,
-            "ecc": 0.0,
-            "inc": 88.67657116,
-            "raan": 127.55,
-            "aop": 0,
-            "ta": 0
-        }]
+        "@type": "Walkerdelta",
+        "numberSatellites": 4,
+        "numberPlanes": 2,
+        "relativeSpacing":1,
+        "inc":56,
+        "alt": 700,
+        "ecc": 0.0001,
+        "aop": 0
     }, 
     "instrument":[{
         "@type": "Synthetic Aperture Radar",
@@ -48,55 +37,45 @@
         "systemNoiseFigure": 5.11,
         "sigmaNEZ0threshold": -10, 
         "sceneLength2AltRatio":0.0714,
-        "_references":  ["The Seasat-A Synthetic Aperture Radar System, Rolando L.Jordan 1980",
-                         "Spaceborne SAR Study: LDRD ’92 Final Report",
-                         "https://directory.eoportal.org/web/eoportal/satellite-missions/s/seasat"
-                        ],
         "maneuverability":{
-            "@type": "ROLLONLY",
+            "@type": "Yaw180ROLL",
             "rollMin": -5,
             "rollMax": 5    
-        }          
+        },
+        "_references":  ["The Seasat-A Synthetic Aperture Radar System, Rolando L.Jordan 1980",
+                 "Spaceborne SAR Study: LDRD ’92 Final Report",
+                 "https://directory.eoportal.org/web/eoportal/satellite-missions/s/seasat"
+                ]  
     }],   
     "groundStations":{
         "gndStnFn":"groundStations"
-    },   
-    "power":{
     },
     "grid":{
         "@type": "autoGrid",
         "regions":[{
             "@id":1,
-            "latUpper":20,
-            "latLower":15,
-            "lonUpper":360,
-            "lonLower":0                
+            "latUpper":40,
+            "latLower":5,
+            "lonUpper":100,
+            "lonLower":65                
         },
         {
             "@id":2,
-            "latUpper":-30,
-            "latLower":-35,
-            "lonUpper":45,
-            "lonLower":20
+            "latUpper":56,
+            "latLower":46,
+            "lonUpper":15,
+            "lonLower":6
+        },
+        {
+            "@id":3,
+            "latUpper":50,
+            "latLower":30,
+            "lonUpper":150,
+            "lonLower":125
         }
         ]        
     },
     "settings":{
-        "customTimeStep": 1     
-                     
-    },
-    "_debug":{
-        
-        "customGridRes":0.25,
-        "fieldOfView": {
-            "sensorGeometry": "CONICAL",
-            "fullConeAngle": 10
-        },
-        "1fieldOfView": {
-            "sensorGeometry": "RECTANGULAR",
-            "alongTrackFieldOfView": 2,
-            "crossTrackFieldOfView": 25
-        }
+        "customGridRes": 1                      
     }
-
 }

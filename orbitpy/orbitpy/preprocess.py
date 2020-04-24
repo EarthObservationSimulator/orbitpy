@@ -21,19 +21,15 @@ class ConstellationType(EnumEntity):
     """Enumeration of recognized constellation types"""
     CUSTOM = "CUSTOM",
     WALKERDELTA = "WALKERDELTA"
-
-
 class GridType(EnumEntity):
     """Enumeration of recognized constellation types"""
     CUSTOM = "CUSTOMGRID",
     AUTOGRID = "AUTOGRID"
-
 class FOVGeometry(EnumEntity):
     """Enumeration of recognized instrument sensor geometries."""
     CONICAL = "CONICAL",
     RECTANGULAR = "RECTANGULAR",
     CUSTOM = "CUSTOM"
-
 class OrbitParameters():
     """ Data structure to hold parameters defining the orbit of a satellite in the constellation. An orbit is 
         assumed to be unique for a satellite.
@@ -73,8 +69,6 @@ class OrbitParameters():
             self.ta = float(ta)
         except:
             raise Exception("Error in initialization of OrbitParameters object.")
-            
-
 class InstrumentCoverageParameters():
     """ Data structure to hold instrument coverage related parameters. For a more detailed description of the representation
     of the FOV in terms of clock, cone angles and the orientation in terms of Euler sequences, angles, please refer to the
@@ -280,7 +274,7 @@ class PreProcess():
                 if 'customTimeStep' in specs['settings']:                    
                     self.time_step = float(specs['settings']['customTimeStep'])
                     if(_time_step < self.time_step ):
-                        warnings.warn("Custom time-step larger than computed time-step")
+                        warnings.warn("Custom time-step coarser than computed time-step")
                         print("Custom time-step [s]: ", self.time_step)
                         print("Computed time-step [s]: ", _time_step)
                 else:
@@ -289,10 +283,15 @@ class PreProcess():
                 print('Error in processing time step')
                 raise            
             try:
+                _grid_res = PreProcess.compute_grid_res(self.sats, OrbitPyDefaults.grid_res_fac) 
                 if 'customGridRes' in specs['settings']:
                     self.grid_res = float(specs['settings']['customGridRes'])
+                    if(_grid_res < self.grid_res):
+                       warnings.warn("Custom grid-resolution is coarser than computed grid resolution.")
+                       print("Custom grid resolution [deg]: ", self.grid_res)
+                       print("Computed grid resolution [deg]: ", _grid_res) 
                 else:
-                    self.grid_res = PreProcess.compute_grid_res(self.sats, OrbitPyDefaults.grid_res_fac) 
+                    self.grid_res = _grid_res
             except:
                 print('Error in processing grid resolution')
                 raise
@@ -538,7 +537,7 @@ class PreProcess():
         grid_type = GridType.get(grid['@type'])     
         if grid_type == "AUTOGRID":
             # Generate grid based on user input lat, lon bounds
-            cov_grid_fl = user_dir + "covGridFn" # coverage grid file path        
+            cov_grid_fl = user_dir + "covGrid" # coverage grid file path        
             prc_args.append(cov_grid_fl)
 
             try:
@@ -618,7 +617,10 @@ class PreProcess():
         :paramtype sats: list,:class:`orbitpy:preprocess.Satellites`
 
         :param grid_res_fac: Factor which decides the resolution of the generated grid
-        :paramtype grid_res_fac: float    
+        :paramtype grid_res_fac: float  
+
+        :return: Minimum required grid resolution in degrees.
+        :rtype: float  
 
         """
         RE = Constants.radiusOfEarthInKM        

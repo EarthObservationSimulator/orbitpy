@@ -3,23 +3,59 @@
 Examples
 *********
 
+The :code:`run_mission.py` script can be invoked to execute missions as defined in a customizable JSON configuration file.
+Description of the scipt is given below, followed by description of the example scenarios present in the 
+directory :code:`orbitpy/examples/`.  
+
 .. automodule:: run_mission
    :members:
    :exclude-members: readable_dir
 
-Several examples user directories are available in the :code:`/orbitpy/examples/` directory. The main features of each of the examples 
-are given below:
+Example 1
+==========
 
-1. Example 1
+* 3 satellites, 3 plane Walker delta constellation
+* Basic Sensor, Nadir pointing, Conical FOV, No Manuverability
+* Grid: Auto, Continental USA 
+* Custom time-step = 1s
+* No inter-satellite comm possible
 
-2. Example 2
 
-3. Example 3
+Example 2
+==========
 
-4. Example 4
+* 2 satellites, Custom constellation 
+* Basic Sensor, Rectangular FOV, Side Look, RollOnly Manuverability
+* Grid: Custom, Continental USA 
+* Custom time-step
+  * Warning message displayed
 
-5. Example 5
+Example 3
+==========
 
+* 4 satellites, 2 plane Walker delta constellation
+* SAR, Sidelook, Yaw180Roll Manuverability, ScanFOV concept => Correction of access files
+* Grid: Auto, India, Germany, Japan
+* Auto time-step
+* Custom grid-resolution
+  * Warning message displayed
+
+Example 4
+==========
+
+* 4 satellites, 3 plane Walker delta constellation
+* Planet DOVE CCD imager, Rectangular FOV, Nadir pointing, Cone Manuverability
+* Grid: Auto, World 
+
+Example 5
+==========
+
+* 6 satellites, 3 plane Walker delta constellation
+* Landsat-8 TIRS, Pushbroom (Rectangular), Nadir pointing, RollOnly, ScanFOV concept => Correction of access files
+* Grid: Custom, World
+
+Running your own case
+======================
 
 To create and execute your own mission scenario create a user directory containing the below files, and run the :code:`run_mission.py` 
 script with the argument as the path to the user directory. 

@@ -2,16 +2,14 @@
     "epoch": "2018, 1, 15, 12, 0, 0",
     "duration": 0.1,
     "constellation":{
-        "@type": "Custom",
-        "orbits":[{
-            "@id": 11,
-            "sma": 6678.137,
-            "ecc": 0.0,
-            "inc": 96.67657116,
-            "raan": 327.55,
-            "aop": 0,
-            "ta": 0
-        }]
+        "@type": "Walkerdelta",
+        "numberSatellites": 3,
+        "numberPlanes": 3,
+        "relativeSpacing":1,
+        "inc":56,
+        "alt": 700,
+        "ecc": 0.0001,
+        "aop": 0
     }, 
     "instrument":    [{        
         "@type": "Basic Sensor",
@@ -25,48 +23,29 @@
             "fullConeAngle": 25
         },
         "orientation": {
-            "convention": "SIDE_LOOK",
-            "sideLookAngle": 0
+            "convention": "NADIR"
         },
         "maneuverability":{
-            "@type": "CONE",
-            "fullConeAngle": "1"
-    
+            "@type": "FIXED"   
         }        
     }]
     ,
     "groundStations":{
         "gndStnFn":"groundStations"
     },   
-    "power":{
-    },
     "grid":{
         "@type": "autoGrid",
         "regions":[{
             "@id":1,
-            "latUpper":20,
-            "latLower":1,
-            "lonUpper":60,
-            "lonLower":-90                
+            "latUpper":50,
+            "latLower":30,
+            "lonUpper":-60,
+            "lonLower":-110                
         }
         ]
     },
     "settings":{
         "customTimeStep": 1     
                      
-    },
-    "_debug":{
-        
-        "customGridRes":0.25,
-        "fieldOfView": {
-            "sensorGeometry": "CONICAL",
-            "fullConeAngle": 10
-        },
-        "1fieldOfView": {
-            "sensorGeometry": "RECTANGULAR",
-            "alongTrackFieldOfView": 2,
-            "crossTrackFieldOfView": 25
-        }
     }
-
 }

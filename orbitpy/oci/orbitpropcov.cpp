@@ -128,8 +128,8 @@ int main(int argc, char *argv[])
   MessageInterface::SetMessageReceiver(consoleMsg);
   
   std::string outPath = "./";
-  MessageInterface::SetLogFile(outPath + "OClog.txt");
-  MessageInterface::SetLogEnable(true);
+  //MessageInterface::SetLogFile(outPath + "OClog.txt");
+  //MessageInterface::SetLogEnable(true);
   MessageInterface::ShowMessage("%s\n",
                                 GmatTimeUtil::FormatCurrentTime().c_str());
   /** Parse input arguments **/
@@ -376,9 +376,9 @@ int main(int argc, char *argv[])
       satOut.open(satFn.c_str(),ios::binary | ios::out);
       satOut << "Satellite states are in Earth-Centered-Inertial equatorial plane.\n";
       satOut << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
-      satOut << "All time is referenced to the Epoch.\n";
+      satOut << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
       satOut << "Mission Duration [Days] is "<< duration << "\n";
-      satOut << "Time[s],X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]\n";
+      satOut << "TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]\n";
 
 
       // Write the access file in matrix format with rows as the time and columns as ground-points. 
@@ -387,9 +387,9 @@ int main(int argc, char *argv[])
       satAcc.open(satAccFn.c_str(),ios::binary | ios::out);
       satAcc << "Satellite states are in Earth-Centered-Inertial equatorial plane.\n";
       satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
-      satAcc << "All time is referenced to the Epoch.\n";
+      satAcc << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
       satAcc << "Mission Duration [Days] is "<< duration << "\n";
-      satAcc << "Time[s],";
+      satAcc << "TimeIndex,";
       for(int i=0;i<numGridPoints;i++){
          satAcc<<"GP"<<i;
          if(i<numGridPoints-1){
@@ -428,16 +428,12 @@ int main(int argc, char *argv[])
             sort( loopPoints.begin(), loopPoints.end() );
             loopPoints.erase( unique( loopPoints.begin(), loopPoints.end() ), loopPoints.end() );
          }
-
-         // Propagate
-         date->Advance(stepSize);
-         prop->Propagate(*date);
-         
+        
          Rvector6 cartState;
          cartState = sat1->GetCartesianState();
 
          // Write satellite states to file
-         satOut << std::setprecision(prc) << nSteps * stepSize << "," ;
+         satOut << std::setprecision(prc) << nSteps<< "," ;
          satOut << std::setprecision(prc) << cartState[0] << "," ;
          satOut << std::setprecision(prc) << cartState[1] << "," ;
          satOut << std::setprecision(prc) << cartState[2] << "," ;
@@ -454,7 +450,7 @@ int main(int argc, char *argv[])
             for(int j = 0; j<loopPoints.size();j++){
                accessRow[loopPoints[j]] = 1;
             }
-            satAcc << std::setprecision(prc) << nSteps * stepSize ;
+            satAcc << std::setprecision(prc) << nSteps;
             for(int k=0; k<numGridPoints; k++){
                if(accessRow[k] == 1){
                   satAcc<< ",1";
@@ -465,7 +461,12 @@ int main(int argc, char *argv[])
             }
             satAcc << "\n";
             }        
-         nSteps++;      
+         nSteps++; 
+
+         // Propagate
+         date->Advance(stepSize);
+         prop->Propagate(*date);     
+      
       }
       satOut.close();
 

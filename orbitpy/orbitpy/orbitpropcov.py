@@ -74,7 +74,7 @@ class OrbitPropCov:
             new_accessInfo_fl = acc_fl
 
             df = pd.read_csv(old_accessInfo_fl, skiprows = 4)
-            df = df.set_index('Time[s]')
+            df = df.set_index('TimeIndex')
             dfnew =  pd.DataFrame(np.nan, index=df.index, columns=df.columns)
             # iterate over all the columns (ground-points)
             for gpi in range(0, df.shape[1]):
