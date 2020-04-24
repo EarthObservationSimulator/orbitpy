@@ -271,7 +271,7 @@ class PreProcess():
                 raise            
             try:
                 _time_step = PreProcess.compute_time_step(self.sats, OrbitPyDefaults.time_res_fac)
-                if 'customTimeStep' in specs['settings']:                    
+                if "settings" in specs and 'customTimeStep' in specs['settings']:                    
                     self.time_step = float(specs['settings']['customTimeStep'])
                     if(_time_step < self.time_step ):
                         warnings.warn("Custom time-step coarser than computed time-step")
@@ -284,7 +284,7 @@ class PreProcess():
                 raise            
             try:
                 _grid_res = PreProcess.compute_grid_res(self.sats, OrbitPyDefaults.grid_res_fac) 
-                if 'customGridRes' in specs['settings']:
+                if "settings" in specs and 'customGridRes' in specs['settings']:
                     self.grid_res = float(specs['settings']['customGridRes'])
                     if(_grid_res < self.grid_res):
                        warnings.warn("Custom grid-resolution is coarser than computed grid resolution.")
@@ -322,7 +322,6 @@ class PreProcess():
         """
         try:
             _ics = FileUtilityFunctions.from_json(o.get_coverage_specs())
-            print(_ics)
             ics_fldofview = InstrumentCoverageParameters(_ics["fieldOfView"]["geometry"], 
                                              _ics["fieldOfView"]["coneAnglesVector"], _ics["fieldOfView"]["clockAnglesVector"],
                                              _ics["fieldOfView"]["AlongTrackFov"], _ics["fieldOfView"]["CrossTrackFov"],
@@ -331,8 +330,8 @@ class PreProcess():
                                              _ics["purely_side_look"], _ics["fieldOfView"]["yaw180_flag"]
                                              )           
             ics_fldofreg = InstrumentCoverageParameters(_ics["fieldOfRegard"]["geometry"], 
-                                             _ics["fieldOfRegard"]["coneAnglesVector"], _ics["fieldOfView"]["clockAnglesVector"],
-                                             _ics["fieldOfRegard"]["AlongTrackFov"], _ics["fieldOfView"]["CrossTrackFov"],
+                                             _ics["fieldOfRegard"]["coneAnglesVector"], _ics["fieldOfRegard"]["clockAnglesVector"],
+                                             _ics["fieldOfRegard"]["AlongTrackFov"], _ics["fieldOfRegard"]["CrossTrackFov"],
                                              _ics["Orientation"]["eulerSeq1"], _ics["Orientation"]["eulerSeq2"], _ics["Orientation"]["eulerSeq3"],
                                              _ics["Orientation"]["eulerAngle1"], _ics["Orientation"]["eulerAngle2"], _ics["Orientation"]["eulerAngle3"],
                                              _ics["purely_side_look"], _ics["fieldOfRegard"]["yaw180_flag"]

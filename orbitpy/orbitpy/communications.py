@@ -354,12 +354,12 @@ class GroundStationComm:
 
       if access_log[0] is True: # Means the mission startes off with the satellite seeing the ground station
          if(len(interval_boundary) == 0):
-            interval_boundary.append(time_s[numTimeSteps-1]) # There is LOS for complete mission duration
+            interval_boundary.append(time_indx[numTimeSteps-1]) # There is LOS for complete mission duration
          interval_boundary = [0] + interval_boundary  # append start of LOS, which is start of mission
          
       # interval_boundary should be even, else add the end of mission time to the interval boundary
       if(len(interval_boundary)%2 != 0):
-         interval_boundary.append(time_s[numTimeSteps-1])
+         interval_boundary.append(time_indx[numTimeSteps-1])
 
       # Write detailed output file     
       with open(output_detailed_fl, 'a', newline='') as csvfile:

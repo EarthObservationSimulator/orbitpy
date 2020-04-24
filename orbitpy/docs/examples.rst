@@ -43,16 +43,17 @@ Example 3
 Example 4
 ==========
 
-* 4 satellites, 3 plane Walker delta constellation
+* 8 satellites, 1 plane Walker delta constellation
 * Planet DOVE CCD imager, Rectangular FOV, Nadir pointing, Cone Manuverability
-* Grid: Auto, World 
+* Custom time step
+* Grid: Auto, -5 deg to +5 deg latitudes
 
 Example 5
 ==========
 
 * 6 satellites, 3 plane Walker delta constellation
-* Landsat-8 TIRS, Pushbroom (Rectangular), Nadir pointing, RollOnly, ScanFOV concept => Correction of access files
-* Grid: Custom, World
+* Landsat-8 TIRS, Pushbroom (Rectangular), Nadir pointing, RollOnly, ScanFOV concept (180 km x 185 km scene) => Correction of access files
+* Grid: Auto, Continental USA
 
 Running your own case
 ======================

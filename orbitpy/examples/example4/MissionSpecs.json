@@ -2,68 +2,68 @@
     "epoch": "2018, 1, 15, 12, 0, 0",
     "duration": 0.1,
     "constellation":{
-        "@type": "Custom",
-        "orbits":[{
-            "@id": 11,
-            "sma": 6678.137,
-            "ecc": 0.0,
-            "inc": 96.67657116,
-            "raan": 327.55,
-            "aop": 0,
-            "ta": 0
-        }]
-    }, 
-    "instrument":    [{        
-        "@type": "Basic Sensor",
-        "name": "Atom",  
-        "mass": 28, 
-        "volume": 0.12, 
-        "power": 32, 
-        "bitsPerPixel": 8, 
+        "@type": "Walkerdelta",
+        "numberSatellites": 8,
+        "numberPlanes": 1,
+        "relativeSpacing":1,
+        "inc":56,
+        "alt": 700,
+        "ecc": 0.0001,
+        "aop": 0
+    },
+    "instrument":    [
+    {
+        "@type": "Passive Optical Scanner",
+        "name": "PlanetScope-PS2",
+        "mass": 4, 
+        "volume": 1.5, 
+        "power": 5, 
         "fieldOfView": {
-            "sensorGeometry": "CONICAL",
-            "fullConeAngle": 25
+            "sensorGeometry": "RECTANGULAR",
+            "alongTrackFieldOfView": 1.9773,
+            "crossTrackFieldOfView": 2.9662
         },
+        "scanTechnique": "MATRIX_IMAGER",
         "orientation": {
-            "convention": "SIDE_LOOK",
-            "sideLookAngle": 17
+            "convention": "NADIR"
         },
+        "dataRate": 1,
+        "numberOfDetectorsRowsAlongTrack": 4452,
+        "numberOfDetectorsColsCrossTrack":  6644,
+        "detectorWidth": 5.5e-6,
+        "focalLength": 0.7095,
+        "operatingWavelength": 475e-9,
+        "bandwidth": 110e-9,
+        "quantumEff": 0.37,
+        "targetBlackBodyTemp": 290,
+        "bitsPerPixel": 12,
+        "opticsSysEff": 0.75,
+        "numOfReadOutE": 10,
+        "apertureDia": 89e-3,
+        "Fnum": 8,
+        "snrThreshold": 30,
         "maneuverability":{
-            "@type": "YAW180"
-        }        
+            "@type": "CONE",
+            "fullConeAngle": 55
+        },
+        "_comments": ["mass, power, volume are of another commerical (ISIS) 3U cubesat payload capacity advertisement.",
+                          "Telescope and detector specs are guessed.",
+                          "datarate is wrong."
+                         ]
     }],    
     "groundStations":{
         "gndStnFn":"groundStations"
-    },   
-    "power":{
     },
     "grid":{
         "@type": "autoGrid",
         "regions":[{
             "@id":1,
-            "latUpper":20,
-            "latLower":1,
-            "lonUpper":360,
-            "lonLower":0                
+            "latUpper":5,
+            "latLower":-5,
+            "lonUpper":180,
+            "lonLower":-180                
         }
         ]        
-    },
-    "settings":{
-        "customTimeStep": 1     
-                     
-    },
-    "_debug":{
-        
-        "customGridRes":0.25,
-        "fieldOfView": {
-            "sensorGeometry": "CONICAL",
-            "fullConeAngle": 10
-        },
-        "1fieldOfView": {
-            "sensorGeometry": "RECTANGULAR",
-            "alongTrackFieldOfView": 2,
-            "crossTrackFieldOfView": 25
-        }
     }
 
 }

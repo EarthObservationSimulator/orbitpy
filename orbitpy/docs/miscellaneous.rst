@@ -33,6 +33,8 @@ is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives 
 
     Illustration of relationship between grid resolution and sensor footprint.
 
+.. note:: Both the time-step and gird-resolution are based off the sensor FOV and **not** the FOR.
+
 .. _corr_acc_files:
 
 "Correction" of access files for purely side-looking instruments

@@ -193,8 +193,8 @@ int main(int argc, char *argv[])
       MessageInterface::ShowMessage("Atleast one sensor cone angle must be present.\n");
       exit(1);
    }
-   if(senType!="Conical" && senCone.size()!=senClock.size()){ 
-      MessageInterface::ShowMessage("The number of sensor cone and clock angles must be the same for non-conical sensor.\n");
+   if(senCone.size()!=senClock.size()){ 
+      MessageInterface::ShowMessage("The number of sensor cone and clock angles must be the same.\n");
       exit(1);
    }
 
