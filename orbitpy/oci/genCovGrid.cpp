@@ -8,7 +8,7 @@
 /**
  * Generate coverage grid for input region (possibly multiple) bounds.
  * 
- * .. warning:: THe OC "AddHelicalPointsByNumPoints" function adds the 
+ * .. warning:: The OC "AddHelicalPointsByNumPoints" function adds the 
  * input number of points over entire globe and later discards points outside
  * the latitude, longitude bounds.
  * 
@@ -40,13 +40,13 @@ using namespace GmatMathUtil;
 using namespace GmatMathConstants;
 
 
-void add_grid_points_in_region(const int regionID, const Real gridRes, const Real latUp_deg, const Real latLow_deg, const Real lonUp_deg, const Real lonLow_deg, RealArray& regionIDArray, RealArray& latArray, RealArray& lonArray){
+void add_grid_points_in_region(const int regionID, const Real gridRes_deg, const Real latUp_deg, const Real latLow_deg, const Real lonUp_deg, const Real lonLow_deg, RealArray& regionIDArray, RealArray& latArray, RealArray& lonArray){
   
   PointGroup   *regionPgroup; // temporary point group to hold points at a region
   regionPgroup = new PointGroup();
   /*Set the bounds on the region */
   regionPgroup->SetLatLonBounds(latUp_deg*RAD_PER_DEG, latLow_deg*RAD_PER_DEG, lonUp_deg*RAD_PER_DEG, lonLow_deg*RAD_PER_DEG);
-  regionPgroup->AddHelicalPointsByAngle(gridRes*RAD_PER_DEG);
+  regionPgroup->AddHelicalPointsByAngle(gridRes_deg*RAD_PER_DEG);
   for (Integer pointIdx = 0; pointIdx < regionPgroup->GetNumPoints(); pointIdx++)
   {
       Real latValue;
@@ -59,7 +59,6 @@ void add_grid_points_in_region(const int regionID, const Real gridRes, const Rea
   delete regionPgroup;
 }
 
-
 /**
  * 
  * Multiple below entries for each region.
@@ -69,6 +68,7 @@ void add_grid_points_in_region(const int regionID, const Real gridRes, const Rea
  * @param lon_upper Longitude upper in degrees
  * @param lon_lower Longitude lower in degrees
  * @param gridRes Grid resolution in degrees
+ * 
  * .. code-block:: bash
 
       /../examples/example1/covGrid 0,-22.16,-24.04,133.75,131.62,100
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     RealArray regionIDArray, latArray, lonArray;    
     if(argc<3){
       MessageInterface::ShowMessage("Error inprocessing inputs.\n");
-      MessageInterface::ShowMessage("Please make sure to input coverage grid filename and \
+      MessageInterface::ShowMessage("Please make sure to input: coverage grid filename and \
                                      atleast one region specifications.\n");
       exit(1);
     }

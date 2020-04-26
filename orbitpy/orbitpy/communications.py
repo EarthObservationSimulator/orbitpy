@@ -1,7 +1,7 @@
 """ 
-.. module:: intersatellitecomm
+.. module:: communications
 
-:synopsis: *Module to handle computation of inter-satellite communications periods.*
+:synopsis: *Module to handle computation of inter-satellite communications intervals and satellite to ground-station contacts.*
 
 """
 import os
@@ -11,16 +11,15 @@ import csv
 import numpy as np
 from orbitpy.util import Constants, MathUtilityFunctions
 class InterSatelliteComm:
-   """ Class to handle computation of inter-satellite communication periods.
+   """ Class to handle computation of inter-satellite communication intervals.
 
-       :ivar sat_state_fls: Satellite state filepaths with names
+       :ivar sat_state_fls: Satellite state filepaths
        :vartype sat_state_fls: list, str
 
-       :ivar comm_dir: Inter-satellite Comm directory path
+       :ivar comm_dir: Inter-satellite comm directory path
        :vartype comm_dir: str
 
-       :ivar opaque_atmos_height_km: Height of opaque atmosphere to be considered below which communication cannot 
-                                     take place
+       :ivar opaque_atmos_height_km: Height of opaque atmosphere (kilometers) to be considered below which line-of-sight cannot exist.
        :vartype opaque_atmos_height_km: float
 
    """
@@ -31,14 +30,13 @@ class InterSatelliteComm:
    
    def compute_all_contacts(self):
       """ Iterate over all possible satellite pairs, and compute their contact times. Accepts list of satellite state
-      files in the instance variable :code:`sat_state_fls` as input. 
+      files from the instance variable :code:`sat_state_fls` as input. 
       
       The format of the data in each of the state files is as follows:
-      The first four lines contain auxillary information. The second line contains the mission epoch.
-      The third line contains the step size in seconds.
-      The fifth line contains comma seperated coulmn headers as follows:
-      :code:`TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]`. 
-      However the headers are ignored and the data is read according to the position of the columns. 
+         * The first four lines contain auxillary information. The second line contains the mission epoch.
+         * The third line contains the step size in seconds.
+         * The fifth line contains comma seperated coulmn headers as follows: :code:`TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]`. 
+         * However the headers are ignored and the data is read according to the position of the columns. 
       
       The states of all the satellites must be synced to the same time-series.
       """
@@ -54,15 +52,20 @@ class InterSatelliteComm:
          sat1_x_km = list(sat1.iloc[:,1])
          sat1_y_km = list(sat1.iloc[:,2])
          sat1_z_km = list(sat1.iloc[:,3])
-         
-         for indx2 in range(indx1+1,number_of_files):
-               
-               sat2_fl = self.sat_state_fls[indx2]
 
-               with open(sat1_fl) as fd:
+         with open(sat1_fl) as fd:
                   reader = csv.reader(fd)
                   epoch = [row for idx, row in enumerate(reader) if idx == 1]
                   epoch = str(epoch)[3:-3]
+         
+         with open(sat1_fl) as fd:
+                  reader = csv.reader(fd)
+                  step_size = [row for idx, row in enumerate(reader) if idx == 2]
+                  step_size = str(step_size)[3:-3]
+         
+         for indx2 in range(indx1+1,number_of_files):
+               
+               sat2_fl = self.sat_state_fls[indx2]            
 
                sat2 = pd.read_csv(sat2_fl, skiprows=5, header=None, delimiter=r",")
                sat2 = sat2[:-1]               
@@ -76,11 +79,15 @@ class InterSatelliteComm:
                f = open(output_detailed_fl, "w")
                f.write(epoch)
                f.write("\n")
+               f.write(step_size)
+               f.write("\n")
                f.close()
 
                output_concise_fl = self.comm_dir + sat1_fl.split('/')[-2]+"_to_"+sat2_fl.split('/')[-2]+"_concise"       
                f = open(output_concise_fl, "w")
                f.write(epoch)
+               f.write("\n")
+               f.write(step_size)
                f.write("\n")
                f.close()
 
@@ -92,35 +99,37 @@ class InterSatelliteComm:
                                        output_concise_fl, output_detailed_fl, opaque_atmos_height_km):
       """ Compute contact times between two given satellites over a time series. The results are written onto data files,
       one containing contact info per time step along with range information, and the other file containing contact intervals. 
+      The format of the output-data is described in :ref:`intersatt_comm_op`. 
+      The satellites states can be in any but must be in a common frame-of-reference. 
 
-      :param time_indx: Time index series
+      :param time_indx: Time-index series, where time (seconds) = TimeIndex * step size 
       :paramtype time_indx: list, float
 
-      :param satA_x_km: Satellite A X position series in kilometers
+      :param satA_x_km: Satellite-A X-position series in kilometers
       :paramtype satA_x_km: list, float
 
-      :param satA_y_km: Satellite A Y position series in kilometers
+      :param satA_y_km: Satellite-A Y-position series in kilometers
       :paramtype satA_y_km: list, float
 
-      :param satA_z_km: Satellite A Z position series in kilometers
+      :param satA_z_km: Satellite-A Z-position series in kilometers
       :paramtype satA_z_km: list, float
 
-      :param satB_x_km: Satellite B X position series in kilometers
+      :param satB_x_km: Satellite-B X-position series in kilometers
       :paramtype satB_x_km: list, float
 
-      :param satB_y_km: Satellite B Y position series in kilometers
+      :param satB_y_km: Satellite-B Y-position series in kilometers
       :paramtype satB_y_km: list, float
 
-      :param satB_z_km: Satellite B Z position series in kilometers
+      :param satB_z_km: Satellite-B Z-position series in kilometers
       :paramtype satB_z_km: list, float
 
-      :param output_concise_fl: Filepath with name to write contact intervals
+      :param output_concise_fl: Filepath to write contact intervals
       :paramtype output_concise_fl: str
 
-      :param output_detailed_fl: Filepath with name to write contact data with range information
+      :param output_detailed_fl: Filepath to write contact data with range information
       :paramtype output_detailed_fl: str
 
-      :param opaque_atmos_height_km: Height of atmosphere below which line-of-sight communication cannot take place
+      :param opaque_atmos_height_km: Height of atmosphere (kilometers) below which line-of-sight communication cannot take place.
       :paramtype opaque_atmos_height_km: float
 
       :returns: None
@@ -161,28 +170,26 @@ class InterSatelliteComm:
       # Write detailed output file
       with open(output_detailed_fl, 'a', newline='') as csvfile:
          fwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-         fwriter.writerow(['Time[s]', 'AccessOrNoAccess', 'Range[km]'])
+         fwriter.writerow(['TimeIndex', 'AccessOrNoAccess', 'Range[km]'])
          indx = 0
          for indx in range(0,len(time_indx)):
             fwriter.writerow([time_indx[indx], access_log[indx], range_log[indx]])     
       
       with open(output_concise_fl, 'a', newline='') as csvfile:
          fwriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-         fwriter.writerow(['AccessFrom[s]', 'AccessTo[s]'])
+         fwriter.writerow(['AccessFromIndex', 'AccessToIndex'])
          indx = 0
          while indx < len(interval_boundary):
             fwriter.writerow([interval_boundary[indx], interval_boundary[indx+1]])
-            indx = indx + 2
-
-               
+            indx = indx + 2             
 
 class GroundStationComm:
    """ Class to handle computation of contact periods between satellites and ground stations. 
 
-   The ground station specifications is read of an input file (whose path is given as input during instantiation 
-   of the class object). The entry in the files is as in CSV format with the first row having the following headers:
+   The ground station specifications is read from an input file (whose path is a class instance variable). 
+   The entry in the files is in CSV format with the first row having the following headers:
    :code:`index,name,lat[deg],lon[deg],alt[km],minElevation[deg]`. The rest of the rows contain the corresponding 
-   information for each ground-station in the mission. The names of the headers is to be striclty as indicated.
+   information for each ground-station in the mission.
 
    :ivar sat_dirs: List of all satellite directories
    :vartype sat_dirs: list, str
@@ -193,26 +200,17 @@ class GroundStationComm:
    """
    def __init__(self, sat_dirs = None, gnd_stn_fl = None):
       self.sat_dirs = sat_dirs
-      try:
-         try:
-            self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")
-         except:
-            print('Error in reading ground-station(s) specifications file.')
-            raise  
-      except:
-         raise Exception("Error in processing (initialization) of ground station contacts.")
-         
+      self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")        
 
    def compute_all_contacts(self):
       """ Iterate over all possible satellites and ground-stations, and compute their contact times. Accepts list of satellite state
       files in the instance variable :code:`sat_state_fls` as input. 
       
       The format of the data in each of the state files is as follows:
-      The first four lines contain auxillary information. The second line contains the mission epoch. 
-      The third line contains the step size in seconds.
-      The fifth line contains comma seperated coulmn headers as follows:
-      :code:`TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]`. 
-      However the headers are ignored and the data is read according to the position of the columns. 
+         * The first four lines contain auxillary information. 
+         * The second line contains the mission epoch. 
+         * The third line contains the step size in seconds.
+         * The fifth line contains comma seperated coulmn headers as follows: :code:`TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]`. 
 
       The ground-station coordinates and minimum elelvation requirements is read off the instance variable :code:`gnd_stn_specs`.
       """
@@ -243,7 +241,7 @@ class GroundStationComm:
          # Iterate over all ground stations
          for indx2 in range(0,self.gnd_stn_specs.shape[0]):
                
-               gnd_stn_i = int(self.gnd_stn_specs.iloc[indx2]['index'])
+               gnd_stn_i = str(self.gnd_stn_specs.iloc[indx2]['index'])
                gnd_stn_lat = float(self.gnd_stn_specs.iloc[indx2]['lat[deg]'])
                gnd_stn_lon = float(self.gnd_stn_specs.iloc[indx2]['lon[deg]'])
                gnd_stn_alt = float(self.gnd_stn_specs.iloc[indx2]['alt[km]'])
@@ -276,7 +274,8 @@ class GroundStationComm:
    def compute_sat_to_GS_contact(epoch, step_size, time_indx, sat_x_km, sat_y_km, sat_z_km, ground_stn_coords,
                                  output_concise_fl, output_detailed_fl, gnd_stn_minelv_deg):
       """ Compute contact times between two given satellites over a time series. The results are written onto data files,
-      one containing contact info per time step along with range information, and the other file containing contact intervals. 
+      one containing contact info per time step along with range and elevation information, and the other file containing contact intervals. 
+      The format of the output-data is described in :ref:`satt2gnd_comm_op`.
 
       :param epoch: Epoch in Julian Day UT1
       :paramtype epoch: float
@@ -284,28 +283,28 @@ class GroundStationComm:
       :param step_size: Step size in seconds
       :paramtype step_size: float
 
-      :param time_indx: Time index series in seconds
+      :param time_indx: Time index series, where time (seconds) = TimeIndex * step size 
       :paramtype time_indx: list, int
 
-      :param sat_x_km: Satellite X position series in kilometers
+      :param sat_x_km: Satellite X-position series in kilometers (ECI equatorial frame)
       :paramtype satA_x_km: list, float
 
-      :param sat_y_km: Satellite Y position series in kilometers
+      :param sat_y_km: Satellite Y-position series in kilometers (ECI equatorial frame)
       :paramtype satA_y_km: list, float
 
-      :param sat_z_km: Satellite Z position series in kilometers
+      :param sat_z_km: Satellite Z-position series in kilometers (ECI equatorial frame)
       :paramtype satA_z_km: list, float
 
       :param ground_stn_coords: Ground station latitude, longitude (in degrees) and altitude in kilometers
       :paramtype ground_stn_coords: list, float
 
-      :param output_concise_fl: Filepath with name to write contact intervals
+      :param output_concise_fl: Filepath of file to write contact intervals
       :paramtype output_concise_fl: str
 
-      :param output_detailed_fl: Filepath with name to write contact data with elevation information
+      :param output_detailed_fl: Filepath of file to write contact data with elevation information
       :paramtype output_detailed_fl: str
 
-      :param gnd_stn_minelv_deg: Minimum elevation angle beyond which communication can take place with the ground-station
+      :param gnd_stn_minelv_deg: Minimum elevation angle (degrees) beyond which communication can take place with the ground-station
       :paramtype gnd_stn_minelv_deg: float
 
       :returns: None
@@ -334,8 +333,8 @@ class GroundStationComm:
          elv_angle = np.pi/2 - np.arccos(np.dot(unit_gndst, unit_gndst_to_sat))
          range_log.append(r_gndst_to_sat)
          elv_log.append(np.rad2deg(elv_angle))
-         if(los):
-            # Satellite is in line-of-sight of the ground station
+         # Satellite is in line-of-sight of the ground station
+         if(los):            
             # Check if the satellite fulfills the elevation condition                     
             if(elv_angle > np.deg2rad(gnd_stn_minelv_deg)):
                access_log.append(True)

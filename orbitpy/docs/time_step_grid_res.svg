@@ -267,9 +267,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="546.63614"
-     inkscape:cy="458.77953"
+     inkscape:zoom="1.4"
+     inkscape:cx="447.79747"
+     inkscape:cy="393.10767"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -808,7 +808,9 @@
          x="163.89575"
          y="73.618683"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888855px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332"
-         id="tspan9656-9-5-6-0-93">Sensor </tspan><tspan
+         id="tspan9656-9-5-6-0-93">Sensor <tspan
+   style="font-weight:bold"
+   id="tspan1062">FOR</tspan> </tspan><tspan
          sodipodi:role="line"
          x="163.89575"
          y="79.792297"
@@ -951,7 +953,9 @@
          x="145.83458"
          y="208.7767"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.93888855px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.26458332"
-         id="tspan4906-7">sensor Footprint</tspan></text>
+         id="tspan4906-7">sensor <tspan
+   style="font-weight:bold"
+   id="tspan1064">FOV</tspan> Footprint</tspan></text>
     <ellipse
        style="opacity:1;vector-effect:none;fill:#d17a22;fill-opacity:1;stroke:none;stroke-width:0.26499999;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
        id="path4834-46-0"

@@ -5,7 +5,8 @@ import sys
 import csv
 import glob
 from orbitpy import preprocess, orbitpropcov, communications, obsdatametrics, util
- 
+import time
+
 
 def main(user_dir):
     """ This script invokes the relevant classes and functions from the :code:`orbitpy` package to execute
@@ -17,10 +18,10 @@ def main(user_dir):
         2. Preprocess: Delete existing output directories and create new empty directories, compute field-of-regard,
            decide propagation time step and grid resolution,  generate coverage grid if needed, compute orbits.
         3. Run orbit propagation and coverage for each of the satellites in the mission sequentially by invoking the :code:`orbitpropcov` program.
-        4. "Corrrection" of access files if purely side looking instrument.
+        4. "Corrrection" of access files if needed for purely side looking instrument.
         5. Computation of inter-satellite contact periods.
         6. Computation of ground-station contacts.
-        7. Invoke :code:`instrupy` and compute of observational data metrics. 
+        7. Computation of observational data metrics. 
         
     Example usage: :code:`python bin/run_mission.py examples/example1/`
 
@@ -30,77 +31,99 @@ def main(user_dir):
 
         example1/
             ├── comm/
+                ├── sat11_to_sat21_concise
+                ├── sat11_to_sat21_detailed
+                ├── sat11_to_sat31_concise
+                ├── sat11_to_sat31_detailed
+                ├── sat21_to_sat31_concise
+                ├── sat21_to_sat31_detailed
             ├── sat11/
-            ├── sat12/
+                ├── state
+                ├── pay1_access
+                ├── gndStn1_contact_concise
+                ├── gndStn1_contact_detailed
+                ├── gndStn2_contact_concise
+                ├── gndStn2_contact_detailed
+            ├── sat21/
+                ├── state
+                ├── pay1_access
+                ├── gndStn1_contact_concise
+                ├── gndStn1_contact_detailed
+                ├── gndStn2_contact_concise
+                ├── gndStn2_contact_detailed
             ├── covGrid
             ├── groundStations*
             ├── MissionSpecs.json*
 
-
     """
+    start_time = time.process_time()
     # Read in mssion specifications from user config file, coverage grid file (optional) 
     # and the ground stations specifications file in the user directory.
     usf = user_dir + 'MissionSpecs.json'
     with open(usf, 'r') as orbit_specs_file:
-            miss_specs = util.FileUtilityFunctions.from_json(orbit_specs_file)  
-    
-    DEBUG = 0
-    if DEBUG:
-        comm_dir = user_dir + 'comm/'
-        cov_grid_fl = user_dir + 'covGrid'
-        gnd_stn_fl = user_dir + str(miss_specs['groundStations']['gndStnFn'])
+            miss_specs = util.FileUtilityFunctions.from_json(orbit_specs_file)      
 
+    # Preprocess
+    print(".......Preprocessing user config file.......")
+    pi = preprocess.PreProcess(miss_specs, user_dir) # generates grid if-needed, calculates propagation 
+                                                    # and coverage parameters, enumerates orbits, etc.
+    prop_cov_param = pi.generate_prop_cov_param()   
+    print(".......Done.......")
+
+    # Run orbit propagation and coverage for each of the satellties (orbits) in the constellation
+    for orb_indx in range(0,len(prop_cov_param)):
+        pcp = prop_cov_param[orb_indx]
+        opc = orbitpropcov.OrbitPropCov(pcp)
+        print(".......Running Orbit Propagation and Coverage for satellite.......", pcp.sat_id)
+        opc.run()        
+        print(".......Done.......")
+
+    comm_dir = pi.comm_dir
+    gnd_stn_fl = pi.gnd_stn_fl
+    cov_grid_fl = pi.cov_grid_fl
+
+    sat_dirs =  glob.glob(user_dir+'sat*/')
+    sat_state_fls =  glob.glob(user_dir+'sat*/state')
+    sat_access_fls =  glob.glob(user_dir+'sat*/*_access')
+
+    # Correct access files for purely side-looking instruments if necessary        
+    if(pi.sats[0].ics_fov.purely_side_look):            
+        print(".......Correcting access files......")
+        t1 = time.process_time() 
+        orbitpropcov.correct_access_files(sat_access_fls)
+        t2 = time.process_time()
+        print(".......DONE.......time taken (s): ", t2-t1)
     else:
-        # Preprocess
-        pi = preprocess.PreProcess(miss_specs, user_dir) # generates grid if-needed, calculates propagation 
-                                                        # and coverage parameters, enumerates orbits, etc.
-        prop_cov_param = pi.generate_prop_cov_param()   
+        print(".......No correction of access files......")
 
-        # Run orbit propagation and coverage for each of the satellties (orbits) in the constellation
-        for orb_indx in range(0,len(prop_cov_param)):
-            pcp = prop_cov_param[orb_indx]
-            opc = orbitpropcov.OrbitPropCov(pcp)
-            print(".......Running Orbit Propagation and Coverage for satellite.......", pcp.sat_id)
-            opc.run()        
-            print(".......Done.......")
+    # Compute satellite-to-satellite contacts
+    print(".......Computing satellite-to-satellite contact periods.......")
+    t1 = time.process_time()    
+    opaque_atmos_height_km = 30
+    inter_sat_comm = communications.InterSatelliteComm(sat_state_fls, comm_dir, opaque_atmos_height_km)
+    inter_sat_comm.compute_all_contacts() 
+    t2 = time.process_time()       
+    print(".......DONE.......time taken (s): ", t2-t1)
 
-        comm_dir = pi.comm_dir
-        gnd_stn_fl = pi.gnd_stn_fl
-        cov_grid_fl = pi.cov_grid_fl
+    # Compute satellite-to-ground-station contacts
+    print(".......Computing satellite-to-ground-station contact periods.......")
+    t1 = time.process_time() 
+    gnd_stn_comm = communications.GroundStationComm(sat_dirs, gnd_stn_fl)
+    gnd_stn_comm.compute_all_contacts()
+    t2 = time.process_time()   
+    print(".......DONE.......time taken (s): ", t2-t1)
 
-        sat_dirs =  glob.glob(user_dir+'sat*/')
-        sat_state_fls =  glob.glob(user_dir+'sat*/state')
-        sat_access_fls =  glob.glob(user_dir+'sat*/*_access')
+    # Compute observational data-metrics
+    print(".......Computing observational data metrics.......")
+    t1 = time.process_time() 
+    instru_specs = miss_specs['instrument']
+    obs = obsdatametrics.ObsDataMetrics(sat_dirs, cov_grid_fl, instru_specs)
+    obs.compute_all_obs_dmetrics()      
+    t2 = time.process_time()      
+    print(".......DONE.......time taken (s): ", t2-t1)
 
-        # Correct access files for purely side-looking instruments if necessary        
-        if(pi.sats[0].ics_fov.purely_side_look):            
-            print(".......Correcting access files......")
-            orbitpropcov.OrbitPropCov.correct_access_files(sat_access_fls, pi.time_step)
-            print(".......Done.......")
-
-        # Compute satellite-to-satellite contacts
-        print(".......Computing satellite-to-satellite contact periods.......")
-        
-        opaque_atmos_height_km = 30
-        inter_sat_comm = communications.InterSatelliteComm(sat_state_fls, comm_dir, opaque_atmos_height_km)
-        inter_sat_comm.compute_all_contacts()    
-        print(".......Done.......")
-
-        # Compute satellite-to-ground-station contacts
-        print(".......Computing satellite-to-ground-station contact periods.......")
-        gnd_stn_comm = communications.GroundStationComm(sat_dirs, gnd_stn_fl)
-        gnd_stn_comm.compute_all_contacts()
-        print(".......Done.......")
-
-    
-        # Compute observational data-metrics
-        print(".......Computing observational data metrics.......") 
-
-        instru_specs = miss_specs['instrument']
-        obs = obsdatametrics.ObsDataMetrics(sat_dirs, cov_grid_fl, instru_specs)
-        obs.compute_all_obs_dmetrics()      
-        
-        print(".......DONE.......")
+    end_time = time.process_time()
+    print("Total time taken (s):", end_time - start_time)
 
 
 

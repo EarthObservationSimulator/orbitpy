@@ -5,7 +5,7 @@ Miscellaneous
 
 Propagation time-step determination
 ======================================
-The propagation time step is selected based on the time taken to cover the length (along-track) of the sensor footprint (calculated 
+The propagation time step is selected based on the time taken to cover the length (along-track) of the sensor footprint from it's field-of-**regard** (calculated 
 at the nadir) and a time-resolution factor (:code:`time_res_fac`) which be default is set to 0.25. Smaller :code:`time_res_fac` implies higher precision
 in calculation of the access interval over a grid-point. In case of conical sensors there is always a chance that a grid-point
 is missed during the access calculations.
@@ -20,7 +20,7 @@ is missed during the access calculations.
 
 Grid Resolution determination
 ================================
-The grid resolution is set such that at any given arbitrary time, the sensor footprint captures atleast one grid-point
+The grid resolution is set such that at any given arbitrary time, the sensor footprint from its field-of-**view** captures atleast one grid-point
 when the satellite is within the interior of a region. This can be acheived by setting the grid resolution (spacing between
 the grid points) to be less than the minimum footprint dimension. A grid resolution factor :code:`grid_res_fac` is defined 
 (with default value 0.9) and the grid resolution is computed as (:code:`grid_res_fac` . minimum footprint angular dimension).
@@ -33,7 +33,7 @@ is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives 
 
     Illustration of relationship between grid resolution and sensor footprint.
 
-.. note:: Both the time-step and gird-resolution are based off the sensor FOV and **not** the FOR.
+.. note:: While the time-step is calculated from the FOV, the  grid-resolution is calculated from the FOR.
 
 .. _corr_acc_files:
 
@@ -50,3 +50,9 @@ access data shall show access only at t=108s.
 The correction of the access files is handled by the :class:`orbitpy.orbitpropcov` module which requires as inputs list of access files (to be corrected)
 and the time-step at which there are produced. The original access files are renamed to :code:`...._old` and the corrected access files are
 produced with the same name as the original access files at the same location.
+
+.. warning:: There is a small hiccup when the propagation time step is smaller than the SAR dwell time and access is corrected as described above. 
+            Since the propagation time step is small, the access over the grid point takes place over number of time-steps, while the corrected access
+            files show access as taking place at only one time-step. The correction method is to be used when the dwell time is much smaller than the 
+            propagation time step. The dwell time needed for the calculation of the SAR data-metrics is calculated analytically by the :code:`instrupy` module.
+            However I do not think this hiccup leads to wrong results for the DSHEILD application even with a large dwell time. 

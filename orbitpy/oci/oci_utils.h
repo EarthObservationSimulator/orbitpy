@@ -40,9 +40,8 @@ using namespace GmatMathConstants;
 
 namespace oci_utils {
 
-
-/** Extract substrings from comma seprated string **/
 vector<string> extract_dlim_str(string strinp, char dlim){
+/** Extract substrings from comma seprated string **/
    stringstream ss(strinp.c_str());
    vector<string> vecStrOut;
 
@@ -56,8 +55,8 @@ vector<string> extract_dlim_str(string strinp, char dlim){
    return vecStrOut;
 }
 
-/** Convert string vector to RealArray**/
 RealArray convertStringVectortoRealVector(const std::vector<std::string>& stringVector){
+/** Convert string vector to RealArray**/
    RealArray realVector(stringVector.size());
    std::transform(stringVector.begin(), stringVector.end(), realVector.begin(), [](const std::string& val)
    {

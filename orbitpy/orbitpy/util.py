@@ -1,7 +1,8 @@
 """ 
 .. module:: util
 
-:synopsis: *Utilities*
+:synopsis: *Collection of utlity functions used by the :code:`orbitpy` package. 
+            Note that many other utility functions are imported from the :code:`instrupy` package too.*
 
 """
 import json
@@ -41,31 +42,31 @@ class PropagationCoverageParameters():
     :ivar duration: Mission duration in days
     :vartype duration: float
 
-    :ivar cov_grid_fl: Filepath with name to the coverage grid data
+    :ivar cov_grid_fl: Filepath to the coverage grid data
     :vartype cov_grid_fl: str
 
-    :ivar sen_fov_geom: FOV geometry of the sensor (perhaps corresponding to a Field of Regard)
+    :ivar sen_fov_geom: FOV/FOR geometry of the sensor
     :vartype sen_fov_geom:  str
 
-    :ivar sen_orien: Sensor (perhaps corresponding to a Field of Regard) orientation specification in the following CSV string format: :code:`Euler Seq1, Euler Seq2, Euler Seq3, Euler Angle1, Euler Angle2,, Euler Angle3`. Angles are specifed in degrees.
+    :ivar sen_orien: Sensor orientation specification in the following CSV string format: :code:`Euler-Seq1, Euler-Seq2, Euler-Seq3, Euler-Angle1, Euler-Angle2,, Euler-Angle3`. Angles are specifed in degrees.
     :vartype sen_orien:  str
 
-    :ivar sen_clock: Sensor (perhaps corresponding to a Field of Regard) clock angles in degrees in CSV string format.
+    :ivar sen_clock: Sensor FOV/FOR clock angles in degrees in CSV string format.
     :vartype sen_clock: str
 
-    :ivar sen_cone: Sensor (perhaps corresponding to a Field of Regard) cone angles in degrees in CSV string format.
+    :ivar sen_cone: Sensor FOV/FOR cone angles in degrees in CSV string format.
     :vartype sen_cone: str
 
-    :ivar yaw180_flag: Flag indicating if FOR includes the FOV defined by the above clock, cone angles rotated by 180 deg around the satellite yaw axis.
-    :vartype yaw180_flag: int
+    :ivar yaw180_flag: Flag indicating if FOR includes the FOV defined by the above clock, cone angles rotated by 180 deg around the nadir.
+    :vartype yaw180_flag:  (0/1)
 
     :ivar step_size: Propagation step size in seconds.
     :vartype step_size: float
 
-    :ivar sat_state_fl: Filepath with name to write the resulting satellite states.
+    :ivar sat_state_fl: Filepath to write the resulting satellite states.
     :vartype sat_state_fl: str
 
-    :ivar sat_acc_fl: Filepath with name to write the resulting satellite access data over the grid of points given in the coverage grid file.
+    :ivar sat_acc_fl: Filepath to write the resulting satellite access data over the grid of points given in the coverage grid file.
     :vartype sat_acc_fl: str
     
     """
@@ -92,8 +93,7 @@ class PropagationCoverageParameters():
         self.sat_acc_fl = str(sat_acc_fl) 
 
 class OrbitPyDefaults(object):
-    """ Enumeration of various constants used by package **OrbitPy**. Unless indicated otherwise, the constants 
-        are in S.I. units. 
+    """ Enumeration of various default values used by package **OrbitPy**.
     """
     grid_res_fac = 0.9
     time_res_fac = 0.25

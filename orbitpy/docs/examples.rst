@@ -34,7 +34,7 @@ Example 3
 ==========
 
 * 4 satellites, 2 plane Walker delta constellation
-* SAR, Sidelook, Yaw180Roll Manuverability, ScanFOV concept => Correction of access files
+* SAR, Sidelook, Yaw180Roll Manuverability, ScanFOV concept (50km scene-length) => Correction of access files
 * Grid: Auto, India, Germany, Japan
 * Auto time-step
 * Custom grid-resolution
@@ -52,7 +52,7 @@ Example 5
 ==========
 
 * 6 satellites, 3 plane Walker delta constellation
-* Landsat-8 TIRS, Pushbroom (Rectangular), Nadir pointing, RollOnly, ScanFOV concept (180 km x 185 km scene) => Correction of access files
+* Landsat-8 TIRS, Pushbroom (Rectangular), Nadir pointing, RollOnly, ScanFOV concept (185 km scene-length) => Correction of access files
 * Grid: Auto, Continental USA
 
 Running your own case

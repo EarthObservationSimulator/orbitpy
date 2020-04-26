@@ -11,14 +11,15 @@ processes JSON formatted files containing mission specifications). The format of
 the satellite states at the propagated time-steps. 
 
 The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
-in the state data is referenced to this epoch. The fifth row contains the columns headers and the sixth row onwards contains the 
-corresponding data. Description of the data is given below:
+in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
+The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+Description of the data is given below:
 
 .. csv-table:: State data description
    :header: Column, Data type, Units, Description
    :widths: 10,10,5,40
 
-   Time[s], float, seconds, Time referenced to the epoch.
+   TimeIndex, int, , Time-index
    X[km], float, kilometers, X component of Satellite position in ECI-equatorial frame
    Y[km], float, kilometers, Y component of Satellite position in ECI-equatorial frame
    Z[km], float, kilometers, Z component of Satellite position in ECI-equatorial frame
@@ -35,6 +36,8 @@ data can be found in the coverage grid data file. Each cell entry corresponds to
 (or if there can be access in the case when the FOR is used for access computation), the cell entry is :code:`1`, else there is no entry. During
 times are which there is no access over all the grid-points, the entire row is absent. 
 
+.. _intersatt_comm_op:
+
 Intersatellite Contact Data
 ==================================
 The intersatellite contact data is produced by invoking the :class:`orbitpy.communications.InterSatelliteComm` class. The class is 
@@ -46,26 +49,28 @@ while the other data file contains the contact intervals. The pair of satellites
 that the name of the satellite is same as the name of the directory in which the corresponding state data file is present. For example if we have
 */sat12/state*, */sat32/state* as the input state files, the name of the resulting output files are *sat12_sat32_detailed* and *sat12_sat32_concise*.
 
-Description of the data in the *_detailed* file is as follows. The first row contains the epoch. The second row contains the column headers
-with the subsequent rows containing the corresponding data. 
+Description of the data in the *_detailed* file is as follows. The first row contains the epoch. The second row contains the time-step size in seconds. 
+The third row contains the column headers with the subsequent rows containing the corresponding data. 
 
 .. csv-table:: Detailed contact description
    :header: Column, Data type, Units, Description
    :widths: 10,10,5,40
 
-   Time[s], float, seconds, Time referenced to the epoch.
+   TimeIndex, int, , Time-index
    AccessOrNoAccess,bool,, Possible values are :code:`True` or :code:`False` corresponding to access and no-access.
    Range[km], float, kilometers, Distance between the two satellites.
 
-Description of the data in the *_concise* file is as follows. The first row contains the epoch. The second row contains the column headers
-with the subsequent rows containing the corresponding data. 
+Description of the data in the *_concise* file is as follows. The first row contains the epoch. he second row contains the time-step size in seconds.
+The third row contains the column headers with the subsequent rows containing the corresponding data. 
 
 .. csv-table:: Concise contact description
    :header: Column, Data type, Units, Description
    :widths: 10,10,5,40
 
-   AccessFrom[s],float, seconds, Access interval start time.
-   AccessTo[s], float, seconds, Access interval end time.
+   AccessFromIndex,int,, Access interval start time-index.
+   AccessToIndex, int,, Access interval end time-index.
+
+.. _satt2gnd_comm_op:
 
 Ground Stations Contact Data
 ==============================
@@ -77,27 +82,27 @@ The resulting files have a similar format to the intersatellite contact data fil
 The files are named according to the ground-station index given in the input ground station data file.  For example if we have the ground station 
 index as *4*, the name of the resulting files are *gndStn4_contact_detailed* and *gndStn4_contact_concise*.
 
-Description of the data in the *_detailed* file is as follows. The first row contains the epoch. The second row contains the column headers
-with the subsequent rows containing the corresponding data. 
+Description of the data in the *_detailed* file is as follows. The first row contains the epoch. The second row contains the time-step size in seconds. 
+The third row contains the column headers with the subsequent rows containing the corresponding data. 
 
 .. csv-table:: Detailed contact description
    :header: Column, Data type, Units, Description
    :widths: 10,10,5,40
 
-   Time[s], float, seconds, Time referenced to the epoch.
+   TimeIndex, int, seconds, Time-index.
    AccessOrNoAccess,bool,, Possible values are :code:`True` or :code:`False` corresponding to access and no-access.
    Range[km], float, kilometers, Distance between the satellite and the ground station.
    Elevation[deg], float, degrees, Elevation angle at which the satellite is visible from the ground-station.
 
-Description of the data in the *_concise* file is as follows. The first row contains the epoch. The second row contains the column headers
-with the subsequent rows containing the corresponding data. 
+Description of the data in the *_concise* file is as follows. The first row contains the epoch. he second row contains the time-step size in seconds.
+The third row contains the column header with the subsequent rows containing the corresponding data. 
 
 .. csv-table:: Concise contact description
    :header: Column, Data type, Units, Description
    :widths: 10,10,5,40
 
-   AccessFrom[s],float, seconds, Access interval start time referenced to epoch.
-   AccessTo[s], float, seconds, Access interval end time referenced to epoch.
+   AccessFromIndex,int,, Access interval start time-index.
+   AccessToIndex, int,, Access interval end time-index.
    
 Observation Data Metrics 
 =========================
@@ -108,7 +113,7 @@ format *payI_access*, where *I* is the identifier of the payload to which the ac
 work with only one payload with identifier as *1* and hence the name of the access file is *pay1_access*. 
 
 The name of the output file is *pay1_obsMetrics*. The first row of the resulting file contains the mission epoch in Julian Day UT1. 
-The second row contains general information. The third row contains the column headers and the subsequent rows contain the corresponding
+The second row contains the time-step size in seconds. The third row contains the column headers and the subsequent rows contain the corresponding
 data. The description of the first two columns is given below. The rest of the columns contain the data-metrics corresponding to the particular
 instrument type (passive-optical, SAR or basic sensor). Description of the data metrics can be found in the :code:`instrupy` documentation.
 
@@ -116,7 +121,7 @@ instrument type (passive-optical, SAR or basic sensor). Description of the data 
    :header: Column, Data type, Units, Description
    :widths: 10,10,5,40
 
-   observationTime[s],float, seconds, Observation time referenced to epoch.
+   observationTimeIndex,int, , Observation time-index
    gpi, integer, ,Grid-point index
 
 Coverage Grid Data

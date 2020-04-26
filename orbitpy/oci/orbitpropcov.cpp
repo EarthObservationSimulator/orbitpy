@@ -13,10 +13,10 @@
  * (2) propagate first with large time-step, and later accumulate using interpolation with smaller time steps.
  * Method (1) is implemented.
  * 
- * The pointing of the satellite is fixed to be Nadir-pointing.
- * Lat must be in the range -pi/2 to pi/2, while lon must be in the range -pi to pi
+ * The pointing of the satellite is fixed to be Nadir-pointing nominally. When the 'yaw180_flag' is set,
+ * the satellite is rotated about 180 deg about yaw axis and additional coverage is calculated.
  * 
- * Log file is written in the bin directory
+ * Latitudes must be in the range -pi/2 to pi/2, while longitudes must be in the range -pi to pi.
  * 
  */
 //------------------------------------------------------------------------------
@@ -64,7 +64,8 @@ using namespace GmatMathUtil;
 using namespace GmatMathConstants;
 
 int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
-{
+{/**Read coverage grid data file onto double arrays.**/
+
     ifstream in(covGridFp.c_str());
 
     if(!in){
@@ -108,12 +109,13 @@ int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
  * @param ta true anomaly in degrees
  * @param duration mission duration in days
  * @param covGridFp coverage grid file path and name
- * @param senType sensor FOV geometry type
+ * @param fovGeom sensor FOV geometry type
  * @param senOrien sensor orientation (euler angles in degrees and sequence)
- * @param senClock sensor clock angles in degrees
- * @param senCone sensor cone angles in degrees
+ * @param fovClock sensor clock angles in degrees
+ * @param fovCone sensor cone angles in degrees
+ * @param yaw180_flag 
  * @param stepSize propagation step size
- * @param satFn Filename, path to write the satellite ECI states
+ * @param satStateFn Filename, path to write the satellite ECI states
  * @param satAccFn Filename, path to write the computed satellite access data
  *
  */
@@ -142,13 +144,13 @@ int main(int argc, char *argv[])
   Real ta; 
   Real duration; 
   string covGridFp; 
-  string senType; 
+  string fovGeom; 
   string _senOrien; 
-  string _senClock; 
-  string _senCone;
+  string _fovClock; 
+  string _fovCone;
   bool yaw180_flag; 
   Real stepSize; 
-  string satFn;
+  string satStateFn;
   string satAccFn;
 
   if(argc==18){            
@@ -161,13 +163,13 @@ int main(int argc, char *argv[])
       ta = Real(stod(argv[7]));
       duration = Real(stod(argv[8]));
       covGridFp = argv[9];
-      senType = argv[10];
+      fovGeom = argv[10];
       _senOrien = argv[11];
-      _senClock = argv[12];
-      _senCone = argv[13];
+      _fovClock = argv[12];
+      _fovCone = argv[13];
       yaw180_flag = bool(stoi(argv[14]));
       stepSize = Real(stod(argv[15]));
-      satFn = argv[16];
+      satStateFn = argv[16];
       satAccFn = argv[17];
    }else{
       MessageInterface::ShowMessage("Please input right number of arguments.\n");
@@ -187,13 +189,13 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
-   RealArray senClock(oci_utils::convertStringVectortoRealVector(oci_utils::extract_dlim_str(_senClock, ',')));
-   RealArray senCone(oci_utils::convertStringVectortoRealVector(oci_utils::extract_dlim_str(_senCone, ',')));
-   if(senCone.size()==0){
+   RealArray fovClock(oci_utils::convertStringVectortoRealVector(oci_utils::extract_dlim_str(_fovClock, ',')));
+   RealArray fovCone(oci_utils::convertStringVectortoRealVector(oci_utils::extract_dlim_str(_fovCone, ',')));
+   if(fovCone.size()==0){
       MessageInterface::ShowMessage("Atleast one sensor cone angle must be present.\n");
       exit(1);
    }
-   if(senCone.size()!=senClock.size()){ 
+   if(fovCone.size()!=fovClock.size()){ 
       MessageInterface::ShowMessage("The number of sensor cone and clock angles must be the same.\n");
       exit(1);
    }
@@ -209,21 +211,21 @@ int main(int argc, char *argv[])
       MessageInterface::ShowMessage("TA is %16.9f \n", ta);
       MessageInterface::ShowMessage("Mission Duration is %16.9f \n", duration);
       MessageInterface::ShowMessage("Coverage grid file path is %s \n", covGridFp.c_str());
-      MessageInterface::ShowMessage("Sensor type is %s \n", senType.c_str());
+      MessageInterface::ShowMessage("Sensor type is %s \n", fovGeom.c_str());
       MessageInterface::ShowMessage("Sensor Orientation is %16.9f, %16.9f, %16.9f,%16.9f, %16.9f, %16.9f \n", senOrien[0], senOrien[1], senOrien[2], senOrien[3], senOrien[4], senOrien[5]);
       MessageInterface::ShowMessage("Sensor cone angle vector is: ");
-      for(int i =0; i<senCone.size(); i++){
-         MessageInterface::ShowMessage(" %16.9f ", senCone[i]);
+      for(int i =0; i<fovCone.size(); i++){
+         MessageInterface::ShowMessage(" %16.9f ", fovCone[i]);
       }
       MessageInterface::ShowMessage("\n");
       MessageInterface::ShowMessage("Sensor clock angle vector is: ");
-      for(int i =0; i<senClock.size(); i++){
-         MessageInterface::ShowMessage(" %16.9f ", senClock[i]);
+      for(int i =0; i<fovClock.size(); i++){
+         MessageInterface::ShowMessage(" %16.9f ", fovClock[i]);
       }
       MessageInterface::ShowMessage("\n");
       MessageInterface::ShowMessage("yaw180_flag is %d \n", yaw180_flag);
       MessageInterface::ShowMessage("Step size is %16.9f \n", stepSize);
-      MessageInterface::ShowMessage("Satellite states file path, name is: %s \n", satFn.c_str());
+      MessageInterface::ShowMessage("Satellite states file path, name is: %s \n", satStateFn.c_str());
       MessageInterface::ShowMessage("Satellite access file path, name is: %s \n", satAccFn.c_str());
    #endif
    
@@ -277,11 +279,9 @@ int main(int argc, char *argv[])
       #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
          // Create the container to hold the coverage events
          std::vector<IntervalEventReport> coverageEvents;
-      #endif
-      
+      #endif      
       
       clock_t t0 = clock(); // for timing
-
 
       // Create an Earth model
       earth = new Earth();
@@ -298,8 +298,7 @@ int main(int argc, char *argv[])
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("**** date and state OK "
                                        "**************\n");
-      #endif
-            
+      #endif            
                
       // Create a spacecraft giving it a state and epoch
       attitude = new NadirPointingAttitude();
@@ -308,30 +307,35 @@ int main(int argc, char *argv[])
          MessageInterface::ShowMessage(
                            "*** About to create Spacecraft!!!!\n");
       #endif
-      sat1     = new Spacecraft(date, state, attitude, interp); //,0.0, 0.0,
-                                                                  // 180.0);
+      sat1     = new Spacecraft(date, state, attitude, interp); //,0.0, 0.0, 180.0);
          
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("*** DONE creating Spacecraft!!!!\n");
          MessageInterface::ShowMessage("**** attitude and sat1 OK "
                                        "**************\n");
       #endif
-
    
+      MessageInterface::ShowMessage("*** About to add Sensors!!!!\n");
       // Add sensor to satellite
-      if(senType == "CONICAL"){
-         conicalSensor = new ConicalSensor(senCone[0]*RAD_PER_DEG);
+      if(fovGeom == "CONICAL"){
+         conicalSensor = new ConicalSensor(fovCone[0]*RAD_PER_DEG);
          conicalSensor->SetSensorBodyOffsetAngles(senOrien[3], senOrien[4], senOrien[5], senOrien[0], senOrien[1], senOrien[2]); // careful: angle in degrees
          sat1->AddSensor(conicalSensor);
-      }else if(senType == "RECTANGULAR" || senType == "CUSTOM"){
+         #ifdef DEBUG_CONSISE
+            MessageInterface::ShowMessage("*** CONICAL Sensor added.\n");
+         #endif
+      }else if(fovGeom == "RECTANGULAR" || fovGeom == "CUSTOM"){
 
-         std::vector<double> senCone_r(senCone.size()); 
-         std::transform(senCone.begin(), senCone.end(), senCone_r.begin(),[](double i){ return i * RAD_PER_DEG; });
-         std::vector<double> senClock_r(senClock.size()); 
-         std::transform(senClock.begin(), senClock.end(), senClock_r.begin(),[](double i){ return i * RAD_PER_DEG; });
+         std::vector<double> senCone_r(fovCone.size()); 
+         std::transform(fovCone.begin(), fovCone.end(), senCone_r.begin(),[](double i){ return i * RAD_PER_DEG; });
+         std::vector<double> senClock_r(fovClock.size()); 
+         std::transform(fovClock.begin(), fovClock.end(), senClock_r.begin(),[](double i){ return i * RAD_PER_DEG; });
          customSensor =  new CustomSensor(senCone_r, senClock_r);
          customSensor->SetSensorBodyOffsetAngles(senOrien[3], senOrien[4], senOrien[5], senOrien[0], senOrien[1], senOrien[2]); // careful: angle in degrees
          sat1->AddSensor(customSensor);
+         #ifdef DEBUG_CONSISE
+            MessageInterface::ShowMessage("*** RECTANGULAR/ CUSTOM Sensor added.\n");
+         #endif
       }else{
          MessageInterface::ShowMessage("**** Warning no Sensor defined!! ****\n");
       }
@@ -345,9 +349,8 @@ int main(int argc, char *argv[])
       
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("*** DONE creating Propagator!!!!\n");
-      #endif      
+      #endif            
       
-     
       // Initialize the coverage checker
       covChecker = new CoverageChecker(pGroup,sat1);
       
@@ -355,9 +358,7 @@ int main(int argc, char *argv[])
          covChecker->SetComputePOIGeometryData(true); 
       #else
          covChecker->SetComputePOIGeometryData(false); 
-      #endif
-      
-      
+      #endif    
       
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("*** Coverage Checker created!!!!\n");
@@ -373,19 +374,18 @@ int main(int argc, char *argv[])
 
       // Satellite state file initialization
       ofstream satOut; 
-      satOut.open(satFn.c_str(),ios::binary | ios::out);
-      satOut << "Satellite states are in Earth-Centered-Inertial equatorial plane.\n";
+      satOut.open(satStateFn.c_str(),ios::binary | ios::out);
+      satOut << "Satellite states are in Earth-Centered-Inertial equatorial-plane frame.\n";
       satOut << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satOut << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
       satOut << "Mission Duration [Days] is "<< duration << "\n";
       satOut << "TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]\n";
 
-
       // Write the access file in matrix format with rows as the time and columns as ground-points. 
       // Each entry in a cell of the matrix corresponds to 0 (No Access) or 1 (Access).
       ofstream satAcc; 
       satAcc.open(satAccFn.c_str(),ios::binary | ios::out);
-      satAcc << "Satellite states are in Earth-Centered-Inertial equatorial plane.\n";
+      satAcc << "Satellite states are in Earth-Centered-Inertial equatorial-plane frame.\n";
       satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satAcc << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
       satAcc << "Mission Duration [Days] is "<< duration << "\n";
@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
          #endif
 
          if(yaw180_flag == true){
-            // Rotate satellite around yaw axis by 180 deg and calculate coverage
+            // Rotate satellite around z-axis by 180 deg and calculate coverage
             sat1->SetBodyNadirOffsetAngles(0,0,180,1,2,3);
             #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
                loopPoints_yaw180 = covChecker->AccumulateCoverageDataAtPreviousTimeIndex();
@@ -425,6 +425,7 @@ int main(int argc, char *argv[])
             sat1->SetBodyNadirOffsetAngles(0,0,0,1,2,3); // Reset the satellite attitude to Nadir-pointing
             // Add the points to the list of points seen. Sort and remove possible duplicates (in case of overlap)
             loopPoints.insert( loopPoints.end(), loopPoints_yaw180.begin(), loopPoints_yaw180.end() );
+            // remove duplicates
             sort( loopPoints.begin(), loopPoints.end() );
             loopPoints.erase( unique( loopPoints.begin(), loopPoints.end() ), loopPoints.end() );
          }
@@ -442,8 +443,8 @@ int main(int argc, char *argv[])
          satOut << std::setprecision(prc) << cartState[5] << "\n" ; 
 
          // Write access data         
-         // Make array with '1' (Access) in the cells corresponding to indices of gp's
-         // accessed, and '0' (No Access) elsewhere.
+         // Make array with '1' (Access) in the cells corresponding to indices of gp's accessed
+         // and nothing with there is no access.
          if(loopPoints.size()>0){
             // If no ground-points are accessed at this time, skip writing the row altogether.
             IntegerArray accessRow(numGridPoints,0);
@@ -495,9 +496,9 @@ int main(int argc, char *argv[])
       delete    state;
       delete    attitude;
       
-      if(senType == "Conical"){
+      if(fovGeom == "Conical"){
          delete    conicalSensor;
-      }else if(senType == "Custom" || senType=="Rectangular"){
+      }else if(fovGeom == "Custom" || fovGeom=="Rectangular"){
          delete    customSensor;
       }      
       delete    earth;
