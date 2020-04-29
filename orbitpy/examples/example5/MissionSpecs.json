@@ -25,12 +25,11 @@
         },
         "scanTechnique": "PUSHBROOM",
         "orientation": {
-            "convention": "SIDE_LOOK",
-            "sideLookAngle": 0
+            "convention": "NADIR"
         },
         "dataRate":  384,
-        "numberOfDetectorsRowsAlongTrack": 1,
-        "numberOfDetectorsColsCrossTrack": 1850,
+        "numberDetectorRowsAT": 1,
+        "numberDetectorColsCT": 1850,
         "detectorWidth": 25e-6,
         "focalLength": 0.178,
         "operatingWavelength": 10.9e-6,
@@ -44,7 +43,7 @@
         "Fnum":  1.64,
         "maxDetectorExposureTime": 3.49e-3,
         "snrThreshold":  25,
-        "sceneLength2AltRatio":0.2571,
+        "numStripsInScene":1000,
         "maneuverability":{
             "@type": "ROLLONLY",
             "rollMin": -15,

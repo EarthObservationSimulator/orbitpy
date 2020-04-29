@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
       satAcc << "Satellite states are in Earth-Centered-Inertial equatorial-plane frame.\n";
       satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satAcc << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
-      satAcc << "Mission Duration [Days] is "<< duration << "\n";
+      satAcc << "Mission Duration [Days] is "<< duration << ".\n";
       satAcc << "TimeIndex,";
       for(int i=0;i<numGridPoints;i++){
          satAcc<<"GP"<<i;

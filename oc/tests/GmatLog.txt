@@ -1,0 +1,4 @@
+GMAT Build Date: Apr 21 2020 23:21:10
+
+GMAT Log file set to ./GmatLog.txt
+The log file mode is create

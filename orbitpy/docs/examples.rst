@@ -4,7 +4,7 @@ Examples
 *********
 
 The :code:`run_mission.py` script can be invoked to execute missions as defined in a customizable JSON configuration file.
-Description of the scipt is given below, followed by description of the example scenarios present in the 
+Description of the script is given below, followed by description of the example scenarios present in the 
 directory :code:`orbitpy/examples/`.  
 
 .. automodule:: run_mission

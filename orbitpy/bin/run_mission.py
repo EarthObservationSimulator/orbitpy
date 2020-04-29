@@ -40,6 +40,7 @@ def main(user_dir):
             ├── sat11/
                 ├── state
                 ├── pay1_access
+                ├── pay1_obsMetrics
                 ├── gndStn1_contact_concise
                 ├── gndStn1_contact_detailed
                 ├── gndStn2_contact_concise
@@ -47,6 +48,7 @@ def main(user_dir):
             ├── sat21/
                 ├── state
                 ├── pay1_access
+                ├── pay1_obsMetrics
                 ├── gndStn1_contact_concise
                 ├── gndStn1_contact_detailed
                 ├── gndStn2_contact_concise

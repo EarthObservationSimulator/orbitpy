@@ -106,8 +106,10 @@ def correct_access_files(sat_access_fls):
             head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
         
             with open(new_accessInfo_fl, 'w') as f2:
-                for r in head:
-                    f2.write(str(r))
+                for k in range(0,len(head)-1):
+                    f2.write(str(head[k]))
+                message = " Access listed below corresponds to approximate access instants at the grid-points at a (approximately) side-look target geometery. The scene scan time should be used along with the below data to get complete access information.\n"
+                f2.write(str(head[-1]).rstrip() + message)
 
         with open(new_accessInfo_fl, 'a') as f2:
             dfnew.to_csv(f2, header=True)

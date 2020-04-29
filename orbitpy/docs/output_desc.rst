@@ -30,7 +30,7 @@ Description of the data is given below:
 Access Data
 ==============
 The format of the access data is similar to the satellite states data and is also produced by the :class:`orbitpy.orbitpropcov` module.
-The time data of both the states and access are synced. One access data file is produced for each satellite payload. Excluding the :code:`Time[s]`
+The time data of both the states and access are synced. One access data file is produced for each satellite payload. Excluding the :code:`TimeIndex`
 column, the column headers are named as :code:`GP0`, :code:`GP1`, :code:`GP2`, and so on corresponding to the grid-point indices. The grid point
 data can be found in the coverage grid data file. Each cell entry corresponds to a True/ False condition for access. If there has been access 
 (or if there can be access in the case when the FOR is used for access computation), the cell entry is :code:`1`, else there is no entry. During
@@ -44,7 +44,7 @@ The intersatellite contact data is produced by invoking the :class:`orbitpy.comm
 initialized with a list of the satellite state data files (satellites between which contacts needs to be calculated), a :code:`opaque_atmos_height_km`
 parameter and the directory in which the results are to be written. 
 
-Two seperate data files are produced for each satellite pair. One of the data files containes information of the contacts at each propagation time step, 
+Two seperate data files are produced for each satellite pair. One of the data files contains information of the contacts at each propagation time step, 
 while the other data file contains the contact intervals. The pair of satellites is indicated in the name of the file, where it is presumed
 that the name of the satellite is same as the name of the directory in which the corresponding state data file is present. For example if we have
 */sat12/state*, */sat32/state* as the input state files, the name of the resulting output files are *sat12_sat32_detailed* and *sat12_sat32_concise*.
@@ -60,7 +60,7 @@ The third row contains the column headers with the subsequent rows containing th
    AccessOrNoAccess,bool,, Possible values are :code:`True` or :code:`False` corresponding to access and no-access.
    Range[km], float, kilometers, Distance between the two satellites.
 
-Description of the data in the *_concise* file is as follows. The first row contains the epoch. he second row contains the time-step size in seconds.
+Description of the data in the *_concise* file is as follows. The first row contains the epoch. The second row contains the time-step size in seconds.
 The third row contains the column headers with the subsequent rows containing the corresponding data. 
 
 .. csv-table:: Concise contact description
@@ -74,9 +74,9 @@ The third row contains the column headers with the subsequent rows containing th
 
 Ground Stations Contact Data
 ==============================
-The ground stations contact data is produced by invoking the :class:`orbitpy.communications.InterSatelliteComm` class. The class is initialized
-by list of directories in which the satellite states are present. The name of the satellite state data files is presumed to be *state*
-The second initialization parameter is the filepath (with filename) containing the ground station data (See :ref:`groundStations_json_object`).
+The ground stations contact data is produced by invoking the :class:`orbitpy.communications.GroundStationComm` class. The class is initialized
+by list of directories in which the satellite states are present. The name of the satellite state data files is presumed to be *state*.
+The second initialization parameter is the filepath containing the ground station data (See :ref:`groundStations_json_object`).
 
 The resulting files have a similar format to the intersatellite contact data files. The files are written in the respective satellite directories.
 The files are named according to the ground-station index given in the input ground station data file.  For example if we have the ground station 
@@ -94,7 +94,7 @@ The third row contains the column headers with the subsequent rows containing th
    Range[km], float, kilometers, Distance between the satellite and the ground station.
    Elevation[deg], float, degrees, Elevation angle at which the satellite is visible from the ground-station.
 
-Description of the data in the *_concise* file is as follows. The first row contains the epoch. he second row contains the time-step size in seconds.
+Description of the data in the *_concise* file is as follows. The first row contains the epoch. The second row contains the time-step size in seconds.
 The third row contains the column header with the subsequent rows containing the corresponding data. 
 
 .. csv-table:: Concise contact description
@@ -107,7 +107,7 @@ The third row contains the column header with the subsequent rows containing the
 Observation Data Metrics 
 =========================
 The observation data metrics are produced by the :class:`orbitpy.obsdatametrics` module which inturn invokes the :code:`instrupy` package.
-The module can be initialized by dictonary containing the instrument specifications, path to the coverage grid file and a list of directories containing the satellite 
+The module can be initialized by dictionary containing the instrument specifications, path to the coverage grid file and a list of directories containing the satellite 
 state data, access data. The name of the state data file is presumed to be *state* and the name of the access data file is presumed to be of the
 format *payI_access*, where *I* is the identifier of the payload to which the access data corresponds. Currently the module is hardcoded to 
 work with only one payload with identifier as *1* and hence the name of the access file is *pay1_access*. 

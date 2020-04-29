@@ -36,7 +36,7 @@
         "bitsPerPixel": 5, 
         "systemNoiseFigure": 5.11,
         "sigmaNEZ0threshold": -10, 
-        "sceneLength2AltRatio":0.0714,
+        "numStripsInScene":5,
         "maneuverability":{
             "@type": "Yaw180ROLL",
             "rollMin": -5,

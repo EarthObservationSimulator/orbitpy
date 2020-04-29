@@ -14,7 +14,7 @@ is missed during the access calculations.
     :scale: 75 %
     :align: center
 
-    Illustration of possible inaccuracies due to a large time resolution factor.
+    Illustration of possible inaccuracies due to a large time resolution factor (0.75 in above figure).
 
 .. _grid_res_determination:
 
@@ -41,18 +41,34 @@ is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives 
 ==================================================================
 
 In case of purely side-looking instruments (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place when the grid-point
-is seen with no squint angle. The orbit propagation and coverage calculations takes place for a corresponding *sceneFOV* for the instrument 
-(see :code:`instrupy` package documentation) which results in long access intervals over a grid-point. The access files are then "corrected"
-to show access only at approximately the middle of the access interval. For example if the access data has been registered at t = 104s, 106s, 108s, 110s
-(with the propagation time-step as 2 seconds), the times between and including 104s and 110s is treated as a access interval and the corrected
-access data shall show access only at t=108s.   
+is seen with no squint angle. The orbit propagation and coverage calculations takes place for a corresponding *FOV/sceneFOV* for the instrument 
+(see :code:`instrupy` package documentation). 
+The generated access files are then *corrected* to a new format, to show access only at approximately the middle of the access interval. This should be 
+coupled with the scene-scan time to get complete information about the access. 
 
-The correction of the access files is handled by the :class:`orbitpy.orbitpropcov` module which requires as inputs list of access files (to be corrected)
-and the time-step at which there are produced. The original access files are renamed to :code:`...._old` and the corrected access files are
-produced with the same name as the original access files at the same location.
+For example, consider a SAR instrument pointing sideways as shown in the figure below. The along-track FOV is narrow
+corresponding to narrow strips, and a scene is built from concatenated strips. A SceneFOV is associated with the SAR and is used for access 
+calculation over the grid point shown in the figure. Say the propagation time-step is 1s as shown in the figure. An acccess interval between
+t=100s to t=105s is registered. However as shown the actual access takes place over a small interval of time at t=103.177s. 
 
-.. warning:: There is a small hiccup when the propagation time step is smaller than the SAR dwell time and access is corrected as described above. 
+An approximation can be applied (i.e. correction is made) that the observaton time of the ground point is at the middle of the access
+interval rounded of to the nearest propgation time as calculated using the SceneFOV, i.e. :math:`t= 100 + ((105-100)/2) % 1 = 103s`. The state 
+of the spacecraft at :math:`t=103s` is utilized for the data-metrics calculation.
+
+
+.. figure:: sar_access.png
+    :scale: 75 %
+    :align: center
+
+The correction of the access files is handled by the :class:`orbitpy.orbitpropcov` module which requires as inputs: list of access files (to be revised). The original access files are renamed to :code:`...._old` and the corrected access files are
+produced with the same name as the original access files at the same location. An additional message is displayed within the file as follows:
+   
+   *Access listed below corresponds to approximate access instants at the grid-points at a (approximately) side-look target geometery. The scene scan time should be used along with the below data to get complete access information.*
+
+
+.. warning:: There is a small hiccup when the propagation time step is smaller than the sensor (eg: SAR) dwell time and access is corrected as described above. 
             Since the propagation time step is small, the access over the grid point takes place over number of time-steps, while the corrected access
             files show access as taking place at only one time-step. The correction method is to be used when the dwell time is much smaller than the 
-            propagation time step. The dwell time needed for the calculation of the SAR data-metrics is calculated analytically by the :code:`instrupy` module.
-            However I do not think this hiccup leads to wrong results for the DSHEILD application even with a large dwell time. 
+            propagation time step. The dwell time needed for the calculation of the data-metrics is calculated analytically by the :code:`instrupy` module.
+            It should be OK as long as we are aware.
+

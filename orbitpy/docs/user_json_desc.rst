@@ -72,7 +72,7 @@ Note that the individual orbits are specified as a list (within square brackets)
 2. :code:`"@type":"Walkerdelta"`
 
 Under this option the user can define parameters of a Walker Delta constellation (as given in SMAD 3rd ed.) and the corresponding 
-satellite orbits shall be auto-generated. The identifier of the satellites is coded as follows: :code:`satxy` where :code:`x` indicates
+satellite orbits shall be auto-generated. The identifier of the satellites is coded as follows: :code:`xy` where :code:`x` indicates
 the plane number and :code:`y` indicates the satellite number within the orbital plane.
 The following fields are expected for the definition of the Walker Delta constellation:
 
@@ -143,13 +143,13 @@ Within the :code:`autoGrid` JSOn field, a *list* of regions can be specifyed. Th
    :widths: 10,10,5,40
 
    @id, str, , Unique region identifier
-   latUpper, int,, Upper latitude in degrees
-   latLower, float, kilometers, Lower latitude in degrees
-   lonUpper,float,, Upper longitude in degrees
-   lonLower,float,degrees, Lower longitude in degrees
+   latUpper, float, degrees, Upper latitude in degrees
+   latLower, float, degrees, Lower latitude in degrees
+   lonUpper,float, degrees, Upper longitude in degrees
+   lonLower,float, degrees, Lower longitude in degrees
 
 A file named as :code:`covGrid` containing the grid points is created within the user directory. If a :code:`customGridRes` parameter
-is specified in the :code:`settings` JSON object, that grid resolution is user, else the grid resolution is decided based on the smallest 
+is specified in the :code:`settings` JSON object, that grid resolution is used, else the grid resolution is decided based on the smallest 
 sensor footprint angular dimension (see :ref:`grid_res_determination`).
 
 Example:
@@ -190,7 +190,7 @@ Example:
     }
 
 The datafile needs to be of CSV format as indicated in the example below. *regi* is the region index, *gpi* is the grid point index,
-*lat[deg]* is the latitude in degrees, and *lon[deg]* is the longitude in degrees. **gpi must start from 0 and increment by 1 as shwon 
+*lat[deg]* is the latitude in degrees, and *lon[deg]* is the longitude in degrees. **gpi must start from 0 and increment by 1 as shown 
 in the example.**
 
 .. csv-table:: Example of the coverage grid data file.
@@ -209,7 +209,7 @@ in the example.**
     2,9,-49.1,22.902
 
 .. note:: Please specify latitudes in the range of -90 deg to +90 deg and longitudes in the range of -180 deg to +180 deg. Do *NOT* 
-          specify the longitudes inr ange of 0 deg to 360 deg.
+          specify the longitudes in range of 0 deg to 360 deg.
 
 .. _settings_json_object:
 

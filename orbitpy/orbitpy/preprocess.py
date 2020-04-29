@@ -395,7 +395,7 @@ class PreProcess():
             raan = pl_i * 360.0/num_planes
             ta_ref = pl_i * rel_spc * 360.0/num_sats
             for sat_i in range(0,num_sats_pp):
-                orb_id = str(pl_i) + str(sat_i)
+                orb_id = str(pl_i+1) + str(sat_i+1)
                 ta = (ta_ref + sat_i * 360.0/num_sats_pp)%360
                 orbits.append(OrbitParameters(orb_id, sma, ecc, inc,
                                           raan, aop, ta)) 

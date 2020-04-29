@@ -28,8 +28,8 @@
             "convention": "NADIR"
         },
         "dataRate": 1,
-        "numberOfDetectorsRowsAlongTrack": 4452,
-        "numberOfDetectorsColsCrossTrack":  6644,
+        "numberDetectorRowsAT": 4452,
+        "numberDetectorColsCT":  6644,
         "detectorWidth": 5.5e-6,
         "focalLength": 0.7095,
         "operatingWavelength": 475e-9,

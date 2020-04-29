@@ -20,7 +20,7 @@ Requires: `python 3.8`, `gcc`, `gfortran`
 5. Run an example, by running the following command from the `orbits` directory: `python orbitpy/bin/run_mission.py orbitpy/examples/example1/`.
    See the results in the `orbitpy/examples/example1/` folder. More description of the examples is given in the documentation.
 
-Find the documentation in: `orbits/orbitpy/docs/_build/html/user_json_desc.html`
+Find the documentation in: `/orbitpy/docs/_build/html/index.html#`
 
 ## Questions?
 
