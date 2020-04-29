@@ -5,18 +5,10 @@
 
 Welcome to OrbitPy's documentation!
 ===================================
-This package contain set of modules to compute orbit data of satellites. It performs the following functions:
-
-1. Computation of satellite state (position and velocity) data.
-2. Generation of grid-of-points at a (user-defined or auto) angular resolution.
-3. Computation of Field Of Regard (FOR) based on the manueverability and sensor specifications, mounting.
-4. Computation of satellite access intervals over given set of grid points for the length of the mission. 
-5. Computation of inter-satellite communication time intervals.
-6. Computation of ground-station contact time intervals.
 
 Install
 ========
-Requires: Unix-like operating system (currently tested in Ubuntu 18.04.03), :code:`python 3.8`, :code:`gcc`, :code:`gfortran`
+*Requires:* Unix-like operating system (currently tested in Ubuntu 18.04.03), :code:`python 3.8`, :code:`gcc`, :code:`gfortran`
 
 1. Make sure the :code:`instrupy` package (dependency) has been installed. It can be installed by running :code:`make` in the :code:`instruments/instrupy/` directory.
 2. Navigate to the :code:`orbits/oc/` directory and run :code:`make`. 
@@ -25,7 +17,7 @@ Requires: Unix-like operating system (currently tested in Ubuntu 18.04.03), :cod
 5. Run an example, by running the following command from the :code:`orbits` directory: :code:`python orbitpy/bin/run_mission.py orbitpy/examples/example1/`.
    See the results in the :code:`orbitpy/examples/example1/` folder. Description of the examples in given in :ref:`examples` page. 
 
-Find the documentation in: :code:`/orbitpy/docs/_build/html/index.html#`
+Find the documentation in: :code:`/orbitpy/docs/_build/html/index.html`
 
 .. toctree::
    :maxdepth: 2
@@ -37,6 +29,81 @@ Find the documentation in: :code:`/orbitpy/docs/_build/html/index.html#`
    examples
    miscellaneous
 
+Description
+===========
+
+This package contain set of modules to compute orbit data of satellites. It performs the following functions:
+
+1. Computation of satellite state (position and velocity) data.
+2. Generation of grid-of-points at a (user-defined or auto) angular resolution.
+3. Computation of Field Of Regard (FOR) based on the manueverability and sensor specifications, mounting.
+4. Computation of satellite access intervals over given set of grid points for the length of the mission. 
+5. Computation of inter-satellite communication time intervals.
+6. Computation of ground-station contact time intervals.
+
+With respect to integration in DSHIELD, the outputs/ functions of the package are used by other modules
+of DSHIELD as follows:
+
+.. csv-table:: Integration to other modules
+   :header: "Data output", "the other module"
+   :widths: 20, 20
+
+   "Satellite States, Grid Points", "ACS module"
+   "Intersatellite comms", "Comm Module"
+   "Ground-station comms", "Ground module"
+   "Access Opps with Observation quality", "Planner"
+
+The input to the first three items is straightforward and can be used directly from the current implemnetation. The last item
+however has issues. The raw access outputs are naive, and need to be filtered, post-processed to imaging oppurtunities (**raw access vs imaging opps**).     
+
+Consider a 5 second mission, the desired output from the Orbits to the Planner would be as follows:
+
+.. code-block:: bash
+
+   Time, (Grid-points, Observation Quality)
+   1,    (10,2) (45,1) (100,1) (210,4) 
+   2,    (10,3) (45,2) (100,2) (210,3) 
+   3,    (10,4) (45,3) (100,3) (210,2) 
+   4,    (10,3)        (100,4) (210,1) 
+   5,    (10,1)        (100,5)  
+
+
+Where a observation is defined as taking an image/ reading around the respective ground-point:
+
+.. figure:: valid_vs_invalid_obs.png
+    :scale: 75 %
+    :align: center
+
+    Valid vs Invalid observations
+
+A similar issue exists in the time domain:
+
+.. code-block:: bash
+
+   Time,Access,Imaging Opp
+   98,No, No     
+   99,No, No   
+   100,Yes, No   
+   101,Yes, No   
+   102,Yes, No
+   103,Yes, Yes iff t= 104, are free
+   104,Yes, Yes iff t= 103, 105 are free
+   105,Yes, Yes iff t=103, 104, 106 are free
+   .,.,,
+   .,.,,
+   .,.,,
+   .,.,,
+   115, Yes,No
+   116, No,No
+
+
+
+.. figure:: outlier_times.png
+    :scale: 75 %
+    :align: center
+
+    Valid vs Invalid obs times
+
 Issues
 ========
 
@@ -44,12 +111,14 @@ Issue #1
 ^^^^^^^^
 
 Current implementation works well only for:
-   1. Instruments whose required observation time < propagation step-size (i.e. < 1s).  
+   1. Instruments whose required observation time < propagation step-size (i.e. < 1s).  For scanning type instruments 
+      (like pushbroom sensors, stripmap SARs) this condition can be waived. But cannot be waived instruments like Matrix imagers, radiometers 
+      which require the entire sensor FOV to be focused on the scene. 
    2. Whose FOV << FOR.
 
 *First one is not realistic if the minimum exposure/ dwell time of instruments 
 (required in radiometers) is to be considered. Second one is not realistic assumption for 
-instruments having a wide-swath. *
+instruments having a wide-swath.*
 
 The access file generated by the orbit and coverage is quite naive. It indicates if the ground-point can be accessed at some instant of time.
 However, what we require are the imaging oppourtunities, where a imaging opportunity is defined as:

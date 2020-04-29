@@ -38,9 +38,9 @@
         "sigmaNEZ0threshold": -10, 
         "numStripsInScene":5,
         "maneuverability":{
-            "@type": "Yaw180ROLL",
-            "rollMin": -5,
-            "rollMax": 5    
+            "@type": "YAW180ROLL",
+            "rollMin": -10,
+            "rollMax": 10    
         },
         "_references":  ["The Seasat-A Synthetic Aperture Radar System, Rolando L.Jordan 1980",
                  "Spaceborne SAR Study: LDRD ’92 Final Report",

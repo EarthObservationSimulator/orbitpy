@@ -23,13 +23,13 @@ def main(user_dir):
         6. Computation of ground-station contacts.
         7. Computation of observational data metrics. 
         
-    Example usage: :code:`python bin/run_mission.py examples/example1/`
+    Example usage: :code:`python bin/run_mission.py examples/example2/`
 
     Directory structure (input files are starred):
 
     .. code-block:: bash
 
-        example1/
+        example2/
             ├── comm/
                 ├── sat11_to_sat21_concise
                 ├── sat11_to_sat21_detailed

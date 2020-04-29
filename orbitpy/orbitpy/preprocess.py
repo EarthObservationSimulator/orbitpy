@@ -568,9 +568,9 @@ class PreProcess():
         # find the minimum required grid resolution over all satellites
         min_grid_res_deg = 1e1000 # some large number
         for indx in range(0,len(sats)):
-            fov_ct = sats[indx].ics_fov.fov_ct # instrument cross-track FOV in degrees (use FOV and not FOR)
+            fov = min(sats[indx].ics_fov.fov_at, sats[indx].ics_fov.fov_ct) # (use FOV and not FOR)
             sinRho = RE/sats[indx].orbit.sma
-            hfov_deg = 0.5*fov_ct
+            hfov_deg = 0.5*fov
             elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
             lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
             eca_deg = lambda_deg*2 # total earth centric angle

@@ -45,9 +45,8 @@
         "snrThreshold":  25,
         "numStripsInScene":1000,
         "maneuverability":{
-            "@type": "ROLLONLY",
-            "rollMin": -15,
-            "rollMax": 15    
+            "@type":"Cone",
+            "fullConeAngle": 25 
         },
         "_comments": ["Above is Total payload data-rate not just off the TIRS.",
                       "numReadOutE and snrThreshold are guessed."],

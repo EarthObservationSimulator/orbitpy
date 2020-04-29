@@ -99,7 +99,7 @@ def correct_access_files(sat_access_fls):
                 mid_access.append(acc_evt[int(0.5*len(acc_evt))])
                 
                 for j in range(0,len(mid_access)):
-                    dfnew.loc[mid_access[j]][gpi] = 1
+                    dfnew.loc[mid_access[j]][gpi] = int(1)
 
 
         with open(old_accessInfo_fl, 'r') as f1:
