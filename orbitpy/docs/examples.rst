@@ -52,7 +52,7 @@ Example 5
 ==========
 
 * 6 satellites, 3 plane Walker delta constellation
-* Landsat-8 TIRS, Pushbroom (Rectangular), Nadir pointing, RollOnly, ScanFOV concept (100 km scene-length) => Correction of access files
+* Landsat-8 TIRS, Pushbroom (Rectangular), Nadir pointing, Cone Manuverability, ScanFOV concept (100 km scene-length) 
 * Grid: Auto, Continental USA
 
 Running your own case
