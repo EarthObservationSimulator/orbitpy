@@ -475,9 +475,10 @@ bool Spacecraft::CheckTargetVisibility(const Rvector6 &bodyFixedState,
                                        Real            atTime,
                                        Integer         sensorNumber)
 {
-   //
-   Rmatrix33 R_NI = GetBodyFixedToInertial(bodyFixedState);
-   Rvector3  satToTarget_Sensor =
+   // VINAY: Error? R_NI here may actually be the rotation matrix from Earth-Fixed to Nadir. Correspondingly GetBodyFixedToInertial() must be named as `GetBodyFixedToReference`?
+   // where BodyFixed refers to EarthFixed and Reference refers to Nadir.
+   Rmatrix33 R_NI = GetBodyFixedToInertial(bodyFixedState); 
+   Rvector3  satToTarget_Sensor = // Vinay: satToTarget_Sensor is vector in Sensor frame
              sensorList.at(sensorNumber)->GetBodyToSensorMatrix(atTime) *
              (R_BN * (R_NI * satToTargetVec));
    Real cone, clock;
@@ -497,7 +498,7 @@ bool Spacecraft::CheckTargetVisibility(const Rvector6 &bodyFixedState,
  *
  */
 //------------------------------------------------------------------------------
-Rmatrix33 Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState)
+Rmatrix33 Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) // Vinay: Error? Should be GetBodyFixedtoReference, where BodyFixed in EarthFixed and Reference would become Nadir.
 {
    return attitude->InertialToReference(bfState); // misnamed??
 }
