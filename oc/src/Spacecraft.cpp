@@ -728,4 +728,6 @@ void Spacecraft::ComputeNadirToBodyMatrix()
                                                     eulerSeq2, eulerSeq3);
 }
 
-
+Rmatrix33 Spacecraft::GetNadirTOBodyMatrix(){
+   return R_BN;
+}

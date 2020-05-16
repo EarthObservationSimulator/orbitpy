@@ -153,4 +153,3 @@ Rmatrix33 NadirPointingAttitude::InertialToReference(const Rvector6& centralBody
    R_fixed_to_nadir_transposed = R_fixed_to_nadir.Transpose();
    return R_fixed_to_nadir_transposed; // Vinay: Error? Should be R_fixed_to_nadir, where Fixed is EarthFixed.
 }
-

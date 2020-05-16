@@ -119,6 +119,9 @@ public:
    
    /// Interpolate the data to the input toTime
    virtual Rvector6       Interpolate(Real toTime);
+
+   // Author: Vinay
+   Rmatrix33 GetNadirTOBodyMatrix();
    
 protected:
    

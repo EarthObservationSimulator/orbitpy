@@ -52,6 +52,9 @@ public:
    /// Get the body-fixed state
    virtual Rvector3         GetBodyFixedState(Rvector3 inertialState,
                                               Real      jd);
+   // Vinay: Get the body-fixed state (position and velocity)
+   Rvector6 GetBodyFixedState(Rvector6 inertialState,
+                                  Real      jd);
    /// Convert between body-fixed representations
    virtual Rvector3         Convert (const Rvector3 &origValue,
                                      const std::string &fromType,

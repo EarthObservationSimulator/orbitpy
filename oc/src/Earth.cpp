@@ -193,6 +193,45 @@ Rvector3 Earth::GetBodyFixedState(Rvector3 inertialState,
    return GetInertialToFixedRotation(jd) * inertialState;
 }
 
+
+//------------------------------------------------------------------------------
+//  Rvector6 GetBodyFixedState(Rvector6 inertialState,
+//                             Real      jd)
+//------------------------------------------------------------------------------
+/**
+ * Returns the body-fixed state given the inertial stat and the time.
+ * Author: Vinay
+ * Adapted from adapted from CoverageChecker::GetEarthFixedSatState(....)
+ * Note that the velocity state conversion needs to be revised.
+ * 
+ * @param  inertialState  the inertial state (x,y,z,vx,vy,vz).
+ * @param  jd             the Julian date at which to compute the
+ *                        body-fixed state.
+ * 
+ * @return  body-fixed state
+ */
+//------------------------------------------------------------------------------
+Rvector6 Earth::GetBodyFixedState(Rvector6 inertialState,
+                                  Real      jd)
+{
+   // Converts state from Earth interial to Earth fixed, adapted from CoverageChecker::GetEarthFixedSatState(....)
+   Rvector3 inertialPos   = inertialState.GetR();
+   Rvector3 inertialVel   = inertialState.GetV();
+   // TODO.  Handle differences in units of points and states.
+   // TODO.  This ignores omega cross r term in velocity, which is ok and 
+   // perhaps desired for current use cases but is not always desired.
+   Rvector3 centralBodyFixedPos  = Earth::GetBodyFixedState(inertialPos, jd);
+   Rvector3 centralBodyFixedVel  = Earth::GetBodyFixedState(inertialVel, jd);
+
+   Rvector6 earthFixedState(centralBodyFixedPos(0), centralBodyFixedPos(1),
+                           centralBodyFixedPos(2),
+                           centralBodyFixedVel(0), centralBodyFixedVel(1),
+                           centralBodyFixedVel(2));
+
+
+   return earthFixedState;
+}
+
 //------------------------------------------------------------------------------
 // Rvector3 Convert (const Rvector3 &origValue, const std::string &fromType
 //                   const std::string &toType);

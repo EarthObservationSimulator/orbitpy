@@ -68,29 +68,33 @@ class PropagationCoverageParameters():
 
     :ivar sat_acc_fl: Filepath to write the resulting satellite access data over the grid of points given in the coverage grid file.
     :vartype sat_acc_fl: str
+
+    :ivar popts_fl: Filepath from which to read the pointing options
+    :vartype popts_fl: str
     
     """
     def __init__(self, sat_id=str(), epoch=str(), sma=float(), ecc=float(), inc=float(), raan=float(), aop=float(), ta=float(), 
                  duration=float(), cov_grid_fl=str(), sen_fov_geom=str(), sen_orien=str(), sen_clock=str(), 
-                 sen_cone=str(), yaw180_flag = int(), step_size=float(), sat_state_fl=str(), sat_acc_fl=str()):
-        self.sat_id = str(sat_id) 
-        self.epoch = str(epoch) 
-        self.sma = float(sma) 
-        self.ecc = float(ecc) 
-        self.inc = float(inc)
-        self.raan = float(raan) 
-        self.aop = float(aop) 
-        self.ta = float(ta) 
-        self.duration = float(duration) 
-        self.cov_grid_fl = str(cov_grid_fl)  
-        self.sen_fov_geom = str(sen_fov_geom) 
-        self.sen_orien = str(sen_orien)  
-        self.sen_clock = str(sen_clock)  
-        self.sen_cone = str(sen_cone)  
-        self.yaw180_flag = int(yaw180_flag) 
-        self.step_size = float(step_size)
-        self.sat_state_fl = str(sat_state_fl) 
-        self.sat_acc_fl = str(sat_acc_fl) 
+                 sen_cone=str(), yaw180_flag = int(), step_size=float(), sat_state_fl=str(), sat_acc_fl=str(), popts_fl=str()):
+        self.sat_id = str(sat_id) if sat_id else None
+        self.epoch = str(epoch) if epoch else None
+        self.sma = float(sma) if sma else None
+        self.ecc = float(ecc) if ecc else None
+        self.inc = float(inc) if inc else None
+        self.raan = float(raan) if raan else None
+        self.aop = float(aop) if aop else None 
+        self.ta = float(ta) if ta else None
+        self.duration = float(duration) if duration else None
+        self.cov_grid_fl = str(cov_grid_fl) if cov_grid_fl else None 
+        self.sen_fov_geom = str(sen_fov_geom) if sen_fov_geom else None
+        self.sen_orien = str(sen_orien) if sen_orien else None 
+        self.sen_clock = str(sen_clock) if sen_clock else None 
+        self.sen_cone = str(sen_cone) if sen_cone else None 
+        self.yaw180_flag = int(yaw180_flag) if yaw180_flag else None
+        self.step_size = float(step_size) if step_size else None
+        self.sat_state_fl = str(sat_state_fl) if sat_state_fl else None
+        self.sat_acc_fl = str(sat_acc_fl) if sat_acc_fl else None
+        self.popts_fl = str(popts_fl) if popts_fl else None
 
 class OrbitPyDefaults(object):
     """ Enumeration of various default values used by package **OrbitPy**.
