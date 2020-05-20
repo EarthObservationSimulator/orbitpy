@@ -82,9 +82,10 @@ int readPntOptsFile(const string &pOptsFl, RealArray &euler_angle1, RealArray &e
       Real eu2 = stod(vecStrOut[2]);
       Real eu3 = stod(vecStrOut[3]);
 
-      euler_angle1.push_back( eu1*RAD_PER_DEG );
-      euler_angle2.push_back( eu2*RAD_PER_DEG );
-      euler_angle3.push_back( eu3*RAD_PER_DEG );
+      // retain the angles in degrees!
+      euler_angle1.push_back( eu1 );
+      euler_angle2.push_back( eu2 );
+      euler_angle3.push_back( eu3 );
 
     }
     in.close();

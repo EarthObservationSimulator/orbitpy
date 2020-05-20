@@ -39,6 +39,7 @@ def main(user_dir):
                 ├── sat21_to_sat31_detailed
             ├── sat11/
                 ├── state
+                ├── pay1_access_
                 ├── pay1_access
                 ├── pay1_obsMetrics
                 ├── gndStn1_contact_concise
@@ -47,6 +48,7 @@ def main(user_dir):
                 ├── gndStn2_contact_detailed
             ├── sat21/
                 ├── state
+                ├── pay1_access_
                 ├── pay1_access
                 ├── pay1_obsMetrics
                 ├── gndStn1_contact_concise
@@ -87,16 +89,6 @@ def main(user_dir):
     sat_dirs =  glob.glob(user_dir+'sat*/')
     sat_state_fls =  glob.glob(user_dir+'sat*/state')
     sat_access_fls =  glob.glob(user_dir+'sat*/*_access')
-
-    # Correct access files for purely side-looking instruments if necessary        
-    if(pi.sats[0].ics_fov.purely_side_look):            
-        print(".......Correcting access files......")
-        t1 = time.process_time() 
-        orbitpropcov.correct_access_files(sat_access_fls)
-        t2 = time.process_time()
-        print(".......DONE.......time taken (s): ", t2-t1)
-    else:
-        print(".......No correction of access files......")
 
     # Compute satellite-to-satellite contacts
     print(".......Computing satellite-to-satellite contact periods.......")

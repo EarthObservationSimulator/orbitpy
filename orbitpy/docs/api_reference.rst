@@ -6,8 +6,8 @@ This API reference provides detailed descriptions of OrbitPy's classes and funct
    :maxdepth: 1
    
    orbitpy
-   orbitpy.orbitpropcov
    orbitpy.preprocess
+   orbitpy.orbitpropcov 
    orbitpy.communications
    orbitpy.obsdatametrics
    orbitpy.util

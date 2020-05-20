@@ -30,6 +30,11 @@ class FOVGeometry(EnumEntity):
     CONICAL = "CONICAL",
     RECTANGULAR = "RECTANGULAR",
     CUSTOM = "CUSTOM"
+
+class PntOptsRefFrame(EnumEntity):
+    """Enumeration of recognized reference frames used in specification of the pointing."""
+    NADIRREFFRAME = "NADIRREFFRAME"
+
 class OrbitParameters():
     """ Data structure to hold parameters defining the orbit of a satellite in the constellation. An orbit is 
         assumed to be unique for a satellite.
@@ -252,18 +257,34 @@ class PreProcess():
             self.time_step = _time_step        
         print("Time step in seconds is: ", self.time_step)
 
-        _grid_res = PreProcess.compute_grid_res(self.sats, OrbitPyDefaults.grid_res_fac) 
-        if "settings" in specs and 'customGridRes' in specs['settings']:
-            self.grid_res = float(specs['settings']['customGridRes'])
-            if(_grid_res < self.grid_res):
-                warnings.warn("Custom grid-resolution is coarser than computed grid resolution.")
-                print("Custom grid resolution [deg]: ", self.grid_res)
-                print("Computed grid resolution [deg]: ", _grid_res) 
-        else:
-            self.grid_res = _grid_res
-        print("Grid resolution in degrees is: ", self.grid_res)
+        if("grid" in specs):
+            self.cov_calc_app = CoverageCalculationsApproach.GRIDPNTS
+            print("Grid-point approach being used for coverage calculations.")
 
-        self.cov_grid_fl = PreProcess.process_cov_grid(self.user_dir, specs['grid'], self.grid_res)
+            _grid_res = PreProcess.compute_grid_res(self.sats, OrbitPyDefaults.grid_res_fac) 
+            if "settings" in specs and 'customGridRes' in specs['settings']:
+                self.grid_res = float(specs['settings']['customGridRes'])
+                if(_grid_res < self.grid_res):
+                    warnings.warn("Custom grid-resolution is coarser than computed grid resolution.")
+                    print("Custom grid resolution [deg]: ", self.grid_res)
+                    print("Computed grid resolution [deg]: ", _grid_res) 
+            else:
+                self.grid_res = _grid_res
+            print("Grid resolution in degrees is: ", self.grid_res)
+
+            self.cov_grid_fl = PreProcess.process_cov_grid(self.user_dir, specs['grid'], self.grid_res)
+            self.pnt_opts_fl = None
+
+        elif("pointingOptions" in specs):
+            self.cov_calc_app = CoverageCalculationsApproach.PNTOPTS
+            print("Pointing-Options approach being used for coverage calculations.")
+
+            self.cov_grid_fl = None
+            self.pnt_opts_fl = PreProcess.process_pointing_options(user_dir, specs['pointingOptions'])
+
+        else:
+            raise Exception("Please specify either 'grid' or 'pointingOptions' JSON fields.")
+
 
         self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFn'])
             
@@ -443,6 +464,7 @@ class PreProcess():
 
             orb = self.sats[sat_indx].orbit
             x =  self.sats[sat_indx].ics_for 
+            y =  self.sats[sat_indx].ics_fov 
             sat_dir = self.user_dir + 'sat' + str(orb._id) + '/'
             if os.path.exists(sat_dir):
                 shutil.rmtree(sat_dir)
@@ -452,12 +474,31 @@ class PreProcess():
             pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                      raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
                      sen_fov_geom=x.get_as_string('Geometry'), sen_orien=x.get_as_string('Orientation'), sen_clock=x.get_as_string('Clock'), 
-                     sen_cone=x.get_as_string('Cone'), yaw180_flag = x.get_as_string('yaw180_flag'), step_size=self.time_step, 
-                     sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl)
+                     sen_cone=x.get_as_string('Cone'), purely_sidelook = y.purely_side_look, yaw180_flag = x.get_as_string('yaw180_flag'), step_size=self.time_step, 
+                     sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= self.pnt_opts_fl, cov_calcs_app= self.cov_calc_app)
 
             prop_cov_param.append(pcp)
             
         return prop_cov_param
+
+    @staticmethod
+    def process_pointing_options(user_dir, pnt_opts):
+        """ Process coverage grid and return the filepath containing the grid info. See :class:`orbitpy.GridType` for allowed grid types.
+
+        :param user_dir: Path to the user directory where the coverage grid file exists or is to be created.
+        :paramtype user_dir: str
+
+        :param pnt_opts: Dictionary containing the filename with pointing options (must be inside the user directory) and other relevant information.
+        :paramtype pnt_opts: dict
+
+        :returns: Filepath to the file containing the pointing options info.
+        :rtype: str
+
+        """                   
+        ref_frame = PntOptsRefFrame.get(pnt_opts['referenceFrame'])     
+        popts_fl = user_dir + pnt_opts["pntOptsFn"] # pointing options file path  
+
+        return popts_fl
 
     @staticmethod
     def process_cov_grid(user_dir, grid, grid_res):

@@ -25,7 +25,7 @@ class ObsDataMetrics():
     """
     def __init__(self, sat_dirs = None, cov_grid_fl = None, instru_specs = dict()):
       self.sat_dirs = sat_dirs
-      self.cov_grid_fl = cov_grid_fl
+      self.cov_grid_fl = cov_grid_fl if cov_grid_fl else None
       self.instru_specs = instru_specs
 
     def compute_all_obs_dmetrics(self):
@@ -42,30 +42,17 @@ class ObsDataMetrics():
             sat_state_fl = os.path.join(_dir, 'state')
             accessInfo_fl = glob.glob(_dir+'*_access')[0] # hardcoded to 1 instrument          
             obsMetrics_fl = os.path.join(_dir, 'pay1_obsMetrics') # hardcoded to 1 instrument  
-            ObsDataMetrics.compute_obs_data_metrics(instru, self.cov_grid_fl, sat_state_fl, accessInfo_fl,
-                                        obsMetrics_fl)
+            ObsDataMetrics.compute_obs_data_metrics(instru, sat_state_fl, accessInfo_fl,
+                                        obsMetrics_fl, self.cov_grid_fl)
 
     @staticmethod
-    def compute_obs_data_metrics(instru, covgrid_fl, state_fl, access_fl, datametrics_fl): 
+    def compute_obs_data_metrics(instru, state_fl, access_fl, datametrics_fl, covgrid_fl = None): 
         ''' Generate typical data metrics for a set of instrument, satellite states, access data. 
             Iterate over all access times in the access data file. The time column of the satellite-state data file and the
             access data file must be referenced to the same epoch and produced at the same time-step size.
             This function iteratively calls :code:`calc_typ_data_metrics` of the :code:`instrupy` over all access events 
             available in the input file. The ouput is a datafile containing the observation metrics.
-
-            :param covgrid_fl: Filepath to CSV file containing lat/lon co-ordinates of points of interest along with index.
-
-                                 First row contains the following header elements, and the following rows contain the data corresponding to these headers.
-                                 
-                                 Description of the header elements:
-                            
-                                 * :code:`regi`, Index of the region to which the grid-point belongs.
-                                 * :code:`gpi`, Index of the point-of-interest. 
-                                 * :code:`lat[deg]`, :code:`lon[deg]`, latitude, longitude (in degrees) of the point-of-interest.  
-
-            :paramtype covgrid_fl: str
-
-             
+            
             :param state_fl: Filepath to CSV file containing data of satellite states at fixed time-step.
                     First four rows convey general information. The second row conveys the Epoch in Julian Days UT1. The third row contains the step size in seconds.
                     The fifth row contains the following header elements, and the following rows contain the data corresponding to these headers.
@@ -101,6 +88,18 @@ class ObsDataMetrics():
             
             :paramtype datametrics_fl: str
 
+            :param covgrid_fl: Filepath to CSV file containing lat/lon co-ordinates of points of interest along with index.
+
+                        First row contains the following header elements, and the following rows contain the data corresponding to these headers.
+                        
+                        Description of the header elements:
+                
+                        * :code:`regi`, Index of the region to which the grid-point belongs.
+                        * :code:`gpi`, Index of the point-of-interest. 
+                        * :code:`lat[deg]`, :code:`lon[deg]`, latitude, longitude (in degrees) of the point-of-interest.  
+
+            :paramtype covgrid_fl: str
+
             :returns: None
 
         '''
@@ -109,23 +108,25 @@ class ObsDataMetrics():
 
         step_size = pd.read_csv(access_fl, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
         step_size = float(step_size[0][0].split()[4])
-                
-        poi_info_df = pd.read_csv(covgrid_fl)
+
+        '''        
+        poi_info_df = pd.read_csv(covgrid_fl, dtype=str)
+        types_dict = {'regi': int, 'gpi': int, 'lat[deg]': float, 'lon[deg]': float}
+        for col, col_type in types_dict.items():
+            poi_info_df[col] = poi_info_df[col].astype(col_type)
         poi_info_df = poi_info_df.set_index('gpi')
+        '''
 
         # Read the access file
-        access_info_df = pd.read_csv(access_fl,skiprows = [0,1,2,3]) # read the access times (corresponding to the DSM in which the instrument was used)
-        access_info_df = access_info_df.set_index('TimeIndex')
+        access_info_df = pd.read_csv(access_fl,skiprows = [0,1,2,3]) # read the access times       
 
         # Read the satellite state file
         sat_state_df = pd.read_csv(state_fl,skiprows = [0,1,2,3]) 
         sat_state_df = sat_state_df.set_index('TimeIndex')
-        sat_state_df = sat_state_df.loc[access_info_df.index] # retain states at only those times in which there are accesses
 
-        # copy second and third row from the original access file
+        # copy info rows from the original access file
         with open(access_fl, 'r') as f:
-            next(f)
-            head = [next(f) for x in [1,2]] 
+            head = [next(f) for x in [0,1,2]] 
 
         # erase any old file and create new one
         with open(datametrics_fl,'w') as f:
@@ -135,18 +136,18 @@ class ObsDataMetrics():
         with open(datametrics_fl,'a+', newline='') as f:
             w = csv.writer(f)
 
-            # Iterate over all valid logged access events
-            acc_indx = list(access_info_df[access_info_df.notnull()].stack().index) # list of valid access [time, POI]
-
+            # Iterate over all logged access events
             idx = 0
-            for indx in acc_indx:
+            for idx in range(0,len(access_info_df)):       
 
-                time_i = float(indx[0])
-                poi_indx = int(indx[1][2:])
+                time_i = int(access_info_df.loc[idx]["accessTimeIndex"])   
 
-                TargetCoords = dict()                
-                TargetCoords["Lat [deg]"] = poi_info_df.loc[poi_indx]["lat[deg]"]
-                TargetCoords["Lon [deg]"] = poi_info_df.loc[poi_indx]["lon[deg]"]
+                regi = int(access_info_df.loc[idx]["regi"]) if pd.notna(access_info_df.loc[idx]["regi"]) else None             
+                gpi = int(access_info_df.loc[idx]["gpi"]) if pd.notna(access_info_df.loc[idx]["gpi"]) else None   
+                
+                TargetCoords = dict()   
+                TargetCoords["Lat [deg]"] = float(access_info_df.loc[idx]["lat[deg]"])
+                TargetCoords["Lon [deg]"] = float(access_info_df.loc[idx]["lon[deg]"])             
 
                 SpacecraftOrbitState = dict()
                 SpacecraftOrbitState["Time[JDUT1]"] = epoch_JDUT1 + time_i*step_size*1.0/86400.0 
@@ -158,7 +159,7 @@ class ObsDataMetrics():
                 SpacecraftOrbitState["vz[km/s]"] = sat_state_df.loc[time_i]["VZ[km/s]"] 
 
                 obsv_metrics = instru.calc_typ_data_metrics(SpacecraftOrbitState, TargetCoords) # calculate the data metrics specific to the instrument type
-                _v = dict({'observationTimeIndex':time_i, 'gpi': poi_indx}, **obsv_metrics)
+                _v = dict({'observationTimeIndex':time_i, 'regi': regi, 'gpi': gpi, 'lat[deg]':TargetCoords["Lat [deg]"], 'lon[deg]':TargetCoords["Lon [deg]"] }, **obsv_metrics)
                 if idx==0: #1st iteration
                     w.writerow(_v.keys())    
                 w.writerow(_v.values())

@@ -63,7 +63,7 @@ of the spacecraft at :math:`t=103s` is utilized for the data-metrics calculation
 The correction of the access files is handled by the :class:`orbitpy.orbitpropcov` module which requires as inputs: list of access files (to be revised). The original access files are renamed to :code:`...._old` and the corrected access files are
 produced with the same name as the original access files at the same location. An additional message is displayed within the file as follows:
    
-   *Access listed below corresponds to approximate access instants at the grid-points at a (approximately) side-look target geometery. The scene scan time should be used along with the below data to get complete access information.*
+   *Access listed below corresponds to approximate access instants at the grid-points at a side-look target geometery. The scene scan time should be used along with the below data to get complete access information.*
 
 
 .. warning:: There is a small hiccup when the propagation time step is smaller than the sensor (eg: SAR) dwell time and access is corrected as described above. 

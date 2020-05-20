@@ -21,6 +21,8 @@
 #include <ctime>
 #include <cmath>
 #include <algorithm>
+#include <iomanip> 
+#include <fstream>
 #include "gmatdefs.hpp"
 #include "GmatConstants.hpp"
 #include "Rvector6.hpp"
@@ -131,8 +133,8 @@ int main(int argc, char *argv[])
 
       covGrid << rgi << ",";
       covGrid << gpi << ",";
-      covGrid << lat_deg << ",";
-      covGrid << lon_deg << "\n";
+      covGrid << std::fixed << std::setprecision(4) << lat_deg << ",";
+      covGrid << std::fixed << std::setprecision(4) << lon_deg << "\n";
   }
   covGrid.close();
 

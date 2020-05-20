@@ -12,6 +12,10 @@ import numpy
 import math
 from instrupy.util import *
 
+class CoverageCalculationsApproach(EnumEntity):
+    """ Enumeration of recognized approaches to calculation coverage."""
+    GRIDPNTS = "GRIDPNTS"
+    PNTOPTS = "PNTOPTS"
 class PropagationCoverageParameters():
     """ Data structure holding propagation and coverage parameters.
     
@@ -57,6 +61,9 @@ class PropagationCoverageParameters():
     :ivar sen_cone: Sensor FOV/FOR cone angles in degrees in CSV string format.
     :vartype sen_cone: str
 
+    :ivar purely_sidelook: Flag to specify if instrument operates in a strictly side-looking viewing geometry.
+    :vartype purely_sidelook: bool
+
     :ivar yaw180_flag: Flag indicating if FOR includes the FOV defined by the above clock, cone angles rotated by 180 deg around the nadir.
     :vartype yaw180_flag:  (0/1)
 
@@ -71,30 +78,36 @@ class PropagationCoverageParameters():
 
     :ivar popts_fl: Filepath from which to read the pointing options
     :vartype popts_fl: str
+
+    :ivar cov_calcs_app: Coverage caclulations approach
+    :vartype cov_calcs_app: str
     
     """
     def __init__(self, sat_id=str(), epoch=str(), sma=float(), ecc=float(), inc=float(), raan=float(), aop=float(), ta=float(), 
                  duration=float(), cov_grid_fl=str(), sen_fov_geom=str(), sen_orien=str(), sen_clock=str(), 
-                 sen_cone=str(), yaw180_flag = int(), step_size=float(), sat_state_fl=str(), sat_acc_fl=str(), popts_fl=str()):
-        self.sat_id = str(sat_id) if sat_id else None
-        self.epoch = str(epoch) if epoch else None
-        self.sma = float(sma) if sma else None
-        self.ecc = float(ecc) if ecc else None
-        self.inc = float(inc) if inc else None
-        self.raan = float(raan) if raan else None
-        self.aop = float(aop) if aop else None 
-        self.ta = float(ta) if ta else None
-        self.duration = float(duration) if duration else None
-        self.cov_grid_fl = str(cov_grid_fl) if cov_grid_fl else None 
-        self.sen_fov_geom = str(sen_fov_geom) if sen_fov_geom else None
-        self.sen_orien = str(sen_orien) if sen_orien else None 
-        self.sen_clock = str(sen_clock) if sen_clock else None 
-        self.sen_cone = str(sen_cone) if sen_cone else None 
-        self.yaw180_flag = int(yaw180_flag) if yaw180_flag else None
-        self.step_size = float(step_size) if step_size else None
-        self.sat_state_fl = str(sat_state_fl) if sat_state_fl else None
-        self.sat_acc_fl = str(sat_acc_fl) if sat_acc_fl else None
-        self.popts_fl = str(popts_fl) if popts_fl else None
+                 sen_cone=str(), purely_sidelook = bool(), yaw180_flag = int(), step_size=float(), sat_state_fl=str(), 
+                 sat_acc_fl=str(), popts_fl=str(), cov_calcs_app = str()):
+        self.sat_id = str(sat_id)
+        self.epoch = str(epoch) 
+        self.sma = float(sma) 
+        self.ecc = float(ecc) 
+        self.inc = float(inc) 
+        self.raan = float(raan) 
+        self.aop = float(aop) 
+        self.ta = float(ta)
+        self.duration = float(duration) 
+        self.cov_grid_fl = str(cov_grid_fl) if cov_grid_fl else None
+        self.popts_fl = str(popts_fl) if popts_fl else None 
+        self.sen_fov_geom = str(sen_fov_geom) 
+        self.sen_orien = str(sen_orien) 
+        self.sen_clock = str(sen_clock) 
+        self.sen_cone = str(sen_cone) 
+        self.purely_sidelook = bool(purely_sidelook) 
+        self.yaw180_flag = int(yaw180_flag) 
+        self.step_size = float(step_size) 
+        self.sat_state_fl = str(sat_state_fl) 
+        self.sat_acc_fl = str(sat_acc_fl) 
+        self.cov_calcs_app = CoverageCalculationsApproach.get(cov_calcs_app) 
 
 class OrbitPyDefaults(object):
     """ Enumeration of various default values used by package **OrbitPy**.

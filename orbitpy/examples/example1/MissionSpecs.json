@@ -45,7 +45,6 @@
         ]
     },
     "settings":{
-        "customTimeStep": 1     
-                     
+        "customTimeStep": 1               
     }
 }

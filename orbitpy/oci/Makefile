@@ -1,4 +1,4 @@
-DRIVER = orbitpropcov genCovGrid orbitpropcov_popts
+DRIVER = orbitpropcov_grid genCovGrid orbitpropcov_popts
 
 # Define macros for locations
 BASE_ROOT = ../../oc
