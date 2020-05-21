@@ -246,7 +246,15 @@ class PreProcess():
 
         self.sats = PreProcess.enumerate_satellites(specs['constellation'], specs["instrument"])
 
-        _time_step = PreProcess.compute_time_step(self.sats, OrbitPyDefaults.time_res_fac)
+        # set time resolution factor based on default value or user input value
+        if "settings" in specs and 'customTimeResFactor' in specs['settings']:
+            time_res_f = specs['settings']['customTimeResFactor']
+            print('Custom time resolution factor of ' + str(time_res_f) + ' being used.')
+        else:
+            time_res_f = OrbitPyDefaults.time_res_fac
+            print('Default time resolution factor of ' + str(time_res_f) + ' being used.')
+
+        _time_step = PreProcess.compute_time_step(self.sats, time_res_f)
         if "settings" in specs and 'customTimeStep' in specs['settings']:                    
             self.time_step = float(specs['settings']['customTimeStep'])
             if(_time_step < self.time_step ):
@@ -261,7 +269,15 @@ class PreProcess():
             self.cov_calc_app = CoverageCalculationsApproach.GRIDPNTS
             print("Grid-point approach being used for coverage calculations.")
 
-            _grid_res = PreProcess.compute_grid_res(self.sats, OrbitPyDefaults.grid_res_fac) 
+            # set grid resolution factor based on default value or user input value
+            if "settings" in specs and 'customGridResFactor' in specs['settings']:
+                grid_res_f = specs['settings']['customGridResFactor']
+                print('Custom grid resolution factor of ' + str(grid_res_f) + ' being used.')
+            else:
+                grid_res_f = OrbitPyDefaults.grid_res_fac
+                print('Default grid resolution factor of ' + str(grid_res_f) + ' being used.')
+            
+            _grid_res = PreProcess.compute_grid_res(self.sats, grid_res_f) 
             if "settings" in specs and 'customGridRes' in specs['settings']:
                 self.grid_res = float(specs['settings']['customGridRes'])
                 if(_grid_res < self.grid_res):

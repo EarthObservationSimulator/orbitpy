@@ -55,6 +55,13 @@ Example 5
 * Landsat-8 TIRS, Pushbroom (Rectangular), Nadir pointing, Cone Manuverability, ScanFOV concept (100 km scene-length) 
 * Grid: Auto, Continental USA
 
+Example 6
+==========
+* Similar to Example 1, but with Pointing-options coverage caclulations
+* 3 satellites, 3 plane Walker delta constellation
+* Basic Sensor, Nadir pointing, Conical FOV, No Manuverability
+* Custom time-resolution factor (to set the propagation time-step) = 0.5. 
+
 Running your own case
 ======================
 

@@ -13,10 +13,13 @@ User JSON Input Description
    constellation, :ref:`constellation_json_object`, ,Constellation specifications.
    instrument, *instrument JSON object*, ,Instrument specifications (please refer :code:`InstruPy` documentation).
    groundStations, :ref:`groundstations_json_object`, ,Ground station specifications.
-   grid, :ref:`grid_json_object`, ,Coverage grid specifications.
+   grid, :ref:`grid_json_object`, ,Coverage grid specifications. 
+   pointingOptions, :ref:`popts_json_object`, ,Set of pointing options. 
    settings, :ref:`settings_json_object`, ,Settings
 
-  
+*Note that either :code:`grid` OR the :code:`pointingOptions` JSON object is to be defined, corresponding to grid-based coverage calculations
+or pointing-options based coverage caclulations.*
+
 .. _constellation_json_object:
 
 :code:`constellation` JSON object
@@ -211,6 +214,34 @@ in the example.**
 .. note:: Please specify latitudes in the range of -90 deg to +90 deg and longitudes in the range of -180 deg to +180 deg. Do *NOT* 
           specify the longitudes in range of 0 deg to 360 deg.
 
+.. _popts_json_object:
+
+:code:`pointingOptions` JSON object
+####################################
+
+This JSON object contains specifications of the pointing-options to be used to calculate the coverage. The first key is the 
+:code:`referenceFrame`, and currently only the :code:`NadirRefFrame` is supported.
+The second key contains the name of the data-file containing the list of pointing options. This file has to be present in the user-directory.
+
+Example:
+
+.. code-block:: javascript
+
+   "pointingOptions":{
+       "referenceFrame": "NadirRefFrame",
+       "pntOptsFn":"pOpts"              
+    },
+
+Example of the data-file:
+
+.. code-block:: javascript
+
+    Euler (intrinsic) rotations with sequence 1,2,3 assumed, i.e. R = R3R2R1, with rotation matrix representing rotation of the coordinate system.
+    index,euler_angle1[deg],euler_angle2[deg],euler_angle3[deg] 
+    0,0,0,0
+    1,0,20,0
+    2,0,-20,0
+
 .. _settings_json_object:
 
 :code:`settings` JSON object
@@ -224,7 +255,8 @@ This JSON object contains items which can be used to configure some of the orbit
 
    customTimeStep, float, seconds, (Optional) Orbit propagation time-step. A warning is issued if the internal computed time-step is coarser than the user specified time-step.
    customGridRes, float, degrees, (Optional) Grid resolution. A warning is issued if the internal computed grid resolution is coarser than the user specified grid resolution. 
-
+   customTimeResFactor, float, seconds, (Optional) Custom time-resolution factor used to determine the propagation time-step. (Default value is 0.25.)
+   customGridResFactor, float, degrees, (Optional) Custom grid-resolution factor used to determine the grid-resolution. (Default value is 0.9.)
 
 
 

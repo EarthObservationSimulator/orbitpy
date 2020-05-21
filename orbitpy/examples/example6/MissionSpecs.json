@@ -24,10 +24,7 @@
         },
         "orientation": {
             "convention": "NADIR"
-        },
-        "maneuverability":{
-            "@type": "FIXED"   
-        }        
+        }       
     }]
     ,
     "groundStations":{
@@ -38,6 +35,6 @@
         "pntOptsFn":"pOpts"              
     },
     "settings":{
-        "customTimeStep": 5                          
+        "customTimeResFactor": 0.5                          
     }
 }

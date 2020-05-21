@@ -30,11 +30,37 @@ Description of the data is given below:
 Access Data
 ==============
 The format of the access data is similar to the satellite states data and is also produced by the :class:`orbitpy.orbitpropcov` module.
-The time data of both the states and access are synced. One access data file is produced for each satellite payload. Excluding the :code:`TimeIndex`
+The time data of both the states ad access are synced. One access data file is produced for each satellite payload. The intermediate access
+files produced by the :ref:`grid_pnts_cov_calc_app` is different from the intermediate file produced by the :ref:`pnt_opts_cov_calc_app`. 
+
+Grid-point based coverage calculations intermediate access file-format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Excluding the :code:`TimeIndex`
 column, the column headers are named as :code:`GP0`, :code:`GP1`, :code:`GP2`, and so on corresponding to the grid-point indices. The grid point
 data can be found in the coverage grid data file. Each cell entry corresponds to a True/ False condition for access. If there has been access 
 (or if there can be access in the case when the FOR is used for access computation), the cell entry is :code:`1`, else there is no entry. During
 times are which there is no access over all the grid-points, the entire row is absent. 
+
+Grid-point based coverage calculations intermediate access file-format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Excluding the :code:`TimeIndex`
+column, the column headers are named as :code:`PntOpt0`, :code:`PntOpt1`, :code:`PntOpt2`, and so on corresponding to the pointing-option indices. Each cell entry corresponds to
+the latitude and longitude (in degrees) seen by the instrument pointing-axis. 
+
+Common final access file-format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The final access file is named as *access*. The data is CSV formatted and includes the following columns: 
+
+.. csv-table:: Observation data metrics description
+   :header: Column, Data type, Units, Description
+   :widths: 10,10,5,40
+
+   accessTimeIndex,int, , Observation time-index
+   regi, integer, ,Region index
+   gpi, integer, ,Grid-point index
+   lat[deg],float, degrees, Geocentrc latitude
+   lon[deg],float, degrees, Geocentric Longitude 
 
 .. _intersatt_comm_op:
 
@@ -122,7 +148,10 @@ instrument type (passive-optical, SAR or basic sensor). Description of the data 
    :widths: 10,10,5,40
 
    observationTimeIndex,int, , Observation time-index
+   regii, integer, ,Region index
    gpi, integer, ,Grid-point index
+   lat[deg],float, degrees, Geocentrc latitude
+   lon[deg],float, degrees, Geocentric Longitude 
 
 Coverage Grid Data
 ====================
