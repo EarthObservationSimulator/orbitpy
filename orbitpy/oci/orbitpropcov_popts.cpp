@@ -331,7 +331,7 @@ int main(int argc, char *argv[])
             Rmatrix33 R_N2B = sat1->GetNadirTOBodyMatrix();
 
             Rvector6 earthFixedState  = earth->GetBodyFixedState(cartState, jd);
-            Rmatrix33 R_EF2N = sat1->GetBodyFixedToInertial(earthFixedState); // actually Earth fixed to Nadir
+            Rmatrix33 R_EF2N = sat1->GetBodyFixedToReference(earthFixedState); // actually Earth fixed to Nadir
             
             Rmatrix33 R_EF2B = R_N2B * R_EF2N;
             // find the direction of the pointing axis (z-axis of the satellite body) in the Earth-Fixed frame

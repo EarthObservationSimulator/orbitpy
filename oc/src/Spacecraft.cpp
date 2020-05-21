@@ -503,6 +503,11 @@ Rmatrix33 Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) // Vinay: 
    return attitude->InertialToReference(bfState); // misnamed??
 }
 
+/// Author: Vinay, Adapted from Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) 
+Rmatrix33 Spacecraft::GetBodyFixedToReference(const Rvector6 &bfState) // Vinay: Error? Should be GetBodyFixedtoReference, where BodyFixed in EarthFixed and Reference would become Nadir.
+{
+   return attitude->GetBodyFixedToReference(bfState); // misnamed??
+}
 
 //------------------------------------------------------------------------------
 //  bool SetOrbitState(const AbsoluteDate &t,

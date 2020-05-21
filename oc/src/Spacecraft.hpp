@@ -97,6 +97,9 @@ public:
 
    /// Get the body-fixed-to-inertial rotation matrix
    virtual Rmatrix33      GetBodyFixedToInertial(const Rvector6 &bfState);
+
+   /// Author: Vinay, Adapted from Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) 
+   virtual Rmatrix33 GetBodyFixedToReference(const Rvector6 &bfState);
    
    /// Add an orbit state (Keplerian elements) for the spacecraft at the input
    /// time t

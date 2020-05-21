@@ -48,6 +48,9 @@ public:
    
    /// Converts the inertial-to-reference matrix @todo is this misnamed?
    virtual Rmatrix33   InertialToReference(const Rvector6& centralBodyState);
+
+   /// Author: Vinay, adapted from Attitude::InertialToReference(const Rvector6& centralBodyState)
+   virtual Rmatrix33 GetBodyFixedToReference(const Rvector6& centralBodyState);
    
    
 protected:

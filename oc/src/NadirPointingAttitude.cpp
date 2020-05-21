@@ -131,6 +131,8 @@ Attitude* NadirPointingAttitude::Clone() const
  *
  * @return matrix from body to inertial
  *
+ * Vinay: Error, Should be NadirPointingAttitude::BodyFixedtoReference(const Rvector6& centralBodyState)?
+ * 
  */
 //------------------------------------------------------------------------------
 Rmatrix33 NadirPointingAttitude::InertialToReference(const Rvector6& centralBodyState)
@@ -152,4 +154,26 @@ Rmatrix33 NadirPointingAttitude::InertialToReference(const Rvector6& centralBody
                         xHat[2], yHat[2], zHat[2]);
    R_fixed_to_nadir_transposed = R_fixed_to_nadir.Transpose();
    return R_fixed_to_nadir_transposed; // Vinay: Error? Should be R_fixed_to_nadir, where Fixed is EarthFixed.
+}
+
+// Author: Vinay, adapted from NadirPointingAttitude::BodyFixedtoReference(const Rvector6& centralBodyState)
+Rmatrix33 NadirPointingAttitude::BodyFixedToReference(const Rvector6& centralBodyState)
+{
+   centralBodyFixedPos.Set(centralBodyState[0],
+                           centralBodyState[1],
+                           centralBodyState[2]);
+   centralBodyFixedVel.Set(centralBodyState[3],
+                           centralBodyState[4],
+                           centralBodyState[5]);
+   zHat = -centralBodyFixedPos;
+   zHat.Normalize();
+   xHat = Cross(zHat, centralBodyFixedVel);
+   xHat = -xHat.Normalize();
+   yHat = Cross(zHat, xHat);
+   
+   R_fixed_to_nadir_transposed.Set(xHat[0], yHat[0], zHat[0],
+                        xHat[1], yHat[1], zHat[1],
+                        xHat[2], yHat[2], zHat[2]);
+   R_fixed_to_nadir = R_fixed_to_nadir_transposed.Transpose();
+   return R_fixed_to_nadir; 
 }
