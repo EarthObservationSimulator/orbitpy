@@ -28,7 +28,6 @@ orbitpy/docs/_templates/*
 
 orbitpy/oci/bin/genCovGrid
 oc/tests/bin/SystemTest_Analysis
-orbitpy/oci/bin/orbitpropcov
+orbitpy/oci/bin/orbitpropcov_grid
 orbitpy/oci/bin/orbitpropcov_popts
-
-OClog.txt
+orbitpy/tests/orbitPropCovGrid/temp/*

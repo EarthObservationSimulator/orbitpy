@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
 
          // Propagate
          date->Advance(stepSize);
-         prop->Propagate(*date);     
+         prop->Propagate(*date); 
       
       }
       satOut.close();

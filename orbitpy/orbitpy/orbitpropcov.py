@@ -37,16 +37,16 @@ class OrbitPropCov:
         over a given mission duration.
         """
         if(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.GRIDPNTS):
-            opc_grid = OrbitPropCov_Grid(self.params)
+            opc_grid = OrbitPropCovGrid(self.params)
             opc_grid.run()
         elif(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.PNTOPTS):
-            opc_popts = OrbitPropCov_POpts(self.params)
+            opc_popts = OrbitPropCovPopts(self.params)
             opc_popts.run()
         else:
             raise RuntimeError("Unrecognized coverage caclulation appproach in 'orbitpropcov' module.")
 
 
-class OrbitPropCov_Grid:
+class OrbitPropCovGrid:
     """ Class to handle propagation and coverage calculations.
     
     :ivar prop_cov_param: Propagation and coverage parameters
@@ -78,14 +78,14 @@ class OrbitPropCov_Grid:
         if(self.params.purely_sidelook):            
             print(".......Correcting access files......")
             t1 = time.process_time() 
-            OrbitPropCov_Grid.correct_access_files(self)
+            OrbitPropCovGrid.correct_access_files(self)
             t2 = time.process_time()
             print(".......DONE.......time taken (s): ", t2-t1)
         else:
             print(".......No correction of access files......")
 
         # reformat access data to common format 
-        OrbitPropCov_Grid.reformat_access_files(self)
+        OrbitPropCovGrid.reformat_access_files(self)
 
 
     def reformat_access_files(self):
@@ -211,7 +211,7 @@ class OrbitPropCov_Grid:
             dfnew.to_csv(f2, header=True)             
 
 
-class OrbitPropCov_POpts:
+class OrbitPropCovPopts:
     """ Class to handle propagation and coverage calculations with the pointing options approach.
     
     :ivar prop_cov_param: Propagation and coverage parameters
@@ -238,7 +238,7 @@ class OrbitPropCov_POpts:
         except:
             raise RuntimeError('Error executing "orbitpropcov_popts" OC script')
 
-        OrbitPropCov_POpts.reformat_access_files(self)
+        OrbitPropCovPopts.reformat_access_files(self)
 
     def reformat_access_files(self):
         """ Reformat the access file data to a common output format used by both the grid-coverage and 
