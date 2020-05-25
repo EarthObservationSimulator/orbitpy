@@ -50,7 +50,7 @@ public:
    virtual Rmatrix33   InertialToReference(const Rvector6& centralBodyState);
 
    /// Author: Vinay, adapted from Attitude::InertialToReference(const Rvector6& centralBodyState)
-   virtual Rmatrix33 GetBodyFixedToReference(const Rvector6& centralBodyState);
+   virtual Rmatrix33 BodyFixedToReference(const Rvector6& centralBodyState);
    
    
 protected:

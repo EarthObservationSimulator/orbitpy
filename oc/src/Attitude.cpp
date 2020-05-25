@@ -121,7 +121,7 @@ Rmatrix33 Attitude::InertialToReference(const Rvector6& centralBodyState)
 }
 
 /// Author: Vinay, adapted from Attitude::InertialToReference(const Rvector6& centralBodyState)
-Rmatrix33 Attitude::GetBodyFixedToReference(const Rvector6& centralBodyState)
+Rmatrix33 Attitude::BodyFixedToReference(const Rvector6& centralBodyState)
 {
    Rmatrix33 I; // identity by default
    return I;

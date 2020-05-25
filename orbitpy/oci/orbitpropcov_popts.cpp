@@ -327,16 +327,15 @@ int main(int argc, char *argv[])
          satAcc << std::setprecision(4) << nSteps;
          /** Iterate over all pointing options **/
          for(int j=0;j<numPntOpts;j++){
-            sat1->SetBodyNadirOffsetAngles(euler_angle1[j],euler_angle2[j],euler_angle3[j],1,2,3); // Reset the satellite attitude to Nadir-pointing
+            sat1->SetBodyNadirOffsetAngles(euler_angle1[j],euler_angle2[j],euler_angle3[j],1,2,3); 
             Rmatrix33 R_N2B = sat1->GetNadirTOBodyMatrix();
 
             Rvector6 earthFixedState  = earth->GetBodyFixedState(cartState, jd);
-            Rmatrix33 R_EF2N = sat1->GetBodyFixedToReference(earthFixedState); // actually Earth fixed to Nadir
+            Rmatrix33 R_EF2N = sat1->GetBodyFixedToReference(earthFixedState); // Earth fixed to Nadir
             
             Rmatrix33 R_EF2B = R_N2B * R_EF2N;
             // find the direction of the pointing axis (z-axis of the satellite body) in the Earth-Fixed frame
             Rvector3 pnt_axis = R_EF2B.Transpose() * Rvector3(0,0,1);
-         
             Rvector3 earthFixedPos(earthFixedState[0], earthFixedState[1], earthFixedState[2]);
             Rvector3 intersect_point;         
             bool result = oci_utils::intersect_vector_sphere(earth->GetRadius(), earthFixedPos, pnt_axis,intersect_point);
