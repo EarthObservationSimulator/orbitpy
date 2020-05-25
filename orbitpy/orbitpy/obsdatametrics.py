@@ -144,6 +144,7 @@ class ObsDataMetrics():
 
                 regi = int(access_info_df.loc[idx]["regi"]) if pd.notna(access_info_df.loc[idx]["regi"]) else None             
                 gpi = int(access_info_df.loc[idx]["gpi"]) if pd.notna(access_info_df.loc[idx]["gpi"]) else None   
+                pOpti = int(access_info_df.loc[idx]["pntOpti"]) if pd.notna(access_info_df.loc[idx]["pntOpti"]) else None 
                 
                 TargetCoords = dict()   
                 TargetCoords["Lat [deg]"] = float(access_info_df.loc[idx]["lat[deg]"])
@@ -159,7 +160,7 @@ class ObsDataMetrics():
                 SpacecraftOrbitState["vz[km/s]"] = sat_state_df.loc[time_i]["VZ[km/s]"] 
 
                 obsv_metrics = instru.calc_typ_data_metrics(SpacecraftOrbitState, TargetCoords) # calculate the data metrics specific to the instrument type
-                _v = dict({'observationTimeIndex':time_i, 'regi': regi, 'gpi': gpi, 'lat[deg]':TargetCoords["Lat [deg]"], 'lon[deg]':TargetCoords["Lon [deg]"] }, **obsv_metrics)
+                _v = dict({'observationTimeIndex':time_i, 'regi': regi, 'gpi': gpi, 'lat[deg]':TargetCoords["Lat [deg]"], 'lon[deg]':TargetCoords["Lon [deg]"], 'pOpti': pOpti }, **obsv_metrics)
                 if idx==0: #1st iteration
                     w.writerow(_v.keys())    
                 w.writerow(_v.values())

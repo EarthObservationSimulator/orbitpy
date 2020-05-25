@@ -121,7 +121,7 @@ class OrbitPropCovGrid:
         with open(new_access_fl,'a+', newline='') as f:
             w = csv.writer(f)
            
-            _v = dict({'accessTimeIndex':None, 'regi': None, 'gpi': None, 'lat[deg]': None, 'lon[deg]': None})
+            _v = dict({'accessTimeIndex':None, 'regi': None, 'gpi': None, 'lat[deg]': None, 'lon[deg]': None, 'pntOpti': None})
             w.writerow(_v.keys())
             
             for indx in acc_indx:
@@ -135,7 +135,7 @@ class OrbitPropCovGrid:
                 TargetCoords["lat[deg]"] = poi_info_df.loc[poi_indx]["lat[deg]"]
                 TargetCoords["lon[deg]"] = poi_info_df.loc[poi_indx]["lon[deg]"]
                 
-                _v = dict({'accessTimeIndex':time_i, 'regi': regi, 'gpi': poi_indx, 'lat[deg]': TargetCoords["lat[deg]"], 'lon[deg]': TargetCoords["lon[deg]"]})
+                _v = dict({'accessTimeIndex':time_i, 'regi': regi, 'gpi': poi_indx, 'lat[deg]': TargetCoords["lat[deg]"], 'lon[deg]': TargetCoords["lon[deg]"], 'pntOpti': ''})
                 w.writerow(_v.values())
 
 
@@ -259,20 +259,23 @@ class OrbitPropCovPopts:
             for r in head:
                 f.write(str(r)) 
 
-        # stack all the accesses
-        access_info_df = access_info_df.stack()
-        access_info_df = access_info_df.reset_index().rename(columns={0:'coords'})
+        # Iterate over all valid logged access events
+        acc_indx = list(access_info_df[access_info_df.notnull()].stack().index) # list of valid access [time, pOpti]
+        #access_info_df = access_info_df.reset_index().rename(columns={0:'coords'})
+        #print(access_info_df)
 
         with open(new_access_fl,'a+', newline='') as f:
             w = csv.writer(f)
            
-            _v = dict({'accessTimeIndex':None, 'regi': None, 'gpi': None, 'lat[deg]': None, 'lon[deg]': None})
+            _v = dict({'accessTimeIndex':None, 'regi': None, 'gpi': None, 'lat[deg]': None, 'lon[deg]': None, 'pntOpti': None})
             w.writerow(_v.keys())
             
-            for indx in access_info_df.index:
+            for indx in acc_indx:
+                time_i = int(indx[0])
+                
+                pOpti = int(indx[1][6:])                
 
-                time_i = int(access_info_df.loc[indx]["TimeIndex"])
-                coords = access_info_df.loc[indx]["coords"]
+                coords = access_info_df.loc[indx]
                 [x,y] = coords.split(" ")
 
                 TargetCoords = dict()                
@@ -280,8 +283,5 @@ class OrbitPropCovPopts:
                 TargetCoords["lat[deg]"] = re.sub('[(]', '', x)
                 TargetCoords["lon[deg]"] = re.sub('[)]', '', y)
                 
-                _v = dict({'accessTimeIndex':time_i, 'regi': '', 'gpi': '', 'lat[deg]': TargetCoords["lat[deg]"], 'lon[deg]': TargetCoords["lon[deg]"]})
+                _v = dict({'accessTimeIndex':time_i, 'regi': '', 'gpi': '', 'lat[deg]': TargetCoords["lat[deg]"], 'lon[deg]': TargetCoords["lon[deg]"], 'pntOpti': pOpti})
                 w.writerow(_v.values())
-
-
-

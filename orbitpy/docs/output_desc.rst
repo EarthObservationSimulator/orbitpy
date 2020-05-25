@@ -57,10 +57,11 @@ The final access file is named as *access*. The data is CSV formatted and includ
    :widths: 10,10,5,40
 
    accessTimeIndex,int, , Observation time-index
-   regi, integer, ,Region index
-   gpi, integer, ,Grid-point index
+   regi, integer, ,Region index if applicable
+   gpi, integer, ,Grid-point index if applicable
    lat[deg],float, degrees, Geocentrc latitude
    lon[deg],float, degrees, Geocentric Longitude 
+   pntOpti, integer, , Pointing option index if applicable
 
 .. _intersatt_comm_op:
 
@@ -148,10 +149,11 @@ instrument type (passive-optical, SAR or basic sensor). Description of the data 
    :widths: 10,10,5,40
 
    observationTimeIndex,int, , Observation time-index
-   regii, integer, ,Region index
-   gpi, integer, ,Grid-point index
+   regi, integer, ,Region index if applicable
+   gpi, integer, ,Grid-point index if applicable
    lat[deg],float, degrees, Geocentrc latitude
    lon[deg],float, degrees, Geocentric Longitude 
+   pntOpti, integer, , Pointing option index if applicable
 
 Coverage Grid Data
 ====================
