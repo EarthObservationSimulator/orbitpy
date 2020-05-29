@@ -46,8 +46,8 @@ class InterSatelliteComm:
 
          sat1_fl = self.sat_state_fls[indx1]
          sat1 = pd.read_csv(sat1_fl, skiprows=5, header=None, delimiter=r",")
-         sat1 = sat1[:-1]
-         time_s = list(sat1.iloc[:,0])
+
+         time_i = list(sat1.iloc[:,0])
 
          sat1_x_km = list(sat1.iloc[:,1])
          sat1_y_km = list(sat1.iloc[:,2])
@@ -68,7 +68,6 @@ class InterSatelliteComm:
                sat2_fl = self.sat_state_fls[indx2]            
 
                sat2 = pd.read_csv(sat2_fl, skiprows=5, header=None, delimiter=r",")
-               sat2 = sat2[:-1]               
 
                sat2_x_km = list(sat2.iloc[:,1])
                sat2_y_km = list(sat2.iloc[:,2])
@@ -91,7 +90,7 @@ class InterSatelliteComm:
                f.write("\n")
                f.close()
 
-               InterSatelliteComm.compute_satA_to_satB_contact(time_s, sat1_x_km, sat1_y_km, sat1_z_km, sat2_x_km, sat2_y_km, sat2_z_km, 
+               InterSatelliteComm.compute_satA_to_satB_contact(time_i, sat1_x_km, sat1_y_km, sat1_z_km, sat2_x_km, sat2_y_km, sat2_z_km, 
                                                   output_concise_fl, output_detailed_fl, self.opaque_atmos_height_km)
    
    @staticmethod
@@ -231,7 +230,6 @@ class GroundStationComm:
          __step_size = float(str(step_size).split()[4])
          
          sat = pd.read_csv(sat_fl, skiprows=5, header=None, delimiter=r",")
-         sat = sat[:-1]
 
          time_indx = sat.iloc[:,0]
          sat_x_km = sat.iloc[:,1]

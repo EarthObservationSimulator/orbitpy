@@ -44,7 +44,7 @@ times are which there is no access over all the grid-points, the entire row is a
 Grid-point based coverage calculations intermediate access file-format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Excluding the :code:`TimeIndex`
-column, the column headers are named as :code:`PntOpt0`, :code:`PntOpt1`, :code:`PntOpt2`, and so on corresponding to the pointing-option indices. Each cell entry corresponds to
+column, the column headers are named as :code:`pntopt0`, :code:`pntopt1`, :code:`pntopt2`, and so on corresponding to the pointing-option indices. Each cell entry corresponds to
 the latitude and longitude (in degrees) seen by the instrument pointing-axis. 
 
 Common final access file-format

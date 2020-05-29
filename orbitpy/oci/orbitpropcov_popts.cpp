@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
       satAcc << "Mission Duration [Days] is "<< duration << ".\n";
       satAcc << "TimeIndex,";
       for(int i=0;i<numPntOpts;i++){
-         satAcc<<"PntOpt"<<i;
+         satAcc<<"pntopt"<<i;
          if(i<numPntOpts-1){
             satAcc<<",";
          }

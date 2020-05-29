@@ -28,6 +28,7 @@ Find the documentation in: :code:`/orbitpy/docs/_build/html/index.html`
    api_reference
    examples
    miscellaneous
+   tests
 
 Description
 ===========

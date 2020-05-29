@@ -1,12 +1,11 @@
-"""Unit tests for orbitpy.orbitpropcov.OrbitPropCovGrid class covering checks on format of produced output files and
-   propagation states.
-
-   :code:`/temp/` folder contains temporary files produced during the run of the tests below. SOme of the parameters are chosen
+""" *Unit tests for :class:`orbitpy.orbitpropcov.OrbitPropCovGrid` covering checks on format of produced output files and
+   propagation states.*
+"""
+'''
+   :code:`/temp/` folder contains temporary files produced during the run of the tests below. Some of the parameters are chosen
    randomly for the tests (and compared with corresponding outputs), hence each test is run with different inputs, and expected 
    outputs. 
-
-"""
-
+'''
 import unittest
 import json
 import numpy
@@ -61,7 +60,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
     def produce_cov_grid(self, sat_id, latUpper, latLower, lonUpper, lonLower, grid_res):
         """ Write a coverage grid file. """
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        prc_args = [os.path.join(dir_path, '..', '..', 'oci', 'bin', 'genCovGrid')] 
+        prc_args = [os.path.join(dir_path, '..', '..', '..', 'oci', 'bin', 'genCovGrid')] 
 
         cov_grid_fl = dir_path + "/temp/covGrid" # coverage grid file path        
         prc_args.append(cov_grid_fl)
@@ -154,9 +153,10 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertEqual(column_headers.iloc[0][2],"gpi")
         self.assertEqual(column_headers.iloc[0][3],"lat[deg]")
         self.assertEqual(column_headers.iloc[0][4],"lon[deg]")
+        self.assertEqual(column_headers.iloc[0][5],"pntopti")
 
     def test_run_2(self):
-        """ Test the satellite altitude, orbital time-period, speed.""" 
+        """ Test the satellite altitude, orbital speed with random inputs for circular orbit.""" 
         TestOrbitPropCovGrid.produce_cov_grid(self, 1, 0, -10, 10, 0, 1)
 
         prop_cov_param = copy.deepcopy(self.default_pcp)
@@ -184,5 +184,5 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertAlmostEqual(orb_sp_in*1e-3, orb_sp_out, delta=0.2) # 0.2km/s difference possible?
 
     def test_run_3(self):
-        """ Check prograde and retrograd -icity of the orbits."""
+        """ TODO: Check prograde and retrograd -icity of the orbits."""
         pass

@@ -6,7 +6,7 @@
         "numberSatellites": 3,
         "numberPlanes": 3,
         "relativeSpacing":1,
-        "inc":56,
+        "inc":98,
         "alt": 700,
         "ecc": 0.0001,
         "aop": 0
