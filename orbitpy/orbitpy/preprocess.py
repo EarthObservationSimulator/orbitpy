@@ -63,14 +63,14 @@ class OrbitParameters():
     :vartype ta: float
     
     """
-    def __init__(self, _id, sma, ecc, inc, raan, aop, ta):
-        self._id = str(_id)
-        self.sma = float(sma)
-        self.ecc = float(ecc)
-        self.inc = float(inc)
-        self.raan = float(raan)
-        self.aop = float(aop)
-        self.ta = float(ta)
+    def __init__(self, _id = None, sma = None, ecc = None, inc = None, raan = None, aop = None, ta = None):
+        self._id = str(_id) if _id is not None else None
+        self.sma = float(sma) if sma is not None else None
+        self.ecc = float(ecc) if ecc is not None else None
+        self.inc = float(inc) if inc is not None else None
+        self.raan = float(raan) if raan is not None else None
+        self.aop = float(aop) if aop is not None else None
+        self.ta = float(ta) if ta is not None else None
 
 class InstrumentCoverageParameters():
     """ Data structure to hold instrument coverage related parameters.
@@ -115,30 +115,31 @@ class InstrumentCoverageParameters():
     :vartype yaw180_flag: bool
     
     """
-    def __init__(self, fov_geom, fov_cone, fov_clock, fov_at, fov_ct, 
-                 orien_eu_seq1, orien_eu_seq2, orien_eu_seq3, 
-                 orien_eu_ang1, orien_eu_ang2, orien_eu_ang3,
-                 purely_side_look, yaw180_flag):
+    def __init__(self, fov_geom = None, fov_cone = None, fov_clock = None, fov_at = None, fov_ct = None, 
+                 orien_eu_seq1 = None, orien_eu_seq2 = None, orien_eu_seq3 = None, 
+                 orien_eu_ang1 = None, orien_eu_ang2 = None, orien_eu_ang3 = None,
+                 purely_side_look = None, yaw180_flag = None):
         
  
-        self.fov_geom = FOVGeometry.get(fov_geom)
-        self.fov_cone = [float(i) for i in fov_cone]
+        self.fov_geom = FOVGeometry.get(fov_geom) if fov_geom is not None else None
+        self.fov_cone = [float(i) for i in fov_cone] if fov_cone is not None else None
         self.fov_clock = [float(i) for i in fov_clock] if fov_clock is not None else None # clock can be "None" if Conical Sensor
         if(self.fov_clock is None):
             if(self.fov_geom=='CONICAL'):
                 self.fov_clock = [0]
             else:
-                raise RuntimeError("Missing clock angles from instrument coverage specifications for non-conical sensor fov.")
-        self.fov_at = float(fov_at)
-        self.fov_ct = float(fov_ct)
-        self.orien_eu_seq1 = int(orien_eu_seq1)
-        self.orien_eu_seq2 = int(orien_eu_seq2)
-        self.orien_eu_seq3 = int(orien_eu_seq3)
-        self.orien_eu_ang1 = float(orien_eu_ang1)
-        self.orien_eu_ang2 = float(orien_eu_ang2)
-        self.orien_eu_ang3 = float(orien_eu_ang3)
-        self.purely_side_look = bool(purely_side_look)
-        self.yaw180_flag = bool(yaw180_flag)
+                pass
+                #raise RuntimeError("Missing clock angles from instrument coverage specifications for non-conical sensor fov.")
+        self.fov_at = float(fov_at) if fov_at is not None else None
+        self.fov_ct = float(fov_ct) if fov_ct is not None else None
+        self.orien_eu_seq1 = int(orien_eu_seq1) if orien_eu_seq1 is not None else None
+        self.orien_eu_seq2 = int(orien_eu_seq2) if orien_eu_seq2 is not None else None
+        self.orien_eu_seq3 = int(orien_eu_seq3) if orien_eu_seq3 is not None else None
+        self.orien_eu_ang1 = float(orien_eu_ang1) if orien_eu_ang1 is not None else None
+        self.orien_eu_ang2 = float(orien_eu_ang2) if orien_eu_ang2 is not None else None
+        self.orien_eu_ang3 = float(orien_eu_ang3) if orien_eu_ang3 is not None else None
+        self.purely_side_look = bool(purely_side_look) if purely_side_look is not None else None
+        self.yaw180_flag = bool(yaw180_flag) if yaw180_flag is not None else None
 
 
     def get_as_string(self, param):
@@ -176,11 +177,11 @@ class Satellite():
     :vartype ics_for: :class:`orbitpy.preprocess.InstrumentCoverageParameters` 
 
     """
-    def __init__(self, orbit, ics_fov, ics_for):
+    def __init__(self, orbit = None, ics_fov =None, ics_for = None):
 
-        self.orbit = orbit
-        self.ics_fov = ics_fov
-        self.ics_for = ics_for
+        self.orbit = orbit if orbit is not None else None
+        self.ics_fov = ics_fov if ics_fov is not None else None
+        self.ics_for = ics_for if ics_for is not None else None
 
 class PreProcess(): 
     """ Class to handle pre-processing of user inputs.
@@ -590,6 +591,10 @@ class PreProcess():
             sma = sats[indx].orbit.sma 
             fov_at = sats[indx].ics_for.fov_at # use FOR, and not FOV
             f = RE/sma
+            # calculate maximum horizon angle
+            max_horizon_angle = np.rad2deg(2*np.arcsin(f))
+            if(fov_at > max_horizon_angle):
+                fov_at = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
             satVel = np.sqrt(GMe/sma)
             satGVel = f * satVel
             sinRho = RE/sma
@@ -626,7 +631,13 @@ class PreProcess():
         min_grid_res_deg = 1e1000 # some large number
         for indx in range(0,len(sats)):
             fov = min(sats[indx].ics_fov.fov_at, sats[indx].ics_fov.fov_ct) # (use FOV and not FOR)
+
             sinRho = RE/sats[indx].orbit.sma
+            # calculate maximum horizon angle
+            max_horizon_angle = np.rad2deg(2*np.arcsin(sinRho))
+            if(fov > max_horizon_angle):
+                fov = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
+
             hfov_deg = 0.5*fov
             elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
             lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 

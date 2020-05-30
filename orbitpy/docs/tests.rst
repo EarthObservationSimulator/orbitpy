@@ -4,7 +4,7 @@ Tests
 How to
 ^^^^^^^^
 
-Testing is done using the :mod:`unittest` module and :code:`nose` module. Use the below command to run all the tests:
+Testing is done using the :mod:`unittest` module and :mod:`nose` module. Use the below command to run all the tests:
 
 .. code-block:: shell
 
@@ -60,4 +60,16 @@ Testing strategies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: test_GroundStationComm
+   :members:
+
+:class:`test_InterSatelliteComm`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_InterSatelliteComm
+   :members:
+
+:class:`test_PreProcess`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_PreProcess
    :members:
