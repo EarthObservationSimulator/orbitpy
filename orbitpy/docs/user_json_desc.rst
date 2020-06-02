@@ -50,7 +50,7 @@ Example:
    
    "constellation":{
         "@type": "Custom",
-        "orbits":[{
+        "orbit":[{
             "idn": 11,
             "sma": 7078.137,
             "ecc": 0.0,
@@ -70,7 +70,7 @@ Example:
         }]
     }
 
-Note that the individual orbits are specified as a list (within square brackets) in the :code:`orbits` name, value pair.
+Note that the individual orbits are specified as a list (within square brackets) in the :code:`orbit` name, value pair.
 
 2. :code:`"@type":"Walkerdelta"`
 

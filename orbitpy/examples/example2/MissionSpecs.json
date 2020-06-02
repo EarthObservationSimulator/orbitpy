@@ -3,7 +3,7 @@
     "duration": 0.25,
      "constellation":{
         "@type": "Custom",
-        "orbits":[{
+        "orbit":[{
             "@id": 11,
             "sma": 6878.137,
             "ecc": 0.0,

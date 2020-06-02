@@ -354,9 +354,9 @@ class PreProcess():
 
         elif(constel_type == 'CUSTOM'):
             # read in the list of orbits
-            if isinstance(constel['orbits'], list):
-                if (len(constel['orbits']) >= 1):
-                    orbits = PreProcess.custom_orbits(constel['orbits'])
+            if isinstance(constel['orbit'], list):
+                if (len(constel['orbit']) >= 1):
+                    orbits = PreProcess.custom_orbits(constel['orbit'])
                 else:
                     raise RuntimeError("Please specify atleast one orbit.")
             else:
