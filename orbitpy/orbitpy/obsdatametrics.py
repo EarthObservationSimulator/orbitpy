@@ -32,18 +32,20 @@ class ObsDataMetrics():
         """ Iterate over all satellite directories and compute the observational data metrics. 
             The instrument specifications from the class instance variable is used. THe satellite state files (with name *state*) and 
             access files (with name *...._access*) are expected to be present each of the satellite directories. A 
-            seperate data-file (named *payN_obsMetrics* ) containing the observational metrics is produced per payload. Currently 
-            hardcoded to process only one payload. 
+            seperate data-file (named *payID_obsMetrics*, where payID is the payload identifier ) containing the observational 
+            metrics is produced per payload. 
         """
         instru = Instrument.from_json(self.instru_specs[0]) # hardcoded to 1 instrument     
         # process each access file separately
         for _dir in self.sat_dirs:           
             
             sat_state_fl = os.path.join(_dir, 'state')
-            accessInfo_fl = glob.glob(_dir+'*_access')[0] # hardcoded to 1 instrument          
-            obsMetrics_fl = os.path.join(_dir, 'pay1_obsMetrics') # hardcoded to 1 instrument  
-            ObsDataMetrics.compute_obs_data_metrics(instru, sat_state_fl, accessInfo_fl,
-                                        obsMetrics_fl, self.cov_grid_fl)
+            files = glob.glob(_dir+'*_access')
+            for accessInfo_fl in files:               
+                pay_id = str(accessInfo_fl).split("_")[-2].split('/')[-1]      
+                obsMetrics_fl = os.path.join(_dir, pay_id +'_obsMetrics')
+                ObsDataMetrics.compute_obs_data_metrics(instru, sat_state_fl, accessInfo_fl,
+                                            obsMetrics_fl, self.cov_grid_fl)
 
     @staticmethod
     def compute_obs_data_metrics(instru, state_fl, access_fl, datametrics_fl, covgrid_fl = None): 

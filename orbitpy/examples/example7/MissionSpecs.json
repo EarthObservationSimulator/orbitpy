@@ -1,0 +1,55 @@
+{
+    "epoch": "2018, 1, 15, 12, 0, 0",
+    "duration": 0.1,
+    "constellation":{
+        "@type": "Walkerdelta",
+        "numberSatellites": 3,
+        "numberPlanes": 3,
+        "relativeSpacing":1,
+        "inc":56,
+        "alt": 700,
+        "ecc": 0.0001,
+        "aop": 0
+    },       
+    "instrument": [{ "@type": "Basic Sensor",
+                        "@id": "pay1",  
+                        "mass": 28, 
+                        "volume": 0.12, 
+                        "power": 32, 
+                        "bitsPerPixel": 8, 
+                        "fieldOfView": {
+                            "sensorGeometry": "RECTANGULAR",
+                            "alongTrackFieldOfView":10,
+                            "crossTrackFieldOfView":30
+                        },
+                        "orientation": {
+                        "convention": "SIDE_LOOK",
+                        "sideLookAngle":45
+                        }       
+                    },
+                    { "@type": "Basic Sensor",
+                        "@id": "pay2",  
+                        "mass": 28, 
+                        "volume": 0.12, 
+                        "power": 32, 
+                        "bitsPerPixel": 8, 
+                        "fieldOfView": {
+                            "sensorGeometry": "CONICAL",
+                            "fullConeAngle":25
+                        },
+                        "orientation": {
+                        "convention": "NADIR"
+                        }       
+                    }
+                    ],
+    "groundStations":{
+        "gndStnFn":"groundStations"
+    },   
+    "pointingOptions":{
+        "referenceFrame": "NadirRefFrame",
+        "pntOptsFn":"pOpts"              
+    },
+    "settings":{
+        "customTimeResFactor": 1                         
+    }
+}
