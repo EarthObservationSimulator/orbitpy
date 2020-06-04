@@ -219,18 +219,38 @@ in the example.**
 :code:`pointingOptions` JSON object
 ####################################
 
-This JSON object contains specifications of the pointing-options to be used to calculate the coverage. The first key is the 
-:code:`referenceFrame`, and currently only the :code:`NadirRefFrame` is supported.
-The second key contains the name of the data-file containing the list of pointing options. This file has to be present in the user-directory.
+This JSON object contains specifications of the pointing-options to be used to calculate the coverage. It contains a list of JSON fields, with each
+field having a format as follows:
+
+.. csv-table:: Expected parameters
+   :header: Parameter, Data type, Units, Description
+   :widths: 10,10,5,40
+
+   instrumentID, str, , The instrument identifier to which the corresponding pointing-options data-file is to be used.
+   referenceFrame, str, , Currently only the :code:`NadirRefFrame` is supported.
+   pntOptsFn, str, , Name of the data-file containing the set of pointing options. This file has to be present in the user-directory.
+
+.. warning:: In the case when the pointing-options approach is used for coverage calculations, the instrument identifier becomes a
+             compulsory attribute of the :code:`Instrument` JSON field, since it is needed to reference the pointing-options files.
+
+.. warning:: The name of the data-file containing the pointing-options should not have any whitespaces.
 
 Example:
 
 .. code-block:: javascript
 
-   "pointingOptions":{
+   "pointingOptions":[
+       {
+       "instrumentID": "sen1",
        "referenceFrame": "NadirRefFrame",
-       "pntOptsFn":"pOpts"              
-    },
+       "pntOptsFn":"pOpts_sen1"              
+       },
+       {
+       "instrumentID": "sen2",
+       "referenceFrame": "NadirRefFrame",
+       "pntOptsFn":"sen2_pOpts"              
+       },
+    ],
 
 Example of the data-file:
 

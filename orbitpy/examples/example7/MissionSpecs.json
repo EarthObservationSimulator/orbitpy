@@ -12,43 +12,50 @@
         "aop": 0
     },       
     "instrument": [{ "@type": "Basic Sensor",
-                        "@id": "pay1",  
-                        "mass": 28, 
-                        "volume": 0.12, 
-                        "power": 32, 
-                        "bitsPerPixel": 8, 
-                        "fieldOfView": {
-                            "sensorGeometry": "RECTANGULAR",
-                            "alongTrackFieldOfView":10,
-                            "crossTrackFieldOfView":30
-                        },
-                        "orientation": {
-                        "convention": "SIDE_LOOK",
-                        "sideLookAngle":45
-                        }       
+                     "@id": "pay1",  
+                     "mass": 28, 
+                     "volume": 0.12, 
+                     "power": 32, 
+                     "bitsPerPixel": 8, 
+                     "fieldOfView": {
+                         "sensorGeometry": "RECTANGULAR",
+                         "alongTrackFieldOfView":10,
+                         "crossTrackFieldOfView":30
+                     },
+                     "orientation": {
+                     "convention": "SIDE_LOOK",
+                     "sideLookAngle":45
+                    }       
                     },
                     { "@type": "Basic Sensor",
-                        "@id": "pay2",  
-                        "mass": 28, 
-                        "volume": 0.12, 
-                        "power": 32, 
-                        "bitsPerPixel": 8, 
-                        "fieldOfView": {
-                            "sensorGeometry": "CONICAL",
-                            "fullConeAngle":25
-                        },
-                        "orientation": {
-                        "convention": "NADIR"
-                        }       
+                      "@id": "pay2",  
+                      "mass": 28, 
+                      "volume": 0.12, 
+                      "power": 32, 
+                      "bitsPerPixel": 8, 
+                      "fieldOfView": {
+                          "sensorGeometry": "CONICAL",
+                          "fullConeAngle":25
+                      },
+                      "orientation": {
+                      "convention": "NADIR"
+                    }       
                     }
                     ],
     "groundStations":{
         "gndStnFn":"groundStations"
     },   
-    "pointingOptions":{
+    "pointingOptions":[
+        {
+        "instrumentID": "pay2",
         "referenceFrame": "NadirRefFrame",
-        "pntOptsFn":"pOpts"              
-    },
+        "pntOptsFn":"pOpts_pay2"              
+        },
+        {
+            "instrumentID": "pay1",
+            "referenceFrame": "NadirRefFrame",
+            "pntOptsFn":"pOpts_pay1"              
+        }],
     "settings":{
         "customTimeResFactor": 1                         
     }

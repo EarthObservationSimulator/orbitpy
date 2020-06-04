@@ -217,6 +217,9 @@ class PreProcess():
     :ivar cov_grid_fl: Filepath of the file containing the coverage grid info.
     :vartype cov_grid_fl: str
 
+    :ivar pnt_opts_fls: List of dictionaries with filepaths to the file containing the pointing options and corresponding instrument ID tag.
+    :vartype pnt_opts_fls: list, dict
+
     ivar gnd_stn_fl: Filepath of the file containing the ground station info.
     :vartype gnd_stn_fl: str
     
@@ -296,14 +299,14 @@ class PreProcess():
             print("Grid resolution in degrees is: ", self.grid_res)
 
             self.cov_grid_fl = PreProcess.process_cov_grid(self.user_dir, specs['grid'], self.grid_res)
-            self.pnt_opts_fl = None
+            self.pnt_opts_fls = None
 
         elif("pointingOptions" in specs):
             self.cov_calc_app = CoverageCalculationsApproach.PNTOPTS
             print("Pointing-Options approach being used for coverage calculations.")
 
             self.cov_grid_fl = None
-            self.pnt_opts_fl = PreProcess.process_pointing_options(user_dir, specs['pointingOptions'])
+            self.pnt_opts_fls = PreProcess.process_pointing_options(user_dir, specs['pointingOptions'])
 
         else:
             raise Exception("Please specify either 'grid' or 'pointingOptions' JSON fields.")
@@ -538,11 +541,23 @@ class PreProcess():
                     sat_acc_fl = sat_dir + str(_x._id) + '_access'
                 else:
                     sat_acc_fl = sat_dir + 'pay' + str(k+1) + '_access'
+
+                if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS): # if pointing-option coverage calculation find the
+                                                                               # pointing-option file to be used for this particular instrument. 
+                    popts_fl = None
+                    for pf in self.pnt_opts_fls:
+                        if pf["instrumentID"] == _x._id:
+                            popts_fl = pf["popts_fl"] 
+                            break
+                    
+                    if not popts_fl:
+                        raise RuntimeError("No pointing options specified for instrument with ID " + str(_x.id))
+                
                 pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                         raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
                         sen_fov_geom=_x.get_as_string('Geometry'), sen_orien=_x.get_as_string('Orientation'), sen_clock= _x.get_as_string('Clock'), 
                         sen_cone=_x.get_as_string('Cone'), purely_sidelook = _y.purely_side_look, yaw180_flag = _x.get_as_string('yaw180_flag'), step_size=self.time_step, 
-                        sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= self.pnt_opts_fl, cov_calcs_app= self.cov_calc_app)
+                        sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= popts_fl, cov_calcs_app= self.cov_calc_app)
 
                 prop_cov_param.append(pcp)
         
@@ -556,17 +571,25 @@ class PreProcess():
         :param user_dir: Path to the user directory where the coverage grid file exists or is to be created.
         :paramtype user_dir: str
 
-        :param pnt_opts: Dictionary containing the filename with pointing options (must be inside the user directory) and other relevant information.
+        :param pnt_opts: Dictionary containing list of filenames with pointing options (must be inside the user directory) and other relevant information. 
+                         Each entry in the list is tagged with the corresponding instrument ID(s) to which it refers to. Multiple IDs separated by commas are allowed.
+                         Only one filename per instrument is allowed. Spaces inside filenames are NOT allowed.
         :paramtype pnt_opts: dict
 
-        :returns: Filepath to the file containing the pointing options info.
-        :rtype: str
+        :returns: List of dictionaries with filepath to the file containing the pointing options and corresponding instrument ID tag.
+        :rtype: list, dict
 
-        """                   
-        ref_frame = PntOptsRefFrame.get(pnt_opts['referenceFrame'])     
-        popts_fl = user_dir + pnt_opts["pntOptsFn"] # pointing options file path  
+        """                     
+        popts_fls = []
+        for x in pnt_opts:
+            if x["instrumentID"]: # if instrument ID is empty, the corresponding filename shall be used for all unspecified instruments
+                instru_ids = [x.strip() for x in str(x["instrumentID"]).split(',')] 
+                for _id in instru_ids:
+                    popts_fls.append({"instrumentID": _id, "popts_fl": user_dir + x["pntOptsFn"]})
+            else:
+                raise RuntimeError("Value of the key 'instrumentID' in the pointing-options specification cannot be left empty.")
 
-        return popts_fl
+        return popts_fls
 
     @staticmethod
     def process_cov_grid(user_dir, grid, grid_res):
