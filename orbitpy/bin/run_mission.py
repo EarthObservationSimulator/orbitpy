@@ -109,8 +109,15 @@ def main(user_dir):
 
     # Compute observational data-metrics
     print(".......Computing observational data metrics.......")
-    t1 = time.process_time() 
-    instru_specs = miss_specs['instrument']
+    t1 = time.process_time()
+     
+    if "instrument" in miss_specs:
+        instru_specs = miss_specs['instrument']
+    elif "satellite" in miss_specs:
+        instru_specs = []
+        for sat in miss_specs["satellite"]:
+            instru_specs.extend(sat["instrument"])
+
     obs = obsdatametrics.ObsDataMetrics(sat_dirs, cov_grid_fl, instru_specs)
     obs.compute_all_obs_dmetrics()      
     t2 = time.process_time()      

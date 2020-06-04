@@ -254,7 +254,12 @@ class PreProcess():
 
         self.duration = float(specs['duration'])
 
-        self.sats = PreProcess.enumerate_satellites(orb_specs = specs['constellation'], instru_specs = specs["instrument"], sat_specs = dict())
+        if "constellation" in specs and "instrument" in specs:
+            self.sats = PreProcess.enumerate_satellites(orb_specs = specs['constellation'], instru_specs = specs["instrument"], sat_specs = dict())
+        elif "satellite" in specs:
+            self.sats = PreProcess.enumerate_satellites(orb_specs = dict(), instru_specs = dict(), sat_specs = specs['satellite'])
+        else:
+            raise RuntimeError("Please specify either `constellation` and `instrument` JSON objects OR `satellite` JSON object.")
 
         # set time resolution factor based on default value or user input value
         if "settings" in specs and 'customTimeResFactor' in specs['settings']:
@@ -483,16 +488,22 @@ class PreProcess():
         :param instru_specs: Specifications of the instrument(s) carried by all the satellites. The instruments are all uniformly distributed to the satellites.
         :paramtype instru_specs: list, dict
 
-        :param sat_specs: Specifications of the satellites (orbits and instruments). 
+        :param sat_specs: Specifications of the satellites (orbits and instruments). Each satellite has an unique identifier same as the orbit identifier (hence no two satellites have the same orbits). 
         :paramtype sat_specs: list, dict
 
         :returns: List of satellites in the mission
         :rtype: list, :class:`orbitpy.preprocess.Satellite`
 
         """
-        
-        if(sat_specs): #TODO
-            raise RuntimeError("Feature not available!")
+        if(sat_specs): 
+            # enumerate satellites from the list of satellites provided
+            sats = []
+            for _sat in sat_specs:# iterate through each satellite
+                _orb = OrbitParameters(_sat["orbit"]['@id'], _sat["orbit"]['sma'], _sat["orbit"]['ecc'], _sat["orbit"]['inc'],
+                                       _sat["orbit"]['raan'], _sat["orbit"]['aop'], _sat["orbit"]['ta'])
+
+                [_ics_fov, _ics_for] = PreProcess.enumerate_instruments(_sat["instrument"])
+                sats.append(Satellite(_orb, _ics_fov, _ics_for))
 
         elif(orb_specs and not instru_specs): #TODO
             raise RuntimeError("Feature not available!")
@@ -708,7 +719,7 @@ class PreProcess():
         min_grid_res_deg = 1e1000 # some large number
         for j in range(0,len(sats)):
 
-            for k in range(0,len(sats[j].ics_for)): # iterate over all instruments in the satellite
+            for k in range(0,len(sats[j].ics_fov)): # iterate over all instruments in the satellite
                 fov = min(sats[j].ics_fov[k].fov_at, sats[j].ics_fov[k].fov_ct) # (use FOV and not FOR)
 
                 sinRho = RE/sats[j].orbit.sma

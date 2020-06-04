@@ -35,17 +35,31 @@ class ObsDataMetrics():
             seperate data-file (named *payID_obsMetrics*, where payID is the payload identifier ) containing the observational 
             metrics is produced per payload. 
         """
-        instru = Instrument.from_json(self.instru_specs[0]) # hardcoded to 1 instrument     
+        
         # process each access file separately
         for _dir in self.sat_dirs:           
             
             sat_state_fl = os.path.join(_dir, 'state')
             files = glob.glob(_dir+'*_access')
             for accessInfo_fl in files:               
-                pay_id = str(accessInfo_fl).split("_")[-2].split('/')[-1]      
-                obsMetrics_fl = os.path.join(_dir, pay_id +'_obsMetrics')
-                ObsDataMetrics.compute_obs_data_metrics(instru, sat_state_fl, accessInfo_fl,
-                                            obsMetrics_fl, self.cov_grid_fl)
+
+                instru_id = str(accessInfo_fl).split("_")[-2].split('/')[-1]   
+                instru_id = str(accessInfo_fl).split('/')[-1]
+                if "_access" in instru_id:
+                    instru_id = instru_id.replace("_access","")   
+
+                instru = None
+                for _isp in self.instru_specs: # iterate through list of instruments and find the instrument with matching ID
+                    if(str(_isp["@id"]) == instru_id):
+                        instru = Instrument.from_json(_isp)  
+
+                if(instru):        
+                    # produce observational metrics
+                    obsMetrics_fl = os.path.join(_dir, instru_id +'_obsMetrics')
+                    ObsDataMetrics.compute_obs_data_metrics(instru, sat_state_fl, accessInfo_fl,
+                                                obsMetrics_fl, self.cov_grid_fl)
+                else:
+                    raise RuntimeError("No matching instrument found for the access file with path: " + str(accessInfo_fl))
 
     @staticmethod
     def compute_obs_data_metrics(instru, state_fl, access_fl, datametrics_fl, covgrid_fl = None): 
