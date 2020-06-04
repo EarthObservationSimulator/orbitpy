@@ -280,16 +280,16 @@ class PreProcess():
             print("Grid-point approach being used for coverage calculations.")
 
             # set grid resolution factor based on default value or user input value
-            if "settings" in specs and 'customGridResFactor' in specs['settings']:
-                grid_res_f = specs['settings']['customGridResFactor']
+            if "customGridResFactor" in specs["grid"]:
+                grid_res_f = specs['grid']['customGridResFactor']
                 print('Custom grid resolution factor of ' + str(grid_res_f) + ' being used.')
             else:
                 grid_res_f = OrbitPyDefaults.grid_res_fac
                 print('Default grid resolution factor of ' + str(grid_res_f) + ' being used.')
             
             _grid_res = PreProcess.compute_grid_res(self.sats, grid_res_f) 
-            if "settings" in specs and 'customGridRes' in specs['settings']:
-                self.grid_res = float(specs['settings']['customGridRes'])
+            if 'customGridRes' in specs["grid"]:
+                self.grid_res = float(specs['grid']['customGridRes'])
                 if(_grid_res < self.grid_res):
                     warnings.warn("Custom grid-resolution is coarser than computed grid resolution.")
                     print("Custom grid resolution [deg]: ", self.grid_res)
@@ -552,6 +552,8 @@ class PreProcess():
                     
                     if not popts_fl:
                         raise RuntimeError("No pointing options specified for instrument with ID " + str(_x.id))
+                elif(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS):
+                    popts_fl = None
                 
                 pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                         raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 

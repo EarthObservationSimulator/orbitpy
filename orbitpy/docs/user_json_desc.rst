@@ -151,9 +151,18 @@ Within the :code:`autoGrid` JSOn field, a *list* of regions can be specifyed. Th
    lonUpper,float, degrees, Upper longitude in degrees
    lonLower,float, degrees, Lower longitude in degrees
 
-A file named as :code:`covGrid` containing the grid points is created within the user directory. If a :code:`customGridRes` parameter
-is specified in the :code:`settings` JSON object, that grid resolution is used, else the grid resolution is decided based on the smallest 
-sensor footprint angular dimension (see :ref:`grid_res_determination`).
+A file named as :code:`covGrid` containing the grid points is created within the user directory.
+
+In addition to the region specifications, optionally two more parameters can be specified, which control the resolution of 
+the generated grid.
+
+.. csv-table:: Expected parameters
+   :header: Parameter, Data type, Units, Description
+   :widths: 10,10,5,40
+
+   customGridRes, float, degrees, (Optional) Grid resolution. A warning is issued if the internal computed grid resolution is coarser than the user specified grid resolution. 
+   customGridResFactor, float, , (Optional) Custom grid-resolution factor used to determine the grid-resolution. (Default value is 0.9.)
+
 
 Example:
 
@@ -176,6 +185,7 @@ Example:
             "lonLower":20
         }
         ],
+        customGridResFactor = 0.5
     }
 
 2. :code:`"@type":"customGrid"` option
@@ -274,9 +284,7 @@ This JSON object contains items which can be used to configure some of the orbit
    :widths: 10,10,5,40
 
    customTimeStep, float, seconds, (Optional) Orbit propagation time-step. A warning is issued if the internal computed time-step is coarser than the user specified time-step.
-   customGridRes, float, degrees, (Optional) Grid resolution. A warning is issued if the internal computed grid resolution is coarser than the user specified grid resolution. 
    customTimeResFactor, float, seconds, (Optional) Custom time-resolution factor used to determine the propagation time-step. (Default value is 0.25.)
-   customGridResFactor, float, degrees, (Optional) Custom grid-resolution factor used to determine the grid-resolution. (Default value is 0.9.)
 
 
 
