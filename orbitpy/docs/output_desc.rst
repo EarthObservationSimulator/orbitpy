@@ -136,8 +136,7 @@ Observation Data Metrics
 The observation data metrics are produced by the :class:`orbitpy.obsdatametrics` module which inturn invokes the :code:`instrupy` package.
 The module can be initialized by dictionary containing the instrument specifications, path to the coverage grid file and a list of directories containing the satellite 
 state data, access data. The name of the state data file is presumed to be *state* and the name of the access data file is presumed to be of the
-format *payI_access*, where *I* is the identifier of the payload to which the access data corresponds. Currently the module is hardcoded to 
-work with only one payload with identifier as *1* and hence the name of the access file is *pay1_access*. 
+format *payI_access*, where *payI* is the identifier of the payload to which the access data corresponds. 
 
 The name of the output file is *pay1_obsMetrics*. The first row of the resulting file contains the mission epoch in Julian Day UT1. 
 The second row contains the time-step size in seconds. The third row contains the column headers and the subsequent rows contain the corresponding

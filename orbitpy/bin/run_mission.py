@@ -88,7 +88,6 @@ def main(user_dir):
 
     sat_dirs =  glob.glob(user_dir+'sat*/')
     sat_state_fls =  glob.glob(user_dir+'sat*/state')
-    sat_access_fls =  glob.glob(user_dir+'sat*/*_access')
 
     # Compute satellite-to-satellite contacts
     print(".......Computing satellite-to-satellite contact periods.......")

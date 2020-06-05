@@ -14,5 +14,6 @@ setup(
     scripts=[ # TODO: remove this? Does not seem to serve any purpose. 
     'bin/run_mission.py'
     ],
-    install_requires=['numpy', 'instrupy', 'nose', 'pandas', 'scipy', 'sphinx', 'sphinx_rtd_theme'] 
+    install_requires=['numpy', 'instrupy', 'nose', 'pandas', 'scipy', 'sphinx', 
+                      'sphinx_rtd_theme'] 
 )
