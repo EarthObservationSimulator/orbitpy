@@ -218,7 +218,6 @@ int main(int argc, char *argv[])
       OrbitState               *state;
       Spacecraft               *sat1;
       Propagator               *prop;
-      CoverageChecker          *covChecker;
 	   Earth                    *earth;
       NadirPointingAttitude    *attitude;
       LagrangeInterpolator     *interp = new LagrangeInterpolator( // Not used really.
@@ -368,7 +367,6 @@ int main(int argc, char *argv[])
       
 
       //Delete un-needed objects
-      delete    covChecker;
       delete    prop;
       // delete    sat1;  // deletes date, state, attitude, interp - so DON'T
       delete    date;
