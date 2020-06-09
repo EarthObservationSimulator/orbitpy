@@ -37,7 +37,9 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinxcontrib.plantuml',
+    'sphinxcontrib.needs'
     ]
 
 mathjax_path="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
@@ -49,7 +51,6 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -83,3 +84,28 @@ intersphinx_mapping = {
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True 
 
+# -- Extension 'sphinxcontrib.needs' settings --------------------------------
+needs_types = [dict(directive="req", title="Requirement", prefix="R_", color="#BFD8D2", style="node"),
+               dict(directive="spec", title="Specification", prefix="S_", color="#FEDCD2", style="node"),
+               dict(directive="impl", title="Implementation", prefix="I_", color="#DF744A", style="node"),
+               dict(directive="test", title="Test Case", prefix="T_", color="#DCB239", style="node"),
+               dict(directive="exp", title="Example", prefix="E_", color="#80DC39", style="node"),
+               # Kept for backwards compatibility
+               dict(directive="need", title="Need", prefix="N_", color="#9856a5", style="node")
+           ]
+
+# -- Extension 'sphinxcontrib.plantuml' settings -----------------------------
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    plantuml = 'java -Djava.awt.headless=true -jar /usr/share/plantuml/plantuml.jar'
+else:
+    cwd = os.getcwd()
+    plantuml = 'java -jar %s' % os.path.join(cwd, "utils/plantuml.1.2020.12.jar")
+
+# If we are running on windows, we need to manipulate the path,
+# otherwise plantuml will have problems.
+if os.name == "nt":
+    plantuml = plantuml.replace("/", "\\")
+    plantuml = plantuml.replace("\\", "\\\\")
+
+plantuml_output_format = 'png'

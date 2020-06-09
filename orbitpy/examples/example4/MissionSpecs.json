@@ -15,6 +15,7 @@
     {
         "@type": "Passive Optical Scanner",
         "name": "PlanetScope-PS2",
+        "@id": "sen1",
         "mass": 4, 
         "volume": 1.5, 
         "power": 5, 

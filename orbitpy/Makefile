@@ -30,25 +30,27 @@ all: bare aux install docs
 
 aux: aux_bare #Build the OC Interface binaries
 	-X=`pwd`; \
-	do echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make all; done
+	echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make all;
 
 aux_clean: 
 	-X=`pwd`; \
-	do echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make clean; done
+	echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make clean;
 
 aux_bare: 
 	-X=`pwd`; \
-	do echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make bare; done
+	echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make bare;
 
 docs: docs_clean #Build the documentation
 	-X=`pwd`; \
-	do echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make html; done
+	echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make html;
 
 docs_clean: 
 	-X=`pwd`; \
-	do echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make clean; done
+	echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make clean;
 
 install: aux 
+	pip install sphinxcontrib.plantuml; \
+	pip install sphinxcontrib.needs; \
 	pip install -e .
 
 runtest:

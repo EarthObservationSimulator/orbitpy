@@ -13,7 +13,8 @@
     }, 
     "instrument":    [{        
         "@type": "Basic Sensor",
-        "name": "Atom",  
+        "name": "Atom",
+        "@id": "sen1",  
         "mass": 28, 
         "volume": 0.12, 
         "power": 32, 
