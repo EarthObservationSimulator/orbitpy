@@ -56,7 +56,7 @@
                    "inc": 96.67657116,
                    "raan": 60,
                    "aop": 0,
-                   "ta": 0},
+                   "ta": 30},
         "instrument": [{ "@type": "Basic Sensor",
                          "@id": "pay2_1",  
                          "mass": 28, 
