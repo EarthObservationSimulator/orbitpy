@@ -149,29 +149,29 @@ class TestPreProcess(unittest.TestCase):
 
     def test_compute_time_step(self):
         """ Test that the time-step computed with precomputed values for fixed orbit altitude and sensor Along-Track **FOR** """
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+500), ics_for = InstrumentCoverageParameters(fov_at = 15))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+500), ics_for = [InstrumentCoverageParameters(fov_at = 15), InstrumentCoverageParameters(fov_at = 25)])]
         self.assertAlmostEqual(PreProcess.compute_time_step(sats, 1),18.6628, delta = 1)
 
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+710), ics_for = InstrumentCoverageParameters(fov_at = 15))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+710), ics_for = [InstrumentCoverageParameters(fov_at = 15)])]
         self.assertAlmostEqual(PreProcess.compute_time_step(sats, 1), 27.2836, delta = 1)
 
         # test with multiple satellites. minimum calculate time-step must be chosen.
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+710), ics_for = InstrumentCoverageParameters(fov_at = 15)),
-                Satellite(orbit = OrbitParameters(sma = RE+710), ics_for = InstrumentCoverageParameters(fov_at = 25)),
-                Satellite(orbit = OrbitParameters(sma = RE+510), ics_for = InstrumentCoverageParameters(fov_at = 25)),
-                Satellite(orbit = OrbitParameters(sma = RE+510), ics_for = InstrumentCoverageParameters(fov_at = 15))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+710), ics_for = [InstrumentCoverageParameters(fov_at = 15)]),
+                Satellite(orbit = OrbitParameters(sma = RE+710), ics_for = [InstrumentCoverageParameters(fov_at = 25), InstrumentCoverageParameters(fov_at = 35)]),
+                Satellite(orbit = OrbitParameters(sma = RE+510), ics_for = [InstrumentCoverageParameters(fov_at = 25)]),
+                Satellite(orbit = OrbitParameters(sma = RE+510), ics_for = [InstrumentCoverageParameters(fov_at = 15)])]
         x = PreProcess.compute_time_step(sats, 1)        
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+510), ics_for = InstrumentCoverageParameters(fov_at = 15))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+510), ics_for = [InstrumentCoverageParameters(fov_at = 15)])]
         y = PreProcess.compute_time_step(sats, 1)
         self.assertAlmostEqual(x, y)
 
         # test with time-resolution factor
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+710), ics_for = InstrumentCoverageParameters(fov_at = 15))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+710), ics_for = [InstrumentCoverageParameters(fov_at = 15)])]
         f = random.random()
         self.assertAlmostEqual(PreProcess.compute_time_step(sats, f), 27.2836*f, delta = 1)
 
         # test when along-track fov is larger than the horizon angle = 119.64321275051853 deg
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+1000), ics_for = InstrumentCoverageParameters(fov_at = 150))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+1000), ics_for = [InstrumentCoverageParameters(fov_at = 150)])]
         f = random.random()
         self.assertAlmostEqual(PreProcess.compute_time_step(sats, f), 1057.437400519928*f, delta = 1)
 
@@ -179,27 +179,27 @@ class TestPreProcess(unittest.TestCase):
         """Test that the grid-resolution computed with precomputed for fixed values of orbit altitute and a sensor FOV (not the FOR)"""
 
         # the smallest fov dimension must be chosen
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+700), ics_fov = InstrumentCoverageParameters(fov_at = 10, fov_ct = 20))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+700), ics_fov = [InstrumentCoverageParameters(fov_at = 10, fov_ct = 20)])]
         self.assertAlmostEqual(PreProcess.compute_grid_res(sats, 1), 1.100773132953890, delta = 0.01)
 
         # list of satellites, choose smallest grid resolution
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+710), ics_fov = InstrumentCoverageParameters(fov_at = 10, fov_ct = 20)),
-                Satellite(orbit = OrbitParameters(sma = RE+710), ics_fov = InstrumentCoverageParameters(fov_at = 10, fov_ct = 5)),
-                Satellite(orbit = OrbitParameters(sma = RE+510), ics_fov = InstrumentCoverageParameters(fov_at = 10, fov_ct = 25)),
-                Satellite(orbit = OrbitParameters(sma = RE+510), ics_fov = InstrumentCoverageParameters(fov_at = 2, fov_ct = 20))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+710), ics_fov = [InstrumentCoverageParameters(fov_at = 10, fov_ct = 20)]),
+                Satellite(orbit = OrbitParameters(sma = RE+710), ics_fov = [InstrumentCoverageParameters(fov_at = 10, fov_ct = 5), InstrumentCoverageParameters(fov_at = 10, fov_ct = 15)]),
+                Satellite(orbit = OrbitParameters(sma = RE+510), ics_fov = [InstrumentCoverageParameters(fov_at = 10, fov_ct = 25)]),
+                Satellite(orbit = OrbitParameters(sma = RE+510), ics_fov = [InstrumentCoverageParameters(fov_at = 2, fov_ct = 20)])]
         x = PreProcess.compute_grid_res(sats, 1)
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+510), ics_fov = InstrumentCoverageParameters(fov_at = 2, fov_ct = 20))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+510), ics_fov = [InstrumentCoverageParameters(fov_at = 2, fov_ct = 20)])]
         y = PreProcess.compute_grid_res(sats, 1)
         self.assertAlmostEqual(x, y)
 
         # test with grid-resolution factor
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+1100), ics_fov = InstrumentCoverageParameters(fov_at = 25, fov_ct = 25))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+1100), ics_fov = [InstrumentCoverageParameters(fov_at = 25, fov_ct = 25), InstrumentCoverageParameters(fov_at = 30, fov_ct = 35), InstrumentCoverageParameters(fov_at = 25, fov_ct = 55)])]
         f = random.random()
         self.assertAlmostEqual(PreProcess.compute_grid_res(sats, f), 4.4012*f, delta = 0.01)
 
 
         # test when along-track fov is larger than the horizon angle = 119.64321275051853 deg
-        sats = [Satellite(orbit = OrbitParameters(sma = RE+1000), ics_fov = InstrumentCoverageParameters(fov_at = 150, fov_ct = 180))]
+        sats = [Satellite(orbit = OrbitParameters(sma = RE+1000), ics_fov = [InstrumentCoverageParameters(fov_at = 150, fov_ct = 180)])]
         f = random.random()
         self.assertAlmostEqual(PreProcess.compute_grid_res(sats, f), 60.3568*f, delta = 1)
 

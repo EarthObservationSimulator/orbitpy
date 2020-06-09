@@ -14,6 +14,7 @@
     "instrument":[{
         "@type": "Synthetic Aperture Radar",
         "name": "Seasat-A",  
+        "@id": "sen1",
         "mass": 243, 
         "volume": 2.5, 
         "power": 500, 
@@ -74,9 +75,7 @@
             "lonUpper":150,
             "lonLower":125
         }
-        ]        
-    },
-    "settings":{
-        "customGridRes": 1                      
+        ],
+        "customGridRes": 1           
     }
 }

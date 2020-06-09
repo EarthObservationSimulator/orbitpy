@@ -1,0 +1,97 @@
+{
+    "epoch": "2018, 1, 15, 12, 0, 0",
+    "duration": 0.1,
+    "constellation":{
+        "@type": "Walkerdelta",
+        "numberSatellites": 3,
+        "numberPlanes": 3,
+        "relativeSpacing":1,
+        "inc":56,
+        "alt": 700,
+        "ecc": 0.0001,
+        "aop": 0
+    }, 
+    "satellite":    [{
+        "orbit": { "@id": 1,
+                   "sma": 6878.137,
+                   "ecc": 0.0,
+                   "inc": 96.67657116,
+                   "raan": 60,
+                   "aop": 0,
+                   "ta": 0},
+        "instrument": [{ "@type": "Basic Sensor",
+                         "@id": "pay1_1",  
+                         "mass": 28, 
+                         "volume": 0.12, 
+                         "power": 32, 
+                         "bitsPerPixel": 8, 
+                         "fieldOfView": {
+                             "sensorGeometry": "CONICAL",
+                             "fullConeAngle": 25
+                         },
+                         "orientation": {
+                             "convention": "NADIR"
+                         }       
+                        },
+                        { "@type": "Basic Sensor",
+                            "@id": "pay1_2",  
+                            "mass": 28, 
+                            "volume": 0.12, 
+                            "power": 32, 
+                            "bitsPerPixel": 8, 
+                            "fieldOfView": {
+                                "sensorGeometry": "CONICAL",
+                                "fullConeAngle": 10
+                            },
+                            "orientation": {
+                                "convention": "NADIR"
+                            }       
+                        }
+                       ]
+        },
+        {  
+        "orbit": { "@id": 2,
+                   "sma": 6878.137,
+                   "ecc": 0.0,
+                   "inc": 96.67657116,
+                   "raan": 60,
+                   "aop": 0,
+                   "ta": 30},
+        "instrument": [{ "@type": "Basic Sensor",
+                         "@id": "pay2_1",  
+                         "mass": 28, 
+                         "volume": 0.12, 
+                         "power": 32, 
+                         "bitsPerPixel": 8, 
+                         "fieldOfView": {
+                             "sensorGeometry": "RECTANGULAR",
+                             "alongTrackFieldOfView":10,
+                             "crossTrackFieldOfView":30
+                         },
+                         "orientation": {
+                            "convention": "SIDE_LOOK",
+                            "sideLookAngle":45
+                         }       
+                        }
+                       ]
+
+        }
+    ],
+    "groundStations":{
+        "gndStnFn":"groundStations"
+    },   
+    "pointingOptions":[{
+        "instrumentID": "pay1_1, pay1_2",
+        "referenceFrame": "NadirRefFrame",
+        "pntOptsFn":"pOpts"              
+    },
+    {
+        "instrumentID": "pay2_1",
+        "referenceFrame": "NadirRefFrame",
+        "pntOptsFn":"pOpts"              
+    }
+    ],
+    "settings":{
+        "customTimeResFactor": 1                         
+    }
+}

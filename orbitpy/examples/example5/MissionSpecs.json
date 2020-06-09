@@ -15,6 +15,7 @@
         {
         "@type": "Passive Optical Scanner",
         "name": "Landsat 8 TIRS Band1",
+        "@id": "sen1",
         "mass": 236,
         "volume": 0.261, 
         "power": 380, 

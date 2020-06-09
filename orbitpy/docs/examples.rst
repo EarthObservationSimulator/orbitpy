@@ -11,6 +11,7 @@ directory :code:`orbitpy/examples/`.
    :members:
    :exclude-members: readable_dir
 
+   
 Example 1
 ==========
 
@@ -61,6 +62,15 @@ Example 6
 * 3 satellites, 3 plane Walker delta constellation
 * Basic Sensor, Nadir pointing, Conical FOV, No Manuverability
 * Custom time-resolution factor (to set the propagation time-step) = 0.5. 
+
+Example 7
+==========
+* Multiple payloads, different pointing options per payload
+
+Example 8
+==========
+* Specification of satellites as a list with heterogenous distribution of payloads.
+
 
 Running your own case
 ======================
