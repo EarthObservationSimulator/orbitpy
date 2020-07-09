@@ -30,8 +30,8 @@ orbitpy/oci/bin/genCovGrid
 oc/tests/bin/SystemTest_Analysis
 orbitpy/oci/bin/orbitpropcov_grid
 orbitpy/oci/bin/orbitpropcov_popts
-orbitpy/tests/orbitpropcov/orbitPropCovGrid/temp/*
-orbitpy/tests/orbitpropcov/orbitPropCovPopts/temp/*
+orbitpy/tests/orbitpropcov/OrbitPropCovGrid/temp/*
+orbitpy/tests/orbitpropcov/OrbitPropCovPopts/temp/*
 orbitpy/tests/communications/temp/*
 orbitpy/tests/preprocess/temp/*
 
