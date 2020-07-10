@@ -166,15 +166,16 @@ for i in range(len(args.path)):
     if args.z == True:
         plotZ(data[i],program[i])
 
-diffData = data[0]
-diffData[:,1:5] = data[0][:,1:5] - data[1][:,1:5]
-
-# Plot differences as requested
-if args.dx == True:
-    plotDx(diffData)
-if args.dy == True:
-    plotDy(diffData)
-if args.dz == True:
-    plotDz(diffData)
+if len(args.path) > 1:
+    diffData = data[0]
+    diffData[:,1:5] = data[0][:,1:5] - data[1][:,1:5]
+    
+    # Plot differences as requested
+    if args.dx == True:
+        plotDx(diffData)
+    if args.dy == True:
+        plotDy(diffData)
+    if args.dz == True:
+        plotDz(diffData)
     
 plt.show()
