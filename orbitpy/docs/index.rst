@@ -8,7 +8,7 @@ Welcome to OrbitPy's documentation!
 
 Install
 ========
-*Requires:* Unix-like operating system (currently tested in Ubuntu 18.04.03), :code:`python 3.8`, :code:`gcc`, :code:`gfortran`
+*Requires:* Unix-like operating system (currently tested in Ubuntu 18.04.03, MacOS, CentOS-8), :code:`python 3.8`, :code:`pip`, :code:`gcc`, :code:`gfortran`
 
 1. Make sure the :code:`instrupy` package (dependency) has been installed. It can be installed by running :code:`make` in the :code:`instruments/instrupy/` directory.
 2. Navigate to the :code:`orbits/oc/` directory and run :code:`make`. 

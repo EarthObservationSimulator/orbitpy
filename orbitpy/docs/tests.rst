@@ -25,6 +25,7 @@ Testing strategies
             the chosen validation methods are approximate in which case an *approximately equal to* assertion tests
             are used.
 3. Using known inputs, and outputs from external sources (eg: literature, other orbital simulation softwares such as GMAT, STK)
+4. Run tests after making any revisions to the code. This helps to check that the revisions do not have uninteded effects on the results.
 
 :class:`test_OrbitPropCovGrid_1`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

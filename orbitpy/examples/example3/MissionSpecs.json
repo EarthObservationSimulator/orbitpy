@@ -7,7 +7,7 @@
         "numberPlanes": 2,
         "relativeSpacing":1,
         "inc":56,
-        "alt": 700,
+        "alt": 800,
         "ecc": 0.0001,
         "aop": 0
     }, 
@@ -34,10 +34,10 @@
         "maximumPRF": 1640, 
         "radarLosses": 3.5, 
         "sceneNoiseTemp": 290, 
-        "altitude": 700,
+        "altitude": 800,
         "bitsPerPixel": 5, 
         "systemNoiseFigure": 5.11,
-        "sigmaNEZ0threshold": -10, 
+        "sigmaNESZthreshold": -10, 
         "numStripsInScene":14392,
         "maneuverability":{
             "@type": "YAW180ROLL",

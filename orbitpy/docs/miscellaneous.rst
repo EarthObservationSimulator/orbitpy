@@ -46,7 +46,7 @@ is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives 
 
     Illustration of relationship between grid resolution and sensor footprint.
 
-.. note:: While the time-step is calculated from the FOV, the  grid-resolution is calculated from the FOR.
+.. note:: While the time-step is calculated from the FOR, the  grid-resolution is calculated from the FOV.
 
 The user may change the default :code:`grid_res_fac` by setting the :code:`customGridResFac` JSON key within the :code:`settings` JSON
 object in the user-defined JSON configuration file.

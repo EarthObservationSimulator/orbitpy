@@ -1,0 +1,4 @@
+index,name,lat[deg],lon[deg],alt[km],minElevation[deg]
+1,Svalbard,78.229772,15.407786,0,0
+2,TrollSat,-72.0167,2.5333,10,0
+3,T3rollSat,-72.0167,2.5333,10,5
