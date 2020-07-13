@@ -8,7 +8,7 @@
         "relativeSpacing":1,
         "inc":98,
         "alt": 700,
-        "ecc": 0.0001,
+        "ecc": 0,
         "aop": 0
     },
     "instrument":    [
