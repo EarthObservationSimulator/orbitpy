@@ -284,6 +284,15 @@ int main(int argc, char *argv[])
       satOut << "Mission Duration [Days] is "<< duration << "\n";
       satOut << "TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]\n";
 
+      // Keplerian elements as state output
+      ofstream satOutKep; 
+      satOutKep.open((satStateFn+"_Keplerian").c_str(),ios::binary | ios::out);
+      satOutKep << "Satellite states as Keplerian elements.\n";
+      satOutKep << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
+      satOutKep << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
+      satOutKep << "Mission Duration [Days] is "<< duration << "\n";
+      satOutKep << "TimeIndex,SMA[km],ECC,INC[deg],RAAN[deg],AOP[deg],TA[deg]\n";  
+
       // Write the access file in matrix format with rows as the time and columns as ground-points. 
       // Each entry in a cell of the matrix corresponds to 0 (No Access) or 1 (Access).
       ofstream satAcc; 
@@ -323,7 +332,19 @@ int main(int argc, char *argv[])
          satOut << std::setprecision(prc) << cartState[4] << "," ;
          satOut << std::setprecision(prc) << cartState[5] << "\n" ; 
 
+         Rvector6 kepState;
+         kepState = sat1->GetKeplerianState();      
+         // Write satellite Keplerian states to file
+         satOutKep << std::setprecision(prc) << nSteps<< "," ;
+         satOutKep << std::setprecision(prc) << kepState[0] << "," ;
+         satOutKep << std::setprecision(prc) << kepState[1] << "," ;
+         satOutKep << std::setprecision(prc) << kepState[2]*GmatMathConstants::DEG_PER_RAD << "," ;
+         satOutKep << std::setprecision(prc) << kepState[3]*GmatMathConstants::DEG_PER_RAD << "," ;
+         satOutKep << std::setprecision(prc) << kepState[4]*GmatMathConstants::DEG_PER_RAD << "," ;
+         satOutKep << std::setprecision(prc) << kepState[5]*GmatMathConstants::DEG_PER_RAD << "\n" ;
+
          satAcc << std::setprecision(4) << nSteps;
+         
          /** Iterate over all pointing options **/
          for(int j=0;j<numPntOpts;j++){
             sat1->SetBodyNadirOffsetAngles(euler_angle1[j],euler_angle2[j],euler_angle3[j],1,2,3); 
@@ -358,7 +379,7 @@ int main(int argc, char *argv[])
       
       }
       satOut.close();
-
+      satOutKep.close();
       satAcc.close(); 
 
       #ifdef DEBUG_CONSISE

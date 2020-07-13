@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
       satOutKep << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satOutKep << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
       satOutKep << "Mission Duration [Days] is "<< duration << "\n";
-      satOutKep << "TimeIndex,SME[km],ECC,INC[deg],RAAN[deg],AOP[deg],TA[deg]\n";                     
+      satOutKep << "TimeIndex,SMA[km],ECC,INC[deg],RAAN[deg],AOP[deg],TA[deg]\n";                     
 
       // Write the access file in matrix format with rows as the time and columns as ground-points. 
       // Each entry in a cell of the matrix corresponds to 0 (No Access) or 1 (Access).
