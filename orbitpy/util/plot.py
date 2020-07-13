@@ -112,6 +112,22 @@ def detectHeader(sat_state_fl):
     
     file.close()
     return lineCount
+
+def equalizeData(data1,data2):
+    
+    size1 = len(data1[:,0])
+    size2 = len(data2[:,0])
+    diff = size1 - size2
+    
+    if diff != 0:
+        print("WARNING: numCols not equal! Removed " + str(diff) + "rows from input 1.")
+        if size1 > size2:
+            data1 = data1[0:-diff,:]
+        else:
+            data2 = data2[0:diff,:]
+            
+    return data1,data2
+            
         
 
 # Begin command line parser execution
@@ -167,6 +183,8 @@ for i in range(len(args.path)):
         plotZ(data[i],program[i])
 
 if len(args.path) > 1:
+    
+    data[0],data[1] = equalizeData(data[0],data[1])
     diffData = data[0]
     diffData[:,1:5] = data[0][:,1:5] - data[1][:,1:5]
     

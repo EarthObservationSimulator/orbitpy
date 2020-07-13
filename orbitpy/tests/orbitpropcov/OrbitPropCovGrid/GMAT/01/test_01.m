@@ -57,6 +57,7 @@ GMAT Test_01_SC.EulerAngleSequence = '321';
 
 
 
+
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
@@ -67,7 +68,7 @@ GMAT OrbitPy_Propagator_J2_ForceModel.PrimaryBodies = {Earth};
 GMAT OrbitPy_Propagator_J2_ForceModel.Drag = None;
 GMAT OrbitPy_Propagator_J2_ForceModel.SRP = Off;
 GMAT OrbitPy_Propagator_J2_ForceModel.RelativisticCorrection = Off;
-GMAT OrbitPy_Propagator_J2_ForceModel.ErrorControl = RSSStep;
+GMAT OrbitPy_Propagator_J2_ForceModel.ErrorControl = LargestStep;
 GMAT OrbitPy_Propagator_J2_ForceModel.GravityField.Earth.Degree = 2;
 GMAT OrbitPy_Propagator_J2_ForceModel.GravityField.Earth.Order = 0;
 GMAT OrbitPy_Propagator_J2_ForceModel.GravityField.Earth.StmLimit = 100;
@@ -146,7 +147,7 @@ GMAT EarthMJ2000Eq_States.Size = [ 0.9948979591836735 0.9441441441441442 ];
 GMAT EarthMJ2000Eq_States.RelativeZOrder = 45;
 GMAT EarthMJ2000Eq_States.Maximized = true;
 GMAT EarthMJ2000Eq_States.Filename = 'states.txt';
-GMAT EarthMJ2000Eq_States.Precision = 16;
+GMAT EarthMJ2000Eq_States.Precision = 17;
 GMAT EarthMJ2000Eq_States.Add = {Test_01_SC.ElapsedSecs, Test_01_SC.EarthMJ2000Eq.X, Test_01_SC.EarthMJ2000Eq.Y, Test_01_SC.EarthMJ2000Eq.Z, Test_01_SC.EarthMJ2000Eq.VX, Test_01_SC.EarthMJ2000Eq.VY, Test_01_SC.EarthMJ2000Eq.VZ};
 GMAT EarthMJ2000Eq_States.WriteHeaders = true;
 GMAT EarthMJ2000Eq_States.LeftJustify = On;

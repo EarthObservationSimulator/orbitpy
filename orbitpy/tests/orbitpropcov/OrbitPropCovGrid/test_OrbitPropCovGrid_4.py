@@ -77,7 +77,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
     
     def gmatStateArray(self,sat_state_fl):
         
-        data = np.genfromtxt(sat_state_fl, skip_header = 2)
+        data = np.genfromtxt(sat_state_fl, skip_header = 1)
         return data
         
     def test_run_1(self):
@@ -92,6 +92,31 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         gmat_sat_state_fl = self.dir_path + "/GMAT/01/states.txt"
         
         # read in state data to numpy array
+        orbitpyData = TestOrbitPropCovGrid.orbitpyStateArray(self,self.default_pcp.sat_state_fl)
+        gmatData = TestOrbitPropCovGrid.gmatStateArray(self,gmat_sat_state_fl)
+        
+        self.assertEqual(1,1)
+        
+    def test_run_8(self):
+        """Propagate GMAT test until RAAN regresses 5 degrees, then propagate w/ OrbitPy and compare"""
+        
+        TestOrbitPropCovGrid.produce_cov_grid(self,1,0,-10,10,0,1)
+        
+        prop_cov_param = copy.deepcopy(self.default_pcp)
+        GMATElapsedSecs = 60388
+        secondsInDay = 86400
+        
+        prop_cov_param.duration = GMATElapsedSecs/secondsInDay
+        prop_cov_param.inc = 10
+        prop_cov_param.aop = 75.78089
+        prop_cov_param.ta = 277.789
+        
+        opc_grid = OrbitPropCovGrid(prop_cov_param)
+        opc_grid.run()
+        
+        gmat_sat_state_fl = self.dir_path + "/GMAT/08/states.txt"
+        
+         # read in state data to numpy array
         orbitpyData = TestOrbitPropCovGrid.orbitpyStateArray(self,self.default_pcp.sat_state_fl)
         gmatData = TestOrbitPropCovGrid.gmatStateArray(self,gmat_sat_state_fl)
         
