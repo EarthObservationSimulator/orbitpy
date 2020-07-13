@@ -374,12 +374,21 @@ int main(int argc, char *argv[])
 
       // Satellite state file initialization
       ofstream satOut; 
-      satOut.open(satStateFn.c_str(),ios::binary | ios::out);
+      satOut.open((satStateFn).c_str(),ios::binary | ios::out);
       satOut << "Satellite states are in Earth-Centered-Inertial equatorial-plane frame.\n";
       satOut << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satOut << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
       satOut << "Mission Duration [Days] is "<< duration << "\n";
       satOut << "TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]\n";
+
+      // Keplerian elements as state output
+      ofstream satOutKep; 
+      satOutKep.open((satStateFn+"_Keplerian").c_str(),ios::binary | ios::out);
+      satOutKep << "Satellite states as Keplerian elements.\n";
+      satOutKep << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
+      satOutKep << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
+      satOutKep << "Mission Duration [Days] is "<< duration << "\n";
+      satOutKep << "TimeIndex,SME[km],ECC,INC[deg],RAAN[deg],AOP[deg],TA[deg]\n";                     
 
       // Write the access file in matrix format with rows as the time and columns as ground-points. 
       // Each entry in a cell of the matrix corresponds to 0 (No Access) or 1 (Access).
@@ -433,7 +442,8 @@ int main(int argc, char *argv[])
          Rvector6 cartState;
          cartState = sat1->GetCartesianState();
 
-         // Write satellite states to file
+        
+         // Write satellite ECI cartesian states to file
          satOut << std::setprecision(prc) << nSteps<< "," ;
          satOut << std::setprecision(prc) << cartState[0] << "," ;
          satOut << std::setprecision(prc) << cartState[1] << "," ;
@@ -441,6 +451,17 @@ int main(int argc, char *argv[])
          satOut << std::setprecision(prc) << cartState[3] << "," ;
          satOut << std::setprecision(prc) << cartState[4] << "," ;
          satOut << std::setprecision(prc) << cartState[5] << "\n" ; 
+
+         Rvector6 kepState;
+         kepState = sat1->GetKeplerianState();      
+         // Write satellite Keplerian states to file
+         satOutKep << std::setprecision(prc) << nSteps<< "," ;
+         satOutKep << std::setprecision(prc) << kepState[0] << "," ;
+         satOutKep << std::setprecision(prc) << kepState[1] << "," ;
+         satOutKep << std::setprecision(prc) << kepState[2]*GmatMathConstants::DEG_PER_RAD << "," ;
+         satOutKep << std::setprecision(prc) << kepState[3]*GmatMathConstants::DEG_PER_RAD << "," ;
+         satOutKep << std::setprecision(prc) << kepState[4]*GmatMathConstants::DEG_PER_RAD << "," ;
+         satOutKep << std::setprecision(prc) << kepState[5]*GmatMathConstants::DEG_PER_RAD << "\n" ;
 
          // Write access data         
          // Make array with '1' (Access) in the cells corresponding to indices of gp's accessed
@@ -470,7 +491,7 @@ int main(int argc, char *argv[])
       
       }
       satOut.close();
-
+      satOutKep.close();
       satAcc.close(); 
 
       #ifdef DEBUG_CONSISE

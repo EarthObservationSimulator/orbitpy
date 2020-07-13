@@ -59,6 +59,8 @@ public:
    virtual Real           GetJulianDate();
    /// Get the current cartesian state
    virtual Rvector6       GetCartesianState();
+   /// Get the current Keplerian state  Author: Vinay
+   virtual Rvector6 GetKeplerianState();
    /// Add a sensor to the spacecraft
    virtual void           AddSensor(Sensor* sensor);
    /// Does this spacecraft have sensors?

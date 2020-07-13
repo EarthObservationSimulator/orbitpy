@@ -262,6 +262,22 @@ Rvector6 Spacecraft::GetCartesianState()
 }
 
 //------------------------------------------------------------------------------
+//  Rvector6 GetKeplerianState()
+//------------------------------------------------------------------------------
+/**
+ * Returns the Spacecraft's cartesian state. Author: Vinay.
+ * 
+ * @return  Spacecraft's cartesian state
+ * 
+ */
+//------------------------------------------------------------------------------
+Rvector6 Spacecraft::GetKeplerianState()
+{
+   return orbitState->GetKeplerianState();
+}
+
+
+//------------------------------------------------------------------------------
 //  void AddSensor(Sensor* sensor)
 //------------------------------------------------------------------------------
 /**
