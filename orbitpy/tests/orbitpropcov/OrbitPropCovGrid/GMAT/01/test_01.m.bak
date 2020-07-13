@@ -15,7 +15,7 @@ GMAT Earth.Flattening = 0;
 
 Create Spacecraft Test_01_SC;
 GMAT Test_01_SC.DateFormat = UTCGregorian;
-GMAT Test_01_SC.Epoch = '01 Jan 2020 11:59:28.000';
+GMAT Test_01_SC.Epoch = '26 May 2018 12:00:00.000';
 GMAT Test_01_SC.CoordinateSystem = EarthMJ2000Eq;
 GMAT Test_01_SC.DisplayStateType = Keplerian;
 GMAT Test_01_SC.SMA = 7000;
@@ -51,6 +51,7 @@ GMAT Test_01_SC.AttitudeDisplayStateType = 'Quaternion';
 GMAT Test_01_SC.AttitudeRateDisplayStateType = 'AngularVelocity';
 GMAT Test_01_SC.AttitudeCoordinateSystem = EarthMJ2000Eq;
 GMAT Test_01_SC.EulerAngleSequence = '321';
+
 
 
 
@@ -93,9 +94,9 @@ GMAT OrbitPy_Propagator_J2.StopIfAccuracyIsViolated = true;
 
 Create OrbitView DefaultOrbitView;
 GMAT DefaultOrbitView.SolverIterations = Current;
-GMAT DefaultOrbitView.UpperLeft = [ 0.3086734693877551 0.05225225225225225 ];
-GMAT DefaultOrbitView.Size = [ 0.9948979591836735 0.9441441441441442 ];
-GMAT DefaultOrbitView.RelativeZOrder = 30;
+GMAT DefaultOrbitView.UpperLeft = [ 0.2682926829268293 0.05225225225225225 ];
+GMAT DefaultOrbitView.Size = [ 0.9955654101995566 0.9441441441441442 ];
+GMAT DefaultOrbitView.RelativeZOrder = 17;
 GMAT DefaultOrbitView.Maximized = true;
 GMAT DefaultOrbitView.Add = {Test_01_SC, Earth};
 GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
@@ -125,9 +126,9 @@ GMAT DefaultOrbitView.EnableConstellations = On;
 
 Create GroundTrackPlot DefaultGroundTrackPlot;
 GMAT DefaultGroundTrackPlot.SolverIterations = Current;
-GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.3086734693877551 0.05225225225225225 ];
-GMAT DefaultGroundTrackPlot.Size = [ 0.9948979591836735 0.9441441441441442 ];
-GMAT DefaultGroundTrackPlot.RelativeZOrder = 47;
+GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.2682926829268293 0.05225225225225225 ];
+GMAT DefaultGroundTrackPlot.Size = [ 0.9955654101995566 0.9441441441441442 ];
+GMAT DefaultGroundTrackPlot.RelativeZOrder = 8;
 GMAT DefaultGroundTrackPlot.Maximized = true;
 GMAT DefaultGroundTrackPlot.Add = {Test_01_SC};
 GMAT DefaultGroundTrackPlot.DataCollectFrequency = 1;
