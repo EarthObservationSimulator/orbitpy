@@ -106,7 +106,7 @@ def detectHeader(sat_state_fl):
     line = file.readline()
     lineCount = 0
     
-    while any(c.isalpha() for c in line):
+    while any((c.isalpha() and c != 'e') for c in line):
         lineCount = lineCount + 1
         line = file.readline()
     
@@ -164,13 +164,17 @@ for i in range(len(args.path)):
 
     # if OrbitPy
     if numHeaderLines[i] == ORBITPY_SIZE:
+        print("INPUT: OrbitPy detected")
         data.append(orbitpyStateArray(args.path[i]))
         program.append('OrbitPy')
     # elif GMAT
     elif numHeaderLines[i] == GMAT_SIZE:
+        print("INPUT: GMAT detected")
         data.append(gmatStateArray(args.path[i]))
         program.append('GMAT')
-
+    else:
+        msg = "INPUT: Header count of " + str(numHeaderLines[i]) + " doesn't match GMAT or OrbitPy."
+        print(msg)
 # Plot positions as requested
 for i in range(len(args.path)):
     if args.x == True:
