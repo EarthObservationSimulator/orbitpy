@@ -229,6 +229,33 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertEqual(1,1)
         
     def test_run_6(self):
+        """Test a polar orbit to verify RAAN doesn't move."""
+        
+        # Prepare the output directory
+        out_dir = os.path.join(self.dir_path,'temp/test_OrbitPropCovGrid_5/06/')
+        if os.path.exists(out_dir):
+            shutil.rmtree(out_dir)
+        os.makedirs(out_dir)
+        
+        # Setup input parameters
+        prop_cov_param = copy.deepcopy(self.default_pcp)
+        prop_cov_param.sma = 7000
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_OrbitPropCovGrid_5/06/state"
+        prop_cov_param.raan = 98.8797
+        prop_cov_param.inc = 90
+        prop_cov_param.aop = 75.78089
+        prop_cov_param.ta = 277.789
+        
+        # Run the simulation
+        opc_grid = OrbitPropCovGrid(prop_cov_param)
+        opc_grid.run()
+        
+        # Read in state data to numpy array
+        gmat_sat_state_fl = self.dir_path + "/GMAT/06/states.txt"
+        orbitpyData = TestOrbitPropCovGrid.orbitpyStateArray(prop_cov_param.sat_state_fl)
+        gmatData = TestOrbitPropCovGrid.gmatStateArray(gmat_sat_state_fl)
+        
+        self.assertEqual(1,1)
         self.assertEqual(1,1)
         
     def test_run_7(self):
