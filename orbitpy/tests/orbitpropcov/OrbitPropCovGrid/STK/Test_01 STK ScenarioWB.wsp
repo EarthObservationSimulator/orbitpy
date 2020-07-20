@@ -11,8 +11,8 @@ ptn_Child1=Frames
 ptn_Child1=MainFrame
 ptn_Child2=ChildFrames
 [WorkState_v1_2.Frames.MainFrame]
-WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPMGBAAAAAAOAAAAAANLGAAAAAFBEAAAAA
-Title=Test_01 - STK 12 - [Report:  Sat_08 - states]
+WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPNGBAAAAAAOAAAAAAOLGAAAAAFBEAAAAA
+Title=Test_01 - STK 12 - [Report:  Sat_02 - states]
 [WorkState_v1_2.Frames.ChildFrames]
 ptn_Child1=Document-0
 ptn_Child2=Document-1
