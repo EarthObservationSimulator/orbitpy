@@ -199,10 +199,10 @@ BEGIN Scenario
             FrameType		 0
             DockCircleID		 0
             DockID		 0
-            WindowRectLeft		 743
-            WindowRectTop		 523
-            WindowRectRight		 3645
-            WindowRectBottom		 1665
+            WindowRectLeft		 352
+            WindowRectTop		 98
+            WindowRectRight		 3846
+            WindowRectBottom		 1866
         END Report
 
         BEGIN Report
@@ -655,10 +655,10 @@ BEGIN Scenario
             FrameType		 0
             DockCircleID		 0
             DockID		 0
-            WindowRectLeft		 352
-            WindowRectTop		 98
-            WindowRectRight		 3846
-            WindowRectBottom		 1866
+            WindowRectLeft		 591
+            WindowRectTop		 371
+            WindowRectRight		 3493
+            WindowRectBottom		 1513
         END Report
 
         BEGIN Report
