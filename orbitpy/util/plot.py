@@ -10,7 +10,11 @@ def orbitpyStateArray(sat_state_fl):
 def gmatStateArray(sat_state_fl):
         
     data = np.genfromtxt(sat_state_fl, skip_header = 1)
-    return data    
+    return data 
+
+def stkStateArray(sat_state_fl):
+    data = np.genfromtxt(sat_state_fl, skip_header = 6)
+    return data
 
 def setPlotStyle(program='OrbitPy'):
     
@@ -18,6 +22,8 @@ def setPlotStyle(program='OrbitPy'):
         plt.title('ECI Data (OrbitPy)')
     elif program == 'GMAT':
         plt.title('ECI Data (GMAT)')
+    elif program == 'STK':
+        plt.title('ECI Data (STK)')
         
 def setPlotStyleKepler(program='OrbitPy'):
     
@@ -25,6 +31,8 @@ def setPlotStyleKepler(program='OrbitPy'):
         plt.title('Keplerian Data (OrbitPy)')
     elif program == 'GMAT':
         plt.title('Keplerian Data (GMAT)')
+    elif program == 'STK':
+        plt.title('Keplerian Data (STK)')
         
 def plotSMA(data,program='OrbitPy'):
     t = data[:,0]
@@ -117,14 +125,10 @@ def plotY(data,program='OrbitPy'):
     plt.figure()
     lines = plt.plot(t,x)
     
+    setPlotStyle(program)
     plt.setp(lines,color = 'b')
     plt.xlabel('time (s)')
     plt.ylabel('Y (km)')
-
-    if program == 'OrbitPy':
-        plt.title('ECI Data (OrbitPy)')
-    elif program == 'GMAT':
-        plt.title('ECI Data (GMAT)')
 
 
 def plotZ(data,program='OrbitPy'):
@@ -138,7 +142,6 @@ def plotZ(data,program='OrbitPy'):
     plt.setp(lines,color = 'g')
     plt.xlabel('time (s)')
     plt.ylabel('Z (km)')
-    
     
 def plotDx(data,program='OrbitPy'):
     t = data[:,0]
@@ -259,7 +262,7 @@ def detectHeader(sat_state_fl):
     line = file.readline()
     lineCount = 0
     
-    while any((c.isalpha() and c != 'e') for c in line):
+    while any((c.isalpha() and c != 'e') for c in line) or all((c.isnumeric() == False) for c in line):
         lineCount = lineCount + 1
         line = file.readline()
     
@@ -320,6 +323,7 @@ args = parser.parse_args()
 # define header sizes
 GMAT_SIZE = 1
 ORBITPY_SIZE = 5
+STK_SIZE = 6
 
 numHeaderLines = []
 data = []
@@ -340,6 +344,10 @@ for i in range(len(args.path)):
         print("INPUT: GMAT detected")
         data.append(gmatStateArray(args.path[i]))
         program.append('GMAT')
+    elif numHeaderLines[i] == STK_SIZE:
+        print("INPUT: STK detected")
+        data.append(stkStateArray(args.path[i]))
+        program.append('STK')
     else:
         msg = "INPUT: Header count of " + str(numHeaderLines[i]) + " doesn't match GMAT or OrbitPy."
         print(msg)
@@ -377,7 +385,7 @@ if len(args.path) > 1:
     
     data[0],data[1] = equalizeData(data[0],data[1])
     diffData = data[0]
-    diffData[:,1:6] = data[0][:,1:6] - data[1][:,1:6]
+    diffData[:,1:7] = data[0][:,1:7] - data[1][:,1:7]
     
     # Plot differences as requested
     if args.dx == True:
