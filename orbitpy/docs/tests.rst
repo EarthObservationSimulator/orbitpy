@@ -45,6 +45,12 @@ Testing strategies
 .. automodule:: test_OrbitPropCovGrid_3
    :members:
 
+:class:`test_STK_propagation`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_STK_propagation
+   :members:
+
 :class:`test_OrbitPropCovPopts_1`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

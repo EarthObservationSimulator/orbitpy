@@ -1,5 +1,4 @@
-""" *Unit tests for :class:`orbitpy.orbitpropcov.OrbitPropCovGrid` covering checks on format of produced output files and
-   propagation states.*
+""" *Unit tests for :class:`orbitpy.orbitpropcov.OrbitPropCovGrid` covering checks on orbit state data when compared to GMAT output.*
 """
 '''
    :code:`/temp/` folder contains temporary files produced during the run of the tests below. Some of the parameters are chosen
@@ -9,9 +8,7 @@
 
 import unittest
 import numpy as np
-import pandas as pd
-import sys, os, shutil
-import random
+import os, shutil
 import subprocess
 import copy
 
@@ -30,7 +27,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
-        out_dir2 = os.path.join(dir_path,'temp/test_OrbitPropCovGrid_5')
+        out_dir2 = os.path.join(dir_path,'temp/test_GMAT_propagation')
         if os.path.exists(out_dir2):
             shutil.rmtree(out_dir2)
         os.makedirs(out_dir2)
@@ -48,7 +45,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                         aop=0, 
                         ta=0, 
                         duration=1.0, 
-                        cov_grid_fl=dir_path+"/temp/test_OrbitPropCovGrid_5/covGrid", 
+                        cov_grid_fl=dir_path+"/temp/test_GMAT_propagation/covGrid", 
                         sen_fov_geom="CONICAL", 
                         sen_orien="1,2,3,0,0,0",
                         sen_clock="0", 
@@ -56,8 +53,8 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                         purely_sidelook = 0, 
                         yaw180_flag = 0, 
                         step_size = 1.0, 
-                        sat_state_fl = dir_path+"/temp/test_OrbitPropCovGrid_5/state", 
-                        sat_acc_fl = dir_path+"/temp/test_OrbitPropCovGrid_5/acc", 
+                        sat_state_fl = dir_path+"/temp/test_GMAT_propagation/state", 
+                        sat_acc_fl = dir_path+"/temp/test_GMAT_propagation/acc", 
                         cov_calcs_app= CoverageCalculationsApproach.GRIDPNTS)
         
         
@@ -69,14 +66,13 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         prc_args = [os.path.join(cls.dir_path, '..', '..', '..', 'oci', 'bin', 'genCovGrid')] 
 
-        cov_grid_fl = cls.dir_path + "/temp/test_OrbitPropCovGrid_5/covGrid" # coverage grid file path
+        cov_grid_fl = cls.dir_path + "/temp/test_GMAT_propagation/covGrid" # coverage grid file path
         
         prc_args.append(cov_grid_fl)
 
         prc_args.append(str(sat_id)+','+str(latUpper)+','+str(latLower)+
                             ','+str(lonUpper)+','+str(lonLower)+','+str(grid_res) # same grid resolution for all regions
                             )
-        print("Entered Coverage Function in test file.")
         result = subprocess.run(prc_args, check= True)
     
     @staticmethod
@@ -95,13 +91,13 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """ Test propagation of 7000 sma orbit w/ all other kepler states = 0.""" 
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_OrbitPropCovGrid_5/01/')
+        out_dir = os.path.join(self.dir_path,'temp/test_GMAT_propagation/01/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
 
         prop_cov_param = copy.deepcopy(self.default_pcp)
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_OrbitPropCovGrid_5/01/state"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_GMAT_propagation/01/state"
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
@@ -118,14 +114,14 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """ Test all states = one, except for size and eccentricity."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_OrbitPropCovGrid_5/02/')
+        out_dir = os.path.join(self.dir_path,'temp/test_GMAT_propagation/02/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
         # Setup input parameters
         prop_cov_param = copy.deepcopy(self.default_pcp)
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_OrbitPropCovGrid_5/02/state"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_GMAT_propagation/02/state"
         prop_cov_param.raan = 1
         prop_cov_param.inc = 1
         prop_cov_param.aop = 1
@@ -146,14 +142,14 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """ Test middle values for all states, except for size and eccentricity."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_OrbitPropCovGrid_5/03/')
+        out_dir = os.path.join(self.dir_path,'temp/test_GMAT_propagation/03/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
         # Setup input parameters
         prop_cov_param = copy.deepcopy(self.default_pcp)
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_OrbitPropCovGrid_5/03/state"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_GMAT_propagation/03/state"
         prop_cov_param.raan = 180
         prop_cov_param.inc = 90
         prop_cov_param.aop = 180
@@ -174,7 +170,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """ Test decimal values for all states, except for eccentricity"""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_OrbitPropCovGrid_5/04/')
+        out_dir = os.path.join(self.dir_path,'temp/test_GMAT_propagation/04/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -182,7 +178,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Setup input parameters
         prop_cov_param = copy.deepcopy(self.default_pcp)
         prop_cov_param.sma = 7578.378
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_OrbitPropCovGrid_5/04/state"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_GMAT_propagation/04/state"
         prop_cov_param.raan = 98.8797
         prop_cov_param.inc = 45.7865
         prop_cov_param.aop = 75.78089
@@ -203,7 +199,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a retrograde orbit."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_OrbitPropCovGrid_5/05/')
+        out_dir = os.path.join(self.dir_path,'temp/test_GMAT_propagation/05/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -211,7 +207,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Setup input parameters
         prop_cov_param = copy.deepcopy(self.default_pcp)
         prop_cov_param.sma = 7578.378
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_OrbitPropCovGrid_5/05/state"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_GMAT_propagation/05/state"
         prop_cov_param.raan = 98.8797
         prop_cov_param.inc = 180
         prop_cov_param.aop = 75.78089
@@ -232,7 +228,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a polar orbit to verify RAAN doesn't move."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_OrbitPropCovGrid_5/06/')
+        out_dir = os.path.join(self.dir_path,'temp/test_GMAT_propagation/06/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -240,7 +236,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Setup input parameters
         prop_cov_param = copy.deepcopy(self.default_pcp)
         prop_cov_param.sma = 7000
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_OrbitPropCovGrid_5/06/state"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_GMAT_propagation/06/state"
         prop_cov_param.raan = 98.8797
         prop_cov_param.inc = 90
         prop_cov_param.aop = 75.78089
@@ -265,7 +261,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Propagate GMAT test until RAAN regresses 5 degrees, then propagate w/ OrbitPy and compare"""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_OrbitPropCovGrid_5/08/')
+        out_dir = os.path.join(self.dir_path,'temp/test_GMAT_propagation/08/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -274,7 +270,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         GMATElapsedSecs = 60388
         secondsInDay = 86400
         
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_OrbitPropCovGrid_5/08/state"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_GMAT_propagation/08/state"
         prop_cov_param.duration = GMATElapsedSecs/secondsInDay
         prop_cov_param.inc = 10
         prop_cov_param.aop = 75.78089
