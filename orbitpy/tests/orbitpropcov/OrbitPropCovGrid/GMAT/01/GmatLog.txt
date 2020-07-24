@@ -11,10 +11,10 @@ Successfully set Planetary Source to use: DE405
 Successfully set Planetary Source to use: DE405
 Setting nutation file to ../data/planetary_coeff/NUTATION.DAT
 Setting leap seconds file to ../data/time/tai-utc.dat
-2020-07-08 17:07:39 GMAT Moderator successfully created core engine
+2020-07-24 15:36:45 GMAT Moderator successfully created core engine
 Successfully set Planetary Source to use: DE405
 Successfully set Planetary Source to use: DE405
-2020-07-08 17:07:39 GMAT GUI successfully launched.
+2020-07-24 15:36:45 GMAT GUI successfully launched.
 *** Error loading "libMatlabInterface": GMAT could not load the MATLAB interface. Please check that MATLAB is installed and configured correctly.  See the User Guide for instructions, or disable the appropriate PLUGIN line in bin/gmat_startup_file.txt to remove this error.
 
 Interpreting scripts from the file.
@@ -36,6 +36,8 @@ Kernel ../data/planetary_coeff/SPICELunaFrameKernel.tf has been loaded.
 *** WARNING *** 26 May 2018 17:33:19.000: 'DefaultOrbitView' exceed the maximum data points, now showing 20000 most recent data points.
 *** WARNING *** 26 May 2018 17:33:19.000: 'DefaultGroundTrackPlot' exceed the maximum data points, now showing 20000 most recent data points.
 Mission run completed.
-===> Total Run Time: 150.671800 seconds
+===> Total Run Time: 293.285035 seconds
 
 ========================================
+Moderator is deleting core engine...
+2020-07-24 15:43:58 GMAT GUI exiting.

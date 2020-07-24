@@ -58,6 +58,7 @@ GMAT Test_01_SC.EulerAngleSequence = '321';
 
 
 
+
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
@@ -156,6 +157,23 @@ GMAT EarthMJ2000Eq_States.FixedWidth = true;
 GMAT EarthMJ2000Eq_States.Delimiter = ' ';
 GMAT EarthMJ2000Eq_States.ColumnWidth = 23;
 GMAT EarthMJ2000Eq_States.WriteReport = true;
+
+Create ReportFile kepler_states;
+GMAT kepler_states.SolverIterations = Current;
+GMAT kepler_states.UpperLeft = [ 0 0 ];
+GMAT kepler_states.Size = [ 0 0 ];
+GMAT kepler_states.RelativeZOrder = 0;
+GMAT kepler_states.Maximized = false;
+GMAT kepler_states.Filename = 'kepler_states.txt';
+GMAT kepler_states.Precision = 17;
+GMAT kepler_states.Add = {Test_01_SC.ElapsedSecs, Test_01_SC.Earth.SMA, Test_01_SC.Earth.ECC, Test_01_SC.EarthFixed.INC, Test_01_SC.EarthFixed.RAAN, Test_01_SC.EarthFixed.AOP, Test_01_SC.Earth.TA};
+GMAT kepler_states.WriteHeaders = true;
+GMAT kepler_states.LeftJustify = On;
+GMAT kepler_states.ZeroFill = On;
+GMAT kepler_states.FixedWidth = true;
+GMAT kepler_states.Delimiter = ' ';
+GMAT kepler_states.ColumnWidth = 23;
+GMAT kepler_states.WriteReport = true;
 
 
 %----------------------------------------
