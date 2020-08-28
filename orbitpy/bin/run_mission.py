@@ -84,7 +84,6 @@ def main(user_dir):
 
     comm_dir = pi.comm_dir
     gnd_stn_fl = pi.gnd_stn_fl
-    cov_grid_fl = pi.cov_grid_fl
 
     sat_dirs =  glob.glob(user_dir+'sat*/')
     sat_state_fls =  glob.glob(user_dir+'sat*/state')
@@ -117,7 +116,8 @@ def main(user_dir):
         for sat in miss_specs["satellite"]:
             instru_specs.extend(sat["instrument"])
 
-    obs = obsdatametrics.ObsDataMetrics(sat_dirs, cov_grid_fl, instru_specs)
+    #obs = obsdatametrics.ObsDataMetrics(sat_dirs, instru_specs)
+    obs = obsdatametrics.ObsDataMetrics(pi.sats)
     obs.compute_all_obs_dmetrics()      
     t2 = time.process_time()      
     print(".......DONE.......time taken (s): ", t2-t1)

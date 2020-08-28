@@ -34,6 +34,7 @@ orbitpy/tests/orbitpropcov/OrbitPropCovGrid/temp/*
 orbitpy/tests/orbitpropcov/OrbitPropCovPopts/temp/*
 orbitpy/tests/communications/temp/*
 orbitpy/tests/preprocess/temp/*
+orbitpy/examples/flood_case_ground_stn_contacts/*
 
 
 

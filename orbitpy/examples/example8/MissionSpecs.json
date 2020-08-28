@@ -1,16 +1,6 @@
 {
     "epoch": "2018, 1, 15, 12, 0, 0",
     "duration": 0.1,
-    "constellation":{
-        "@type": "Walkerdelta",
-        "numberSatellites": 3,
-        "numberPlanes": 3,
-        "relativeSpacing":1,
-        "inc":56,
-        "alt": 700,
-        "ecc": 0.0001,
-        "aop": 0
-    }, 
     "satellite":    [{
         "orbit": { "@id": 1,
                    "sma": 6878.137,

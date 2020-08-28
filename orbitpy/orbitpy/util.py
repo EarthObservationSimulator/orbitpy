@@ -114,4 +114,26 @@ class OrbitPyDefaults(object):
     """
     grid_res_fac = 0.9
     time_res_fac = 0.25
+    
+class Satellite():
+    """ Data structure holding attributes of a Satellite. Note the implicit relation that the :code:`ics_fov`
+        and :code:`ics_for` lists are linkes. I.e. :code:`ics_fov[0]` and :code:`ics_for[0]` refer to the FOV 
+        and FOR of the first instrument on the satellite, and so on. 
+    
+    :ivar orbit: Orbital parameters of the satellite. 
+    :vartype orbit: :class:`orbitpy.preprocess.OrbitParameters` 
+
+    :ivar instru: List of Instruments
+    :vartype instru: :class:`instrupy.public_library.Instrument` 
+
+    :ivar dir_pth: Directory path which contains file relevant to the satellite
+    :vartype dir_pth: str
+
+    """ 
+    def __init__(self, orbit = None, instru =None, dir_pth=None):
+
+        self.orbit = orbit if orbit is not None else None
+        self.instru = instru if instru is not None else None
+        self.dir_pth =  dir_pth if dir_pth is not None else None
+
 

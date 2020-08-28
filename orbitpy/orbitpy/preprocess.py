@@ -14,7 +14,7 @@ import shutil
 import glob
 import warnings
 from .util import *
-from instrupy.public_library import Instrument
+from instrupy.public_library import Instrument, InstrumentCoverageParameters
 import instrupy
 
 class ConstellationType(EnumEntity):
@@ -71,123 +71,6 @@ class OrbitParameters():
         self.raan = float(raan) if raan is not None else None
         self.aop = float(aop) if aop is not None else None
         self.ta = float(ta) if ta is not None else None
-
-class InstrumentCoverageParameters():
-    """ Data structure to hold instrument coverage related parameters.
-
-    :ivar _id: Payload identifier (Optional)
-    :vartype _id: str
-
-    :ivar fov_geom: Geometry of the field-of-view
-    :vartype fov_geom: :class:`FOVGeometry`
-
-    :ivar fov_cone: List of cone angles in degrees
-    :vartype fov_cone: list, float
-
-    :ivar fov_clock: List of clock angles in degrees
-    :vartype fov_clock: list, float
-
-    :ivar fov_at: Along-track FOV in degrees
-    :vartype fov_at: float
-
-    :ivar fov_ct: Cross-track FOV in degrees
-    :vartype fov_ct: float
-
-    :ivar orien_eu_seq1: Euler sequence 1
-    :vartype orien_eu_seq1: int
-
-    :ivar orien_eu_seq2: Euler sequence 2
-    :vartype orien_eu_seq2: int
-
-    :ivar orien_eu_seq3: Euler sequence 3
-    :vartype orien_eu_seq3: int
-
-    :ivar orien_eu_ang1: Euler angle 1 in degrees
-    :vartype orien_eu_ang1: float
-
-    :ivar orien_eu_ang2: Euler angle 2 in degrees
-    :vartype orien_eu_ang2: float
-
-    :ivar orien_eu_ang3: Euler angle 3 in degrees
-    :vartype orien_eu_ang3: float
-
-    :ivar purely_side_look: Flag to specify if instrument operates in a strictly side-looking viewing geometry.
-    :vartype purely_side_look: bool
-
-    :ivar yaw180_flag: Flag applies in case of field-of-regard. If true, it signifies that the field-of-regard includes the field-of-view of payload rotated along nadir by 180 deg. 
-    :vartype yaw180_flag: bool
-    
-    """
-    def __init__(self, _id = None, fov_geom = None, fov_cone = None, fov_clock = None, fov_at = None, fov_ct = None, 
-                 orien_eu_seq1 = None, orien_eu_seq2 = None, orien_eu_seq3 = None, 
-                 orien_eu_ang1 = None, orien_eu_ang2 = None, orien_eu_ang3 = None,
-                 purely_side_look = None, yaw180_flag = None):
-        
- 
-        self._id = str(_id) if _id is not None else None
-        self.fov_geom = FOVGeometry.get(fov_geom) if fov_geom is not None else None
-        self.fov_cone = [float(i) for i in fov_cone] if fov_cone is not None else None
-        self.fov_clock = [float(i) for i in fov_clock] if fov_clock is not None else None # clock can be "None" if Conical Sensor
-        if(self.fov_clock is None):
-            if(self.fov_geom=='CONICAL'):
-                self.fov_clock = [0]
-            else:
-                pass
-                #raise RuntimeError("Missing clock angles from instrument coverage specifications for non-conical sensor fov.")
-        self.fov_at = float(fov_at) if fov_at is not None else None
-        self.fov_ct = float(fov_ct) if fov_ct is not None else None
-        self.orien_eu_seq1 = int(orien_eu_seq1) if orien_eu_seq1 is not None else None
-        self.orien_eu_seq2 = int(orien_eu_seq2) if orien_eu_seq2 is not None else None
-        self.orien_eu_seq3 = int(orien_eu_seq3) if orien_eu_seq3 is not None else None
-        self.orien_eu_ang1 = float(orien_eu_ang1) if orien_eu_ang1 is not None else None
-        self.orien_eu_ang2 = float(orien_eu_ang2) if orien_eu_ang2 is not None else None
-        self.orien_eu_ang3 = float(orien_eu_ang3) if orien_eu_ang3 is not None else None
-        self.purely_side_look = bool(purely_side_look) if purely_side_look is not None else None
-        self.yaw180_flag = bool(yaw180_flag) if yaw180_flag is not None else None
-
-
-    def get_as_string(self, param):
-        """ Get the necessary instrument coverage specifications in string format so it can be directly passed
-            as arguments to the :code:`orbitpropcov` program.
-        """
-        if(param == 'Geometry'):
-            return self.fov_geom.name
-        elif(param == 'Clock'):
-            clock = [str(i) for i in self.fov_clock] 
-            clock = ','.join(clock) 
-            return clock
-        elif(param == 'Cone'):
-            cone = [str(i) for i in self.fov_cone] 
-            cone = ','.join(cone) 
-            return cone 
-        elif(param == 'Orientation'):
-            orien = str(self.orien_eu_seq1) + ',' + str(self.orien_eu_seq2) + ',' + str(self.orien_eu_seq3) + ',' + \
-                   str(self.orien_eu_ang1) + ',' + str(self.orien_eu_ang2) + ',' + str(self.orien_eu_ang3)
-            return orien
-        elif(param == 'yaw180_flag'):
-            return str(int(self.yaw180_flag))
-        else:
-            raise RuntimeError("Unknown parameter")    
-class Satellite():
-    """ Data structure holding attributes of a Satellite. Note the implicit relation that the :code:`ics_fov`
-        and :code:`ics_for` lists are linkes. I.e. :code:`ics_fov[0]` and :code:`ics_for[0]` refer to the FOV 
-        and FOR of the first instrument on the satellite, and so on. 
-    
-    :ivar orbit: Orbital parameters of the satellite. 
-    :vartype orbit: :class:`orbitpy.preprocess.OrbitParameters` 
-
-    :ivar ics_fov: Instrument coverage parameters relating to the field-of-view.
-    :vartype ics_fov: list, :class:`orbitpy.preprocess.InstrumentCoverageParameters` 
-
-    :ivar ics_for: Instrument coverage parameters relating to the field-of-regard.
-    :vartype ics_for: :class:`orbitpy.preprocess.InstrumentCoverageParameters` 
-
-    """
-    def __init__(self, orbit = None, ics_fov =None, ics_for = None):
-
-        self.orbit = orbit if orbit is not None else None
-        self.ics_fov = ics_fov if ics_fov is not None else None
-        self.ics_for = ics_for if ics_for is not None else None
 
 class PreProcess(): 
     """ Class to handle pre-processing of user inputs.
@@ -255,9 +138,9 @@ class PreProcess():
         self.duration = float(specs['duration'])
 
         if "constellation" in specs and "instrument" in specs:
-            self.sats = PreProcess.enumerate_satellites(orb_specs = specs['constellation'], instru_specs = specs["instrument"], sat_specs = dict())
+            self.sats = PreProcess.enumerate_satellites(self.user_dir, orb_specs = specs['constellation'], instru_specs = specs["instrument"], sat_specs = dict())
         elif "satellite" in specs:
-            self.sats = PreProcess.enumerate_satellites(orb_specs = dict(), instru_specs = dict(), sat_specs = specs['satellite'])
+            self.sats = PreProcess.enumerate_satellites(self.user_dir, orb_specs = dict(), instru_specs = dict(), sat_specs = specs['satellite'])
         else:
             raise RuntimeError("Please specify either `constellation` and `instrument` JSON objects OR `satellite` JSON object.")
 
@@ -317,40 +200,7 @@ class PreProcess():
             raise Exception("Please specify either 'grid' or 'pointingOptions' JSON fields.")
 
 
-        self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFn'])
-            
-
-    @staticmethod
-    def get_FOV_FOR(sensor):
-        """ Obtain field-of-view (FOV), field-of-regard (FOR) for a given instrument.
-        
-        :param sensor: Instrument object from the `instrupy` package.
-        :paramtype: :class:`instrupy.public_library.Instrument`
-
-        :returns: FOV and FOR related parameters
-        :rtype: list, :class:`InstrumentCoverageParameters`
-        
-        """       
-        _ics = FileUtilityFunctions.from_json(sensor.get_coverage_specs())
-        ics_fldofview = InstrumentCoverageParameters(_ics["@id"], _ics["fieldOfView"]["geometry"], 
-                                            _ics["fieldOfView"]["coneAnglesVector"], _ics["fieldOfView"]["clockAnglesVector"],
-                                            _ics["fieldOfView"]["AlongTrackFov"], _ics["fieldOfView"]["CrossTrackFov"],
-                                            _ics["Orientation"]["eulerSeq1"], _ics["Orientation"]["eulerSeq2"], _ics["Orientation"]["eulerSeq3"],
-                                            _ics["Orientation"]["eulerAngle1"], _ics["Orientation"]["eulerAngle2"], _ics["Orientation"]["eulerAngle3"],
-                                            _ics["purely_side_look"], _ics["fieldOfView"]["yaw180_flag"]
-                                            )           
-        ics_fldofreg = InstrumentCoverageParameters(_ics["@id"], _ics["fieldOfRegard"]["geometry"], 
-                                            _ics["fieldOfRegard"]["coneAnglesVector"], _ics["fieldOfRegard"]["clockAnglesVector"],
-                                            _ics["fieldOfRegard"]["AlongTrackFov"], _ics["fieldOfRegard"]["CrossTrackFov"],
-                                            _ics["Orientation"]["eulerSeq1"], _ics["Orientation"]["eulerSeq2"], _ics["Orientation"]["eulerSeq3"],
-                                            _ics["Orientation"]["eulerAngle1"], _ics["Orientation"]["eulerAngle2"], _ics["Orientation"]["eulerAngle3"],
-                                            _ics["purely_side_look"], _ics["fieldOfRegard"]["yaw180_flag"]
-                                            )           
-        print("Instrument ID is: ", _ics["@id"])
-        print("fieldOfRegard is: ", _ics["fieldOfRegard"])
-        print("Orientation:", _ics["Orientation"])
-        print("purely_side_look:", _ics["purely_side_look"])
-        return [ics_fldofview, ics_fldofreg]
+        self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFn']) 
 
     @staticmethod
     def enumerate_orbits(constel=dict()):
@@ -458,29 +308,29 @@ class PreProcess():
 
     @staticmethod
     def enumerate_instruments(data):
-        """ Make a list of instruments (FOV and FOR specs). Convert from list of dictionaries to tuple of list of 
+        """ Make a list of instrument properties. Convert from list of dictionaries to tuple of list of 
             :class:`orbitpy.preprocess.InstrumentCoverageParameters`.
 
         :param data: List of dictionaries containing the instrument specifications. 
         :paramtype data: list, dict
 
-        :returns: Tuple of list of FOV and FOR of the instruments
-        :rtype: tuple, list, :class:`orbitpy.preprocess.InstrumentCoverageParameters` 
+        :returns: List of instrument properties
+        :rtype: list, :class:`orbitpy.preprocess.InstrumentProperties` 
         
         """            
-        ics_fov = []
-        ics_for = []
+        instru = []
         for _ins in data:
-                o = Instrument.from_json(_ins)
-                [x, y] =  PreProcess.get_FOV_FOR(o)
-                ics_fov.append(x)
-                ics_for.append(y)                 
-        return [ics_fov, ics_for]
+                instru.append(Instrument.from_dict(_ins))
+                
+        return instru
 
     @staticmethod
-    def enumerate_satellites(orb_specs = dict(), instru_specs = dict(), sat_specs = dict()):
+    def enumerate_satellites(user_dir, orb_specs = dict(), instru_specs = dict(), sat_specs = dict()):
         """ Enumerate list of satellites in a mission from the user-given specifications of :code:`orb_specs` and :code:`instru_specs`
             OR :code:`sat_specs`.
+
+        :param user_dir: Path to the user directory where the satellite dubfolders are to be created.
+        :paramtype user_dir: str
 
         :param orb_specs: Specifications of the orbits of the satellites in form of a constellation. :class:`orbitpy.preprocess.ConstellationType` lists the allowed constellation types.
         :paramtype orb_specs: dict
@@ -502,8 +352,15 @@ class PreProcess():
                 _orb = OrbitParameters(_sat["orbit"]['@id'], _sat["orbit"]['sma'], _sat["orbit"]['ecc'], _sat["orbit"]['inc'],
                                        _sat["orbit"]['raan'], _sat["orbit"]['aop'], _sat["orbit"]['ta'])
 
-                [_ics_fov, _ics_for] = PreProcess.enumerate_instruments(_sat["instrument"])
-                sats.append(Satellite(_orb, _ics_fov, _ics_for))
+                _instru = PreProcess.enumerate_instruments(_sat["instrument"]) # list of instruments for that satellite
+
+                # Create satellite folder
+                sat_dir = user_dir + 'sat' + str(_sat["orbit"]['@id']) + '/'
+                if os.path.exists(sat_dir):
+                    shutil.rmtree(sat_dir)
+                os.makedirs(sat_dir) 
+
+                sats.append(Satellite(_orb, _instru, sat_dir))
 
         elif(orb_specs and not instru_specs): #TODO
             raise RuntimeError("Feature not available!")
@@ -512,15 +369,21 @@ class PreProcess():
             orbits = PreProcess.enumerate_orbits(orb_specs)
 
             # enumerate instruments (from a list of dictionaries)
-            [ics_fov, ics_for] = PreProcess.enumerate_instruments(instru_specs)
-         
+            _instru = PreProcess.enumerate_instruments(instru_specs)
+
             sats = []
             for orb_indx in range(0,len(orbits)): 
+
+                # Create satellite folder
+                sat_dir = user_dir + 'sat' + str(orbits[orb_indx]._id) + '/'
+                if os.path.exists(sat_dir):
+                    shutil.rmtree(sat_dir)
+                os.makedirs(sat_dir)
+
                 # Common instrument(s) in all satellites.
-                sats.append(Satellite(orbits[orb_indx], ics_fov, ics_for))
+                sats.append(Satellite(orbits[orb_indx], _instru, sat_dir))
         
         return sats
-
 
     def generate_prop_cov_param(self):
         ''' Generate propagation and coverage parameters from the class instance variables. 
@@ -535,44 +398,45 @@ class PreProcess():
         for sat_indx in range(0,len(self.sats)):  
 
             orb = self.sats[sat_indx].orbit
-            sat_dir = self.user_dir + 'sat' + str(orb._id) + '/'
-            if os.path.exists(sat_dir):
-                shutil.rmtree(sat_dir)
-            os.makedirs(sat_dir)                  
+            sat_dir = self.sats[sat_indx].dir_pth                 
             sat_state_fl = sat_dir + 'state'
 
-            x =  self.sats[sat_indx].ics_for 
-            y =  self.sats[sat_indx].ics_fov
+            instru = self.sats[sat_indx].instru
 
-            num_of_instru = len(x)
-            for k in range(0,num_of_instru):
-                _x = x[k]
-                _y = y[k]
-                if(_x._id):
-                    sat_acc_fl = sat_dir + str(_x._id) + '_access'
-                else:
-                    sat_acc_fl = sat_dir + 'pay' + str(k+1) + '_access'
+            num_of_instru = len(instru)
+            for k in range(0,num_of_instru): # iterate over each instrument
 
-                if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS): # if pointing-option coverage calculation find the
-                                                                               # pointing-option file to be used for this particular instrument. 
-                    popts_fl = None
-                    for pf in self.pnt_opts_fls:
-                        if pf["instrumentID"] == _x._id:
-                            popts_fl = pf["popts_fl"] 
-                            break
+                ssen_id = instru[k]._ssen_id
+                num_of_ssen = len(ssen_id)
+
+                for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
+
+                    [ _y, _x]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
+                    if(_x._id):
+                        sat_acc_fl = sat_dir + str(_x._id) + '_access'
+                    else:
+                        raise RuntimeError("Please define instrument, subsensor id.")
+
+                    if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS): # if pointing-option coverage calculation find the
+                                                                                # pointing-option file to be used for this particular instrument. 
+                        popts_fl = None
+                        for pf in self.pnt_opts_fls:
+                            if pf["instrumentID"] == _x._id:
+                                popts_fl = pf["popts_fl"] 
+                                break
+                        
+                        if not popts_fl:
+                            raise RuntimeError("No pointing options specified for instrument with ID " + str(_x.id))
+                    elif(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS):
+                        popts_fl = None
                     
-                    if not popts_fl:
-                        raise RuntimeError("No pointing options specified for instrument with ID " + str(_x.id))
-                elif(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS):
-                    popts_fl = None
-                
-                pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
-                        raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
-                        sen_fov_geom=_x.get_as_string('Geometry'), sen_orien=_x.get_as_string('Orientation'), sen_clock= _x.get_as_string('Clock'), 
-                        sen_cone=_x.get_as_string('Cone'), purely_sidelook = _y.purely_side_look, yaw180_flag = _x.get_as_string('yaw180_flag'), step_size=self.time_step, 
-                        sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= popts_fl, cov_calcs_app= self.cov_calc_app)
+                    pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
+                            raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
+                            sen_fov_geom=_x.get_as_string('Geometry'), sen_orien=_x.get_as_string('Orientation'), sen_clock= _x.get_as_string('Clock'), 
+                            sen_cone=_x.get_as_string('Cone'), purely_sidelook = _y.purely_side_look, yaw180_flag = _x.get_as_string('yaw180_flag'), step_size=self.time_step, 
+                            sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= popts_fl, cov_calcs_app= self.cov_calc_app)
 
-                prop_cov_param.append(pcp)
+                    prop_cov_param.append(pcp)
         
             
         return prop_cov_param
@@ -675,26 +539,35 @@ class PreProcess():
         min_t_step = 1e1000 # some large number
         for j in range(0,len(sats)): # iterate over all satellites
             sma = sats[j].orbit.sma 
+            instru = sats[j].instru
+            num_of_instru = len(instru)
+            for k in range(0,num_of_instru): # iterate over each instrument
 
-            for k in range(0,len(sats[j].ics_for)): # iterate over all instruments in the satellite
-                fov_at = sats[j].ics_for[k].fov_at # use FOR, and not FOV
-                f = RE/sma
-                # calculate maximum horizon angle
-                max_horizon_angle = np.rad2deg(2*np.arcsin(f))
-                if(fov_at > max_horizon_angle):
-                    fov_at = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
-                satVel = np.sqrt(GMe/sma)
-                satGVel = f * satVel
-                sinRho = RE/sma
-                hfov_deg = fov_at/2
-                elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
-                lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
-                eca_deg = lambda_deg*2 # total earth centric angle
-                AT_FP_len = RE * np.deg2rad(eca_deg)                
-                t_AT_FP = AT_FP_len / satGVel # find time taken by satellite to go over the along-track length
-                tstep = time_res_fac * t_AT_FP
-                if(tstep < min_t_step):
-                    min_t_step = tstep  
+                ssen_id = instru[k]._ssen_id
+                num_of_ssen = len(ssen_id)
+
+                for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
+
+                    [ics_fov, ics_for]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
+
+                    fov_at = ics_for.fov_at # use FOR, and not FOV
+                    f = RE/sma
+                    # calculate maximum horizon angle
+                    max_horizon_angle = np.rad2deg(2*np.arcsin(f))
+                    if(fov_at > max_horizon_angle):
+                        fov_at = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
+                    satVel = np.sqrt(GMe/sma)
+                    satGVel = f * satVel
+                    sinRho = RE/sma
+                    hfov_deg = fov_at/2
+                    elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
+                    lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
+                    eca_deg = lambda_deg*2 # total earth centric angle
+                    AT_FP_len = RE * np.deg2rad(eca_deg)                
+                    t_AT_FP = AT_FP_len / satGVel # find time taken by satellite to go over the along-track length
+                    tstep = time_res_fac * t_AT_FP
+                    if(tstep < min_t_step):
+                        min_t_step = tstep  
 
         return min_t_step
 
@@ -719,22 +592,32 @@ class PreProcess():
         min_grid_res_deg = 1e1000 # some large number
         for j in range(0,len(sats)):
 
-            for k in range(0,len(sats[j].ics_fov)): # iterate over all instruments in the satellite
-                fov = min(sats[j].ics_fov[k].fov_at, sats[j].ics_fov[k].fov_ct) # (use FOV and not FOR)
+            instru = sats[j].instru
+            num_of_instru = len(instru)
+            for k in range(0,num_of_instru): # iterate over each instrument
 
-                sinRho = RE/sats[j].orbit.sma
-                # calculate maximum horizon angle
-                max_horizon_angle = np.rad2deg(2*np.arcsin(sinRho))
-                if(fov > max_horizon_angle):
-                    fov = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
+                ssen_id = instru[k]._ssen_id
+                num_of_ssen = len(ssen_id)
 
-                hfov_deg = 0.5*fov
-                elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
-                lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
-                eca_deg = lambda_deg*2 # total earth centric angle
-                grid_res_deg = eca_deg*grid_res_fac 
-                if(grid_res_deg < min_grid_res_deg):
-                    min_grid_res_deg = grid_res_deg
+                for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
+
+                    [ics_fov, ics_for]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
+
+                    fov = min(ics_fov.fov_at, ics_fov.fov_ct) # (use FOV and not FOR)
+
+                    sinRho = RE/sats[j].orbit.sma
+                    # calculate maximum horizon angle
+                    max_horizon_angle = np.rad2deg(2*np.arcsin(sinRho))
+                    if(fov > max_horizon_angle):
+                        fov = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
+
+                    hfov_deg = 0.5*fov
+                    elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
+                    lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
+                    eca_deg = lambda_deg*2 # total earth centric angle
+                    grid_res_deg = eca_deg*grid_res_fac 
+                    if(grid_res_deg < min_grid_res_deg):
+                        min_grid_res_deg = grid_res_deg
 
         return min_grid_res_deg
 

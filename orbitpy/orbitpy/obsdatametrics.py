@@ -13,62 +13,39 @@ from instrupy.public_library import Instrument
 class ObsDataMetrics(): 
     """ Class to handle computation of observational data metrics by invoking the :code:`instrupy` package.
 
-        :ivar sat_dirs: List of all satellite directories
-        :vartype sat_dirs: list, str
-
-        :ivar cov_grid_fl: Filepath to the coverage grid data
-        :vartype cov_grid_fl: str
-
-        :ivar instru_specs: List of instrument specifications.  Currently hardcoded to use one instrument.
-        :vartype instru_specs: list, dict
+        :ivar sats: List of Satellites
+        :vartype sats: list, :class:`orbitpy.util.Satellite`
 
     """
-    def __init__(self, sat_dirs = None, cov_grid_fl = None, instru_specs = dict()):
-      self.sat_dirs = sat_dirs
-      self.cov_grid_fl = cov_grid_fl if cov_grid_fl else None
-      self.instru_specs = instru_specs
+    def __init__(self, sats = None):
+
+        self.sats = sats
 
     def compute_all_obs_dmetrics(self):
-        """ Iterate over all satellite directories and compute the observational data metrics. 
-            The instrument specifications from the class instance variable is used. THe satellite state files (with name *state*) and 
-            access files (with name *...._access*) are expected to be present each of the satellite directories. A 
-            seperate data-file (named *payID_obsMetrics*, where payID is the payload identifier ) containing the observational 
-            metrics is produced per payload. 
-        """
-        
-        # process each access file separately
-        for _dir in self.sat_dirs:           
-            
-            sat_state_fl = os.path.join(_dir, 'state')
-            files = glob.glob(_dir+'*_access')
-            for accessInfo_fl in files:               
 
-                instru_id = str(accessInfo_fl).split("_")[-2].split('/')[-1]   
-                instru_id = str(accessInfo_fl).split('/')[-1]
-                if "_access" in instru_id:
-                    instru_id = instru_id.replace("_access","")   
-
-                instru = None
-                for _isp in self.instru_specs: # iterate through list of instruments and find the instrument with matching ID
-                    if(str(_isp["@id"]) == instru_id):
-                        instru = Instrument.from_json(_isp)  
-
-                if(instru):        
-                    # produce observational metrics
-                    obsMetrics_fl = os.path.join(_dir, instru_id +'_obsMetrics')
-                    ObsDataMetrics.compute_obs_data_metrics(instru, sat_state_fl, accessInfo_fl,
-                                                obsMetrics_fl, self.cov_grid_fl)
-                else:
-                    raise RuntimeError("No matching instrument found for the access file with path: " + str(accessInfo_fl))
+        for _sat in self.sats:           
+            sat_state_fl = os.path.join(_sat.dir_pth, 'state')
+            for _instru in _sat.instru: # iterate through list of instruments
+                for _ssid in _instru._ssen_id: # iterate through list of subsensors ids
+                    accessInfo_fl = os.path.join(_sat.dir_pth, str(_ssid)+"_access")
+                    obsMetrics_fl = os.path.join(_sat.dir_pth, str(_ssid) +'_obsMetrics')
+                    ObsDataMetrics.compute_obs_data_metrics(_instru, _ssid, sat_state_fl, accessInfo_fl,
+                                                obsMetrics_fl)
 
     @staticmethod
-    def compute_obs_data_metrics(instru, state_fl, access_fl, datametrics_fl, covgrid_fl = None): 
+    def compute_obs_data_metrics(instru, ssid, state_fl, access_fl, datametrics_fl): 
         ''' Generate typical data metrics for a set of instrument, satellite states, access data. 
             Iterate over all access times in the access data file. The time column of the satellite-state data file and the
             access data file must be referenced to the same epoch and produced at the same time-step size.
             This function iteratively calls :code:`calc_typ_data_metrics` of the :code:`instrupy` over all access events 
             available in the input file. The ouput is a datafile containing the observation metrics.
             
+            :param instru: Instrument object for which the data-metrics are to be calculated.
+            :paramtype instru: :class:`instrupy.public_library.Instrument`
+
+            :param ssid: Subsensor id
+            :paramtype ssid: str
+
             :param state_fl: Filepath to CSV file containing data of satellite states at fixed time-step.
                     First four rows convey general information. The second row conveys the Epoch in Julian Days UT1. The third row contains the step size in seconds.
                     The fifth row contains the following header elements, and the following rows contain the data corresponding to these headers.
@@ -125,14 +102,6 @@ class ObsDataMetrics():
         step_size = pd.read_csv(access_fl, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
         step_size = float(step_size[0][0].split()[4])
 
-        '''        
-        poi_info_df = pd.read_csv(covgrid_fl, dtype=str)
-        types_dict = {'regi': int, 'gpi': int, 'lat[deg]': float, 'lon[deg]': float}
-        for col, col_type in types_dict.items():
-            poi_info_df[col] = poi_info_df[col].astype(col_type)
-        poi_info_df = poi_info_df.set_index('gpi')
-        '''
-
         # Read the access file
         access_info_df = pd.read_csv(access_fl,skiprows = [0,1,2,3]) # read the access times       
 
@@ -175,7 +144,7 @@ class ObsDataMetrics():
                 SpacecraftOrbitState["vy[km/s]"] = sat_state_df.loc[time_i]["VY[km/s]"] 
                 SpacecraftOrbitState["vz[km/s]"] = sat_state_df.loc[time_i]["VZ[km/s]"] 
 
-                obsv_metrics = instru.calc_typ_data_metrics(SpacecraftOrbitState, TargetCoords) # calculate the data metrics specific to the instrument type
+                obsv_metrics = instru.calc_typ_data_metrics(SpacecraftOrbitState, TargetCoords, ssid) # calculate the data metrics specific to the instrument type
                 _v = dict({'observationTimeIndex':time_i, 'regi': regi, 'gpi': gpi, 'lat[deg]':TargetCoords["Lat [deg]"], 'lon[deg]':TargetCoords["Lon [deg]"], 'pntopti': pOpti }, **obsv_metrics)
                 if idx==0: #1st iteration
                     w.writerow(_v.keys())    
