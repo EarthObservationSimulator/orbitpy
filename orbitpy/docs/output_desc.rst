@@ -50,7 +50,9 @@ the latitude and longitude (in degrees) seen by the instrument pointing-axis.
 Common final access file-format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The final access file is named as *access*. The data is CSV formatted and includes the following columns: 
+The final access file is named as *payMmodeN_access*, where *payM* is the identifier of the payload and *modeN* is the identifier of the mode to which the access data corresponds. 
+Random identifier(s) is assigned in case of no user-id specificiation (for the :code:`@id` JSON key in the instrument definition).
+The data is CSV formatted and includes the following columns: 
 
 .. csv-table:: Observation data metrics description
    :header: Column, Data type, Units, Description
@@ -136,9 +138,10 @@ Observation Data Metrics
 The observation data metrics are produced by the :class:`orbitpy.obsdatametrics` module which inturn invokes the :code:`instrupy` package.
 The module can be initialized by dictionary containing the instrument specifications, path to the coverage grid file and a list of directories containing the satellite 
 state data, access data. The name of the state data file is presumed to be *state* and the name of the access data file is presumed to be of the
-format *payI_access*, where *payI* is the identifier of the payload to which the access data corresponds. 
+format *payMmodeN_access*, where *payM* is the identifier of the payload and *modeN* is the identifier of the mode to which the access data corresponds. 
+Random identifier(s) is assigned in case of no user-id specificiation (for the :code:`@id` JSON key in the instrument definition).
 
-The name of the output file is *pay1_obsMetrics*. The first row of the resulting file contains the mission epoch in Julian Day UT1. 
+The name of the output file is *payMmodeN_obsMetrics*. The first row of the resulting file contains the mission epoch in Julian Day UT1. 
 The second row contains the time-step size in seconds. The third row contains the column headers and the subsequent rows contain the corresponding
 data. The description of the first two columns is given below. The rest of the columns contain the data-metrics corresponding to the particular
 instrument type (passive-optical, SAR or basic sensor). Description of the data metrics can be found in the :code:`instrupy` documentation.

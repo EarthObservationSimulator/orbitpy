@@ -111,9 +111,7 @@
                 "sideLookAngle": 12.5
             },
             "maneuverability":{
-                "@type": "ROLLONLY",
-                "rollMin": -5,
-                "rollMax": 5
+                "@type": "Yaw180"
             }        
             }
         ]
