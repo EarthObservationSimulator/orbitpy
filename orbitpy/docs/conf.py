@@ -15,6 +15,7 @@ import sys
 sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('../tests/orbitpropcov/OrbitPropCovGrid/'))
 sys.path.insert(0, os.path.abspath('../tests/orbitpropcov/OrbitPropCovPopts/'))
+sys.path.insert(0, os.path.abspath('../tests/validation/'))
 sys.path.insert(0, os.path.abspath('../tests/communications/'))
 sys.path.insert(0, os.path.abspath('../tests/preprocess/'))
 
