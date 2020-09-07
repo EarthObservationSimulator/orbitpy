@@ -190,7 +190,9 @@ class Coverage:
         fig.suptitle(self.program,fontsize = 22)
         
         # Set initial viewing angle
-        ax.view_init(azim=-105,elev = 40)        
+        ax.view_init(azim=-105,elev = 40)    
+        fig.set_size_inches(8*1.2,5*1.2)
+        
         plt.show()
  
     def writeOrbitPyGrid(self,path):

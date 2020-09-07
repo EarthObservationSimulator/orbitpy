@@ -1,0 +1,831 @@
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(SPKINSUFFDATA) --
+ 
+Insufficient ephemeris data has been loaded to compute the position of
+-10000001 (Sat2_3) relative to 0 (SOLAR SYSTEM BARYCENTER) at the ephemeris
+epoch 2018 JAN 15 14:25:09.184.
+ 
+A traceback follows.  The name of the highest level module is first.
+spkpos_c --> SPKPOS --> SPKEZP --> SPKAPO --> SPKGPS
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(TOOFEWSTATES) --
+ 
+At least 4 states are required to define a Hermite polynomial of degree 7.
+Number of states supplied: 2
+ 
+A traceback follows.  The name of the highest level module is first.
+spkw13_c --> SPKW13
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(TOOFEWSTATES) --
+ 
+At least 4 states are required to define a Hermite polynomial of degree 7.
+Number of states supplied: 2
+ 
+A traceback follows.  The name of the highest level module is first.
+spkw13_c --> SPKW13
+ 
+================================================================================
+ 
+================================================================================
+ 
+Toolkit version: N0065
+ 
+SPICE(TOOFEWSTATES) --
+ 
+At least 4 states are required to define a He

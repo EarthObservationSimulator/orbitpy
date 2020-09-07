@@ -1,0 +1,30 @@
+GMAT Build Date: Apr 19 2018 15:28:18
+
+GMAT Log file set to ../output/GmatLog.txt
+Moderator is updating data files...
+Moderator is creating core engine...
+
+libpython3.6m.so.1.0: cannot open shared object file: No such file or directory
+*** Library "../plugins/libPythonInterface" did not open.
+
+libmx.so: cannot open shared object file: No such file or directory
+*** Library "../plugins/libMatlabInterface" did not open.
+Successfully set Planetary Source to use: DE405
+Successfully set Planetary Source to use: DE405
+Successfully set Planetary Source to use: DE405
+Setting nutation file to ../data/planetary_coeff/NUTATION.DAT
+Setting leap seconds file to ../data/time/tai-utc.dat
+2020-08-31 21:33:07 GMAT Moderator successfully created core engine
+Successfully set Planetary Source to use: DE405
+Successfully set Planetary Source to use: DE405
+2020-08-31 21:33:07 GMAT GUI successfully launched.
+*** Unable to load the dynamic library "../plugins/libPythonInterface"
+*** Error loading "libMatlabInterface": GMAT could not load the MATLAB interface. Please check that MATLAB is installed and configured correctly.  See the User Guide for instructions, or disable the appropriate PLUGIN line in bin/gmat_startup_file.txt to remove this error.
+
+Interpreting scripts from the file.
+***** file: /home/reno/Documents/shield/repos/orbits/orbitpy/tests/validation/GMAT/08/test_08.m
+Successfully set Planetary Source to use: DE405
+Successfully set Planetary Source to use: DE405
+Successfully interpreted the script
+Moderator is deleting core engine...
+2020-08-31 21:34:12 GMAT GUI exiting.
