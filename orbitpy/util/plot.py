@@ -10,14 +10,101 @@ def orbitpyStateArray(sat_state_fl):
 def gmatStateArray(sat_state_fl):
         
     data = np.genfromtxt(sat_state_fl, skip_header = 1)
-    return data    
+    return data 
 
-def setPlotStyle(program='Orbitpy'):
+def stkStateArray(sat_state_fl):
+    data = np.genfromtxt(sat_state_fl, skip_header = 6)
+    return data
+
+def setPlotStyle(program='OrbitPy'):
     
     if program == 'OrbitPy':
         plt.title('ECI Data (OrbitPy)')
     elif program == 'GMAT':
         plt.title('ECI Data (GMAT)')
+    elif program == 'STK':
+        plt.title('ECI Data (STK)')
+        
+def setPlotStyleKepler(program='OrbitPy'):
+    
+    if program == 'OrbitPy':
+        plt.title('Keplerian Data (OrbitPy)')
+    elif program == 'GMAT':
+        plt.title('Keplerian Data (GMAT)')
+    elif program == 'STK':
+        plt.title('Keplerian Data (STK)')
+        
+def plotSMA(data,program='OrbitPy'):
+    t = data[:,0]
+    SMA = data[:,1]
+    
+    plt.figure()
+    lines = plt.plot(t,SMA)
+    
+    setPlotStyleKepler(program)
+    plt.setp(lines,color = 'r')
+    plt.xlabel('time (s)')
+    plt.ylabel('SMA (km)')
+    
+def plotECC(data,program='OrbitPy'):
+    t = data[:,0]
+    ECC = data[:,2]
+    
+    plt.figure()
+    lines = plt.plot(t,ECC)
+    
+    setPlotStyleKepler(program)
+    plt.setp(lines,color = 'b')
+    plt.xlabel('time (s)')
+    plt.ylabel('ECC')
+    
+def plotINC(data,program='OrbitPy'):
+    t = data[:,0]
+    INC = data[:,3]
+    
+    plt.figure()
+    lines = plt.plot(t,INC)
+    
+    setPlotStyleKepler(program)
+    plt.setp(lines,color = 'g')
+    plt.xlabel('time (s)')
+    plt.ylabel('INC (deg)')
+    
+def plotRAAN(data,program='OrbitPy'):
+    t = data[:,0]
+    RAAN = data[:,4]
+    
+    plt.figure()
+    lines = plt.plot(t,RAAN)
+    
+    setPlotStyleKepler(program)
+    plt.setp(lines,color = 'r')
+    plt.xlabel('time (s)')
+    plt.ylabel('RAAN (deg)')
+    
+def plotAOP(data,program='OrbitPy'):
+    t = data[:,0]
+    AOP = data[:,5]
+    
+    plt.figure()
+    lines = plt.plot(t,AOP)
+    
+    setPlotStyleKepler(program)
+    plt.setp(lines,color = 'b')
+    plt.xlabel('time (s)')
+    plt.ylabel('AOP (deg)')
+    
+def plotTA(data,program='OrbitPy'):
+    t = data[:,0]
+    SMA = data[:,6]
+    
+    plt.figure()
+    lines = plt.plot(t,SMA)
+    
+    setPlotStyleKepler(program)
+    plt.setp(lines,color = 'g')
+    plt.xlabel('time (s)')
+    plt.ylabel('TA (deg)')
 
 def plotX(data,program='OrbitPy'):
     t = data[:,0]
@@ -38,14 +125,10 @@ def plotY(data,program='OrbitPy'):
     plt.figure()
     lines = plt.plot(t,x)
     
+    setPlotStyle(program)
     plt.setp(lines,color = 'b')
     plt.xlabel('time (s)')
     plt.ylabel('Y (km)')
-
-    if program == 'OrbitPy':
-        plt.title('ECI Data (OrbitPy)')
-    elif program == 'GMAT':
-        plt.title('ECI Data (GMAT)')
 
 
 def plotZ(data,program='OrbitPy'):
@@ -59,7 +142,6 @@ def plotZ(data,program='OrbitPy'):
     plt.setp(lines,color = 'g')
     plt.xlabel('time (s)')
     plt.ylabel('Z (km)')
-    
     
 def plotDx(data,program='OrbitPy'):
     t = data[:,0]
@@ -98,6 +180,80 @@ def plotDz(data,program='OrbitPy'):
     plt.xlabel('time (s)')
     plt.ylabel('Z Diff (km)')
     
+def plotDsma(data,program='OrbitPy'):
+    t = data[:,0]
+    sma = data[:,1]
+    
+    plt.figure()
+    lines = plt.plot(t,sma)
+    
+    plt.title("SMA Difference Between States")
+    plt.setp(lines,color = 'r')
+    plt.xlabel('time(s)')
+    plt.ylabel('SMA Diff (km)')
+
+def plotDecc(data,program='OrbitPy'):
+    t = data[:,0]
+    ecc = data[:,2]
+    
+    plt.figure()
+    lines = plt.plot(t,ecc)
+    
+    plt.title("ECC Difference Between States")
+    plt.setp(lines,color = 'b')
+    plt.xlabel('time (s)')
+    plt.ylabel('ECC Diff')
+
+
+def plotDinc(data,program='OrbitPy'):
+    t = data[:,0]
+    inc = data[:,3]
+    
+    plt.figure()
+    lines = plt.plot(t,inc)
+    
+    plt.title("INC Difference Between States")
+    plt.setp(lines,color = 'g')
+    plt.xlabel('time (s)')
+    plt.ylabel('INC Diff (deg)')
+    
+def plotDraan(data,program='OrbitPy'):
+    t = data[:,0]
+    raan = data[:,4]
+    
+    plt.figure()
+    lines = plt.plot(t,raan)
+    
+    plt.title("RAAN Difference Between States")
+    plt.setp(lines,color = 'r')
+    plt.xlabel('time(s)')
+    plt.ylabel('RAAN Diff (deg)')
+
+def plotDaop(data,program='OrbitPy'):
+    t = data[:,0]
+    aop = data[:,5]
+    
+    plt.figure()
+    lines = plt.plot(t,aop)
+    
+    plt.title("AOP Difference Between States")
+    plt.setp(lines,color = 'b')
+    plt.xlabel('time (s)')
+    plt.ylabel('AOP Diff (deg)')
+
+
+def plotDta(data,program='OrbitPy'):
+    t = data[:,0]
+    ta = data[:,6]
+    
+    plt.figure()
+    lines = plt.plot(t,ta)
+    
+    plt.title("TA Difference Between States")
+    plt.setp(lines,color = 'g')
+    plt.xlabel('time (s)')
+    plt.ylabel('TA Diff (deg)')
+    
     
 def detectHeader(sat_state_fl):
     
@@ -106,12 +262,28 @@ def detectHeader(sat_state_fl):
     line = file.readline()
     lineCount = 0
     
-    while any(c.isalpha() for c in line):
+    while any((c.isalpha() and c != 'e') for c in line) or all((c.isnumeric() == False) for c in line):
         lineCount = lineCount + 1
         line = file.readline()
     
     file.close()
     return lineCount
+
+def equalizeData(data1,data2):
+    
+    size1 = len(data1[:,0])
+    size2 = len(data2[:,0])
+    diff = size1 - size2
+    
+    if diff != 0:
+        print("WARNING: numCols not equal! Removed " + str(diff) + "rows from input 1.")
+        if size1 > size2:
+            data1 = data1[0:-diff,:]
+        else:
+            data2 = data2[0:diff,:]
+            
+    return data1,data2
+            
         
 
 # Begin command line parser execution
@@ -129,6 +301,21 @@ parser.add_argument('-dx',action='store_true',help='Plot the difference between 
 parser.add_argument('-dy',action='store_true',help='Plot the difference between the y positions of the two inputs as a function of time.')
 parser.add_argument('-dz',action='store_true',help='Plot the difference between the z positions of the two inputs as a function of time.')
 
+# keplerian input
+parser.add_argument('-sma', action='store_true',help='Plot the SMA of the orbit/s as a function of time.')
+parser.add_argument('-ecc', action='store_true',help='Plot the ECC of the orbit/s as a function of time.')
+parser.add_argument('-inc', action='store_true',help='Plot the INC of the orbit/s as a function of time.')
+parser.add_argument('-raan', action='store_true',help='Plot the RAAN of the orbit/s as a function of time.')
+parser.add_argument('-aop', action='store_true',help='Plot the AOP of the orbit/s as a function of time.')
+parser.add_argument('-ta', action='store_true',help='Plot the TA of the orbit/s as a function of time.')
+
+parser.add_argument('-dsma',action='store_true',help='Plot the difference between the SMA of the two inputs as a function of time.')
+parser.add_argument('-decc',action='store_true',help='Plot the difference between the ECC of the two inputs as a function of time.')
+parser.add_argument('-dinc',action='store_true',help='Plot the difference between the INC of the two inputs as a function of time.')
+parser.add_argument('-draan',action='store_true',help='Plot the difference between the RAAN of the two inputs as a function of time.')
+parser.add_argument('-daop',action='store_true',help='Plot the difference between the AOP of the two inputs as a function of time.')
+parser.add_argument('-dta',action='store_true',help='Plot the difference between the TA of the two inputs as a function of time.')
+
 args = parser.parse_args()
 
 ## Begin program execution
@@ -136,6 +323,7 @@ args = parser.parse_args()
 # define header sizes
 GMAT_SIZE = 1
 ORBITPY_SIZE = 5
+STK_SIZE = 6
 
 numHeaderLines = []
 data = []
@@ -148,13 +336,21 @@ for i in range(len(args.path)):
 
     # if OrbitPy
     if numHeaderLines[i] == ORBITPY_SIZE:
+        print("INPUT: OrbitPy detected")
         data.append(orbitpyStateArray(args.path[i]))
         program.append('OrbitPy')
     # elif GMAT
     elif numHeaderLines[i] == GMAT_SIZE:
+        print("INPUT: GMAT detected")
         data.append(gmatStateArray(args.path[i]))
         program.append('GMAT')
-
+    elif numHeaderLines[i] == STK_SIZE:
+        print("INPUT: STK detected")
+        data.append(stkStateArray(args.path[i]))
+        program.append('STK')
+    else:
+        msg = "INPUT: Header count of " + str(numHeaderLines[i]) + " doesn't match GMAT or OrbitPy."
+        print(msg)
 # Plot positions as requested
 for i in range(len(args.path)):
     if args.x == True:
@@ -165,10 +361,31 @@ for i in range(len(args.path)):
         
     if args.z == True:
         plotZ(data[i],program[i])
+        
+    # keplerian       
+    if args.sma == True:
+        plotSMA(data[i],program[i])
+        
+    if args.ecc == True:
+        plotECC(data[i],program[i])
+        
+    if args.inc == True:
+        plotINC(data[i],program[i])
+        
+    if args.raan == True:
+        plotRAAN(data[i],program[i])
+        
+    if args.aop == True:
+        plotAOP(data[i],program[i])
+        
+    if args.ta == True:
+        plotTA(data[i],program[i])
 
 if len(args.path) > 1:
+    
+    data[0],data[1] = equalizeData(data[0],data[1])
     diffData = data[0]
-    diffData[:,1:5] = data[0][:,1:5] - data[1][:,1:5]
+    diffData[:,1:7] = data[0][:,1:7] - data[1][:,1:7]
     
     # Plot differences as requested
     if args.dx == True:
@@ -177,5 +394,24 @@ if len(args.path) > 1:
         plotDy(diffData)
     if args.dz == True:
         plotDz(diffData)
+        
+    # keplerian
+    if args.dsma == True:
+        plotDsma(diffData)
+        
+    if args.decc == True:
+        plotDecc(diffData)
+        
+    if args.dinc == True:
+        plotDinc(diffData)
+        
+    if args.draan == True:
+        plotDraan(diffData)
+        
+    if args.daop == True:
+        plotDaop(diffData)
+        
+    if args.dta == True:
+        plotDta(diffData)
     
 plt.show()

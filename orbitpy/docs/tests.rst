@@ -2,7 +2,7 @@ Tests
 ******
 
 How to
-^^^^^^^^
+======
 
 Testing is done using the :mod:`unittest` module and :mod:`nose` module. Use the below command to run all the tests:
 
@@ -11,7 +11,7 @@ Testing is done using the :mod:`unittest` module and :mod:`nose` module. Use the
         make runtest
 
 Testing strategies
-^^^^^^^^^^^^^^^^^^^^
+==================
 
 1. Test the expected format of the output files.
 2. Use of random input values and calculated output values to validate the test.
@@ -26,6 +26,10 @@ Testing strategies
             are used.
 3. Using known inputs, and outputs from external sources (eg: literature, other orbital simulation softwares such as GMAT, STK)
 4. Run tests after making any revisions to the code. This helps to check that the revisions do not have uninteded effects on the results.
+
+
+Test Modules
+============
 
 :class:`test_OrbitPropCovGrid_1`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -43,6 +47,24 @@ Testing strategies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: test_OrbitPropCovGrid_3
+   :members:
+   
+:class:`test_GMAT_propagation`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_GMAT_propagation
+   :members:
+
+:class:`test_STK_propagation`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_STK_propagation
+   :members:
+   
+:class:`test_STK_coverage`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_STK_coverage
    :members:
 
 :class:`test_OrbitPropCovPopts_1`
