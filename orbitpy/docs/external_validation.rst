@@ -266,10 +266,10 @@ The 12 test cases were generated using combinations of the following inputs.
 3.  A 15 degree along track, 10 degree across track rectangular sensor.
 
 **Orientations:**
-(X,Y,Z) 213 Euler (instrinsic) rotations in degrees.
+213 Euler (instrinsic) rotations in degrees.
 
 1.  (0,0,0)
-2.  (30,24,-6)
+2.  (Y = 30, X = 24, Z = -6), instrinsic, order = first Y, then X, then Z
 3.  (-30,-25,5)
 
 

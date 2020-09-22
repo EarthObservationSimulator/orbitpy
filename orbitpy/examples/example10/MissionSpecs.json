@@ -18,68 +18,55 @@
         "mass": 243, 
         "volume": 2.5, 
         "power": 500, 
-            "mode":[
-                    {
-                    "@type": "Stripmap",
-                    "@id": "modeTest",
-                    "orientation": {
-                        "convention": "SIDE_LOOK",
-                        "sideLookAngle": 20.5
-                    },
-                    "dataRate": 110,
-                    "pulseWidth": 33.4e-6,
-                    "antennaAlongTrackDim": 10.7,
-                    "antennaCrossTrackDim": 2.16, 
-                    "antennaApertureEfficiency": 0.6, 
-                    "operatingFrequency": 1.2757e9, 
-                    "peakTransmitPower": 1000, 
-                    "chirpBandwidth": 19e6,      
-                    "minimumPRF": 1463, 
-                    "maximumPRF": 1640, 
-                    "radarLosses": 3.5, 
-                    "sceneNoiseTemp": 290, 
-                    "altitude": 800,
-                    "bitsPerPixel": 5, 
-                    "systemNoiseFigure": 5.11,
-                    "sigmaNESZthreshold": -10, 
-                    "numStripsInScene":14392,
-                    "maneuverability":{
-                        "@type": "YAW180ROLL",
-                        "rollMin": -10,
-                        "rollMax": 10    
+        "dataRate": 110,
+        "pulseWidth": 33.4e-6,
+        "antennaAlongTrackDim": 10.7,
+        "antennaCrossTrackDim": 2.16, 
+        "antennaApertureEfficiency": 0.6, 
+        "operatingFrequency": 1.2757e9, 
+        "peakTransmitPower": 1000, 
+        "chirpBandwidth": 19e6,      
+        "minimumPRF": 1463, 
+        "maximumPRF": 1640, 
+        "radarLosses": 3.5, 
+        "sceneNoiseTemp": 290, 
+        "altitude": 800,
+        "bitsPerPixel": 5, 
+        "systemNoiseFigure": 5.11,
+        "sigmaNESZthreshold": -10, 
+        "numStripsInScene":14392,
+        "orientation": {
+            "convention": "SIDE_LOOK",
+            "sideLookAngle": 20.5
+        },
+        "mode":[
+                {
+                "scanTechnique": "Stripmap",
+                "@id": "modeTest",
+                "maneuverability":{
+                    "@type": "YAW180ROLL",
+                    "rollMin": -10,
+                    "rollMax": 10    
+                },
+                "swathConfig": {
+                    "@type": "full",
+                    "fixedSwathSize": 10
+                },
+                "polarization": {
+                    "@type": "dual",
+                    "pulseConfig": {
+                        "@type": "SMAP"                                                
                     }
-                    },
-                    {
-                        "@type": "Stripmap",
-                        "orientation": {
-                            "convention": "SIDE_LOOK",
-                            "sideLookAngle": 20.5
-                        },
-                        "dataRate": 110,
-                        "pulseWidth": 33.4e-6,
-                        "antennaAlongTrackDim": 10.7,
-                        "antennaCrossTrackDim": 2.16, 
-                        "antennaApertureEfficiency": 0.6, 
-                        "operatingFrequency": 1.2757e9, 
-                        "peakTransmitPower": 1000, 
-                        "chirpBandwidth": 19e6,      
-                        "minimumPRF": 1463, 
-                        "maximumPRF": 1640, 
-                        "radarLosses": 3.5, 
-                        "sceneNoiseTemp": 290, 
-                        "altitude": 800,
-                        "bitsPerPixel": 5, 
-                        "systemNoiseFigure": 5.11,
-                        "sigmaNESZthreshold": -10, 
-                        "numStripsInScene":14392,
-                        "maneuverability":{
-                            "@type": "YAW180ROLL",
-                            "rollMin": -10,
-                            "rollMax": 10    
-                        }
-                        }
-
-                ]
+                }
+                },
+                {
+                "scanTechnique": "ScanSAR",
+                "maneuverability":{
+                    "@type": "YAW180" 
+                },
+                "numSubSwaths": 5
+                }
+            ]
     },
     {        
         "@type": "Basic Sensor",
