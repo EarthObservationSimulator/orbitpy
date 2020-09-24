@@ -1,17 +1,12 @@
 //------------------------------------------------------------------------------
-//                               Mission
+//                           TATC coverage calculator
 //------------------------------------------------------------------------------
 //
 // Author: Vinay Ravindra
-// Created: 2020.02.12
+// Created: 2020.09.22
 //
 /**
- * Run a single satellite mission.
- * 
- * There are two types of coverage calculations possible using OC:
- * (1) accumulate coverage as we propagate.
- * (2) propagate first with large time-step, and later accumulate using interpolation with smaller time steps.
- * Method (1) is implemented.
+ * Run coverage calculations. Coverage calculation at the time-steps given in the input satellite state file.
  * 
  * The pointing of the satellite is fixed to be Nadir-pointing nominally. When the 'yaw180_flag' is set,
  * the satellite is rotated about 180 deg about yaw axis and additional coverage is calculated.
@@ -56,8 +51,8 @@
 #include "oci_utils.h"
 
 #define DEBUG_CONSISE
-//#define DEBUG_CHK_INPS
-//#define COMPUTE_AND_STORE_POI_GEOMETRY
+#define DEBUG_CHK_INPS
+// #define COMPUTE_AND_STORE_POI_GEOMETRY
 
 using namespace std;
 using namespace GmatMathUtil;
@@ -100,22 +95,13 @@ int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
 }
 
 /**
- * @param epoch mission epoch in UTCGregorian 
- * @param sma semi-major axis in kilometers
- * @param ecc eccentricity
- * @param inc inclination in degrees
- * @param raan right ascension of the ascending node in degrees
- * @param aop argument of perigee in degrees
- * @param ta true anomaly in degrees
- * @param duration mission duration in days
+ * @param satStateFp Filename, path to write the satellite ECI states
  * @param covGridFp coverage grid file path and name
  * @param fovGeom sensor FOV geometry type
  * @param senOrien sensor orientation (euler angles in degrees and sequence)
  * @param fovClock sensor clock angles in degrees
  * @param fovCone sensor cone angles in degrees
  * @param yaw180_flag 
- * @param stepSize propagation step size
- * @param satStateFp Filename, path to write the satellite ECI states
  * @param satAccFp Filename, path to write the computed satellite access data
  *
  */
@@ -134,54 +120,29 @@ int main(int argc, char *argv[])
   //MessageInterface::SetLogEnable(true);
   MessageInterface::ShowMessage("%s\n",
                                 GmatTimeUtil::FormatCurrentTime().c_str());
-  /** Parse input arguments **/
-  string _epoch; 
-  Real sma; 
-  Real ecc; 
-  Real inc; 
-  Real raan; 
-  Real aop; 
-  Real ta; 
-  Real duration; 
+  /** Parse input arguments **/ 
+  string satStateFp;
   string covGridFp; 
   string fovGeom; 
   string _senOrien; 
   string _fovClock; 
   string _fovCone;
   bool yaw180_flag; 
-  Real stepSize; 
-  string satStateFp;
   string satAccFp;
 
-  if(argc==18){            
-      _epoch = argv[1];
-      sma = Real(stod(argv[2]));
-      ecc = Real(stod(argv[3]));
-      inc = Real(stod(argv[4]));
-      raan = Real(stod(argv[5]));
-      aop = Real(stod(argv[6]));
-      ta = Real(stod(argv[7]));
-      duration = Real(stod(argv[8]));
-      covGridFp = argv[9];
-      fovGeom = argv[10];
-      _senOrien = argv[11];
-      _fovClock = argv[12];
-      _fovCone = argv[13];
-      yaw180_flag = bool(stoi(argv[14]));
-      stepSize = Real(stod(argv[15]));
-      satStateFp = argv[16];
-      satAccFp = argv[17];
+  if(argc==9){            
+      covGridFp = argv[1];
+      fovGeom = argv[2];
+      _senOrien = argv[3];
+      _fovClock = argv[4];
+      _fovCone = argv[5];
+      yaw180_flag = bool(stoi(argv[6]));
+      satStateFp = argv[7];
+      satAccFp = argv[8];
    }else{
       MessageInterface::ShowMessage("Please input right number of arguments.\n");
       exit(1);
    }  
-
-   // Extract values from string comma separated string arguments
-   RealArray epoch(oci_utils::convertStringVectortoRealVector(oci_utils::extract_dlim_str(_epoch, ',')));
-   if(epoch.size()!=6){
-      MessageInterface::ShowMessage("Please enter epoch in the format of \"year,month,day,hour, minute, second\".\n");
-      exit(1);
-   }
 
    RealArray senOrien(oci_utils::convertStringVectortoRealVector(oci_utils::extract_dlim_str(_senOrien, ',')));
    if(senOrien.size()!=6){
@@ -201,15 +162,7 @@ int main(int argc, char *argv[])
    }
 
    #ifdef DEBUG_CHK_INPS
-      MessageInterface::ShowMessage("epoch is %16.9f year, %16.9f month, %16.9f day, %16.9f hour, %16.9f min, %16.9f second \n", 
-      epoch[0], epoch[1], epoch[2], epoch[3], epoch[4], epoch[5]);
-      MessageInterface::ShowMessage("SMA is %16.9f \n", sma);
-      MessageInterface::ShowMessage("ECC is %16.9f \n", ecc);
-      MessageInterface::ShowMessage("INC is %16.9f \n", inc);
-      MessageInterface::ShowMessage("RAAN is %16.9f \n", raan);
-      MessageInterface::ShowMessage("AOP is %16.9f \n", aop);
-      MessageInterface::ShowMessage("TA is %16.9f \n", ta);
-      MessageInterface::ShowMessage("Mission Duration is %16.9f \n", duration);
+      MessageInterface::ShowMessage("Satellite states file path, name is: %s \n", satStateFp.c_str());
       MessageInterface::ShowMessage("Coverage grid file path is %s \n", covGridFp.c_str());
       MessageInterface::ShowMessage("Sensor type is %s \n", fovGeom.c_str());
       MessageInterface::ShowMessage("Sensor Orientation is %16.9f, %16.9f, %16.9f,%16.9f, %16.9f, %16.9f \n", senOrien[0], senOrien[1], senOrien[2], senOrien[3], senOrien[4], senOrien[5]);
@@ -224,8 +177,6 @@ int main(int argc, char *argv[])
       }
       MessageInterface::ShowMessage("\n");
       MessageInterface::ShowMessage("yaw180_flag is %d \n", yaw180_flag);
-      MessageInterface::ShowMessage("Step size is %16.9f \n", stepSize);
-      MessageInterface::ShowMessage("Satellite states file path, name is: %s \n", satStateFp.c_str());
       MessageInterface::ShowMessage("Satellite access file path, name is: %s \n", satAccFp.c_str());
    #endif
    
@@ -241,7 +192,18 @@ int main(int argc, char *argv[])
    #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("**** Finished reading in Coverage grid ******\n");
    #endif
-   
+
+   #ifdef DEBUG_CONSISE
+         MessageInterface::ShowMessage("**** About to read satellite state file header ******\n");
+   #endif
+   // Read the epoch and satellite state at the epoch from input satellite state file
+   Real epoch, duration, stepSize;
+   Rvector6 state0;
+   oci_utils::readSatStateFileHeader(satStateFp,  epoch,  stepSize, duration, state0);
+   #ifdef DEBUG_CONSISE
+         MessageInterface::ShowMessage("**** Finished reading satellite state file header ******\n");
+   #endif
+
    // Set the global format setting
    GmatGlobal *global = GmatGlobal::Instance();
    global->SetActualFormat(false, false, 16, 1, false);
@@ -270,7 +232,7 @@ int main(int argc, char *argv[])
       Spacecraft               *sat1;
       Propagator               *prop;
       CoverageChecker          *covChecker;
-	   Earth                    *earth;
+	  Earth                    *earth;
       CustomSensor             *customSensor;
       NadirPointingAttitude    *attitude;
       LagrangeInterpolator     *interp = new LagrangeInterpolator( // Not used really.
@@ -288,12 +250,11 @@ int main(int argc, char *argv[])
       
       // Create the epoch object and set the initial epoch
       date = new AbsoluteDate();
-      date->SetGregorianDate(epoch[0], epoch[1], epoch[2], epoch[3], epoch[4], epoch[5]);
+      date->SetJulianDate(epoch);
       
       // Create the spacecraft state object and set Keplerian elements
       state = new OrbitState();
-      state->SetKeplerianState( sma, ecc, inc*RAD_PER_DEG, raan*RAD_PER_DEG, 
-                                 aop*RAD_PER_DEG, ta*RAD_PER_DEG );
+      state->SetCartesianState(state0);
       
       #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("**** date and state OK "
@@ -370,25 +331,7 @@ int main(int argc, char *argv[])
       IntegerArray   loopPoints_yaw180;
 
       /** Write satellite states and access files **/
-      const int prc = std::numeric_limits<double>::digits10 + 1; // set to maximum precision
-
-      // Satellite state file initialization
-      ofstream satOut; 
-      satOut.open((satStateFp).c_str(),ios::binary | ios::out);
-      satOut << "Satellite states are in Earth-Centered-Inertial equatorial-plane frame.\n";
-      satOut << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
-      satOut << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
-      satOut << "Mission Duration [Days] is "<< duration << "\n";
-      satOut << "TimeIndex,X[km],Y[km],Z[km],VX[km/s],VY[km/s],VZ[km/s]\n";
-
-      // Keplerian elements as state output
-      ofstream satOutKep; 
-      satOutKep.open((satStateFp+"_Keplerian").c_str(),ios::binary | ios::out);
-      satOutKep << "Satellite states as Keplerian elements.\n";
-      satOutKep << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
-      satOutKep << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
-      satOutKep << "Mission Duration [Days] is "<< duration << "\n";
-      satOutKep << "TimeIndex,SMA[km],ECC,INC[deg],RAAN[deg],AOP[deg],TA[deg]\n";                     
+      const int prc = std::numeric_limits<double>::digits10 + 1; // set to maximum precision                    
 
       // Write the access file in matrix format with rows as the time and columns as ground-points. 
       // Each entry in a cell of the matrix corresponds to 0 (No Access) or 1 (Access).
@@ -407,15 +350,48 @@ int main(int argc, char *argv[])
       }
       satAcc << "\n";
 
+      ifstream satState(satStateFp.c_str());
+
+      if(!satState){
+          std::cerr << "Cannot open the Satellite State File : "<<satStateFp.c_str()<<std::endl;
+          return -1;
+      }
+
+      string line;
+      std::getline(satState,line); 
+      std::getline(satState,line); 
+      std::getline(satState,line);
+      std::getline(satState,line);
+      std::getline(satState,line);
+
       #ifdef DEBUG_CONSISE
-         MessageInterface::ShowMessage("*** About to Propagate!!!!\n");
+         MessageInterface::ShowMessage("Start looping through the states.\n");
       #endif
       int nSteps = 0;
-      // Propagate to the initial time first
-      prop->Propagate(*date);
-      while (date->GetJulianDate() < ((Real)startDate +
-                                       duration))
-      {
+
+      while(std::getline(satState,line)){
+
+         Rvector6 _state;
+         Real _date;
+         RealArray e;
+         int i=0;
+         stringstream ss(line);
+         while(ss.good()){
+             string substr;
+             std::getline(ss, substr, ',');
+             if(i==0){
+                 _date = epoch + stepSize*stoi(substr)*GmatTimeConstants::DAYS_PER_SEC;
+             }
+             else{
+                 e.push_back(stod(substr));               
+             }
+             i++;
+         }        
+         _state.Set(e[0], e[1], e[2], e[3], e[4], e[5]);
+
+         date->SetJulianDate(_date);
+         state->SetCartesianState(_state);
+
          #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
             loopPoints = covChecker->AccumulateCoverageData();
          #else
@@ -439,30 +415,6 @@ int main(int argc, char *argv[])
             loopPoints.erase( unique( loopPoints.begin(), loopPoints.end() ), loopPoints.end() );
          }
         
-         Rvector6 cartState;
-         cartState = sat1->GetCartesianState();
-
-        
-         // Write satellite ECI cartesian states to file
-         satOut << std::setprecision(prc) << nSteps<< "," ;
-         satOut << std::setprecision(prc) << cartState[0] << "," ;
-         satOut << std::setprecision(prc) << cartState[1] << "," ;
-         satOut << std::setprecision(prc) << cartState[2] << "," ;
-         satOut << std::setprecision(prc) << cartState[3] << "," ;
-         satOut << std::setprecision(prc) << cartState[4] << "," ;
-         satOut << std::setprecision(prc) << cartState[5] << "\n" ; 
-
-         Rvector6 kepState;
-         kepState = sat1->GetKeplerianState();      
-         // Write satellite Keplerian states to file
-         satOutKep << std::setprecision(prc) << nSteps<< "," ;
-         satOutKep << std::setprecision(prc) << kepState[0] << "," ;
-         satOutKep << std::setprecision(prc) << kepState[1] << "," ;
-         satOutKep << std::setprecision(prc) << kepState[2]*GmatMathConstants::DEG_PER_RAD << "," ;
-         satOutKep << std::setprecision(prc) << kepState[3]*GmatMathConstants::DEG_PER_RAD << "," ;
-         satOutKep << std::setprecision(prc) << kepState[4]*GmatMathConstants::DEG_PER_RAD << "," ;
-         satOutKep << std::setprecision(prc) << kepState[5]*GmatMathConstants::DEG_PER_RAD << "\n" ;
-
          // Write access data         
          // Make array with '1' (Access) in the cells corresponding to indices of gp's accessed
          // and nothing with there is no access.
@@ -485,37 +437,19 @@ int main(int argc, char *argv[])
             }        
          nSteps++; 
 
-         // Propagate
-         date->Advance(stepSize);
-         prop->Propagate(*date); 
-      
+         
       }
-      satOut.close();
-      satOutKep.close();
+      
       satAcc.close(); 
+      satState.close();
 
-      #ifdef DEBUG_CONSISE
-         MessageInterface::ShowMessage(" --- propagation completed\n");
-      #endif
-      
-      #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
-      // Compute coverage data
-      coverageEvents = covChecker->ProcessCoverageData();
-      MessageInterface::ShowMessage(" --- ProcessCoverageData completed \n");
-      if (coverageEvents.empty())
-      {
-         MessageInterface::ShowMessage("--- !! No events !!\n");
-         //exit(0);
-      }
-      #endif
-      
       //Delete un-needed objects
       delete    covChecker;
       delete    prop;
-      // delete    sat1;  // deletes date, state, attitude, interp - so DON'T
       delete    date;
       delete    state;
       delete    attitude;
+      // delete sat1; ??
       
       if(fovGeom == "Conical"){
          delete    conicalSensor;
@@ -528,61 +462,9 @@ int main(int argc, char *argv[])
          MessageInterface::ShowMessage(" --- Done deleting old pointers\n");
       #endif
 
-
       // check timing
       Real timeSpent = ((Real) (clock() - t0)) / CLOCKS_PER_SEC;
       MessageInterface::ShowMessage("TIME SPENT is %12.10f seconds\n",timeSpent);
-
-            
-      #ifdef COMPUTE_AND_STORE_POI_GEOMETRY
-      // TODO: Need to reqrite since accumulation of coverage is not performed previously.
-      MessageInterface::ShowMessage("       =======================================================================\n");
-      MessageInterface::ShowMessage("       ==================== Brief POI Geometry Report ========================\n");
-      MessageInterface::ShowMessage("       POI index: Ground point index                               \n");
-      MessageInterface::ShowMessage("       lat: Latitude of point in degrees                     \n");
-      MessageInterface::ShowMessage("       lon: Longitude of point in degrees                    \n");
-      MessageInterface::ShowMessage("       Mid access date: Date of the middle of the access (Julian Day UT1) \n");
-      MessageInterface::ShowMessage("       Access duration: Access duration in seconds                 \n");
-      MessageInterface::ShowMessage("       obsZenith: Satellite zenith in degrees                      \n");
-      MessageInterface::ShowMessage("       obsAzimuth : Satellite azimuth in degrees                   \n");
-      MessageInterface::ShowMessage("       obsRange   : Satellite range in kilometers                  \n");
-      MessageInterface::ShowMessage("       sunZenith   : Satellite zenith in degrees                   \n");
-      MessageInterface::ShowMessage("       sunAzimuth   : Satellite azimuth in degrees                 \n");
-      MessageInterface::ShowMessage("       =======================================================================\n");
-      MessageInterface::ShowMessage("       =======================================================================\n");
-      MessageInterface::ShowMessage("  ");
-      satAcc << "    POI index    lat      lon      obsZenith      obsAzimuth     obsRange    SunZenith      SunAzimuth\n";
-
-      for (UnsignedInt eventIdx = 0; eventIdx < coverageEvents.size(); eventIdx++)
-      {
-            IntervalEventReport currEvent = coverageEvents.at(eventIdx);
-            Integer          poiIndex       = currEvent.GetPOIIndex();
-            std::vector<VisiblePOIReport> discreteEvents = currEvent.GetPOIEvents();
-            Real             eventDuration  = (currEvent.GetEndDate().GetJulianDate() -
-                                             currEvent.GetStartDate().GetJulianDate()) * GmatTimeConstants::SECS_PER_DAY;
-            VisiblePOIReport ev = discreteEvents[int(discreteEvents.size()/2)]; // The 1/2 factor allows to access the middle of the access period.
-     
-            Rvector3 *vec = pGroup->GetPointPositionVector(poiIndex);
-            Real lon = (ATan(vec->GetElement(1),vec->GetElement(0))
-                           *DEG_PER_RAD);
-            Real lat = (ASin(vec->GetElement(2)/vec->GetMagnitude())
-                           *DEG_PER_RAD);
-
-            MessageInterface::ShowMessage(
-                           "     %d    %le      %le      %le      %le      %le      %le      %le      %le     %le \n",
-                           poiIndex,
-                           lat,
-                           lon,
-                           ev.GetStartDate().GetJulianDate(),
-                           eventDuration,
-                           ev.GetObsZenith()*DEG_PER_RAD,
-                           ev.GetObsAzimuth()*DEG_PER_RAD,
-                           ev.GetObsRange(),
-                           ev.GetSunZenith()*DEG_PER_RAD,
-                           ev.GetSunAzimuth()*DEG_PER_RAD);
-      }
-
-      #endif       
       
       MessageInterface::ShowMessage("*** END ***\n");
    

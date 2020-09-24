@@ -30,12 +30,12 @@ orbitpy/oci/bin/genCovGrid
 oc/tests/bin/SystemTest_Analysis
 orbitpy/oci/bin/orbitpropcov_grid
 orbitpy/oci/bin/orbitpropcov_popts
+orbitpy/oci/bin/j2_analytical_propagator
+orbitpy/oci/bin/gp_in_fov_cov_calc
+orbitpy/oci/bin/pnt_axis_sphere_intsec_cov_calc
 orbitpy/tests/orbitpropcov/OrbitPropCovGrid/temp/*
 orbitpy/tests/orbitpropcov/OrbitPropCovPopts/temp/*
 orbitpy/tests/validation/temp/*
 orbitpy/tests/communications/temp/*
 orbitpy/tests/preprocess/temp/*
 orbitpy/examples/flood_case_ground_stn_contacts/*
-
-
-

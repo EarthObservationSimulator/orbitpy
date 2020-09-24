@@ -193,7 +193,9 @@ The ground point access capabilities of OrbitPy's :class:`orbitpy.orbitpropcov.O
 
 STK settings were matched to OrbitPy wherever possible. STK uses a variable time step for access calculations, so OrbitPy's one second time step wasn't matched exactly. Rather than reporting a binary access value for each grid point at each timestep, like OrbitPy does, STK simply outputs the access intervals for each grid point; the STK output was converted to OrbitPy's format for comparison.
 
-STK uses a different default coordinate frame definition for its sensors. Like in OrbitPy, the Z axis can be set to nadir alligned with the ECF velocity constraint. However, the X axis is alligned with the satellite's velocity vector, wherease in OrbitPy, the Y axis takes this position. In this report, orientations will be described using an intrinsic 213 Euler sequence in OrbitPy's sensor coordinate frame. The equivalent orientations were used in STK after performing a coordinate transformation.
+STK uses a different default coordinate frame definition for its sensors. Like in OrbitPy, the Z axis can be set to nadir alligned with the ECF velocity constraint. 
+However, the X axis is alligned with the satellite's velocity vector, wherease in OrbitPy, the Y axis takes this position. 
+This was taken into consideration and an intrinsic 213 Euler sequence was applied in OrbitPy's sensor coordinate frame to match with the (default) STK coordinate frame. 
 
 The results of each of the 12 scenarios (described below) tested were evaluated against STK according to the following four metrics:
 
@@ -266,11 +268,11 @@ The 12 test cases were generated using combinations of the following inputs.
 3.  A 15 degree along track, 10 degree across track rectangular sensor.
 
 **Orientations:**
-213 Euler (instrinsic) rotations in degrees.
+213 (order = first Y, then X, then Z) Euler (instrinsic) rotations in degrees. 
 
-1.  (0,0,0)
-2.  (Y = 30, X = 24, Z = -6), instrinsic, order = first Y, then X, then Z
-3.  (-30,-25,5)
+1.  (Y = 0, X = 0, Z = 0)
+2.  (Y = 30, X = 24, Z = -6), instrinsic, 
+3.  (Y = -30, X = -25, Z = 5)
 
 
 .. list-table:: **Test Combinations**

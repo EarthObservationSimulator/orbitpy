@@ -64,12 +64,17 @@ class OrbitPropCovGrid:
         dir_path = os.path.dirname(os.path.realpath(__file__))
         try:
             result = subprocess.run([
-                        os.path.join(dir_path, '..', 'oci', 'bin', 'orbitpropcov_grid'),
+                        os.path.join(dir_path, '..', 'oci', 'bin', 'j2_analytical_propagator'),
                         str(self.params.epoch), str(self.params.sma), str(self.params.ecc), str(self.params.inc), 
                         str(self.params.raan), str(self.params.aop), str(self.params.ta), str(self.params.duration), 
+                        str(self.params.step_size), str(self.params.sat_state_fl)
+                        ], check= True)
+            print("start coverage calcs")
+            result = subprocess.run([
+                        os.path.join(dir_path, '..', 'oci', 'bin', 'gp_in_fov_cov_calc'),
                         str(self.params.cov_grid_fl), str(self.params.sen_fov_geom), str(self.params.sen_orien), 
                         str(self.params.sen_clock), str(self.params.sen_cone), str(self.params.yaw180_flag), 
-                        str(self.params.step_size), str(self.params.sat_state_fl), str(self.params.sat_acc_fl + '_') 
+                        str(self.params.sat_state_fl), str(self.params.sat_acc_fl + '_') 
                         ], check= True)
         except:
             raise RuntimeError('Error executing "orbitpropcov_grid" OC script')
@@ -229,11 +234,16 @@ class OrbitPropCovPopts:
         dir_path = os.path.dirname(os.path.realpath(__file__))
         try:
             result = subprocess.run([
-                        os.path.join(dir_path, '..', 'oci', 'bin', 'orbitpropcov_popts'),
+                        os.path.join(dir_path, '..', 'oci', 'bin', 'j2_analytical_propagator'),
                         str(self.params.epoch), str(self.params.sma), str(self.params.ecc), str(self.params.inc), 
                         str(self.params.raan), str(self.params.aop), str(self.params.ta), str(self.params.duration), 
-                        str(self.params.popts_fl), 
-                        str(self.params.step_size), str(self.params.sat_state_fl), str(self.params.sat_acc_fl)+'_'
+                        str(self.params.step_size), str(self.params.sat_state_fl)
+                        ], check= True)
+            print("start coverage calcs")
+            result = subprocess.run([
+                        os.path.join(dir_path, '..', 'oci', 'bin', 'pnt_axis_sphere_intsec_cov_calc'),
+                        str(self.params.popts_fl), str(self.params.sat_state_fl), 
+                        str(self.params.sat_acc_fl + '_') 
                         ], check= True)
         except:
             raise RuntimeError('Error executing "orbitpropcov_popts" OC script')
