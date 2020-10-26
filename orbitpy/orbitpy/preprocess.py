@@ -71,6 +71,11 @@ class OrbitParameters():
         self.raan = float(raan) if raan is not None else None
         self.aop = float(aop) if aop is not None else None
         self.ta = float(ta) if ta is not None else None
+    
+    def to_dict(self):
+        orb_param_dict = {"@id": self._id, "sma": self.sma, "ecc": self.ecc, "inc": self.inc, "raan": self.raan, "aop": self.aop, 
+                          "ta": self.ta}
+        return orb_param_dict
 
 class PreProcess(): 
     """ Class to handle pre-processing of user inputs.
@@ -271,6 +276,7 @@ class PreProcess():
                         * :code:`ecc`(:class:`float`): Eccentricity
                         * :code:`inc` (:class:`float`): Inclination in degrees
                         * :code:`aop` (:class:`float`): Argument of perigee in degrees
+                        * :code:`@id` (:class:`float`): (Optional) Constellation Identifier
         :paramtype: dict
 
         :returns: List of orbits in the constellation
@@ -285,6 +291,10 @@ class PreProcess():
         inc = float(data['inc'])
         aop = float(data['aop'])
 
+        uid = None
+        if('@id' in data):
+            uid = str(data['@id'])
+
         num_sats_pp = num_sats/num_planes
         if(not num_sats_pp.is_integer()):
             raise RuntimeError("Ratio of number of satellites to number of planes must be an integer.")
@@ -295,10 +305,13 @@ class PreProcess():
         print("orb_id, sma, ecc, inc, raan, aop, ta")
         orbits = []
         for pl_i in range(0,num_planes):
-            raan = pl_i * 360.0/num_planes
+            raan = pl_i * 180.0/num_planes
             ta_ref = pl_i * rel_spc * 360.0/num_sats
             for sat_i in range(0,num_sats_pp):
-                orb_id = str(pl_i+1) + str(sat_i+1)
+                if uid is not None:
+                    orb_id = uid + str(pl_i+1) + str(sat_i+1)
+                else:
+                    orb_id = str(pl_i+1) + str(sat_i+1)
                 ta = (ta_ref + sat_i * 360.0/num_sats_pp)%360
                 orbits.append(OrbitParameters(orb_id, sma, ecc, inc,
                                           raan, aop, ta)) 

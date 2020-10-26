@@ -39,3 +39,4 @@ orbitpy/tests/validation/temp/*
 orbitpy/tests/communications/temp/*
 orbitpy/tests/preprocess/temp/*
 orbitpy/examples/flood_case_ground_stn_contacts/*
+orbitpy/examples/20201024_adcs_paper/*
