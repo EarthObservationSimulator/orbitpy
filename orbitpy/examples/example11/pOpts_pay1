@@ -1,0 +1,6 @@
+Euler (intrinsic) rotations with sequence 1,2,3 assumed, i.e. R = R3R2R1, with rotation matrix representing rotation of the coordinate system.
+index,euler_angle1[deg],euler_angle2[deg],euler_angle3[deg] 
+0,0,0,0
+1,0,0,90
+2,0,0,180
+3,0,45,0

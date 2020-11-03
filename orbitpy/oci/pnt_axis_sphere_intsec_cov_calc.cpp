@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//         Orbit Propagation and Coverage Calcs with Pointing Options
+//                         Coverage Calcs with Pointing Options
 //------------------------------------------------------------------------------
 //
 // Author: Vinay Ravindra
@@ -52,46 +52,6 @@ using namespace std;
 using namespace GmatMathUtil;
 using namespace GmatMathConstants;
 
-int readPntOptsFile(const string &pOptsFl, RealArray &euler_angle1, RealArray &euler_angle2, RealArray &euler_angle3)
-{/**Read pointing options data file onto double arrays.**/
-
-    ifstream in(pOptsFl.c_str());
-
-    if(!in){
-  		std::cerr << "Cannot open the Pointing Options File : "<<pOptsFl.c_str()<<std::endl;
-		return -1;
-    }
-
-    string line;
-    getline(in,line); // skip header
-    getline(in,line); // skip header
-    while (getline(in,line))
-    {
-      stringstream ss(line);
-      vector<string> vecStrOut;
-
-      while(ss.good()){
-         string substr;
-         std::getline( ss, substr, ',' );
-         vecStrOut.push_back( substr );
-      }
-      // The first entry is the index
-      Real eu1 = stod(vecStrOut[1]);
-      Real eu2 = stod(vecStrOut[2]);
-      Real eu3 = stod(vecStrOut[3]);
-
-      // retain the angles in degrees!
-      euler_angle1.push_back( eu1 );
-      euler_angle2.push_back( eu2 );
-      euler_angle3.push_back( eu3 );
-
-    }
-    in.close();
-
-    return 0;
-
-}
-
 /**
  * @param popts_fl pointing options file path and name
  * @param satStateFp Filename, path to write the satellite ECI states
@@ -134,6 +94,16 @@ int main(int argc, char *argv[])
    #endif
    
    #ifdef DEBUG_CONSISE
+         MessageInterface::ShowMessage("**** About to read in pointing options ******\n");
+   #endif
+   RealArray euler_angle1, euler_angle2, euler_angle3; // The pointing-options are defined with respect to the Nadir-frame
+   oci_utils::readPntOptsFile(popts_fl, euler_angle1, euler_angle2, euler_angle3);  
+   Integer numPntOpts = euler_angle1.size();
+   #ifdef DEBUG_CONSISE
+         MessageInterface::ShowMessage("**** Finished reading in pointing options  ******\n");
+   #endif
+
+   #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("**** About to read satellite state file header ******\n");
    #endif
    // Read the epoch and satellite state at the epoch from input satellite state file
@@ -148,17 +118,6 @@ int main(int argc, char *argv[])
    #endif
    #ifdef DEBUG_CONSISE
          MessageInterface::ShowMessage("**** Finished reading satellite state file header ******\n");
-   #endif
-
-   #ifdef DEBUG_CONSISE
-         MessageInterface::ShowMessage("**** About to read in pointing options ******\n");
-   #endif
-   /** Read in the coverage grid **/
-   RealArray euler_angle1, euler_angle2, euler_angle3;
-   readPntOptsFile(popts_fl, euler_angle1, euler_angle2, euler_angle3);  
-   Integer numPntOpts = euler_angle1.size();
-   #ifdef DEBUG_CONSISE
-         MessageInterface::ShowMessage("**** Finished reading in pointing options  ******\n");
    #endif
    
    // Set the global format setting

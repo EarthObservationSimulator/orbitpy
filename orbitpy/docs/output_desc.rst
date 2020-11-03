@@ -41,11 +41,17 @@ data can be found in the coverage grid data file. Each cell entry corresponds to
 (or if there can be access in the case when the FOR is used for access computation), the cell entry is :code:`1`, else there is no entry. During
 times are which there is no access over all the grid-points, the entire row is absent. 
 
-Grid-point based coverage calculations intermediate access file-format
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Pointing-options based coverage calculations intermediate access file-format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Excluding the :code:`TimeIndex`
 column, the column headers are named as :code:`pntopt0`, :code:`pntopt1`, :code:`pntopt2`, and so on corresponding to the pointing-option indices. Each cell entry corresponds to
 the latitude and longitude (in degrees) seen by the instrument pointing-axis. 
+
+Pointing Options with Grid coverage calcuations approach intermediate access file-format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Identical to the intermediate access file format of the *Grid-point based* coverage calculations. An additional column is present next to the 
+:code:`TimeIndex` column with the header :code:`PntOptIndex` and the column containing the pointing-option indices corresponding to the rest
+of the data of the row.
 
 Common final access file-format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

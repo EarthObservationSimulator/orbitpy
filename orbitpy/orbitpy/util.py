@@ -14,6 +14,7 @@ from instrupy.util import *
 
 class CoverageCalculationsApproach(EnumEntity):
     """ Enumeration of recognized approaches to calculation coverage."""
+    PNTOPTS_WITH_GRIDPNTS = "PNTOPTS_WITH_GRIDPNTS"
     GRIDPNTS = "GRIDPNTS"
     PNTOPTS = "PNTOPTS"
 class PropagationCoverageParameters():

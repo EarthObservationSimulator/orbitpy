@@ -183,5 +183,81 @@ int readSatStateFileHeader(const string &satStateFp, Real &epoch, Real &stepSize
    return 0;
 }
 
+int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
+{/**Read coverage grid data file onto double arrays.**/
+
+    ifstream in(covGridFp.c_str());
+
+    if(!in){
+  		std::cerr << "Cannot open the Coverage Grid File : "<<covGridFp.c_str()<<std::endl;
+		return -1;
+    }
+
+    string line;
+    getline(in,line); // skip header
+    while (getline(in,line))
+    {
+      stringstream ss(line);
+      vector<string> vecStrOut;
+
+      while(ss.good()){
+         string substr;
+         std::getline( ss, substr, ',' );
+         vecStrOut.push_back( substr );
+      }
+      // The first two entries in the file are the region index and grid point index
+      Real lat = stod(vecStrOut[2]);
+      Real lon = stod(vecStrOut[3]);
+
+      lats.push_back( lat*RAD_PER_DEG );
+      lons.push_back( lon*RAD_PER_DEG );
+
+    }
+    in.close();
+
+    return 0;
+
+}
+
+int readPntOptsFile(const string &pOptsFl, RealArray &euler_angle1, RealArray &euler_angle2, RealArray &euler_angle3)
+{/**Read pointing options data file onto double arrays.**/
+
+    ifstream in(pOptsFl.c_str());
+
+    if(!in){
+  		std::cerr << "Cannot open the Pointing Options File : "<<pOptsFl.c_str()<<std::endl;
+		return -1;
+    }
+
+    string line;
+    getline(in,line); // skip header
+    getline(in,line); // skip header
+    while (getline(in,line))
+    {
+      stringstream ss(line);
+      vector<string> vecStrOut;
+
+      while(ss.good()){
+         string substr;
+         std::getline( ss, substr, ',' );
+         vecStrOut.push_back( substr );
+      }
+      // The first entry is the index
+      Real eu1 = stod(vecStrOut[1]);
+      Real eu2 = stod(vecStrOut[2]);
+      Real eu3 = stod(vecStrOut[3]);
+
+      // retain the angles in degrees!
+      euler_angle1.push_back( eu1 );
+      euler_angle2.push_back( eu2 );
+      euler_angle3.push_back( eu3 );
+
+    }
+    in.close();
+
+    return 0;
+
+}
+
 }
 #endif /* OCI_UTILS_H */

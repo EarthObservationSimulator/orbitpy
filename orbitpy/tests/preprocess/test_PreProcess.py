@@ -76,12 +76,12 @@ class TestPreProcess(unittest.TestCase):
         self.assertEqual(plane5_raan, orbits[14].raan)
 
         # the raans are uniformly spaced
-        raan_spacing = 72
+        raan_spacing = 36
         self.assertEqual(plane2_raan-plane1_raan, raan_spacing)
         self.assertEqual(plane3_raan-plane2_raan, raan_spacing)
         self.assertEqual(plane4_raan-plane3_raan, raan_spacing)
         self.assertEqual(plane5_raan-plane4_raan, raan_spacing)
-        self.assertEqual(plane5_raan-plane1_raan, 360 - raan_spacing)
+        self.assertEqual(plane5_raan-plane1_raan, 180 - raan_spacing)
 
         # check inplane spacing between satellites
         in_plane_spc = 120
@@ -132,10 +132,10 @@ class TestPreProcess(unittest.TestCase):
         self.assertEqual(plane3_raan, orbits[5].raan)
 
         # the raans are uniformly spaced
-        raan_spacing = 120
+        raan_spacing = 60
         self.assertEqual(plane2_raan-plane1_raan, raan_spacing)
         self.assertEqual(plane3_raan-plane2_raan, raan_spacing)
-        self.assertEqual(plane3_raan-plane1_raan, 360 - raan_spacing)
+        self.assertEqual(plane3_raan-plane1_raan, 180 - raan_spacing)
 
         # check inplane spacing between satellites
         in_plane_spc = 180

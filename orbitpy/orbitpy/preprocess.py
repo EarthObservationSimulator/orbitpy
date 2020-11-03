@@ -168,9 +168,22 @@ class PreProcess():
             self.time_step = _time_step        
         print("Time step in seconds is: ", self.time_step)
 
-        if("grid" in specs):
+        if("grid" in specs and "pointingOptions" in specs):
+            # Both grid and pointing options specified, calculate coverage for each pointing option over the grid seperately.
+            self.cov_calc_app = CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS
+            print("Pointing options with grid-points approach being used for coverage calculations.")
+        elif("grid" in specs):
             self.cov_calc_app = CoverageCalculationsApproach.GRIDPNTS
             print("Grid-point approach being used for coverage calculations.")
+        elif("pointingOptions" in specs):
+            self.cov_calc_app = CoverageCalculationsApproach.PNTOPTS
+            print("Pointing-Options approach being used for coverage calculations.")
+        else:
+            raise Exception("Please specify either 'grid' and/or 'pointingOptions' JSON fields.")
+
+        self.cov_grid_fl = None
+        self.pnt_opts_fls = None
+        if(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS):
 
             # set grid resolution factor based on default value or user input value
             if "customGridResFactor" in specs["grid"]:
@@ -192,20 +205,15 @@ class PreProcess():
             print("Grid resolution in degrees is: ", self.grid_res)
 
             self.cov_grid_fl = PreProcess.process_cov_grid(self.user_dir, specs['grid'], self.grid_res)
-            self.pnt_opts_fls = None
-
-        elif("pointingOptions" in specs):
-            self.cov_calc_app = CoverageCalculationsApproach.PNTOPTS
-            print("Pointing-Options approach being used for coverage calculations.")
-
-            self.cov_grid_fl = None
+            
+        if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS):
+           
             self.pnt_opts_fls = PreProcess.process_pointing_options(user_dir, specs['pointingOptions'])
 
-        else:
-            raise Exception("Please specify either 'grid' or 'pointingOptions' JSON fields.")
-
-
-        self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFn']) 
+        self.gnd_stn_fl = None
+        if('groundStations' in specs):
+            if('gndStnFn' in specs['groundStations']):
+                self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFn'])                 
 
     @staticmethod
     def enumerate_orbits(constel=dict()):
@@ -430,8 +438,8 @@ class PreProcess():
                     else:
                         raise RuntimeError("Please define instrument, subsensor id.")
 
-                    if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS): # if pointing-option coverage calculation find the
-                                                                                # pointing-option file to be used for this particular instrument. 
+                    if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS): 
+                        # if pointing-option coverage calculation find the pointing-option file to be used for this particular instrument. 
                         popts_fl = None
                         for pf in self.pnt_opts_fls:
                             if pf["instrumentID"] == _x._id:

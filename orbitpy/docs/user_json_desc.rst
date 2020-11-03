@@ -298,7 +298,8 @@ field having a format as follows:
 .. warning:: In the case when the pointing-options approach is used for coverage calculations, the instrument identifier becomes a
              compulsory attribute of the :code:`Instrument` JSON field, since it is needed to reference the pointing-options files.
 
-.. warning:: The name of the data-file containing the pointing-options should not have any whitespaces.
+.. warning:: The name of the data-file containing the pointing-options should not have any whitespaces. The pointing-otions indicated in the file 
+             are strictly indexed from *0* onwards. 
 
 Example:
 

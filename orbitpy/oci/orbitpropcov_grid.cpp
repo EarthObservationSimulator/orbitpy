@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                               Mission
+//                    Coverage Calcs with Pointing Options
 //------------------------------------------------------------------------------
 //
 // Author: Vinay Ravindra
@@ -62,42 +62,6 @@
 using namespace std;
 using namespace GmatMathUtil;
 using namespace GmatMathConstants;
-
-int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
-{/**Read coverage grid data file onto double arrays.**/
-
-    ifstream in(covGridFp.c_str());
-
-    if(!in){
-  		std::cerr << "Cannot open the Coverage Grid File : "<<covGridFp.c_str()<<std::endl;
-		return -1;
-    }
-
-    string line;
-    getline(in,line); // skip header
-    while (getline(in,line))
-    {
-      stringstream ss(line);
-      vector<string> vecStrOut;
-
-      while(ss.good()){
-         string substr;
-         std::getline( ss, substr, ',' );
-         vecStrOut.push_back( substr );
-      }
-      // The first two entries in the file are the region index and grid point index
-      Real lat = stod(vecStrOut[2]);
-      Real lon = stod(vecStrOut[3]);
-
-      lats.push_back( lat*RAD_PER_DEG );
-      lons.push_back( lon*RAD_PER_DEG );
-
-    }
-    in.close();
-
-    return 0;
-
-}
 
 /**
  * @param epoch mission epoch in UTCGregorian 
@@ -234,7 +198,7 @@ int main(int argc, char *argv[])
    #endif
    /** Read in the coverage grid **/
    RealArray lats, lons;
-   readCovGridFile(covGridFp, lats, lons);  
+   oci_utils::readCovGridFile(covGridFp, lats, lons);  
    PointGroup               *pGroup = new PointGroup();
    pGroup->AddUserDefinedPoints(lats, lons);
    Integer numGridPoints = lats.size();

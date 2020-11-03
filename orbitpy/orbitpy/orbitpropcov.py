@@ -36,7 +36,10 @@ class OrbitPropCov:
         """ Function which invokes the :code:`orbitpropcov` program to propagate and compute coverage of a satellite
         over a given mission duration.
         """
-        if(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.GRIDPNTS):
+        if(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS):
+            opc_grid = OrbitPropCovPoptsWithGrid(self.params)
+            opc_grid.run()
+        elif(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.GRIDPNTS):
             opc_grid = OrbitPropCovGrid(self.params)
             opc_grid.run()
         elif(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.PNTOPTS):
@@ -91,7 +94,6 @@ class OrbitPropCovGrid:
 
         # reformat access data to common format 
         OrbitPropCovGrid.reformat_access_files(self)
-
 
     def reformat_access_files(self):
         """ Reformat the access file data to a common output format used by both the grid-coverage and 
@@ -226,7 +228,6 @@ class OrbitPropCovPopts:
     def __init__(self, prop_cov_param = PropagationCoverageParameters()):
         self.params = copy.deepcopy(prop_cov_param)
 
-
     def run(self): 
         """ Function which invokes the :code:`orbitpropcov` program to propagate and compute coverage of a satellite
         over a given mission duration.
@@ -293,3 +294,182 @@ class OrbitPropCovPopts:
                 
                 _v = dict({'accessTimeIndex':time_i, 'regi': '', 'gpi': '', 'lat[deg]': TargetCoords["lat[deg]"], 'lon[deg]': TargetCoords["lon[deg]"], 'pntopti': pOpti})
                 w.writerow(_v.values())
+
+class OrbitPropCovPoptsWithGrid:
+    """ Class to handle propagation and coverage calculations.
+    
+    :ivar prop_cov_param: Propagation and coverage parameters
+    :vartype prop_cov_param: :class:`orbitpy.util.PropagationCoverageParameters`
+
+    """
+    def __init__(self, prop_cov_param = PropagationCoverageParameters()):
+        self.params = copy.deepcopy(prop_cov_param)
+
+
+    def run(self): 
+        """ Function which invokes the :code:`orbitpropcov` program to propagate and compute coverage of a satellite
+        over a given mission duration.
+        """
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        try:
+            result = subprocess.run([
+                        os.path.join(dir_path, '..', 'oci', 'bin', 'j2_analytical_propagator'),
+                        str(self.params.epoch), str(self.params.sma), str(self.params.ecc), str(self.params.inc), 
+                        str(self.params.raan), str(self.params.aop), str(self.params.ta), str(self.params.duration), 
+                        str(self.params.step_size), str(self.params.sat_state_fl)
+                        ], check= True)
+            print("start coverage calcs")
+            result = subprocess.run([
+                        os.path.join(dir_path, '..', 'oci', 'bin', 'pnt_opts_with_gp_in_fov_cov_calc'),
+                        str(self.params.cov_grid_fl), str(self.params.popts_fl), str(self.params.sen_fov_geom), 
+                        str(self.params.sen_clock), str(self.params.sen_cone),
+                        str(self.params.sat_state_fl), str(self.params.sat_acc_fl + '_') 
+                        ], check= True)
+        except:
+            raise RuntimeError('Error executing "orbitpropcov_grid" OC script')
+
+        # Correct access files for purely side-looking instruments if necessary        
+        if(self.params.purely_sidelook):            
+            print(".......Correcting access files......")
+            t1 = time.process_time() 
+            OrbitPropCovPoptsWithGrid.correct_access_files(self)
+            t2 = time.process_time()
+            print(".......DONE.......time taken (s): ", t2-t1)
+        else:
+            print(".......No correction of access files......")
+
+        # reformat access data to common format 
+        OrbitPropCovPoptsWithGrid.reformat_access_files(self)
+
+    def reformat_access_files(self):
+        """ Reformat the access file data to a common output format used by both the grid-coverage and 
+            point-options-coverage approaches.
+        """
+        covgrid_fl = self.params.cov_grid_fl
+
+        access_fl = self.params.sat_acc_fl  + '_' 
+        new_access_fl = self.params.sat_acc_fl 
+                
+        poi_info_df = pd.read_csv(covgrid_fl, dtype=str)
+        types_dict = {'regi': int, 'gpi': int}
+        for col, col_type in types_dict.items():
+            poi_info_df[col] = poi_info_df[col].astype(col_type)
+        poi_info_df = poi_info_df.set_index('gpi')
+
+        # Read the access file
+        access_info_df = pd.read_csv(access_fl,skiprows = [0,1,2,3]) # read the access times 
+        access_info_df = access_info_df.set_index(['TimeIndex', 'PntOptIndex'])
+
+        # copy headers from the original access file
+        with open(access_fl, 'r') as f:
+            head = [next(f) for x in [0,1,2,3]] 
+
+        with open(new_access_fl,'w') as f:
+            for r in head:
+                f.write(str(r)) 
+
+        # Iterate over all valid logged access events
+        acc_indx = list(access_info_df[access_info_df.notnull()].stack().index) # list of valid access [time, POI]
+
+        with open(new_access_fl,'a+', newline='') as f:
+            w = csv.writer(f)
+           
+            _v = dict({'accessTimeIndex':None, 'regi': None, 'gpi': None, 'lat[deg]': None, 'lon[deg]': None, 'pntopti': None})
+            w.writerow(_v.keys())
+            
+            for indx in acc_indx:
+                
+                time_i = int(indx[0])
+                pntopt_i = int(indx[1])
+                
+                poi_indx = int(indx[2][2:])                
+
+                regi  = int(poi_info_df.loc[poi_indx]["regi"])
+                TargetCoords = dict()                
+                TargetCoords["lat[deg]"] = poi_info_df.loc[poi_indx]["lat[deg]"]
+                TargetCoords["lon[deg]"] = poi_info_df.loc[poi_indx]["lon[deg]"]
+                
+                _v = dict({'accessTimeIndex':time_i, 'regi': regi, 'gpi': poi_indx, 'lat[deg]': TargetCoords["lat[deg]"], 'lon[deg]': TargetCoords["lon[deg]"], 'pntopti': pntopt_i})
+                w.writerow(_v.values())
+
+    def correct_access_files(self):
+        """ When the instrument takes observations at purely side-looking geometry (no squint),
+            post-process the access files to indicate access only at middle of access-interval. 
+            The middle of access-interval is approximately the time at which the instrument shall
+            be at side-looking geometry to the target ground-point.
+            The new access files are written in the same directory (with the same names), while the
+            previous access files are renamed as *..._* under the same directory.
+
+            :ivar sat_access_fls: List of access files (paths) which need to be corrected
+
+            The file format is as follows: The first four lines contain general information. The fifth line contains the
+            column headers with the following names: :code:`TimeIndex,PntOptIndex,GP0,GP1,.....`. The number of columns depends on the number
+            of gridpoints and can be a varied. 
+
+            :vartype sat_access_fls: list, str
+
+            :returns: None
+
+        """
+        acc_fl = self.params.sat_acc_fl  + '_'            
+        
+        os.rename(acc_fl, acc_fl + '_') 
+        old_accessInfo_fl = acc_fl + '_'
+        new_accessInfo_fl = acc_fl 
+
+        df = pd.read_csv(old_accessInfo_fl, skiprows = 4)        
+        df = df.set_index(['PntOptIndex'])
+        
+        d ={}
+        for popt, df_per_popt in df.groupby(level=0):
+           
+            df_per_popt = df_per_popt.set_index(['TimeIndex'])
+            dfnew =  pd.DataFrame(np.nan, index=df_per_popt.index, columns=df_per_popt.columns)
+            
+            # iterate over all the columns (ground-points)
+            for gpi in range(0, df_per_popt.shape[1]):
+                # Select column by index position using iloc[]
+                gp_acc = df_per_popt.iloc[: , gpi]
+                gp_acc = gp_acc.dropna()             
+                
+                # search for consecutive (in time) access, and replace by access 
+                # at (approximately) the middle of the access period
+                mid_access = []
+                if(gp_acc.index.size>0): 
+                    acc_evt = []                 
+                    t0 = gp_acc.index[0]
+                    acc_evt.append(t0)
+                    for j in range(1,len(gp_acc.index)):
+                        if(gp_acc.index[j] == t0 + 1):
+                            # same access event                            
+                            t0 = gp_acc.index[j]
+                            acc_evt.append(t0)
+                        else:
+                            # new access event
+                            mid_access.append(acc_evt[int(0.5*len(acc_evt))])
+                            acc_evt = []
+                            t0 = gp_acc.index[j]
+                            acc_evt.append(t0)
+                    # append the mid access time of the final access event
+                    mid_access.append(acc_evt[int(0.5*len(acc_evt))])
+                    
+                    for j in range(0,len(mid_access)):
+                        dfnew.loc[mid_access[j]][gpi] = int(1)
+                
+            d[popt]=dfnew
+
+        df_final = pd.concat(d)
+        df_final.rename_axis(['PntOptIndex', 'TimeIndex'], inplace=True)
+        df_final = df_final.swaplevel(0, 1) # change the order of levels
+
+        with open(old_accessInfo_fl, 'r') as f1:
+            head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
+        
+            with open(new_accessInfo_fl, 'w') as f2:
+                for k in range(0,len(head)-1):
+                    f2.write(str(head[k]))
+                message = " Access listed below corresponds to approximate access instants at the grid-points at a side-look target geometery. The scene scan time should be used along with the below data to get complete access information.\n"
+                f2.write(str(head[-1]).rstrip() + message)
+
+        with open(new_accessInfo_fl, 'a') as f2:
+            df_final.to_csv(f2, header=True)       
