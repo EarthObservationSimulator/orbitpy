@@ -391,16 +391,13 @@ class OrbitPropCovPoptsWithGrid:
 
         df = pd.read_csv(old_accessInfo_fl, skiprows = 4)
 
-        df0 = df.set_index(['PntOptIndex'])
+        #df = df.set_index(['PntOptIndex'])
         
         d ={}
-        for popt, df_per_popt in df0.groupby(level=0):
-           
-            df_per_popt = df_per_popt.set_index(['TimeIndex'])
-            df =  pd.DataFrame(np.nan, index=df_per_popt.index, columns=df_per_popt.columns)
-
-            df_grp = df.groupby('gpi')
-            dfnew =  pd.DataFrame(columns=df.columns)
+        for popt, df_per_popt in df.groupby('PntOptIndex'):
+                      
+            df_grp = df_per_popt.groupby('gpi')
+            dfnew =  pd.DataFrame(columns=df_per_popt.columns)
             # iterate over all the gorups (ground-points)
             for name, group in df_grp:
                 x = (group['TimeIndex'].shift(periods=1) - group['TimeIndex']) < -1
@@ -418,8 +415,9 @@ class OrbitPropCovPoptsWithGrid:
             d[popt]=dfnew
 
         df_final = pd.concat(d)
-        df_final.rename_axis(['PntOptIndex', 'TimeIndex'], inplace=True)
-        df_final = df_final.swaplevel(0, 1) # change the order of levels
+        df_final = df_final.sort_values(by=['TimeIndex'])
+        #df_final.rename_axis(['PntOptIndex', 'TimeIndex'], inplace=True)
+        #df_final = df_final.swaplevel(0, 1) # change the order of levels
 
         with open(old_accessInfo_fl, 'r') as f1:
             head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
@@ -431,4 +429,4 @@ class OrbitPropCovPoptsWithGrid:
                 f2.write(str(head[-1]).rstrip() + message)
 
         with open(new_accessInfo_fl, 'a') as f2:
-            dfnew.to_csv(f2, index=False, header=True)  
+            df_final.to_csv(f2, index=False, header=True)  
