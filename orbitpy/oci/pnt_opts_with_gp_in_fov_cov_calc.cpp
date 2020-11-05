@@ -290,14 +290,7 @@ int main(int argc, char *argv[])
       satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satAcc << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
       satAcc << "Mission Duration [Days] is "<< duration << ".\n";
-      satAcc << "TimeIndex,PntOptIndex,";
-      for(int i=0;i<numGridPoints;i++){
-         satAcc<<"GP"<<i;
-         if(i<numGridPoints-1){
-            satAcc<<",";
-         }
-      }
-      satAcc << "\n";
+      satAcc << "TimeIndex,PntOptIndex,gpi\n";
   
       ifstream satState(satStateFp.c_str());
 
@@ -348,24 +341,13 @@ int main(int argc, char *argv[])
             loopPoints = covChecker->CheckPointCoverage();        
         
             // Write access data         
-            // Make array with '1' (Access) in the cells corresponding to indices of gp's accessed
-            // and nothing with there is no access.
             if(loopPoints.size()>0){
                // If no ground-points are accessed at this time, skip writing the row altogether.
                IntegerArray accessRow(numGridPoints,0);
-               for(int j = 0; j<loopPoints.size();j++){
-                  accessRow[loopPoints[j]] = 1;
+               for(int k = 0; k<loopPoints.size();k++){
+                  satAcc << std::setprecision(prc) << nSteps << "," << j << "," << loopPoints[k] << "\n";
                }
-               satAcc << std::setprecision(prc) << nSteps << "," << j; 
-               for(int k=0; k<numGridPoints; k++){
-                  if(accessRow[k] == 1){ // kth column of the accessRow
-                     satAcc<< ",1";
-                  }else{
-                     satAcc<< ",";
-                  }                  
-               }
-               satAcc << "\n";
-               }        
+            }         
          
          }
          nSteps++; 

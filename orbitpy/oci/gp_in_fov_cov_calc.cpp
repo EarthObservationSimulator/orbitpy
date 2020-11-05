@@ -306,14 +306,7 @@ int main(int argc, char *argv[])
       satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satAcc << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
       satAcc << "Mission Duration [Days] is "<< duration << ".\n";
-      satAcc << "TimeIndex,";
-      for(int i=0;i<numGridPoints;i++){
-         satAcc<<"GP"<<i;
-         if(i<numGridPoints-1){
-            satAcc<<",";
-         }
-      }
-      satAcc << "\n";
+      satAcc << "TimeIndex,gpi" << "\n";
 
       ifstream satState(satStateFp.c_str());
 
@@ -387,22 +380,10 @@ int main(int argc, char *argv[])
             // If no ground-points are accessed at this time, skip writing the row altogether.
             IntegerArray accessRow(numGridPoints,0);
             for(int j = 0; j<loopPoints.size();j++){
-               accessRow[loopPoints[j]] = 1;
+               satAcc << std::setprecision(prc) << nSteps << "," << loopPoints[j] << "\n";
             }
-            satAcc << std::setprecision(prc) << nSteps;
-            for(int k=0; k<numGridPoints; k++){
-               if(accessRow[k] == 1){
-                  satAcc<< ",1";
-               }else{
-                  satAcc<< ",";
-               }
-               
-            }
-            satAcc << "\n";
-            }        
+         }        
          nSteps++; 
-
-         
       }
       
       satAcc.close(); 

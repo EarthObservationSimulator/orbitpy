@@ -174,7 +174,9 @@
             "lonLower":125
         }
         ],
-        "customGridRes": 1,
-        "customTimeStep": 1           
+        "customGridRes": 1
+    },
+    "settings":{
+        "customTimeStep": 1                         
     }
 }

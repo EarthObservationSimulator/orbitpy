@@ -112,7 +112,7 @@ class OrbitPropCovGrid:
 
         # Read the access file
         access_info_df = pd.read_csv(access_fl,skiprows = [0,1,2,3]) # read the access times 
-        access_info_df = access_info_df.set_index('TimeIndex')
+        access_info_df = access_info_df
 
         # copy headers from the original access file
         with open(access_fl, 'r') as f:
@@ -123,8 +123,7 @@ class OrbitPropCovGrid:
                 f.write(str(r)) 
 
         # Iterate over all valid logged access events
-        acc_indx = list(access_info_df[access_info_df.notnull()].stack().index) # list of valid access [time, POI]
-
+        acc_indx = access_info_df.index # list of valid access [time, POI]
         with open(new_access_fl,'a+', newline='') as f:
             w = csv.writer(f)
            
@@ -133,9 +132,9 @@ class OrbitPropCovGrid:
             
             for indx in acc_indx:
 
-                time_i = int(indx[0])
+                time_i = int(access_info_df.loc[indx][0])
                 
-                poi_indx = int(indx[1][2:])                
+                poi_indx = int(access_info_df.loc[indx][1])                
 
                 regi  = int(poi_info_df.loc[poi_indx]["regi"])
                 TargetCoords = dict()                
@@ -145,22 +144,17 @@ class OrbitPropCovGrid:
                 _v = dict({'accessTimeIndex':time_i, 'regi': regi, 'gpi': poi_indx, 'lat[deg]': TargetCoords["lat[deg]"], 'lon[deg]': TargetCoords["lon[deg]"], 'pntopti': ''})
                 w.writerow(_v.values())
 
-
-
     def correct_access_files(self):
         """ When the instrument takes observations at purely side-looking geometry (no squint),
             post-process the access files to indicate access only at middle of access-interval. 
             The middle of access-interval is approximately the time at which the instrument shall
             be at side-looking geometry to the target ground-point.
             The new access files are written in the same directory (with the same names), while the
-            previous access files are renamed as *...._old* under the same directory.
+            previous access files are renamed as *...._old* under the same directory. 
+            The file format is as follows: The first four lines contain general information. The fifth line contains the
+            column headers with the following names: :code:`TimeIndex,gpi`. 
 
             :ivar sat_access_fls: List of access files (paths) which need to be corrected
-
-            The file format is as follows: The first four lines contain general information. The fifth line contains the
-            column headers with the following names: :code:`TimeIndex,GP0,GP1,.....`. The number of columns depends on the number
-            of gridpoints and can be a varied. 
-
             :vartype sat_access_fls: list, str
 
             :returns: None
@@ -173,37 +167,21 @@ class OrbitPropCovGrid:
         new_accessInfo_fl = acc_fl 
 
         df = pd.read_csv(old_accessInfo_fl, skiprows = 4)
-        df = df.set_index('TimeIndex')
-        dfnew =  pd.DataFrame(np.nan, index=df.index, columns=df.columns)
-        # iterate over all the columns (ground-points)
-        for gpi in range(0, df.shape[1]):
-            # Select column by index position using iloc[]
-            gp_acc = df.iloc[: , gpi]
-            gp_acc = gp_acc.dropna()
-            # search for consecutive (in time) access, and replace by access 
-            # at (approximately) the middle of the access period
-            mid_access = []
-            if(gp_acc.index.size>0): 
-                acc_evt = []                 
-                t0 = gp_acc.index[0]
-                acc_evt.append(t0)
-                for j in range(1,len(gp_acc.index)):
-                    if(gp_acc.index[j] == t0 + 1):
-                        # same access event                            
-                        t0 = gp_acc.index[j]
-                        acc_evt.append(t0)
-                    else:
-                        # new access event
-                        mid_access.append(acc_evt[int(0.5*len(acc_evt))])
-                        acc_evt = []
-                        t0 = gp_acc.index[j]
-                        acc_evt.append(t0)
-                # append the mid access time of the final access event
-                mid_access.append(acc_evt[int(0.5*len(acc_evt))])
-                
-                for j in range(0,len(mid_access)):
-                    dfnew.loc[mid_access[j]][gpi] = int(1)
-
+        df_grp = df.groupby('gpi')
+        dfnew =  pd.DataFrame(columns=df.columns)
+        # iterate over all the gorups (ground-points)
+        for name, group in df_grp:
+            x = (group['TimeIndex'].shift(periods=1) - group['TimeIndex']) < -1
+            _intv = np.where(x == True)[0]            
+            interval_indices = [0] # add the very first interval start index
+            interval_indices.extend(_intv)
+            interval_indices.extend((_intv - 1).tolist())
+            interval_indices.append(len(group)-1) # add the very last interval end index
+            interval_indices.sort()
+            mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
+            mid_points = [int(np.floor(x)) for x in mid_points]
+            dfnew = dfnew.append(group.iloc[mid_points])
+            dfnew = dfnew.sort_values(by=['TimeIndex'])
 
         with open(old_accessInfo_fl, 'r') as f1:
             head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
@@ -215,8 +193,7 @@ class OrbitPropCovGrid:
                 f2.write(str(head[-1]).rstrip() + message)
 
         with open(new_accessInfo_fl, 'a') as f2:
-            dfnew.to_csv(f2, header=True)             
-
+            dfnew.to_csv(f2, index=False, header=True)  
 
 class OrbitPropCovPopts:
     """ Class to handle propagation and coverage calculations with the pointing options approach.
@@ -358,7 +335,7 @@ class OrbitPropCovPoptsWithGrid:
 
         # Read the access file
         access_info_df = pd.read_csv(access_fl,skiprows = [0,1,2,3]) # read the access times 
-        access_info_df = access_info_df.set_index(['TimeIndex', 'PntOptIndex'])
+        access_info_df = access_info_df
 
         # copy headers from the original access file
         with open(access_fl, 'r') as f:
@@ -369,20 +346,18 @@ class OrbitPropCovPoptsWithGrid:
                 f.write(str(r)) 
 
         # Iterate over all valid logged access events
-        acc_indx = list(access_info_df[access_info_df.notnull()].stack().index) # list of valid access [time, POI]
-
+        acc_indx = access_info_df.index # list of valid access [time, POI]
         with open(new_access_fl,'a+', newline='') as f:
             w = csv.writer(f)
            
             _v = dict({'accessTimeIndex':None, 'regi': None, 'gpi': None, 'lat[deg]': None, 'lon[deg]': None, 'pntopti': None})
             w.writerow(_v.keys())
             
+            
             for indx in acc_indx:
-                
-                time_i = int(indx[0])
-                pntopt_i = int(indx[1])
-                
-                poi_indx = int(indx[2][2:])                
+                time_i = int(access_info_df.loc[indx][0])
+                pntopt_i = int(access_info_df.loc[indx][1])                
+                poi_indx = int(access_info_df.loc[indx][2])                
 
                 regi  = int(poi_info_df.loc[poi_indx]["regi"])
                 TargetCoords = dict()                
@@ -398,14 +373,11 @@ class OrbitPropCovPoptsWithGrid:
             The middle of access-interval is approximately the time at which the instrument shall
             be at side-looking geometry to the target ground-point.
             The new access files are written in the same directory (with the same names), while the
-            previous access files are renamed as *..._* under the same directory.
+            previous access files are renamed as *...._old* under the same directory. 
+            The file format is as follows: The first four lines contain general information. The fifth line contains the
+            column headers with the following names: :code:`TimeIndex,gpi`. 
 
             :ivar sat_access_fls: List of access files (paths) which need to be corrected
-
-            The file format is as follows: The first four lines contain general information. The fifth line contains the
-            column headers with the following names: :code:`TimeIndex,PntOptIndex,GP0,GP1,.....`. The number of columns depends on the number
-            of gridpoints and can be a varied. 
-
             :vartype sat_access_fls: list, str
 
             :returns: None
@@ -417,45 +389,32 @@ class OrbitPropCovPoptsWithGrid:
         old_accessInfo_fl = acc_fl + '_'
         new_accessInfo_fl = acc_fl 
 
-        df = pd.read_csv(old_accessInfo_fl, skiprows = 4)        
-        df = df.set_index(['PntOptIndex'])
+        df = pd.read_csv(old_accessInfo_fl, skiprows = 4)
+
+        df0 = df.set_index(['PntOptIndex'])
         
         d ={}
-        for popt, df_per_popt in df.groupby(level=0):
+        for popt, df_per_popt in df0.groupby(level=0):
            
             df_per_popt = df_per_popt.set_index(['TimeIndex'])
-            dfnew =  pd.DataFrame(np.nan, index=df_per_popt.index, columns=df_per_popt.columns)
-            
-            # iterate over all the columns (ground-points)
-            for gpi in range(0, df_per_popt.shape[1]):
-                # Select column by index position using iloc[]
-                gp_acc = df_per_popt.iloc[: , gpi]
-                gp_acc = gp_acc.dropna()             
-                
-                # search for consecutive (in time) access, and replace by access 
-                # at (approximately) the middle of the access period
-                mid_access = []
-                if(gp_acc.index.size>0): 
-                    acc_evt = []                 
-                    t0 = gp_acc.index[0]
-                    acc_evt.append(t0)
-                    for j in range(1,len(gp_acc.index)):
-                        if(gp_acc.index[j] == t0 + 1):
-                            # same access event                            
-                            t0 = gp_acc.index[j]
-                            acc_evt.append(t0)
-                        else:
-                            # new access event
-                            mid_access.append(acc_evt[int(0.5*len(acc_evt))])
-                            acc_evt = []
-                            t0 = gp_acc.index[j]
-                            acc_evt.append(t0)
-                    # append the mid access time of the final access event
-                    mid_access.append(acc_evt[int(0.5*len(acc_evt))])
-                    
-                    for j in range(0,len(mid_access)):
-                        dfnew.loc[mid_access[j]][gpi] = int(1)
-                
+            df =  pd.DataFrame(np.nan, index=df_per_popt.index, columns=df_per_popt.columns)
+
+            df_grp = df.groupby('gpi')
+            dfnew =  pd.DataFrame(columns=df.columns)
+            # iterate over all the gorups (ground-points)
+            for name, group in df_grp:
+                x = (group['TimeIndex'].shift(periods=1) - group['TimeIndex']) < -1
+                _intv = np.where(x == True)[0]            
+                interval_indices = [0] # add the very first interval start index
+                interval_indices.extend(_intv)
+                interval_indices.extend((_intv - 1).tolist())
+                interval_indices.append(len(group)-1) # add the very last interval end index
+                interval_indices.sort()
+                mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
+                mid_points = [int(np.floor(x)) for x in mid_points]
+                dfnew = dfnew.append(group.iloc[mid_points])
+                dfnew = dfnew.sort_values(by=['TimeIndex'])
+
             d[popt]=dfnew
 
         df_final = pd.concat(d)
@@ -472,4 +431,4 @@ class OrbitPropCovPoptsWithGrid:
                 f2.write(str(head[-1]).rstrip() + message)
 
         with open(new_accessInfo_fl, 'a') as f2:
-            df_final.to_csv(f2, header=True)       
+            dfnew.to_csv(f2, index=False, header=True)  

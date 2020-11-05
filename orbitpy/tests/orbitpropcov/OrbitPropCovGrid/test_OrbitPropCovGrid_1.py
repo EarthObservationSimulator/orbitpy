@@ -125,12 +125,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
 
         column_headers = pd.read_csv(inter_access_fl, skiprows = [0,1,2,3], nrows=1, header=None).astype(str) # 5th row contains the columns headers
         self.assertEqual(column_headers.iloc[0][0],"TimeIndex")
-
-        covData = pd.read_csv(prop_cov_param.cov_grid_fl)
-        num_of_gps = len(covData["gpi"])
-        for i in range(0,num_of_gps):
-            self.assertEqual(column_headers.iloc[0][i+1],"GP"+str(i))
-
+        self.assertEqual(column_headers.iloc[0][1],"gpi")
 
         ##### access file test ##### 
         access_fl = prop_cov_param.sat_acc_fl

@@ -29,17 +29,14 @@ Description of the data is given below:
 
 Access Data
 ==============
-The format of the access data is similar to the satellite states data and is also produced by the :class:`orbitpy.orbitpropcov` module.
-The time data of both the states ad access are synced. One access data file is produced for each satellite payload. The intermediate access
+The format of the access data is produced by the :class:`orbitpy.orbitpropcov` module.
+The time data of both the states and access are synced. Seperate access data files are produced for per satellite payload. The intermediate access
 files produced by the :ref:`grid_pnts_cov_calc_app` is different from the intermediate file produced by the :ref:`pnt_opts_cov_calc_app`. 
 
 Grid-point based coverage calculations intermediate access file-format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Excluding the :code:`TimeIndex`
-column, the column headers are named as :code:`GP0`, :code:`GP1`, :code:`GP2`, and so on corresponding to the grid-point indices. The grid point
-data can be found in the coverage grid data file. Each cell entry corresponds to a True/ False condition for access. If there has been access 
-(or if there can be access in the case when the FOR is used for access computation), the cell entry is :code:`1`, else there is no entry. During
-times are which there is no access over all the grid-points, the entire row is absent. 
+The column headers are named as :code:`TimeIndex` (corresponding to Time Index) and :code:`gpi` (corresponding to ground-point index). The grid point
+data can be found in the coverage grid data file. Each row entry corresponds to the time at which the corresponding ground-point is seen.
 
 Pointing-options based coverage calculations intermediate access file-format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
