@@ -278,8 +278,7 @@ int main(int argc, char *argv[])
       
       // Propagate for a duration and collect data
       Real           startDate   = date->GetJulianDate();
-      IntegerArray   loopPoints;
-      IntegerArray   loopPoints_yaw180;
+      
 
       /** Write satellite states and access files **/
       const int prc = std::numeric_limits<double>::digits10 + 1; // set to maximum precision                 
@@ -334,11 +333,27 @@ int main(int argc, char *argv[])
          date->SetJulianDate(_date);
          state->SetCartesianState(_state);
 
+         // TODO.  Handle differences in units of points and states.
+         // TODO.  This ignores omega cross r term in velocity, which is ok and 
+         // perhaps desired for current use cases but is not always desired.
+         Rvector3 sat_pos_EF_km  = earth->GetBodyFixedState(_state.GetR(), _date);
+
+         // Find the set of points within line of sight
+         IntegerArray inLOSPntInd;
+         oci_utils::get_points_in_lineOfSight(sat_pos_EF_km, pGroup, inLOSPntInd);
+         /*
+         cout<<"LOS points: ";
+         for(int k = 0; k<inLOSPntInd.size();k++){ 
+            cout<<inLOSPntInd[k] << ",";
+         }
+         cout<<"\n";
+         */
          for(int j=0;j<numPntOpts;j++){ // loop over pointing options, 'j' is the pointing-option index
 
             sat1->SetBodyNadirOffsetAngles(euler_angle1[j],euler_angle2[j],euler_angle3[j],1,2,3); 
 
-            loopPoints = covChecker->CheckPointCoverage();        
+            IntegerArray   loopPoints;
+            loopPoints = covChecker->CheckPointCoverage();  // Coverage within the FOV is checked only for the points inside the horizon      
         
             // Write access data         
             if(loopPoints.size()>0){
@@ -347,6 +362,34 @@ int main(int argc, char *argv[])
                for(int k = 0; k<loopPoints.size();k++){
                   satAcc << std::setprecision(prc) << nSteps << "," << j << "," << loopPoints[k] << "\n";
                }
+               cout<<"1. FOV points: ";
+               for(int k = 0; k<loopPoints.size();k++){
+                  cout<<loopPoints[k] << ",";
+               }
+               cout<<"\n";
+            }         
+         
+         }
+
+         for(int j=0;j<numPntOpts;j++){ // loop over pointing options, 'j' is the pointing-option index
+
+            sat1->SetBodyNadirOffsetAngles(euler_angle1[j],euler_angle2[j],euler_angle3[j],1,2,3); 
+
+            IntegerArray   loopPoints;
+            loopPoints = covChecker->CheckPointCoverage(inLOSPntInd);  // Coverage within the FOV is checked only for the points within LOS  
+        
+            // Write access data         
+            if(loopPoints.size()>0){
+               // If no ground-points are accessed at this time, skip writing the row altogether.
+               IntegerArray accessRow(numGridPoints,0);
+               for(int k = 0; k<loopPoints.size();k++){
+                  satAcc << std::setprecision(prc) << nSteps << "," << j << "," << loopPoints[k] << "\n";
+               }
+               cout<<"2. FOV points: ";
+               for(int k = 0; k<loopPoints.size();k++){
+                  cout<<loopPoints[k] << ",";
+               }
+               cout<<"\n";
             }         
          
          }

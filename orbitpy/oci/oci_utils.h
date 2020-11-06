@@ -259,5 +259,73 @@ int readPntOptsFile(const string &pOptsFl, RealArray &euler_angle1, RealArray &e
 
 }
 
+
+
+bool is_in_lineOfSight(const Rvector3* object1_pos, const Rvector3* object2_pos, const Real obstacle_radius){
+      
+      Rvector3 obj1_unitVec = object1_pos->GetUnitVector();
+      Rvector3 obj2_unitVec = object2_pos->GetUnitVector();  
+
+      // This condition tends to give a numerical error, so solve for it independently.
+      Real eps = 1e-9;
+      Real x = obj1_unitVec * obj2_unitVec; // Dot product
+      Real theta, theta1, theta2;
+
+      if((x > -1-eps) && (x < -1+eps)){
+         return false;
+      }         
+      else{
+         if(x>1){
+             x=1;
+         }            
+         theta  = GmatMathUtil::ACos(x);
+      }
+                        
+      Real obj1_r = object1_pos->GetMagnitude();      
+      if(obj1_r - obstacle_radius > 1e-5){
+         theta1 = GmatMathUtil::ACos(obstacle_radius/obj1_r);
+      }
+      else if(abs(obj1_r - obstacle_radius) < 1e-5){
+         theta1 =  0.0;
+      }         
+      else{
+         return false; // object1 is inside the obstacle
+      }
+         
+      Real obj2_r = object2_pos->GetMagnitude();
+      if(obj2_r - obstacle_radius > 1e-5){
+         theta2 = GmatMathUtil::ACos(obstacle_radius/obj2_r);
+      }         
+      else if(abs(obj2_r - obstacle_radius) < 1e-5){
+         theta2 =  0.0;
+      }         
+      else{
+         return false; // object2 is inside the obstacle
+      }        
+               
+      if(theta1 + theta2 < theta)
+         return false;
+      else
+         return true;
+}
+
+void get_points_in_lineOfSight(const Rvector3 sat_pos_EF_km, PointGroup *pointGroupIn, IntegerArray& inViewPntInd){
+   /* 
+      Perform horizon test on the list of points
+   */
+   // @todo DON'T hard-code body radius
+   const Real BODY_RADIUS = 6378.1363;
+   Integer numPts = pointGroupIn->GetNumPoints();   
+   for (Integer pointIdx = 0; pointIdx < numPts; pointIdx++)
+   {
+ 
+      Rvector3 *ptPos1  = pointGroupIn->GetPointPositionVector(pointIdx);
+
+      if (oci_utils::is_in_lineOfSight(ptPos1, &sat_pos_EF_km, BODY_RADIUS)){
+         inViewPntInd.push_back(pointIdx); 
+      }
+   
+   }
+}
 }
 #endif /* OCI_UTILS_H */
