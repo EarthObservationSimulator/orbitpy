@@ -169,7 +169,12 @@ class OrbitPropCovGrid:
         df = pd.read_csv(old_accessInfo_fl, skiprows = 4)
         df_grp = df.groupby('gpi')
         dfnew =  pd.DataFrame(columns=df.columns)
-        # iterate over all the gorups (ground-points)
+
+        # iterate over all the groups (ground-points)
+        max_num_acc = len(df.index)
+        data = np.zeros((max_num_acc,2), dtype=int)
+        k = 0
+        data_indx = 0
         for name, group in df_grp:
             x = (group['TimeIndex'].shift(periods=1) - group['TimeIndex']) < -1
             _intv = np.where(x == True)[0]            
@@ -180,12 +185,15 @@ class OrbitPropCovGrid:
             interval_indices.sort()
             mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
             mid_points = [int(np.floor(x)) for x in mid_points]
-            dfnew = dfnew.append(group.iloc[mid_points])
-            dfnew = dfnew.sort_values(by=['TimeIndex'])
+            _data = group.iloc[mid_points].to_numpy()
+            m = _data.shape[0]
+            data[data_indx:data_indx+m,:] = _data
+            data_indx = data_indx + m
 
+        data = data[0:data_indx]
+        dfnew = pd.DataFrame(data = data, columns = ['TimeIndex', 'gpi']) 
         with open(old_accessInfo_fl, 'r') as f1:
             head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
-        
             with open(new_accessInfo_fl, 'w') as f2:
                 for k in range(0,len(head)-1):
                     f2.write(str(head[k]))
@@ -193,7 +201,7 @@ class OrbitPropCovGrid:
                 f2.write(str(head[-1]).rstrip() + message)
 
         with open(new_accessInfo_fl, 'a') as f2:
-            dfnew.to_csv(f2, index=False, header=True)  
+            dfnew.to_csv(f2, index=False, header=True, line_terminator='\n')  
 
 class OrbitPropCovPopts:
     """ Class to handle propagation and coverage calculations with the pointing options approach.
@@ -409,7 +417,7 @@ class OrbitPropCovPoptsWithGrid:
                 interval_indices.sort()
                 mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
                 mid_points = [int(np.floor(x)) for x in mid_points]
-                dfnew = dfnew.append(group.iloc[mid_points])
+                dfnew = dfnew.append(group.iloc[mid_points]) # TODO: Replace this time-inefficient append function by preallocated numpy arrays
                 dfnew = dfnew.sort_values(by=['TimeIndex'])
 
             d[popt]=dfnew

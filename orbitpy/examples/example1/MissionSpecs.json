@@ -6,7 +6,7 @@
         "numberSatellites": 3,
         "numberPlanes": 3,
         "relativeSpacing":1,
-        "inc":98,
+        "inc":0,
         "alt": 700,
         "ecc": 0.0001,
         "aop": 0
@@ -21,7 +21,7 @@
         "bitsPerPixel": 8, 
         "fieldOfView": {
             "sensorGeometry": "CONICAL",
-            "fullConeAngle": 25
+            "fullConeAngle": 45
         },
         "orientation": {
             "convention": "NADIR"
@@ -36,16 +36,25 @@
     },   
     "grid":{
         "@type": "autoGrid",
+        "customGridRes": 1,
         "regions":[{
             "@id":1,
-            "latUpper":50,
-            "latLower":30,
+            "latUpper":20,
+            "latLower":1,
+            "lonUpper":-60,
+            "lonLower":-110                
+        },
+        {
+            "@id":2,
+            "latUpper":-1,
+            "latLower":-20,
             "lonUpper":-60,
             "lonLower":-110                
         }
         ]
     },
     "settings":{
-        "customTimeStep": 1               
+        "customTimeStep": 1
+
     }
 }

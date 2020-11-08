@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
             cout<<inLOSPntInd[k] << ",";
          }
          cout<<"\n";
-         */
+         
          for(int j=0;j<numPntOpts;j++){ // loop over pointing options, 'j' is the pointing-option index
 
             sat1->SetBodyNadirOffsetAngles(euler_angle1[j],euler_angle2[j],euler_angle3[j],1,2,3); 
@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
                cout<<"\n";
             }         
          
-         }
+         }*/
 
          for(int j=0;j<numPntOpts;j++){ // loop over pointing options, 'j' is the pointing-option index
 
@@ -385,11 +385,13 @@ int main(int argc, char *argv[])
                for(int k = 0; k<loopPoints.size();k++){
                   satAcc << std::setprecision(prc) << nSteps << "," << j << "," << loopPoints[k] << "\n";
                }
+               /*
                cout<<"2. FOV points: ";
                for(int k = 0; k<loopPoints.size();k++){
                   cout<<loopPoints[k] << ",";
                }
                cout<<"\n";
+               */
             }         
          
          }
