@@ -121,7 +121,7 @@ def main(user_dir):
 
     #obs = obsdatametrics.ObsDataMetrics(sat_dirs, instru_specs)
     obs = obsdatametrics.ObsDataMetrics(pi.sats)
-    obs.compute_all_obs_dmetrics()      
+    obs.compute_all_obs_metrics()      
     t2 = time.process_time()      
     print(".......DONE.......time taken (s): ", t2-t1)
 

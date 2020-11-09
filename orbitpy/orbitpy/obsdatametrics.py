@@ -21,7 +21,7 @@ class ObsDataMetrics():
 
         self.sats = sats
 
-    def compute_all_obs_dmetrics(self):
+    def compute_all_obs_metrics(self):
 
         for _sat in self.sats:           
             sat_state_fl = os.path.join(_sat.dir_pth, 'state')
