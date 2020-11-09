@@ -117,12 +117,15 @@ def main(user_dir):
     elif "satellite" in miss_specs:
         instru_specs = []
         for sat in miss_specs["satellite"]:
-            instru_specs.extend(sat["instrument"])
+            if("instrument" in sat):
+                instru_specs.extend(sat["instrument"])
 
-    #obs = obsdatametrics.ObsDataMetrics(sat_dirs, instru_specs)
-    obs = obsdatametrics.ObsDataMetrics(pi.sats)
-    obs.compute_all_obs_metrics()      
-    t2 = time.process_time()      
+    if(instru_specs is not None):
+        obs = obsdatametrics.ObsDataMetrics(pi.sats)
+        obs.compute_all_obs_metrics()      
+        t2 = time.process_time()      
+    else:
+        pass
     print(".......DONE.......time taken (s): ", t2-t1)
 
     end_time = time.process_time()

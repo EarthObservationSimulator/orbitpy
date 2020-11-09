@@ -25,12 +25,13 @@ class ObsDataMetrics():
 
         for _sat in self.sats:           
             sat_state_fl = os.path.join(_sat.dir_pth, 'state')
-            for _instru in _sat.instru: # iterate through list of instruments
-                for _ssid in _instru._ssen_id: # iterate through list of subsensors ids
-                    accessInfo_fl = os.path.join(_sat.dir_pth, str(_ssid)+"_access")
-                    obsMetrics_fl = os.path.join(_sat.dir_pth, str(_ssid) +'_obsMetrics')
-                    ObsDataMetrics.compute_obs_data_metrics(_instru, _ssid, sat_state_fl, accessInfo_fl,
-                                                obsMetrics_fl)
+            if(_sat.instru is not None):
+                for _instru in _sat.instru: # iterate through list of instruments
+                    for _ssid in _instru._ssen_id: # iterate through list of subsensors ids
+                        accessInfo_fl = os.path.join(_sat.dir_pth, str(_ssid)+"_access")
+                        obsMetrics_fl = os.path.join(_sat.dir_pth, str(_ssid) +'_obsMetrics')
+                        ObsDataMetrics.compute_obs_data_metrics(_instru, _ssid, sat_state_fl, accessInfo_fl,
+                                                    obsMetrics_fl)
 
     @staticmethod
     def compute_obs_data_metrics(instru, ssid, state_fl, access_fl, datametrics_fl): 

@@ -82,12 +82,18 @@ class PropagationCoverageParameters():
 
     :ivar cov_calcs_app: Coverage caclulations approach
     :vartype cov_calcs_app: str
+
+    :ivar do_prop: Flag indicating if propagation calculation is to be performed.
+    :vartype do_prop: bool
+
+    :ivar do_cov: Flag indicating if coverage calculation is to be performed.
+    :vartype do_cov: bool
     
     """
     def __init__(self, sat_id=str(), epoch=str(), sma=float(), ecc=float(), inc=float(), raan=float(), aop=float(), ta=float(), 
                  duration=float(), cov_grid_fl=str(), sen_fov_geom=str(), sen_orien=str(), sen_clock=str(), 
                  sen_cone=str(), purely_sidelook = bool(), yaw180_flag = int(), step_size=float(), sat_state_fl=str(), 
-                 sat_acc_fl=str(), popts_fl=str(), cov_calcs_app = str()):
+                 sat_acc_fl=str(), popts_fl=str(), cov_calcs_app = str(), do_prop=bool(), do_cov=bool()):
         self.sat_id = str(sat_id)
         self.epoch = str(epoch) 
         self.sma = float(sma) 
@@ -109,6 +115,8 @@ class PropagationCoverageParameters():
         self.sat_state_fl = str(sat_state_fl) 
         self.sat_acc_fl = str(sat_acc_fl) 
         self.cov_calcs_app = CoverageCalculationsApproach.get(cov_calcs_app) 
+        self.do_prop = bool(do_prop)
+        self.do_cov = bool(do_cov)
 
 class OrbitPyDefaults(object):
     """ Enumeration of various default values used by package **OrbitPy**.

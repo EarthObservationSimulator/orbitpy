@@ -373,7 +373,10 @@ class PreProcess():
                 _orb = OrbitParameters(_sat["orbit"]['@id'], _sat["orbit"]['sma'], _sat["orbit"]['ecc'], _sat["orbit"]['inc'],
                                        _sat["orbit"]['raan'], _sat["orbit"]['aop'], _sat["orbit"]['ta'])
 
-                _instru = PreProcess.enumerate_instruments(_sat["instrument"]) # list of instruments for that satellite
+                if("instrument" in _sat):
+                    _instru = PreProcess.enumerate_instruments(_sat["instrument"]) # list of instruments for that satellite
+                else:
+                    _instru = None
 
                 # Create satellite folder
                 sat_dir = user_dir + 'sat' + str(_sat["orbit"]['@id']) + '/'
@@ -383,14 +386,14 @@ class PreProcess():
 
                 sats.append(Satellite(_orb, _instru, sat_dir))
 
-        elif(orb_specs and not instru_specs): #TODO
-            raise RuntimeError("Feature not available!")
-
-        elif(orb_specs and instru_specs):
+        elif(orb_specs):
             orbits = PreProcess.enumerate_orbits(orb_specs)
 
-            # enumerate instruments (from a list of dictionaries)
-            _instru = PreProcess.enumerate_instruments(instru_specs)
+            if(instru_specs is not None):
+                # enumerate instruments (from a list of dictionaries)
+                _instru = PreProcess.enumerate_instruments(instru_specs)
+            else:
+                _instru = None
 
             sats = []
             for orb_indx in range(0,len(orbits)): 
@@ -424,41 +427,52 @@ class PreProcess():
 
             instru = self.sats[sat_indx].instru
 
-            num_of_instru = len(instru)
-            for k in range(0,num_of_instru): # iterate over each instrument
-
-                ssen_id = instru[k]._ssen_id
-                num_of_ssen = len(ssen_id)
-
-                for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
-
-                    [ _y, _x]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
-                    if(_x._id):
-                        sat_acc_fl = sat_dir + str(_x._id) + '_access'
-                    else:
-                        raise RuntimeError("Please define instrument, subsensor id.")
-
-                    if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS): 
-                        # if pointing-option coverage calculation find the pointing-option file to be used for this particular instrument. 
-                        popts_fl = None
-                        for pf in self.pnt_opts_fls:
-                            if pf["instrumentID"] == _x._id:
-                                popts_fl = pf["popts_fl"] 
-                                break
-                        
-                        if not popts_fl:
-                            raise RuntimeError("No pointing options specified for instrument with ID " + str(_x.id))
-                    elif(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS):
-                        popts_fl = None
-                    
-                    pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
+            if(instru is None):
+                # no instruments specified, skip coverage calculations
+                pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                             raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
                             sen_fov_geom=_x.get_as_string('Geometry'), sen_orien=_x.get_as_string('Orientation'), sen_clock= _x.get_as_string('Clock'), 
                             sen_cone=_x.get_as_string('Cone'), purely_sidelook = _y.purely_side_look, yaw180_flag = _x.get_as_string('yaw180_flag'), step_size=self.time_step, 
-                            sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= popts_fl, cov_calcs_app= self.cov_calc_app)
+                            sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= popts_fl, cov_calcs_app= self.cov_calc_app, do_prop = True, do_cov = False)
 
-                    prop_cov_param.append(pcp)
-        
+                prop_cov_param.append(pcp)
+
+            else:
+                num_of_instru = len(instru)
+                for k in range(0,num_of_instru): # iterate over each instrument
+
+                    ssen_id = instru[k]._ssen_id
+                    num_of_ssen = len(ssen_id)
+
+                    for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
+
+                        [ _y, _x]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
+                        if(_x._id):
+                            sat_acc_fl = sat_dir + str(_x._id) + '_access'
+                        else:
+                            raise RuntimeError("Please define instrument, subsensor id.")
+
+                        if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS): 
+                            # if pointing-option coverage calculation find the pointing-option file to be used for this particular instrument. 
+                            popts_fl = None
+                            for pf in self.pnt_opts_fls:
+                                if pf["instrumentID"] == _x._id:
+                                    popts_fl = pf["popts_fl"] 
+                                    break
+                            
+                            if not popts_fl:
+                                raise RuntimeError("No pointing options specified for instrument with ID " + str(_x.id))
+                        elif(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS):
+                            popts_fl = None
+                        
+                        pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
+                                raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
+                                sen_fov_geom=_x.get_as_string('Geometry'), sen_orien=_x.get_as_string('Orientation'), sen_clock= _x.get_as_string('Clock'), 
+                                sen_cone=_x.get_as_string('Cone'), purely_sidelook = _y.purely_side_look, yaw180_flag = _x.get_as_string('yaw180_flag'), step_size=self.time_step, 
+                                sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= popts_fl, cov_calcs_app= self.cov_calc_app, do_prop = True, do_cov = True)
+
+                        prop_cov_param.append(pcp)
+            
             
         return prop_cov_param
 
@@ -561,34 +575,47 @@ class PreProcess():
         for j in range(0,len(sats)): # iterate over all satellites
             sma = sats[j].orbit.sma 
             instru = sats[j].instru
-            num_of_instru = len(instru)
-            for k in range(0,num_of_instru): # iterate over each instrument
 
-                ssen_id = instru[k]._ssen_id
-                num_of_ssen = len(ssen_id)
+            # Find the minimum along-track fov over all the sensors attached to the satellite
+            fov_at = 1000 # some large number
+            if instru is not None:
+                num_of_instru = len(instru)
+                for k in range(0,num_of_instru): # iterate over each instrument
 
-                for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
+                    ssen_id = instru[k]._ssen_id
+                    num_of_ssen = len(ssen_id)
 
-                    [ics_fov, ics_for]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
+                    for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
 
-                    fov_at = ics_for.fov_at # use FOR, and not FOV
-                    f = RE/sma
-                    # calculate maximum horizon angle
-                    max_horizon_angle = np.rad2deg(2*np.arcsin(f))
-                    if(fov_at > max_horizon_angle):
-                        fov_at = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
-                    satVel = np.sqrt(GMe/sma)
-                    satGVel = f * satVel
-                    sinRho = RE/sma
-                    hfov_deg = fov_at/2
-                    elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
-                    lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
-                    eca_deg = lambda_deg*2 # total earth centric angle
-                    AT_FP_len = RE * np.deg2rad(eca_deg)                
-                    t_AT_FP = AT_FP_len / satGVel # find time taken by satellite to go over the along-track length
-                    tstep = time_res_fac * t_AT_FP
-                    if(tstep < min_t_step):
-                        min_t_step = tstep  
+                        [ics_fov, ics_for]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
+
+                        __fov_at = ics_for.fov_at # use FOR, and not FOV
+            else:
+                # no instruments specified, hence no FOV/FOR to consider, hence consider the entire horizon angle as FOV
+                f = RE/sma
+                __fov_at = np.rad2deg(2*np.arcsin(f))
+
+            if fov_at > __fov_at:
+                fov_at = __fov_at
+
+            # calculate the minimum time-step corresponding to the 'j'th satellite
+            # calculate maximum horizon angle
+            f = RE/sma
+            max_horizon_angle = np.rad2deg(2*np.arcsin(f))
+            if(fov_at > max_horizon_angle):
+                fov_at = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
+            satVel = np.sqrt(GMe/sma)
+            satGVel = f * satVel
+            sinRho = RE/sma
+            hfov_deg = fov_at/2
+            elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
+            lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
+            eca_deg = lambda_deg*2 # total earth centric angle
+            AT_FP_len = RE * np.deg2rad(eca_deg)                
+            t_AT_FP = AT_FP_len / satGVel # find time taken by satellite to go over the along-track length
+            tstep = time_res_fac * t_AT_FP
+            if(tstep < min_t_step):
+                min_t_step = tstep 
 
         return min_t_step
 
@@ -614,31 +641,43 @@ class PreProcess():
         for j in range(0,len(sats)):
 
             instru = sats[j].instru
-            num_of_instru = len(instru)
-            for k in range(0,num_of_instru): # iterate over each instrument
+            
+            # Find the minimum fov over all the sensors attached to the satellite
+            fov = 1000 # some large number
+            if instru is not None:
+                num_of_instru = len(instru)
+                for k in range(0,num_of_instru): # iterate over each instrument
 
-                ssen_id = instru[k]._ssen_id
-                num_of_ssen = len(ssen_id)
+                    ssen_id = instru[k]._ssen_id
+                    num_of_ssen = len(ssen_id)
 
-                for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
+                    for m in range(0,num_of_ssen):# iterate over each subsensor in the instrument
 
-                    [ics_fov, ics_for]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
+                        [ics_fov, ics_for]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
 
-                    fov = min(ics_fov.fov_at, ics_fov.fov_ct) # (use FOV and not FOR)
+                        __fov = min(ics_fov.fov_at, ics_fov.fov_ct) # (use FOV and not FOR)
+            else:
+                # no instruments specified, hence no FOV/FOR to consider, hence consider the entire horizon angle as FOV
+                sinRho = RE/sats[j].orbit.sma
+                fov = np.rad2deg(2*np.arcsin(sinRho))
 
-                    sinRho = RE/sats[j].orbit.sma
-                    # calculate maximum horizon angle
-                    max_horizon_angle = np.rad2deg(2*np.arcsin(sinRho))
-                    if(fov > max_horizon_angle):
-                        fov = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
+            if fov > __fov:
+                fov = __fov
 
-                    hfov_deg = 0.5*fov
-                    elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
-                    lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
-                    eca_deg = lambda_deg*2 # total earth centric angle
-                    grid_res_deg = eca_deg*grid_res_fac 
-                    if(grid_res_deg < min_grid_res_deg):
-                        min_grid_res_deg = grid_res_deg
+            # calculate the minimum grid-resolution corresponding to the 'j'th satellite
+            # calculate maximum horizon angle
+            sinRho = RE/sats[j].orbit.sma            
+            max_horizon_angle = np.rad2deg(2*np.arcsin(sinRho))
+            if(fov > max_horizon_angle):
+                fov = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
+
+            hfov_deg = 0.5*fov
+            elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
+            lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
+            eca_deg = lambda_deg*2 # total earth centric angle
+            grid_res_deg = eca_deg*grid_res_fac 
+            if(grid_res_deg < min_grid_res_deg):
+                min_grid_res_deg = grid_res_deg
 
         return min_grid_res_deg
 
