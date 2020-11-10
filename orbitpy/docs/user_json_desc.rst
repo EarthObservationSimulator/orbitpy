@@ -16,7 +16,7 @@ User JSON Input Description
    groundStations, :ref:`groundstations_json_object`, ,Ground station specifications.
    grid, :ref:`grid_json_object`, ,Coverage grid specifications. 
    pointingOptions, :ref:`popts_json_object`, ,Set of pointing options. 
-   settings, :ref:`settings_json_object`, ,Settings
+   propagator, :ref:`propagator_json_object`, ,Propagator related items.
 
 *Note that either :code:`grid` OR the :code:`pointingOptions` JSON object is to be defined, corresponding to grid-based coverage calculations
 or pointing-options based coverage caclulations.*
@@ -330,10 +330,10 @@ Example of the data-file:
 
 .. _settings_json_object:
 
-:code:`settings` JSON object
+:code:`propagator` JSON object
 ####################################
 
-This JSON object contains items which can be used to configure some of the orbit propagation and coverage parameters. 
+This JSON object contains items relating to the propagator. 
 
 .. csv-table:: Expected parameters
    :header: Parameter, Data type, Units, Description

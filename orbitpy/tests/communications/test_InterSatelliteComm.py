@@ -53,6 +53,8 @@ class TestInterSatelliteComm(unittest.TestCase):
                         step_size = 0.1+random.random(), 
                         sat_state_fl = dir_path+"/temp/state", 
                         sat_acc_fl = dir_path+"/temp/access", 
+                        do_prop=True,
+                        do_cov=True,
                         cov_calcs_app= CoverageCalculationsApproach.GRIDPNTS)
 
 

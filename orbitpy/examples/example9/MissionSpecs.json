@@ -39,7 +39,7 @@
         "@type": "customGrid",
         "covGridFn": "covGrid"
     },
-    "settings":{
+    "propagator":{
         "customTimeStep": 1               
     }
 }

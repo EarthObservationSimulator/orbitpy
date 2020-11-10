@@ -53,7 +53,7 @@
         }
         ]
     },
-    "settings":{
+    "propagator":{
         "customTimeStep": 1
 
     }

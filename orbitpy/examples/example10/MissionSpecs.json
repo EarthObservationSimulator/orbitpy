@@ -176,7 +176,7 @@
         ],
         "customGridRes": 1
     },
-    "settings":{
+    "propagator":{
         "customTimeStep": 1                         
     }
 }

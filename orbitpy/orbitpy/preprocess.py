@@ -150,16 +150,16 @@ class PreProcess():
             raise RuntimeError("Please specify either `constellation` and `instrument` JSON objects OR `satellite` JSON object.")
 
         # set time resolution factor based on default value or user input value
-        if "settings" in specs and 'customTimeResFactor' in specs['settings']:
-            time_res_f = specs['settings']['customTimeResFactor']
+        if "propagator" in specs and 'customTimeResFactor' in specs['propagator']:
+            time_res_f = specs['propagator']['customTimeResFactor']
             print('Custom time resolution factor of ' + str(time_res_f) + ' being used.')
         else:
             time_res_f = OrbitPyDefaults.time_res_fac
             print('Default time resolution factor of ' + str(time_res_f) + ' being used.')
 
         _time_step = PreProcess.compute_time_step(self.sats, time_res_f)
-        if "settings" in specs and 'customTimeStep' in specs['settings']:                    
-            self.time_step = float(specs['settings']['customTimeStep'])
+        if "propagator" in specs and 'customTimeStep' in specs['propagator']:                    
+            self.time_step = float(specs['propagator']['customTimeStep'])
             if(_time_step < self.time_step ):
                 warnings.warn("Custom time-step coarser than computed time-step.")
                 print("Custom time-step [s]: ", self.time_step)
@@ -580,6 +580,7 @@ class PreProcess():
             fov_at = 1000 # some large number
             if instru is not None:
                 num_of_instru = len(instru)
+                _fov_at = 1000 # some large number
                 for k in range(0,num_of_instru): # iterate over each instrument
 
                     ssen_id = instru[k]._ssen_id
@@ -590,13 +591,16 @@ class PreProcess():
                         [ics_fov, ics_for]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
 
                         __fov_at = ics_for.fov_at # use FOR, and not FOV
+
+                        if(_fov_at>__fov_at):
+                            _fov_at = __fov_at
             else:
                 # no instruments specified, hence no FOV/FOR to consider, hence consider the entire horizon angle as FOV
                 f = RE/sma
-                __fov_at = np.rad2deg(2*np.arcsin(f))
+                _fov_at = np.rad2deg(2*np.arcsin(f))
 
-            if fov_at > __fov_at:
-                fov_at = __fov_at
+            if fov_at > _fov_at:
+                fov_at = _fov_at
 
             # calculate the minimum time-step corresponding to the 'j'th satellite
             # calculate maximum horizon angle
@@ -646,6 +650,7 @@ class PreProcess():
             fov = 1000 # some large number
             if instru is not None:
                 num_of_instru = len(instru)
+                _fov = 1000 # some large number
                 for k in range(0,num_of_instru): # iterate over each instrument
 
                     ssen_id = instru[k]._ssen_id
@@ -656,13 +661,15 @@ class PreProcess():
                         [ics_fov, ics_for]  = instru[k].get_FOV_FOR_objs(ssen_id[m])
 
                         __fov = min(ics_fov.fov_at, ics_fov.fov_ct) # (use FOV and not FOR)
+                        if(_fov > __fov):
+                            _fov = __fov
             else:
                 # no instruments specified, hence no FOV/FOR to consider, hence consider the entire horizon angle as FOV
                 sinRho = RE/sats[j].orbit.sma
                 fov = np.rad2deg(2*np.arcsin(sinRho))
 
-            if fov > __fov:
-                fov = __fov
+            if fov > _fov:
+                fov = _fov
 
             # calculate the minimum grid-resolution corresponding to the 'j'th satellite
             # calculate maximum horizon angle

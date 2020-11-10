@@ -1,6 +1,6 @@
 {
     "epoch": "2018, 1, 15, 12, 0, 0",
-    "duration": 0.05,
+    "duration": 0.025,
     "constellation":{
         "@type": "Walkerdelta",
         "numberSatellites": 1,
@@ -19,8 +19,8 @@
                      "bitsPerPixel": 8, 
                      "fieldOfView": {
                          "sensorGeometry": "RECTANGULAR",
-                         "alongTrackFieldOfView":20,
-                         "crossTrackFieldOfView":20
+                         "alongTrackFieldOfView":40,
+                         "crossTrackFieldOfView":40
                      },
                      "orientation": {
                      "convention": "SIDE_LOOK",
@@ -100,7 +100,7 @@
         ],
         "customGridRes": 1
     },
-    "settings":{
+    "propagator":{
         "customTimeStep": 1                         
     }
 }

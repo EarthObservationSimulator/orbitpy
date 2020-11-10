@@ -52,7 +52,7 @@
         "@type": "customGrid",
         "covGridFn": "covGridUSA"
     },
-    "settings":{        
+    "propagator":{        
         "customTimeStep": 1
     }
 

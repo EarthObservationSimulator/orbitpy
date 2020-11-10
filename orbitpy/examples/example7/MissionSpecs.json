@@ -56,7 +56,7 @@
             "referenceFrame": "NadirRefFrame",
             "pntOptsFn":"pOpts_pay1"              
         }],
-    "settings":{
+    "propagator":{
         "customTimeResFactor": 1                         
     }
 }

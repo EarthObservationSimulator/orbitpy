@@ -90,7 +90,7 @@
         "pntOptsFn":"pOpts"              
     }
     ],
-    "settings":{
+    "propagator":{
         "customTimeResFactor": 1                         
     }
 }

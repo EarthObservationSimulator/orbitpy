@@ -207,6 +207,7 @@ class OrbitPropCovGrid:
                 message = " Access listed below corresponds to approximate access instants at the grid-points at a side-look target geometery. The scene scan time should be used along with the below data to get complete access information.\n"
                 f2.write(str(head[-1]).rstrip() + message)
 
+        dfnew.sort_values(by=['TimeIndex'], inplace=True)
         with open(new_accessInfo_fl, 'a') as f2:
             dfnew.to_csv(f2, index=False, header=True, line_terminator='\n')  
 
@@ -455,5 +456,6 @@ class OrbitPropCovPoptsWithGrid:
                 message = " Access listed below corresponds to approximate access instants at the grid-points at a side-look target geometery. The scene scan time should be used along with the below data to get complete access information.\n"
                 f2.write(str(head[-1]).rstrip() + message)
 
+        dfnew.sort_values(by=['TimeIndex'], inplace=True)
         with open(new_accessInfo_fl, 'a') as f2:
             df_final.to_csv(f2, index=False, header=True)  

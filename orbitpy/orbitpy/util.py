@@ -115,8 +115,8 @@ class PropagationCoverageParameters():
         self.sat_state_fl = str(sat_state_fl) 
         self.sat_acc_fl = str(sat_acc_fl) 
         self.cov_calcs_app = CoverageCalculationsApproach.get(cov_calcs_app) 
-        self.do_prop = bool(do_prop)
-        self.do_cov = bool(do_cov)
+        self.do_prop = bool(do_prop) if do_prop is not None else True
+        self.do_cov = bool(do_cov) if do_cov is not None else True
 
 class OrbitPyDefaults(object):
     """ Enumeration of various default values used by package **OrbitPy**.
