@@ -82,12 +82,12 @@
     "pointingOptions":[{
         "instrumentID": "pay1_1, pay1_2",
         "referenceFrame": "NadirRefFrame",
-        "pntOptsFn":"pOpts"              
+        "pntOptsFileName":"pOpts"              
     },
     {
         "instrumentID": "pay2_1",
         "referenceFrame": "NadirRefFrame",
-        "pntOptsFn":"pOpts"              
+        "pntOptsFileName":"pOpts"              
     }
     ],
     "propagator":{

@@ -34,7 +34,7 @@
     "pointingOptions":[{
         "instrumentID": "sen1",
         "referenceFrame": "NadirRefFrame",
-        "pntOptsFn":"pOpts"              
+        "pntOptsFileName":"pOpts"              
     }],
     "propagator":{
         "customTimeResFactor": 0.5                          

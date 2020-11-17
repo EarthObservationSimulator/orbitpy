@@ -37,7 +37,7 @@
     },   
     "grid":{
         "@type": "customGrid",
-        "covGridFn": "covGrid"
+        "covGridFileName": "covGrid"
     },
     "propagator":{
         "customTimeStep": 1               

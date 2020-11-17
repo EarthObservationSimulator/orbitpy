@@ -299,9 +299,10 @@ field having a format as follows:
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
-   instrumentID, str, , The instrument identifier to which the corresponding pointing-options data-file is to be used.
+   instrumentID, str, , The instrument identifier to which the corresponding pointing-options data-file is to be used. Multiple IDs separated by commas are allowed.
    referenceFrame, str, , Currently only the :code:`NadirRefFrame` is supported.
-   pntOptsFn, str, , Name of the data-file containing the set of pointing options. This file has to be present in the user-directory.
+   pntOptsFileName, str, , Name of the data-file containing the set of pointing options. This file has to be present in the user-directory.
+   pntOptsFilePath, str, , Path to the data-file containing the set of pointing options. (Specify :code:`pntOptsFilePath` **or** :code:`pntOptsFileName`) 
 
 .. warning:: In the case when the pointing-options approach is used for coverage calculations, the instrument identifier becomes a
              compulsory attribute of the :code:`Instrument` JSON field, since it is needed to reference the pointing-options files.
@@ -317,12 +318,12 @@ Example:
        {
        "instrumentID": "sen1",
        "referenceFrame": "NadirRefFrame",
-       "pntOptsFn":"pOpts_sen1"              
+       "pntOptsFileName":"pOpts_sen1"              
        },
        {
        "instrumentID": "sen2",
        "referenceFrame": "NadirRefFrame",
-       "pntOptsFn":"sen2_pOpts"              
+       "pntOptsFilePath":"C:\workspace\sen2_pOpts"              
        },
     ],
 

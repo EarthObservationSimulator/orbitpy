@@ -509,7 +509,11 @@ class PreProcess():
             if x["instrumentID"]: # if instrument ID is empty, the corresponding filename shall be used for all unspecified instruments
                 instru_ids = [x.strip() for x in str(x["instrumentID"]).split(',')] 
                 for _id in instru_ids:
-                    popts_fls.append({"instrumentID": _id, "popts_fl": user_dir + x["pntOptsFn"]})
+                    if "pntOptsFileName" in x:
+                        _filepath =  user_dir + x["pntOptsFileName"]
+                    elif "pntOptsFilePath" in x:
+                        _filepath =  x["pntOptsFilePath"]
+                    popts_fls.append({"instrumentID": _id, "popts_fl": _filepath})
             else:
                 raise RuntimeError("Value of the key 'instrumentID' in the pointing-options specification cannot be left empty.")
 

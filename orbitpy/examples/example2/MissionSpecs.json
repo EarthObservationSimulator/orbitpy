@@ -50,7 +50,7 @@
     },
     "grid":{
         "@type": "customGrid",
-        "covGridFn": "covGridUSA"
+        "covGridFileName": "covGridUSA"
     },
     "propagator":{        
         "customTimeStep": 1
