@@ -43,7 +43,7 @@
                     }
                     ],
     "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
     },   
     "pointingOptions":[
         {

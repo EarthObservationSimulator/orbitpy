@@ -77,7 +77,7 @@
     }
     ],    
     "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
     },
     "grid":{
         "@type": "autoGrid",

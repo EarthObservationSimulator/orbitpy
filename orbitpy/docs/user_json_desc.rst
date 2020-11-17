@@ -166,8 +166,10 @@ Example:
 :code:`groundStations` JSON object
 ####################################
 
-The ground station data can be specifed by specifying the name of the CSV file with the ground station data. The file has to be
-present in the user directory. An example of the data file (name: *groundStations*) is given below. The column headers 
+The ground station data can be specifed by specifying the name of the file with the ground station data. In case the 
+:code:`gndStnFileName` key, value pair is specified, the file has to be present in the user directory. Otherwise a :code:`gndStnFilePath`
+key, value pair may be used to give the complete path to the data-file.
+An example of the data file (name: *groundStations*) is given below. The column headers 
 need to be as indicated.
 
 Example:
@@ -175,7 +177,13 @@ Example:
 .. code-block:: javascript
    
    "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
+    }
+
+.. code-block:: javascript
+   
+   "groundStations":{
+        "gndStnFilePath":"C:\workspace\groundStations"
     }
 
 .. csv-table:: Example of the ground station data file.

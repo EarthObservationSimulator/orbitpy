@@ -29,7 +29,7 @@
     }]
     ,
     "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
     },   
     "pointingOptions":[{
         "instrumentID": "sen1",

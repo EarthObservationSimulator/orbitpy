@@ -222,8 +222,10 @@ class PreProcess():
 
         self.gnd_stn_fl = None
         if('groundStations' in specs):
-            if('gndStnFn' in specs['groundStations']):
-                self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFn'])                 
+            if('gndStnFileName' in specs['groundStations']):
+                self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFileName'])        
+            elif('gndStnFilePath' in specs['groundStations']):
+                self.gnd_stn_fl = str(specs['groundStations']['gndStnFilePath'])           
 
     @staticmethod
     def enumerate_orbits(constel=dict()):
