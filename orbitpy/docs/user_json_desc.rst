@@ -336,7 +336,7 @@ Example of the data-file:
     1,0,20,0
     2,0,-20,0
 
-.. _settings_json_object:
+.. _propagator_json_object:
 
 :code:`propagator` JSON object
 ####################################

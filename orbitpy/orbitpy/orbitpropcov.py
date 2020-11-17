@@ -46,12 +46,38 @@ class OrbitPropCov:
             opc_popts = OrbitPropCovPopts(self.params)
             opc_popts.run()
         elif(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.SKIP):
-            opc_grid = OrbitPropCovPoptsWithGrid(self.params)
+            opc_grid = OrbitProp(self.params)
             opc_grid.run() # only propagation executed
         else:
             raise RuntimeError("Unrecognized coverage calculation appproach in 'orbitpropcov' module.")
 
+class OrbitProp:
+    """ Class to handle propagation calculations.
+    
+    :ivar prop_cov_param: Propagation and coverage parameters
+    :vartype prop_cov_param: :class:`orbitpy.util.PropagationCoverageParameters`
 
+    """
+    def __init__(self, prop_cov_param = PropagationCoverageParameters()):
+        self.params = copy.deepcopy(prop_cov_param)
+
+
+    def run(self): 
+        """ Function which invokes the :code:`orbitpropcov` program to propagate and compute coverage of a satellite
+        over a given mission duration.
+        """
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        try:
+            if(self.params.do_prop):
+                print("start propagation calcs")
+                result = subprocess.run([
+                            os.path.join(dir_path, '..', 'oci', 'bin', 'j2_analytical_propagator'),
+                            str(self.params.epoch), str(self.params.sma), str(self.params.ecc), str(self.params.inc), 
+                            str(self.params.raan), str(self.params.aop), str(self.params.ta), str(self.params.duration), 
+                            str(self.params.step_size), str(self.params.sat_state_fl)
+                            ], check= True)
+        except:
+            raise RuntimeError('Error executing "j2_analytical_propagator" OCI script')
 class OrbitPropCovGrid:
     """ Class to handle propagation and coverage calculations.
     
