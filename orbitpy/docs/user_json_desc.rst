@@ -245,8 +245,9 @@ Example:
 
 2. :code:`"@type":"customGrid"` option
 
-In this option the user supplies the grid points in a data file. The file has to be present in the user directory and
-the name can needs to be supplied in the :code:`covGridFn` key, value pair.
+In this option the user supplies the grid points in a data file. If the :code:`covGridFileName` key, value pair is used, 
+the file has to be present in the user directory. 
+If the :code:`covGridFilePath` key, value pair is used, the entire path to the file needs to be supplied.
 
 Example:
 
@@ -254,7 +255,14 @@ Example:
   
    "grid":{
         "@type": "customGrid",
-        "covGridFn": "covGridUSA"
+        "covGridFileName": "covGridUSA"
+    }
+
+.. code-block:: javascript
+  
+   "grid":{
+        "@type": "customGrid",
+        "covGridFilePath": "C:\workspace\covGridUSA.csv"
     }
 
 The datafile needs to be of CSV format as indicated in the example below. *regi* is the region index, *gpi* is the grid point index,

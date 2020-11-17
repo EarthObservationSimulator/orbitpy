@@ -64,8 +64,8 @@ def main(user_dir):
     # Read in mssion specifications from user config file, coverage grid file (optional) 
     # and the ground stations specifications file in the user directory.
     usf = user_dir + 'MissionSpecs.json'
-    with open(usf, 'r') as orbit_specs_file:
-            miss_specs = util.FileUtilityFunctions.from_json(orbit_specs_file)      
+    with open(usf, 'r') as mission_specs_file:
+            miss_specs = util.FileUtilityFunctions.from_json(mission_specs_file)      
 
     # Preprocess
     print(".......Preprocessing user config file.......")

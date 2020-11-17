@@ -16,6 +16,8 @@ import warnings
 from .util import *
 from instrupy.public_library import Instrument, InstrumentCoverageParameters
 import instrupy
+import logging
+logger = logging.getLogger(__name__)
 
 class ConstellationType(EnumEntity):
     """Enumeration of recognized constellation types"""
@@ -150,22 +152,29 @@ class PreProcess():
             raise RuntimeError("Please specify either `constellation` and `instrument` JSON objects OR `satellite` JSON object.")
 
         # set time resolution factor based on default value or user input value
-        if "propagator" in specs and 'customTimeResFactor' in specs['propagator']:
-            time_res_f = specs['propagator']['customTimeResFactor']
+        try:
+            time_res_f = specs.get('propagator').get('customTimeResFactor')
+        except (AttributeError, KeyError) as e:
+            time_res_f = None
+        if time_res_f is not None:
             print('Custom time resolution factor of ' + str(time_res_f) + ' being used.')
         else:
             time_res_f = OrbitPyDefaults.time_res_fac
             print('Default time resolution factor of ' + str(time_res_f) + ' being used.')
 
-        _time_step = PreProcess.compute_time_step(self.sats, time_res_f)
-        if "propagator" in specs and 'customTimeStep' in specs['propagator']:                    
-            self.time_step = float(specs['propagator']['customTimeStep'])
-            if(_time_step < self.time_step ):
+        __time_step = PreProcess.compute_time_step(self.sats, time_res_f)        
+        try:
+            _time_step = specs.get('propagator').get('customTimeStep')
+        except (AttributeError, KeyError) as e:
+            _time_step = None
+        if _time_step is not None:                    
+            self.time_step = float(_time_step)
+            if(__time_step < self.time_step ):
                 warnings.warn("Custom time-step coarser than computed time-step.")
                 print("Custom time-step [s]: ", self.time_step)
-                print("Computed time-step [s]: ", _time_step)
+                print("Computed time-step [s]: ", __time_step)
         else:
-            self.time_step = _time_step        
+            self.time_step = __time_step        
         print("Time step in seconds is: ", self.time_step)
 
         if("grid" in specs and "pointingOptions" in specs):
@@ -179,35 +188,36 @@ class PreProcess():
             self.cov_calc_app = CoverageCalculationsApproach.PNTOPTS
             print("Pointing-Options approach being used for coverage calculations.")
         else:
-            raise Exception("Please specify either 'grid' and/or 'pointingOptions' JSON fields.")
+            self.cov_calc_app = CoverageCalculationsApproach.SKIP
 
         self.cov_grid_fl = None
         self.pnt_opts_fls = None
         if(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS):
 
             # set grid resolution factor based on default value or user input value
-            if "customGridResFactor" in specs["grid"]:
+            grid_res_f = specs["grid"].get("customGridResFactor")
+            if grid_res_f is not None:
                 grid_res_f = specs['grid']['customGridResFactor']
                 print('Custom grid resolution factor of ' + str(grid_res_f) + ' being used.')
             else:
                 grid_res_f = OrbitPyDefaults.grid_res_fac
                 print('Default grid resolution factor of ' + str(grid_res_f) + ' being used.')
             
-            _grid_res = PreProcess.compute_grid_res(self.sats, grid_res_f) 
-            if 'customGridRes' in specs["grid"]:
-                self.grid_res = float(specs['grid']['customGridRes'])
-                if(_grid_res < self.grid_res):
+            __grid_res = PreProcess.compute_grid_res(self.sats, grid_res_f) 
+            _grid_res = specs["grid"].get('customGridRes')
+            if _grid_res is not None:
+                self.grid_res = float(_grid_res)
+                if(__grid_res < self.grid_res):
                     warnings.warn("Custom grid-resolution is coarser than computed grid resolution.")
                     print("Custom grid resolution [deg]: ", self.grid_res)
                     print("Computed grid resolution [deg]: ", _grid_res) 
             else:
-                self.grid_res = _grid_res
+                self.grid_res = __grid_res
             print("Grid resolution in degrees is: ", self.grid_res)
 
             self.cov_grid_fl = PreProcess.process_cov_grid(self.user_dir, specs['grid'], self.grid_res)
             
-        if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS):
-           
+        if(self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS):           
             self.pnt_opts_fls = PreProcess.process_pointing_options(user_dir, specs['pointingOptions'])
 
         self.gnd_stn_fl = None
@@ -309,8 +319,8 @@ class PreProcess():
         else:
             num_sats_pp = int(num_sats_pp)
 
-        print(".......Generating Walker Delta orbital Keplerian elements.......")
-        print("orb_id, sma, ecc, inc, raan, aop, ta")
+        logger.debug(".......Generating Walker Delta orbital Keplerian elements.......")
+        logger.debug("orb_id, sma, ecc, inc, raan, aop, ta")
         orbits = []
         for pl_i in range(0,num_planes):
             raan = pl_i * 180.0/num_planes
@@ -323,8 +333,8 @@ class PreProcess():
                 ta = (ta_ref + sat_i * 360.0/num_sats_pp)%360
                 orbits.append(OrbitParameters(orb_id, sma, ecc, inc,
                                           raan, aop, ta)) 
-                print(orb_id,sma,ecc, inc,raan, aop, ta)
-        print(".......Done.......")
+                logger.debug('{orb_id}, {sma}, {ecc}, {inc}, {raan}, {aop}, {ta}'.format(orb_id=orb_id, sma=sma, ecc=ecc, inc=inc, raan=raan, aop=aop, ta=ta))
+        logger.debug(".......Done.......")
         return orbits
 
     @staticmethod
@@ -427,13 +437,13 @@ class PreProcess():
 
             instru = self.sats[sat_indx].instru
 
-            if(instru is None):
-                # no instruments specified, skip coverage calculations
+            if(instru is None or self.cov_calc_app==CoverageCalculationsApproach.SKIP):
+                # no instruments specified and or grid, pointing-options specified, skip coverage calculations
                 pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                             raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
-                            sen_fov_geom=_x.get_as_string('Geometry'), sen_orien=_x.get_as_string('Orientation'), sen_clock= _x.get_as_string('Clock'), 
-                            sen_cone=_x.get_as_string('Cone'), purely_sidelook = _y.purely_side_look, yaw180_flag = _x.get_as_string('yaw180_flag'), step_size=self.time_step, 
-                            sat_state_fl = sat_state_fl, sat_acc_fl = sat_acc_fl, popts_fl= popts_fl, cov_calcs_app= self.cov_calc_app, do_prop = True, do_cov = False)
+                            sen_fov_geom=None, sen_orien=None, sen_clock=None, 
+                            sen_cone=None, purely_sidelook=None, yaw180_flag=None, step_size=self.time_step, 
+                            sat_state_fl = sat_state_fl, sat_acc_fl = None, popts_fl= None, cov_calcs_app= self.cov_calc_app, do_prop = True, do_cov = False)
 
                 prop_cov_param.append(pcp)
 
@@ -462,8 +472,10 @@ class PreProcess():
                             
                             if not popts_fl:
                                 raise RuntimeError("No pointing options specified for instrument with ID " + str(_x.id))
-                        elif(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS):
+                        elif(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS or self.cov_calc_app == CoverageCalculationsApproach.SKIP):
                             popts_fl = None
+                        else:
+                            raise RuntimeError("Unknown coverage calculation approach.")
                         
                         pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                                 raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
@@ -543,7 +555,10 @@ class PreProcess():
         
         elif grid_type == "CUSTOMGRID":
             print("Custom grid file to be used.")
-            cov_grid_fl = user_dir + grid["covGridFn"] # coverage grid file path  
+            if("covGridFileName" in grid):
+                cov_grid_fl = user_dir + grid["covGridFileName"] # coverage grid file path  
+            elif("covGridFilePath" in grid):
+                cov_grid_fl = grid["covGridFilePath"]
 
         else:
             raise RuntimeError('Error in processing grid. Unknown option, only "autoGrid" \

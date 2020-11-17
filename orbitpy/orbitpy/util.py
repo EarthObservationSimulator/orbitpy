@@ -17,6 +17,7 @@ class CoverageCalculationsApproach(EnumEntity):
     PNTOPTS_WITH_GRIDPNTS = "PNTOPTS_WITH_GRIDPNTS"
     GRIDPNTS = "GRIDPNTS"
     PNTOPTS = "PNTOPTS"
+    SKIP = "SKIP"
 class PropagationCoverageParameters():
     """ Data structure holding propagation and coverage parameters.
     
@@ -105,15 +106,15 @@ class PropagationCoverageParameters():
         self.duration = float(duration) 
         self.cov_grid_fl = str(cov_grid_fl) if cov_grid_fl else None
         self.popts_fl = str(popts_fl) if popts_fl else None 
-        self.sen_fov_geom = str(sen_fov_geom) 
-        self.sen_orien = str(sen_orien) 
-        self.sen_clock = str(sen_clock) 
-        self.sen_cone = str(sen_cone) 
-        self.purely_sidelook = bool(purely_sidelook) 
-        self.yaw180_flag = int(yaw180_flag) 
+        self.sen_fov_geom = str(sen_fov_geom) if sen_fov_geom else None
+        self.sen_orien = str(sen_orien) if sen_orien else None
+        self.sen_clock = str(sen_clock) if sen_clock else None
+        self.sen_cone = str(sen_cone) if sen_cone else None
+        self.purely_sidelook = bool(purely_sidelook) if purely_sidelook else None
+        self.yaw180_flag = int(yaw180_flag) if yaw180_flag else None
         self.step_size = float(step_size) 
         self.sat_state_fl = str(sat_state_fl) 
-        self.sat_acc_fl = str(sat_acc_fl) 
+        self.sat_acc_fl = str(sat_acc_fl) if sat_acc_fl else None
         self.cov_calcs_app = CoverageCalculationsApproach.get(cov_calcs_app) 
         self.do_prop = bool(do_prop) if do_prop is not None else True
         self.do_cov = bool(do_cov) if do_cov is not None else True

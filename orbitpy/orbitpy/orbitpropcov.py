@@ -45,8 +45,11 @@ class OrbitPropCov:
         elif(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.PNTOPTS):
             opc_popts = OrbitPropCovPopts(self.params)
             opc_popts.run()
+        elif(CoverageCalculationsApproach.get(self.params.cov_calcs_app) == CoverageCalculationsApproach.SKIP):
+            opc_grid = OrbitPropCovPoptsWithGrid(self.params)
+            opc_grid.run() # only propagation executed
         else:
-            raise RuntimeError("Unrecognized coverage caclulation appproach in 'orbitpropcov' module.")
+            raise RuntimeError("Unrecognized coverage calculation appproach in 'orbitpropcov' module.")
 
 
 class OrbitPropCovGrid:
@@ -90,17 +93,18 @@ class OrbitPropCovGrid:
             raise RuntimeError('Error executing "gp_in_fov_cov_calc" OCI script')
 
         # Correct access files for purely side-looking instruments if necessary        
-        if(self.params.purely_sidelook):            
-            print(".......Correcting access files......")
-            t1 = time.process_time() 
-            OrbitPropCovGrid.correct_access_files(self)
-            t2 = time.process_time()
-            print(".......DONE.......time taken (s): ", t2-t1)
-        else:
-            print(".......No correction of access files......")
+        if(self.params.do_cov):
+            if(self.params.purely_sidelook):            
+                print(".......Correcting access files......")
+                t1 = time.process_time() 
+                OrbitPropCovGrid.correct_access_files(self)
+                t2 = time.process_time()
+                print(".......DONE.......time taken (s): ", t2-t1)
+            else:
+                print(".......No correction of access files......")
 
-        # reformat access data to common format 
-        OrbitPropCovGrid.reformat_access_files(self)
+            # reformat access data to common format 
+            OrbitPropCovGrid.reformat_access_files(self)
 
     def reformat_access_files(self):
         """ Reformat the access file data to a common output format used by both the grid-coverage and 
@@ -248,7 +252,8 @@ class OrbitPropCovPopts:
         except:
             raise RuntimeError('Error executing "pnt_axis_sphere_intsec_cov_calc" OC script')
 
-        OrbitPropCovPopts.reformat_access_files(self)
+        if(self.params.do_cov):
+            OrbitPropCovPopts.reformat_access_files(self)
 
     def reformat_access_files(self):
         """ Reformat the access file data to a common output format used by both the grid-coverage and 
@@ -333,18 +338,19 @@ class OrbitPropCovPoptsWithGrid:
         except:
             raise RuntimeError('Error executing "pnt_opts_with_gp_in_fov_cov_calc" OC script')
 
-        # Correct access files for purely side-looking instruments if necessary        
-        if(self.params.purely_sidelook):            
-            print(".......Correcting access files......")
-            t1 = time.process_time() 
-            OrbitPropCovPoptsWithGrid.correct_access_files(self)
-            t2 = time.process_time()
-            print(".......DONE.......time taken (s): ", t2-t1)
-        else:
-            print(".......No correction of access files......")
+        if(self.params.do_cov):
+            # Correct access files for purely side-looking instruments if necessary        
+            if(self.params.purely_sidelook):            
+                print(".......Correcting access files......")
+                t1 = time.process_time() 
+                OrbitPropCovPoptsWithGrid.correct_access_files(self)
+                t2 = time.process_time()
+                print(".......DONE.......time taken (s): ", t2-t1)
+            else:
+                print(".......No correction of access files......")
 
-        # reformat access data to common format 
-        OrbitPropCovPoptsWithGrid.reformat_access_files(self)
+            # reformat access data to common format 
+            OrbitPropCovPoptsWithGrid.reformat_access_files(self)
 
     def reformat_access_files(self):
         """ Reformat the access file data to a common output format used by both the grid-coverage and 
