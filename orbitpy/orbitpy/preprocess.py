@@ -221,11 +221,25 @@ class PreProcess():
             self.pnt_opts_fls = PreProcess.process_pointing_options(user_dir, specs['pointingOptions'])
 
         self.gnd_stn_fl = None
+        self.ground_stn_info = None
         if('groundStations' in specs):
             if('gndStnFileName' in specs['groundStations']):
                 self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFileName'])        
             elif('gndStnFilePath' in specs['groundStations']):
-                self.gnd_stn_fl = str(specs['groundStations']['gndStnFilePath'])           
+                self.gnd_stn_fl = str(specs['groundStations']['gndStnFilePath'])    
+            elif('stationInfo' in specs['groundStations']):
+                stn_info = []
+                for stn in specs['groundStations']['stationInfo']:
+                    name = stn['name'] if stn['name'] is not None else None
+                    alt = float(stn['alt']) if stn['alt'] is not None else float(0)
+                    minElevation = float(stn['minElevation'])
+                    lat = float(stn['lat'])
+                    lon = float(stn['lon'])
+                    _stn_info_dict = ({'index': stn['@id'], 'name': name, 'lat[deg]':lat, 'lon[deg]':lon,
+                                     'alt[km]': alt, 'minElevation[deg]':minElevation})
+                    stn_info.append(_stn_info_dict)
+                self.ground_stn_info = stn_info
+                
 
     @staticmethod
     def enumerate_orbits(constel=dict()):

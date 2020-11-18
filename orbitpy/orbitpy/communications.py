@@ -197,9 +197,12 @@ class GroundStationComm:
    :vartype gnd_stn_specs: :class:`pandas.DataFrame`
 
    """
-   def __init__(self, sat_dirs = None, gnd_stn_fl = None):
+   def __init__(self, sat_dirs = None, gnd_stn_fl = None, ground_stn_info = None):
       self.sat_dirs = sat_dirs
-      self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")        
+      if(gnd_stn_fl):
+         self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")  
+      elif(ground_stn_info):
+         self.gnd_stn_specs = pd.DataFrame(ground_stn_info)
 
    def compute_all_contacts(self):
       """ Iterate over all possible satellites and ground-stations, and compute their contact times. Accepts list of satellite state

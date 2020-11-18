@@ -84,6 +84,7 @@ def main(user_dir):
 
     comm_dir = pi.comm_dir
     gnd_stn_fl = pi.gnd_stn_fl
+    ground_stn_info = pi.ground_stn_info
 
     sat_dirs =  glob.glob(user_dir+'sat*/')
     sat_state_fls =  glob.glob(user_dir+'sat*/state')
@@ -99,11 +100,11 @@ def main(user_dir):
 
     # Compute satellite-to-ground-station contacts    
     t1 = time.process_time() 
-    if gnd_stn_fl is None:
+    if gnd_stn_fl is None and ground_stn_info is None:
         print("No ground-stations specified, skip computation of graound-station contacts.")
     else:
         print(".......Computing satellite-to-ground-station contact periods.......")
-        gnd_stn_comm = communications.GroundStationComm(sat_dirs, gnd_stn_fl)
+        gnd_stn_comm = communications.GroundStationComm(sat_dirs=sat_dirs, gnd_stn_fl=gnd_stn_fl, ground_stn_info=ground_stn_info)
         gnd_stn_comm.compute_all_contacts()
         t2 = time.process_time()   
         print(".......DONE.......time taken (s): ", t2-t1)

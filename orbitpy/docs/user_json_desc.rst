@@ -166,7 +166,47 @@ Example:
 :code:`groundStations` JSON object
 ####################################
 
-The ground station data can be specifed by specifying the name of the file with the ground station data. In case the 
+The ground station data can be specifed in two ways: 
+
+1. :code:`stationInfo` JSON object
+
+Within the :code:`stationInfo` JSOn field, a *list* of ground-stations can be specifyed. The required parameters for each region are:
+
+.. csv-table:: Expected parameters
+   :header: Parameter, Data type, Units, Description
+   :widths: 10,10,5,40
+
+   @id, str, ,Unique ground-station identifier
+   name, str, degrees, (Optional) name of the ground-station
+   lat, float, degrees, Latitude
+   lon,float, degrees, Longitude
+   alt,float, km, (Optional) Altitude. Default is 0km.
+   minElevation, float, degrees, Minimum elevation beyond which the ground-station cane see the satellite.
+
+.. code-block:: javascript
+   
+   "groundStations":{
+        "stationInfo":[
+            { "@id": "gs1",
+              "name": "Tacos",
+              "lat": 1,
+              "lon": 1.5,
+              "alt": 0,
+              "minElevation": 7
+            },
+            { "@id": "gs2",
+                "name": "Hilly",
+                "lat": 89,
+                "lon": -10,
+                "alt": 20,
+                "minElevation": 7
+            }
+        ]
+    }
+
+2. :code:`gndStnFileName` or :code:`gndStnFilePath`
+
+By means of a data file containing the ground station info. In case the 
 :code:`gndStnFileName` key, value pair is specified, the file has to be present in the user directory. Otherwise a :code:`gndStnFilePath`
 key, value pair may be used to give the complete path to the data-file.
 An example of the data file (name: *groundStations*) is given below. The column headers 
@@ -192,6 +232,9 @@ Example:
 
    1,Svalbard,78.23,15.40,0,0
    2,TrollSat,-72.01,2.53,10,5
+
+
+
 
 .. _grid_json_object:
 
@@ -225,7 +268,6 @@ the generated grid.
 
    customGridRes, float, degrees, (Optional) Grid resolution. A warning is issued if the internal computed grid resolution is coarser than the user specified grid resolution. 
    customGridResFactor, float, , (Optional) Custom grid-resolution factor used to determine the grid-resolution. (Default value is 0.9.)
-
 
 Example:
 

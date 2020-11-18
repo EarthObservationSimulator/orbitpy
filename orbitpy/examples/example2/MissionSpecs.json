@@ -46,7 +46,22 @@
         }        
     }],    
     "groundStations":{
-        "gndStnFileName":"groundStations"
+        "stationInfo":[
+            { "@id": "gs1",
+              "name": "Tacos",
+              "lat": 1,
+              "lon": 1.5,
+              "alt": 0,
+              "minElevation": 7
+            },
+            { "@id": "gs2",
+                "name": "Hilly",
+                "lat": 89,
+                "lon": -10,
+                "alt": 0,
+                "minElevation": 7
+            }
+        ]
     },
     "grid":{
         "@type": "customGrid",
