@@ -220,10 +220,17 @@ class GroundStationComm:
 
       The ground-station coordinates and minimum elelvation requirements is read off the instance variable :code:`gnd_stn_specs`.
       """
+      gndstn_index = []
+      gndstncomm_concise_fl = []
+      gndstncomm_detailed_fl = []
+      if(not isinstance(self.sat_state_fls, list) ):
+         self.sat_state_fls = [self.sat_state_fls]
+         self.sat_dirs = [self.sat_dirs]
       # Iterate over all satellites
       for indx1 in range(0,len(self.sat_state_fls)):
 
-         sat_fl = self.sat_state_fls[indx1]
+         sat_fl = self.sat_state_fls[indx1] if isinstance(self.sat_state_fls, list) else self.sat_state_fls
+         sat_dir = self.sat_dirs[indx1] if isinstance(self.sat_dirs, list) else self.sat_dirs
          with open(sat_fl) as fd:
                   reader = csv.reader(fd)
                   epoch = [row for idx, row in enumerate(reader) if idx == 1]
@@ -254,7 +261,7 @@ class GroundStationComm:
                gnd_stn_minelv_deg = float(self.gnd_stn_specs.iloc[indx2]['minElevation[deg]'])
 
                # prepare output files
-               output_detailed_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_detailed"
+               output_detailed_fl = sat_dir + "gndStn"+str(gnd_stn_i)+"_contact_detailed"
                f = open(output_detailed_fl, "w")
                f.write(epoch)
                f.write("\n")
@@ -262,7 +269,7 @@ class GroundStationComm:
                f.write("\n")
                f.close()
 
-               output_concise_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_concise"
+               output_concise_fl = sat_dir + "gndStn"+str(gnd_stn_i)+"_contact_concise"
                f = open(output_concise_fl, "w")
                f.write(epoch)
                f.write("\n")
@@ -272,7 +279,12 @@ class GroundStationComm:
 
                GroundStationComm.compute_sat_to_GS_contact(__epoch, __step_size, time_indx, sat_x_km, sat_y_km, sat_z_km, ground_stn_coords,
                                  output_concise_fl, output_detailed_fl, gnd_stn_minelv_deg)
+               
+               gndstn_index.append(gnd_stn_i)
+               gndstncomm_concise_fl.append(output_concise_fl)
+               gndstncomm_detailed_fl.append(output_detailed_fl)
 
+      return [gndstn_index, gndstncomm_concise_fl, gndstncomm_detailed_fl]
               
 
    @staticmethod

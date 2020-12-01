@@ -234,8 +234,8 @@ class PreProcess():
                     minElevation = float(stn['minElevation'])
                     lat = float(stn['lat'])
                     lon = float(stn['lon'])
-                    _stn_info_dict = ({'index': stn['@id'], 'name': name, 'lat[deg]':lat, 'lon[deg]':lon,
-                                     'alt[km]': alt, 'minElevation[deg]':minElevation})
+                    _stn_info_dict = ({'index': stn['@id'], 'name': str(name), 'lat[deg]':float(lat), 'lon[deg]':float(lon),
+                                     'alt[km]': float(alt), 'minElevation[deg]': float(minElevation)})
                     stn_info.append(_stn_info_dict)
                 self.ground_stn_info = stn_info
                 
