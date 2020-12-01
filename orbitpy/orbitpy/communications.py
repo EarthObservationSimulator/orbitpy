@@ -13,7 +13,10 @@ from orbitpy.util import Constants, MathUtilityFunctions
 class InterSatelliteComm:
    """ Class to handle computation of inter-satellite communication intervals.
 
-       :ivar sat_state_fls: Satellite state filepaths
+       :ivar sat_ids: Satellite ids
+       :vartype sat_ids: list, str
+
+       :ivar sat_state_fls: Satellite state filepaths (associated with the sat_ids)
        :vartype sat_state_fls: list, str
 
        :ivar comm_dir: Inter-satellite comm directory path
@@ -23,7 +26,8 @@ class InterSatelliteComm:
        :vartype opaque_atmos_height_km: float
 
    """
-   def __init__(self, sat_state_fls, comm_dir, opaque_atmos_height_km):
+   def __init__(self, sat_ids, sat_state_fls, comm_dir, opaque_atmos_height_km):
+      self.sat_ids = sat_ids
       self.sat_state_fls = sat_state_fls
       self.comm_dir = comm_dir
       self.opaque_atmos_height_km = opaque_atmos_height_km     
@@ -40,10 +44,16 @@ class InterSatelliteComm:
       
       The states of all the satellites must be synced to the same time-series.
       """
-      number_of_files = len(self.sat_state_fls)
+      number_of_sats = len(self.sat_ids)
 
-      for indx1 in range(0,number_of_files):
+      SAT1_LIST = []
+      SAT2_LIST = []
+      DETAILED_FILE_LIST = []
+      CONCISE_FILE_LIST = []
 
+      for indx1 in range(0,number_of_sats):
+
+         sat1_id = self.sat_ids[indx1]
          sat1_fl = self.sat_state_fls[indx1]
          sat1 = pd.read_csv(sat1_fl, skiprows=5, header=None, delimiter=r",")
 
@@ -63,8 +73,9 @@ class InterSatelliteComm:
                   step_size = [row for idx, row in enumerate(reader) if idx == 2]
                   step_size = str(step_size)[3:-3]
          
-         for indx2 in range(indx1+1,number_of_files):
+         for indx2 in range(indx1+1,number_of_sats):
                
+               sat2_id = self.sat_ids[indx2]
                sat2_fl = self.sat_state_fls[indx2]            
 
                sat2 = pd.read_csv(sat2_fl, skiprows=5, header=None, delimiter=r",")
@@ -92,6 +103,13 @@ class InterSatelliteComm:
 
                InterSatelliteComm.compute_satA_to_satB_contact(time_i, sat1_x_km, sat1_y_km, sat1_z_km, sat2_x_km, sat2_y_km, sat2_z_km, 
                                                   output_concise_fl, output_detailed_fl, self.opaque_atmos_height_km)
+
+               SAT1_LIST.append(sat1_id)
+               SAT2_LIST.append(sat2_id)
+               DETAILED_FILE_LIST.append(output_concise_fl)
+               CONCISE_FILE_LIST.append(output_detailed_fl)
+
+      return [SAT1_LIST, SAT2_LIST, DETAILED_FILE_LIST, CONCISE_FILE_LIST]
    
    @staticmethod
    def compute_satA_to_satB_contact(time_indx, satA_x_km, satA_y_km, satA_z_km, satB_x_km, satB_y_km, satB_z_km,

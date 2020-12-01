@@ -126,7 +126,7 @@ class TestInterSatelliteComm(unittest.TestCase):
         TestInterSatelliteComm.produce_walker_constellation(self, 5, 1, 1, 700, 0, 98, 0) # make 5 satellite single plane constellation
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        isc = InterSatelliteComm([dir_path+"/temp/sat11/state", dir_path+"/temp/sat12/state", dir_path+"/temp/sat13/state", dir_path+"/temp/sat14/state", dir_path+"/temp/sat15/state"],
+        isc = InterSatelliteComm(['sat11', 'sat12', 'sat13', 'sat14', 'sat15'], [dir_path+"/temp/sat11/state", dir_path+"/temp/sat12/state", dir_path+"/temp/sat13/state", dir_path+"/temp/sat14/state", dir_path+"/temp/sat15/state"],
                                  dir_path+"/temp/",
                                  30)
         isc.compute_all_contacts()
@@ -198,7 +198,7 @@ class TestInterSatelliteComm(unittest.TestCase):
         TestInterSatelliteComm.produce_walker_constellation(self, 8, 1, 1, alt, 0, random.uniform(0,180), random.uniform(0,360)) # make 5 satellite single plane constellation with some Keplerian elements chosen randomly
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        isc = InterSatelliteComm([dir_path+"/temp/sat11/state", dir_path+"/temp/sat12/state", dir_path+"/temp/sat13/state", dir_path+"/temp/sat14/state", dir_path+"/temp/sat15/state", dir_path+"/temp/sat16/state", dir_path+"/temp/sat17/state", dir_path+"/temp/sat18/state"],
+        isc = InterSatelliteComm(['sat11', 'sat12', 'sat13', 'sat14', 'sat15', 'sat16', 'sat17', 'sat18'],[dir_path+"/temp/sat11/state", dir_path+"/temp/sat12/state", dir_path+"/temp/sat13/state", dir_path+"/temp/sat14/state", dir_path+"/temp/sat15/state", dir_path+"/temp/sat16/state", dir_path+"/temp/sat17/state", dir_path+"/temp/sat18/state"],
                                  dir_path+"/temp/",
                                  30)
         isc.compute_all_contacts()

@@ -75,25 +75,29 @@ def main(user_dir):
     print(".......Done.......")
 
     # Run orbit propagation and coverage for each of the satellties (orbits) in the constellation
+    sat_ids = []
+    sat_dirs = []
+    sat_state_fls = []
     for orb_indx in range(0,len(prop_cov_param)):
         pcp = prop_cov_param[orb_indx]
         opc = orbitpropcov.OrbitPropCov(pcp)
         print(".......Running Orbit Propagation and Coverage for satellite.......", pcp.sat_id)
         opc.run()        
+        sat_ids.append(pcp.sat_id)
+        _dir = "/".join([str(x) for x in pcp.sat_state_fl.split("/")[0:-1]])+'/'
+        sat_dirs.append(_dir)
+        sat_state_fls.append(pcp.sat_state_fl)
         print(".......Done.......")
 
     comm_dir = pi.comm_dir
     gnd_stn_fl = pi.gnd_stn_fl
     ground_stn_info = pi.ground_stn_info
 
-    sat_dirs =  glob.glob(user_dir+'sat*/')
-    sat_state_fls =  glob.glob(user_dir+'sat*/state')
-
     # Compute satellite-to-satellite contacts
     print(".......Computing satellite-to-satellite contact periods.......")
     t1 = time.process_time()    
     opaque_atmos_height_km = 30
-    inter_sat_comm = communications.InterSatelliteComm(sat_state_fls, comm_dir, opaque_atmos_height_km)
+    inter_sat_comm = communications.InterSatelliteComm(sat_ids, sat_state_fls, comm_dir, opaque_atmos_height_km)
     inter_sat_comm.compute_all_contacts() 
     t2 = time.process_time()       
     print(".......DONE.......time taken (s): ", t2-t1)
@@ -131,9 +135,6 @@ def main(user_dir):
 
     end_time = time.process_time()
     print("Total time taken (s):", end_time - start_time)
-
-
-
 
 class readable_dir(argparse.Action):
     """Defines a custom argparse Action to identify a readable directory."""

@@ -334,8 +334,8 @@ class PreProcess():
         else:
             num_sats_pp = int(num_sats_pp)
 
-        logger.debug(".......Generating Walker Delta orbital Keplerian elements.......")
-        logger.debug("orb_id, sma, ecc, inc, raan, aop, ta")
+        print(".......Generating Walker Delta orbital Keplerian elements.......")
+        print("orb_id, sma, ecc, inc, raan, aop, ta")
         orbits = []
         for pl_i in range(0,num_planes):
             raan = pl_i * 180.0/num_planes
@@ -348,8 +348,8 @@ class PreProcess():
                 ta = (ta_ref + sat_i * 360.0/num_sats_pp)%360
                 orbits.append(OrbitParameters(orb_id, sma, ecc, inc,
                                           raan, aop, ta)) 
-                logger.debug('{orb_id}, {sma}, {ecc}, {inc}, {raan}, {aop}, {ta}'.format(orb_id=orb_id, sma=sma, ecc=ecc, inc=inc, raan=raan, aop=aop, ta=ta))
-        logger.debug(".......Done.......")
+                print('{orb_id}, {sma}, {ecc}, {inc}, {raan}, {aop}, {ta}'.format(orb_id=orb_id, sma=sma, ecc=ecc, inc=inc, raan=raan, aop=aop, ta=ta))
+        print(".......Done.......")
         return orbits
 
     @staticmethod
