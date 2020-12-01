@@ -109,6 +109,7 @@ class OrbitPropCovGrid:
         try:    
             if(self.params.do_cov):
                 print("start coverage calcs")
+                print(str(self.params.yaw180_flag))
                 result = subprocess.run([
                             os.path.join(dir_path, '..', 'oci', 'bin', 'gp_in_fov_cov_calc'),
                             str(self.params.cov_grid_fl), str(self.params.sen_fov_geom), str(self.params.sen_orien), 

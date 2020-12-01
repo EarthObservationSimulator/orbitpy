@@ -144,9 +144,9 @@ class PreProcess():
 
         self.duration = float(specs['duration'])
 
-        if "constellation" in specs and "instrument" in specs:
+        if specs.get("constellation", None) is not None and specs.get("instrument", None) is not None:
             self.sats = PreProcess.enumerate_satellites(self.user_dir, orb_specs = specs['constellation'], instru_specs = specs["instrument"], sat_specs = dict())
-        elif "satellite" in specs:
+        elif specs.get("satellite", None) is not None:
             self.sats = PreProcess.enumerate_satellites(self.user_dir, orb_specs = dict(), instru_specs = dict(), sat_specs = specs['satellite'])
         else:
             raise RuntimeError("Please specify either `constellation` and `instrument` JSON objects OR `satellite` JSON object.")
@@ -162,7 +162,7 @@ class PreProcess():
             time_res_f = OrbitPyDefaults.time_res_fac
             print('Default time resolution factor of ' + str(time_res_f) + ' being used.')
 
-        __time_step = PreProcess.compute_time_step(self.sats, time_res_f)        
+        __time_step = PreProcess.compute_time_step(self.sats, time_res_f)
         try:
             _time_step = specs.get('propagator').get('customTimeStep')
         except (AttributeError, KeyError) as e:
@@ -174,17 +174,17 @@ class PreProcess():
                 print("Custom time-step [s]: ", self.time_step)
                 print("Computed time-step [s]: ", __time_step)
         else:
-            self.time_step = __time_step        
+            self.time_step = __time_step
         print("Time step in seconds is: ", self.time_step)
 
-        if("grid" in specs and "pointingOptions" in specs):
+        if(specs.get("grid", None) is not None and specs.get("pointingOptions", None) is not None):
             # Both grid and pointing options specified, calculate coverage for each pointing option over the grid seperately.
             self.cov_calc_app = CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS
             print("Pointing options with grid-points approach being used for coverage calculations.")
-        elif("grid" in specs):
+        elif(specs.get("grid", None) is not None ):
             self.cov_calc_app = CoverageCalculationsApproach.GRIDPNTS
             print("Grid-point approach being used for coverage calculations.")
-        elif("pointingOptions" in specs):
+        elif(specs.get("pointingOptions", None) is not None):
             self.cov_calc_app = CoverageCalculationsApproach.PNTOPTS
             print("Pointing-Options approach being used for coverage calculations.")
         else:
@@ -193,7 +193,6 @@ class PreProcess():
         self.cov_grid_fl = None
         self.pnt_opts_fls = None
         if(self.cov_calc_app == CoverageCalculationsApproach.GRIDPNTS or self.cov_calc_app == CoverageCalculationsApproach.PNTOPTS_WITH_GRIDPNTS):
-
             # set grid resolution factor based on default value or user input value
             grid_res_f = specs["grid"].get("customGridResFactor")
             if grid_res_f is not None:
@@ -222,7 +221,7 @@ class PreProcess():
 
         self.gnd_stn_fl = None
         self.ground_stn_info = None
-        if('groundStations' in specs):
+        if(specs.get("groundStations", None) is not None):
             if('gndStnFileName' in specs['groundStations']):
                 self.gnd_stn_fl = self.user_dir + str(specs['groundStations']['gndStnFileName'])        
             elif('gndStnFilePath' in specs['groundStations']):
@@ -452,9 +451,8 @@ class PreProcess():
             sat_state_fl = sat_dir + 'state'
 
             instru = self.sats[sat_indx].instru
-
-            if(instru is None or self.cov_calc_app==CoverageCalculationsApproach.SKIP):
-                # no instruments specified and or grid, pointing-options specified, skip coverage calculations
+            if(instru is None or bool(instru) is False or self.cov_calc_app==CoverageCalculationsApproach.SKIP):
+                # no instruments specified and/or grid, pointing-options specified, skip coverage calculations
                 pcp = PropagationCoverageParameters(sat_id=orb._id, epoch=self.epoch, sma=orb.sma, ecc=orb.ecc, inc=orb.inc, 
                             raan=orb.raan, aop=orb.aop, ta=orb.ta, duration=self.duration, cov_grid_fl=self.cov_grid_fl, 
                             sen_fov_geom=None, sen_orien=None, sen_clock=None, 

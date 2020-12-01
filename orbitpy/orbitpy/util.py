@@ -111,7 +111,7 @@ class PropagationCoverageParameters():
         self.sen_clock = str(sen_clock) if sen_clock else None
         self.sen_cone = str(sen_cone) if sen_cone else None
         self.purely_sidelook = bool(purely_sidelook) if purely_sidelook else None
-        self.yaw180_flag = int(yaw180_flag) if yaw180_flag else None
+        self.yaw180_flag = int(yaw180_flag) if yaw180_flag is not None else None
         self.step_size = float(step_size) 
         self.sat_state_fl = str(sat_state_fl) 
         self.sat_acc_fl = str(sat_acc_fl) if sat_acc_fl else None

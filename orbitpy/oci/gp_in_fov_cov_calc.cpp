@@ -51,7 +51,7 @@
 #include "oci_utils.h"
 
 #define DEBUG_CONSISE
-#define DEBUG_CHK_INPS
+//#define DEBUG_CHK_INPS
 // #define COMPUTE_AND_STORE_POI_GEOMETRY
 
 using namespace std;

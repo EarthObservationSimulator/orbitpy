@@ -104,7 +104,7 @@ def main(user_dir):
         print("No ground-stations specified, skip computation of graound-station contacts.")
     else:
         print(".......Computing satellite-to-ground-station contact periods.......")
-        gnd_stn_comm = communications.GroundStationComm(sat_dirs=sat_dirs, gnd_stn_fl=gnd_stn_fl, ground_stn_info=ground_stn_info)
+        gnd_stn_comm = communications.GroundStationComm(sat_dirs=sat_dirs, sat_state_fls=sat_state_fls, gnd_stn_fl=gnd_stn_fl, ground_stn_info=ground_stn_info)
         gnd_stn_comm.compute_all_contacts()
         t2 = time.process_time()   
         print(".......DONE.......time taken (s): ", t2-t1)

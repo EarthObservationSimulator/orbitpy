@@ -193,12 +193,16 @@ class GroundStationComm:
    :ivar sat_dirs: List of all satellite directories
    :vartype sat_dirs: list, str
 
+   :ivar sat_state_fls: Satellite state filepaths
+   :vartype sat_state_fls: list, str
+
    :ivar gnd_stn_specs: Dataframe containing data of all the ground-stations.
    :vartype gnd_stn_specs: :class:`pandas.DataFrame`
 
    """
-   def __init__(self, sat_dirs = None, gnd_stn_fl = None, ground_stn_info = None):
+   def __init__(self, sat_dirs=None, sat_state_fls = None, gnd_stn_fl = None, ground_stn_info = None):
       self.sat_dirs = sat_dirs
+      self.sat_state_fls = sat_state_fls
       if(gnd_stn_fl):
          self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")  
       elif(ground_stn_info):
@@ -217,9 +221,9 @@ class GroundStationComm:
       The ground-station coordinates and minimum elelvation requirements is read off the instance variable :code:`gnd_stn_specs`.
       """
       # Iterate over all satellites
-      for indx1 in range(0,len(self.sat_dirs)):
+      for indx1 in range(0,len(self.sat_state_fls)):
 
-         sat_fl = self.sat_dirs[indx1] + 'state'
+         sat_fl = self.sat_state_fls[indx1]
          with open(sat_fl) as fd:
                   reader = csv.reader(fd)
                   epoch = [row for idx, row in enumerate(reader) if idx == 1]
