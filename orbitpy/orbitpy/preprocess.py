@@ -391,9 +391,9 @@ class PreProcess():
         :rtype: list, :class:`orbitpy.preprocess.Satellite`
 
         """
+        sats = []
         if(sat_specs): 
-            # enumerate satellites from the list of satellites provided
-            sats = []
+            # enumerate satellites from the list of satellites provided            
             for _sat in sat_specs:# iterate through each satellite
                 _orb = OrbitParameters(_sat["orbit"]['@id'], _sat["orbit"]['sma'], _sat["orbit"]['ecc'], _sat["orbit"]['inc'],
                                        _sat["orbit"]['raan'], _sat["orbit"]['aop'], _sat["orbit"]['ta'])
@@ -420,7 +420,6 @@ class PreProcess():
             else:
                 _instru = None
 
-            sats = []
             for orb_indx in range(0,len(orbits)): 
 
                 # Create satellite folder
