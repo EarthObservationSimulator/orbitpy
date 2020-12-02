@@ -46,6 +46,43 @@ AnglePair DiscreteCoverageChecker::projectionAlg(Real clock,Real cone,const Rvec
 	return latLonP;
 }
 
+/*
+// Cone here is cone angle to edge!
+std::array<Real,3> DiscreteCoverageChecker::poleProjectionAlg(Real clock,Real cone,const Rvector3 &sphericalPos)
+{
+	Real r,latSSP,lonSSP,H;
+	Real lambda,phiE,latPPrime,lonP,latP,deltaL;
+	std::array<Real,3> pole;
+	
+	Real cosZeta,zeta;
+	
+	r = centralBody->GetRadius();
+	latSSP = sphericalPos[0];
+	lonSSP = sphericalPos[1];
+	H = sphericalPos[2];
+	
+	cosZeta = (r + H)*sin(cone)/r;
+	zeta = acos(cosZeta);
+
+	lambda = cone + zeta;
+	phiE = -clock;
+
+	latPPrime = acos(cos(lambda)*sin(latSSP) + sin(lambda)*cos(latSSP)*cos(phiE));
+	latP = pi/2 - latPPrime;
+
+	deltaL = acos( (cos(lambda) - sin(latSSP)*sin(latP))/(cos(latSSP)*cos(latP)));
+	
+	if(clock < pi)
+		lonP = lonSSP + deltaL;
+	else
+		lonP = lonSSP - deltaL;
+		
+	pole = {latP,lonP,zeta};
+	
+	return pole;
+}
+*/
+
 Rmatrix33 DiscreteCoverageChecker::getNadirToSpacecraftAccessMatrix(const Rvector6 &state_ECF)
 {
 	Rvector3 pos_ECF(state_ECF[0],state_ECF[1],state_ECF[2]);   
@@ -137,3 +174,106 @@ std::vector<AnglePair> DiscreteCoverageChecker::checkIntersection(const Rvector6
 	
 	return latLonVector;
 }
+
+std::vector<Rvector3> DiscreteCoverageChecker::checkPoleIntersection(const Rvector6 &state_ECF)
+{
+	// In Sensor Frame
+	std::vector<Rvector3> poleHeadings = sensor->getPoleHeadings();
+	
+	int numPts = poleHeadings.size();
+	
+	// Only works for one sensor!
+	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
+	Rmatrix33 NB = sc->GetNadirTOBodyMatrix().Transpose();
+	Rmatrix33 ECF_N = sc->GetBodyFixedToReference(state_ECF).Transpose();
+	
+	// Change heading basis to Earth Fixed frame
+	for(int i = 0;i < numPts;i++)
+	{
+		// In ECF coordinates
+		poleHeadings[i] = ECF_N*NB*BS*poleHeadings[i];
+		// Re-normalize
+		poleHeadings[i].Normalize();
+	}
+	return poleHeadings;
+}
+
+std::vector<AnglePair> DiscreteCoverageChecker::checkCornerIntersection(const Rvector6 &state_ECF)
+{
+	// In Sensor Frame
+	std::vector<Rvector3> cornerHeadings = sensor->getCornerHeadings();
+	
+	int numPts = cornerHeadings.size();
+	std::vector<AnglePair> latLonVector(numPts);
+	
+	// Both in ECF coordinates
+	Rvector3 pos(state_ECF[0],state_ECF[1],state_ECF[2]);
+	Rvector3 sphericalPos = BodyFixedStateConverterUtil::CartesianToSpherical(pos,1,centralBody->GetRadius());
+	
+	// Only works for one sensor!
+	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
+	Rmatrix33 NB = sc->GetNadirTOBodyMatrix().Transpose();
+	Rmatrix33 SA_N = getNadirToSpacecraftAccessMatrix(state_ECF);
+	
+	// Change heading basis to 'Spacecraft Access (SA)' frame
+	for(int i = 0;i < numPts;i++)
+	{
+		// In Spacecraft Access frame
+		cornerHeadings[i] = SA_N*NB*BS*cornerHeadings[i];
+	}
+	
+	std::vector<AnglePair> clockConeHeadings = unitVectorToClockCone(cornerHeadings);
+	
+	for(int i = 0;i < numPts;i++)
+	{
+		latLonVector[i] = projectionAlg(clockConeHeadings[i][0],clockConeHeadings[i][1],sphericalPos);
+	}
+	
+	return latLonVector;
+}
+
+/*
+// Input is clock,cone of pole
+Real DiscreteCoverageChecker::getPoleLambda(Real alphaP,Real delP)
+{
+	Real delN = 0, alphaN = 0;
+	Real cThetaP = sin(delP)*sin(delN)+cos(delP)*cos(delN)*cos(alphaP - alphaN);
+	Real thetaE = asin(cThetaP);
+	
+	return thetaE;
+}
+
+std::vector<AnglePair> DiscreteCoverageChecker::checkPoleIntersection(const Rvector6 &state_ECF)
+{
+	// In Sensor Frame
+	std::vector<Rvector3> poleHeadings = sensor->getPoleHeadings();
+	
+	int numPts = poleHeadings.size();
+	std::vector<std::array<Real,3>> poleVector(numPts);
+	
+	// Both in ECF coordinates
+	Rvector3 pos(state_ECF[0],state_ECF[1],state_ECF[2]);
+	Rvector3 sphericalPos = BodyFixedStateConverterUtil::CartesianToSpherical(pos,1,centralBody->GetRadius());
+	
+	// Only works for one sensor!
+	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
+	Rmatrix33 NB = sc->GetNadirTOBodyMatrix().Transpose();
+	Rmatrix33 SA_N = getNadirToSpacecraftAccessMatrix(state_ECF);
+	
+	// Change heading basis to 'Spacecraft Access (SA)' frame
+	for(int i = 0;i < numPts;i++)
+	{
+		// In Spacecraft Access frame
+		poleHeadings[i] = SA_N*NB*BS*poleHeadings[i];
+	}
+	
+	std::vector<AnglePair> clockConeHeadings = unitVectorToClockCone(poleHeadings);
+	
+	for(int i = 0;i < numPts;i++)
+	{
+		poleVector[i] = projectionAlg(clockConeHeadings[i][0],clockConeHeadings[i][1],sphericalPos);
+	}
+	
+	return poleVector;
+}
+*/
