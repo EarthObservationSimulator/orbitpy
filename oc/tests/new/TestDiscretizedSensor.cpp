@@ -49,7 +49,8 @@ TEST (RADECToCartesian,45_DEG)
 	ASSERT_NEAR(expectedZVal,zVal,tolerance);
 }
 
-
+// Initializes a Pi/4 x Pi/4 rectangular sensor,
+// and verifies that the IFOV is correct.
 TEST(DiscretizedSensor,FOV)
 {
 	double tolerance = 0.00000000001;
@@ -65,6 +66,8 @@ TEST(DiscretizedSensor,FOV)
 	ASSERT_NEAR(expectedhFOV,hFOV,tolerance);
 }
 
+// Verifies that a sensor with 4 along track pixels
+// and 5 across track pixels has 30 corners
 TEST(GenerateCorners,NumCorners)
 {
 	DiscretizedSensor testSensor = DiscretizedSensor(pi/4.0,pi/4.0,4,5);
@@ -78,6 +81,8 @@ TEST(GenerateCorners,NumCorners)
 	EXPECT_EQ(expectedNumCorners,numCorners);
 }
 
+// Verifies pixel center location for a
+// Pi/4 x Pi/4 sensor with 2 CT pixels.
 TEST(GenerateRADEC,45_45_1_2)
 {
 	double tolerance = 0.00000000001;
@@ -98,6 +103,8 @@ TEST(GenerateRADEC,45_45_1_2)
 	ASSERT_NEAR(expectedEL1,RADEC[1][1],tolerance);
 }
 
+// Verifies pixel corner location for a
+// Pi/4 x Pi/4 sensor with 2 CT pixels.
 TEST(GenerateCorners,45_45_1_2)
 {
 	double tolerance = 0.00000000001;
@@ -130,6 +137,8 @@ TEST(GenerateCorners,45_45_1_2)
 	ASSERT_NEAR(expectedEL4,RADEC[4][1],tolerance);
 }
 
+// Verifies row/col pole location for a
+// Pi/4 x Pi/4 sensor with 2 x 2 pixels.
 TEST(GetPoleHeadings,45_45_2_2)
 {
 	double tolerance = 0.00000000001;
@@ -144,23 +153,25 @@ TEST(GetPoleHeadings,45_45_2_2)
 	Real yVal4 = poles[4][1];
 	Real zVal4 = poles[4][2];
 	
+	// Middle row pole expected to point in -Y direction
 	Real expectedXVal1 = 0;
-	Real expectedYVal1 = 0;
-	Real expectedZVal1 = 1;
+	Real expectedYVal1 = -1;
+	Real expectedZVal1 = 0;
 	
+	// Middle row column expected to point in X direction
 	Real expectedXVal4 = 1;
 	Real expectedYVal4 = 0;
 	Real expectedZVal4 = 0;
 	
 	ASSERT_EQ(6,poles.size());
 	
-	ASSERT_NEAR(expectedXVal1,xVal1,tolerance);
-	ASSERT_NEAR(expectedYVal1,yVal1,tolerance);
-	ASSERT_NEAR(expectedZVal1,zVal1,tolerance);
+	EXPECT_NEAR(expectedXVal1,xVal1,tolerance);
+	EXPECT_NEAR(expectedYVal1,yVal1,tolerance);
+	EXPECT_NEAR(expectedZVal1,zVal1,tolerance);
 	
-	ASSERT_NEAR(expectedXVal4,xVal4,tolerance);
-	ASSERT_NEAR(expectedYVal4,yVal4,tolerance);
-	ASSERT_NEAR(expectedZVal4,zVal4,tolerance);
+	EXPECT_NEAR(expectedXVal4,xVal4,tolerance);
+	EXPECT_NEAR(expectedYVal4,yVal4,tolerance);
+	EXPECT_NEAR(expectedZVal4,zVal4,tolerance);
 }
 
 int main(int argc, char **argv)

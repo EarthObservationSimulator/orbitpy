@@ -29,7 +29,7 @@ DiscretizedSensor::DiscretizedSensor(Real angleWidthIn, Real angleHeightIn, Inte
 	std::vector<AnglePair> RADEC = generateRADEC();
 	std::vector<AnglePair> corners = generateCorners();
 	
-	cartesianHeadings = genCartesianHeadings(RADEC);
+	centerHeadings = genCartesianHeadings(RADEC);
 	cornerHeadings = genCartesianHeadings(corners);
 	poleHeadings = generatePoles();
 }
@@ -88,27 +88,26 @@ std::vector<AnglePair> DiscretizedSensor::generateCorners()
 	return pointList;
 }
 
-/*
-void DiscretizedSensor::generateCartesianHeadings(std::vector<AnglePair> RADECVector)
-{
-	int numPts = RADECVector.size();
-	cartesianHeadings.resize(numPts);
-	
-	for(int i = 0; i < RADECVector.size();i++)
-	{
-		cartesianHeadings[i] = RADECtoUnitVec(RADECVector[i][0],RADECVector[i][1]);
-	}
-}
-*/
-
 std::vector<Rvector3> DiscretizedSensor::genCartesianHeadings(std::vector<AnglePair> RADECVector)
 {
 	int numPts = RADECVector.size();
 	std::vector<Rvector3> headings(numPts);
+	Rvector3 heading;
+	Real temp;
 	
 	for(int i = 0; i < RADECVector.size();i++)
 	{
-		headings[i] = RADECtoUnitVec(RADECVector[i][0],RADECVector[i][1]);
+		heading = RADECtoUnitVec(RADECVector[i][0],RADECVector[i][1]);
+		
+		// Align z axis with boresight.
+
+		temp = heading[1];
+		// New Y axis is old - Z axis
+		heading[1] = -heading[2];
+		// New Z axis is old Y axis
+		heading[2] = temp;
+		
+		headings[i] = heading;
 	}
 	
 	return headings;
@@ -130,7 +129,7 @@ std::vector<Rvector3> DiscretizedSensor::generatePoles()
 		// Index of next value of row i
 		int index2 = getIndex(i,1,numRowPoles);
 		
-		// Positive pole (not sure if important)
+		// NOTE: Need to determine north/south pole convention
 		poles[i] = Cross(cornerHeadings[index2],cornerHeadings[index1]);
 		poles[i].Normalize();
 	}
@@ -143,7 +142,6 @@ std::vector<Rvector3> DiscretizedSensor::generatePoles()
 		// Index of next value of col i 
 		int index2 = getIndex(1,i,numRowPoles);
 		
-		// Not sure which side of pole to use
 		poles[i + numRowPoles] = Cross(cornerHeadings[index2],cornerHeadings[index1]);
 		poles[i + numRowPoles].Normalize();
 	}
@@ -173,9 +171,9 @@ Real DiscretizedSensor::gethFOV()
 	return hFOV;
 }
 
-std::vector<Rvector3> DiscretizedSensor::getCartesianHeadings()
+std::vector<Rvector3> DiscretizedSensor::getCenterHeadings()
 {
-	return cartesianHeadings;
+	return centerHeadings;
 }
 
 std::vector<Rvector3> DiscretizedSensor::getCornerHeadings()
