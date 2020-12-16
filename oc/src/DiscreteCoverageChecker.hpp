@@ -34,9 +34,13 @@ public:
 	AnglePair projectionAlg(Real clock,Real cone,const Rvector3 &sphericalPos);
 	
 	// Coordinate conversion
-	Rmatrix33 getNadirToSpacecraftAccessMatrix(const Rvector6 &state_ECF);
 	std::vector<AnglePair> unitVectorToClockCone(const std::vector<Rvector3> &cartesianHeadings);
 	Rvector6 getEarthFixedState(Real jd,const Rvector6 &state_I);
+	
+	// Matrix coordinate conversion
+	Rmatrix33 getNadirToSpacecraftAccessMatrix(const Rvector6 &state_ECF);
+	Rmatrix33 getSensorToSpacecraftAccessMatrix(const Rvector6 &state_ECF);
+	Rmatrix33 getSensorToNadirMatrix();
 
 protected:
 

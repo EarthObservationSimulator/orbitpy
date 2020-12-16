@@ -46,6 +46,23 @@ AnglePair DiscreteCoverageChecker::projectionAlg(Real clock,Real cone,const Rvec
 	return latLonP;
 }
 
+Rmatrix33 DiscreteCoverageChecker::getSensorToNadirMatrix()
+{
+	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
+	Rmatrix33 NB = sc->GetNadirTOBodyMatrix().Transpose();
+	
+	return NB*BS;
+}
+
+Rmatrix33 DiscreteCoverageChecker::getSensorToSpacecraftAccessMatrix(const Rvector6 &state_ECF)
+{
+	Rmatrix33 NS,SA_N;
+	
+	NS = getSensorToNadirMatrix();
+	SA_N = getNadirToSpacecraftAccessMatrix(state_ECF);
+	
+	return SA_N*NS;
+}
 Rmatrix33 DiscreteCoverageChecker::getNadirToSpacecraftAccessMatrix(const Rvector6 &state_ECF)
 {
 	Rvector3 pos_ECF(state_ECF[0],state_ECF[1],state_ECF[2]);   
@@ -64,7 +81,9 @@ Rmatrix33 DiscreteCoverageChecker::getNadirToSpacecraftAccessMatrix(const Rvecto
 	Rvector3 zHat(0,0,1);
 	Rvector3 xHat = Cross(vel_T,zHat);
 	
-	Rmatrix33 SA_N(xHat[0],vel_T[0],zHat[0],xHat[1],vel_T[1],zHat[1],xHat[2],vel_T[2],zHat[2]);
+	Rmatrix33 SA_N(xHat[0],vel_T[0],zHat[0],
+		       xHat[1],vel_T[1],zHat[1],
+		       xHat[2],vel_T[2],zHat[2]);
 	
 	return SA_N;
 }
@@ -78,7 +97,7 @@ DiscreteCoverageChecker::DiscreteCoverageChecker(Spacecraft *satIn,DiscretizedSe
 
 Rvector6 DiscreteCoverageChecker::getEarthFixedState(Real jd,const Rvector6& state_I)
 {
-	// Converts state from Earth interial to Earth fixed
+	// Converts state from Earth intertial to Earth fixed
 	Rvector3 inertialPos   = state_I.GetR();
 	Rvector3 inertialVel   = state_I.GetV();
 	// TODO.  Handle differences in units of points and states.
@@ -132,15 +151,13 @@ std::vector<AnglePair> DiscreteCoverageChecker::checkIntersection(const Rvector6
 	Rvector3 sphericalPos = BodyFixedStateConverterUtil::CartesianToSpherical(pos,1,centralBody->GetRadius());
 	
 	// Only works for one sensor!
-	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
-	Rmatrix33 NB = sc->GetNadirTOBodyMatrix().Transpose();
-	Rmatrix33 SA_N = getNadirToSpacecraftAccessMatrix(state_ECF);
+	Rmatrix33 SA_S = getSensorToSpacecraftAccessMatrix(state_ECF);
 	
 	// Change heading basis to 'Spacecraft Access (SA)' frame
 	for(int i = 0;i < numPts;i++)
 	{
 		// In Spacecraft Access frame
-		centerHeadings[i] = SA_N*NB*BS*centerHeadings[i];
+		centerHeadings[i] = SA_S*centerHeadings[i];
 	}
 	
 	std::vector<AnglePair> clockConeHeadings = unitVectorToClockCone(centerHeadings);
@@ -161,15 +178,14 @@ std::vector<Rvector3> DiscreteCoverageChecker::checkPoleIntersection(const Rvect
 	int numPts = poleHeadings.size();
 	
 	// Only works for one sensor!
-	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
-	Rmatrix33 NB = sc->GetNadirTOBodyMatrix().Transpose();
-	Rmatrix33 ECF_N = sc->GetBodyFixedToReference(state_ECF).Transpose();
+	Rmatrix33 NS = getSensorToNadirMatrix();
+	//Rmatrix33 ECF_N = sc->GetBodyFixedToReference(state_ECF).Transpose();
 	
 	// Change heading basis to Earth Fixed frame
 	for(int i = 0;i < numPts;i++)
 	{
 		// In ECF coordinates
-		poleHeadings[i] = ECF_N*NB*BS*poleHeadings[i];
+		poleHeadings[i] = /*ECF_N*/NS*poleHeadings[i];
 		// Re-normalize
 		poleHeadings[i].Normalize();
 	}
@@ -189,15 +205,13 @@ std::vector<AnglePair> DiscreteCoverageChecker::checkCornerIntersection(const Rv
 	Rvector3 sphericalPos = BodyFixedStateConverterUtil::CartesianToSpherical(pos,1,centralBody->GetRadius());
 	
 	// Only works for one sensor!
-	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
-	Rmatrix33 NB = sc->GetNadirTOBodyMatrix().Transpose();
-	Rmatrix33 SA_N = getNadirToSpacecraftAccessMatrix(state_ECF);
+	Rmatrix33 SA_S = getSensorToSpacecraftAccessMatrix(state_ECF);
 	
 	// Change heading basis to 'Spacecraft Access (SA)' frame
 	for(int i = 0;i < numPts;i++)
 	{
 		// In Spacecraft Access frame
-		cornerHeadings[i] = SA_N*NB*BS*cornerHeadings[i];
+		cornerHeadings[i] = SA_S*cornerHeadings[i];
 	}
 	
 	std::vector<AnglePair> clockConeHeadings = unitVectorToClockCone(cornerHeadings);

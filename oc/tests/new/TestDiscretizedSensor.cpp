@@ -103,6 +103,43 @@ TEST(GenerateRADEC,45_45_1_2)
 	ASSERT_NEAR(expectedEL1,RADEC[1][1],tolerance);
 }
 
+// Verifies pixel center location for a
+// Pi/3 x Pi/3 sensor with 3 CT pixels.
+TEST(GenerateRADEC,30_30_1_3)
+{
+	double tolerance = 0.00000000001;
+	DiscretizedSensor testSensor = DiscretizedSensor(pi/3.0,pi/3.0,1,3);
+	std::vector<AnglePair> RADEC = testSensor.generateRADEC();
+	Real expectedRA,expectedEL;
+	
+	expectedEL = 0;
+	expectedRA = pi/2.0;
+	
+	// Make sure center pixel is at pi/2, 0;
+	ASSERT_NEAR(expectedRA,RADEC[1][0],tolerance);
+	ASSERT_NEAR(expectedEL,RADEC[1][1],tolerance);
+}
+
+TEST(genCartesianHeadings,45_45_1_2)
+{
+	double tolerance = 0.00000000001;
+	DiscretizedSensor testSensor = DiscretizedSensor(pi/4.0,pi/4.0,1,2);
+	Real expectedRA0,expectedEL0,expectedRA1,expectedEL1;
+	std::vector<AnglePair> RADEC = testSensor.generateRADEC();
+	std::vector<Rvector3> unitVects = testSensor.genCartesianHeadings(RADEC);
+	
+	expectedEL0 = pi/16.0;
+	expectedEL1 = -pi/16.0;
+	
+	// Check X axis values
+	EXPECT_NEAR(sin(expectedEL0),unitVects[0][0],tolerance);
+	EXPECT_NEAR(sin(expectedEL1),unitVects[1][0],tolerance);
+	
+	// Check Y axis values
+	EXPECT_NEAR(0,unitVects[0][1],tolerance);
+	EXPECT_NEAR(0,unitVects[1][1],tolerance);
+}
+
 // Verifies pixel corner location for a
 // Pi/4 x Pi/4 sensor with 2 CT pixels.
 TEST(GenerateCorners,45_45_1_2)
@@ -137,7 +174,21 @@ TEST(GenerateCorners,45_45_1_2)
 	ASSERT_NEAR(expectedEL4,RADEC[4][1],tolerance);
 }
 
-// Verifies row/col pole location for a
+// Verifies center location for a 
+// Pi/3 x Pi/3 sensor w/ 1 x 3 pixels.
+TEST(GetCenterHeadings,60_60_1_3)
+{
+	double tolerance = 0.00000000001;
+	DiscretizedSensor testSensor = DiscretizedSensor(pi/3.0,pi/3.0,1,3);
+	std::vector<Rvector3> centers = testSensor.getCenterHeadings();
+	
+	// All y values should be zero
+	EXPECT_NEAR(0,centers[0][1],tolerance);
+	EXPECT_NEAR(0,centers[1][1],tolerance);
+	EXPECT_NEAR(0,centers[2][1],tolerance);
+}
+
+// Verifies exact pole location for a
 // Pi/4 x Pi/4 sensor with 2 x 2 pixels.
 TEST(GetPoleHeadings,45_45_2_2)
 {
@@ -153,14 +204,14 @@ TEST(GetPoleHeadings,45_45_2_2)
 	Real yVal4 = poles[4][1];
 	Real zVal4 = poles[4][2];
 	
-	// Middle row pole expected to point in -Y direction
-	Real expectedXVal1 = 0;
-	Real expectedYVal1 = -1;
+	// Middle row pole expected to point in -X direction
+	Real expectedXVal1 = -1;
+	Real expectedYVal1 = 0;
 	Real expectedZVal1 = 0;
 	
-	// Middle row column expected to point in X direction
-	Real expectedXVal4 = 1;
-	Real expectedYVal4 = 0;
+	// Middle row column expected to point in Y direction
+	Real expectedXVal4 = 0;
+	Real expectedYVal4 = 1;
 	Real expectedZVal4 = 0;
 	
 	ASSERT_EQ(6,poles.size());
@@ -172,6 +223,33 @@ TEST(GetPoleHeadings,45_45_2_2)
 	EXPECT_NEAR(expectedXVal4,xVal4,tolerance);
 	EXPECT_NEAR(expectedYVal4,yVal4,tolerance);
 	EXPECT_NEAR(expectedZVal4,zVal4,tolerance);
+}
+
+// Test Pole directions to verify correct
+// cross product order.
+TEST(GetPoleHeadings,45_45_1_3)
+{
+	double tolerance = 0.00000000001;
+	DiscretizedSensor testSensor = DiscretizedSensor(pi/3.0,pi/3.0,1,3);
+	std::vector<Rvector3> poles = testSensor.generatePoles();
+	
+	ASSERT_EQ(6,poles.size());
+	
+	// The poles for each row should have zero Y value.
+	EXPECT_NEAR(0.0,poles[0][1],tolerance);
+	EXPECT_NEAR(0.0,poles[1][1],tolerance);
+	EXPECT_NEAR(0.0,poles[2][1],tolerance);
+	EXPECT_NEAR(0.0,poles[3][1],tolerance);
+	
+	// The first and second poles should have positive X values
+	EXPECT_TRUE(poles[0][0] > 0);
+	EXPECT_TRUE(poles[1][0] > 0);
+	EXPECT_TRUE(poles[2][0] < 0);
+	EXPECT_TRUE(poles[3][0] < 0);
+	
+	// The pole for first column should have negative Y value
+	EXPECT_TRUE(poles[4][1] < 0);
+	EXPECT_TRUE(poles[5][1] > 0);
 }
 
 int main(int argc, char **argv)

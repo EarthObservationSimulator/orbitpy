@@ -102,8 +102,13 @@ std::vector<Rvector3> DiscretizedSensor::genCartesianHeadings(std::vector<AngleP
 		// Align z axis with boresight.
 
 		temp = heading[1];
-		// New Y axis is old - Z axis
-		heading[1] = -heading[2];
+		
+		// New Y axis is old X axis
+		heading[1] = heading[0];
+		
+		// New X axis is old Z axis
+		heading[0] = heading[2];
+		
 		// New Z axis is old Y axis
 		heading[2] = temp;
 		
@@ -132,6 +137,15 @@ std::vector<Rvector3> DiscretizedSensor::generatePoles()
 		// NOTE: Need to determine north/south pole convention
 		poles[i] = Cross(cornerHeadings[index2],cornerHeadings[index1]);
 		poles[i].Normalize();
+		
+		
+		// New code
+		if(i >= numRowPoles/2)
+		{
+			poles[i] = Cross(cornerHeadings[index1],cornerHeadings[index2]);
+			poles[i].Normalize();
+		}
+		
 	}
 	
 	// Starting from left col and moving right col by col
@@ -142,8 +156,17 @@ std::vector<Rvector3> DiscretizedSensor::generatePoles()
 		// Index of next value of col i 
 		int index2 = getIndex(1,i,numRowPoles);
 		
-		poles[i + numRowPoles] = Cross(cornerHeadings[index2],cornerHeadings[index1]);
+		poles[i + numRowPoles] = Cross(cornerHeadings[index1],cornerHeadings[index2]);
 		poles[i + numRowPoles].Normalize();
+		
+		
+		// New code
+		if(i >= numColPoles/2)
+		{
+			poles[i + numRowPoles] = Cross(cornerHeadings[index2],cornerHeadings[index1]);
+			poles[i + numRowPoles].Normalize();
+		}
+		
 	}
 	
 	return poles;
