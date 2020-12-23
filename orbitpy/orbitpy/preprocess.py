@@ -238,7 +238,12 @@ class PreProcess():
                                      'alt[km]': float(alt), 'minElevation[deg]': float(minElevation)})
                     stn_info.append(_stn_info_dict)
                 self.ground_stn_info = stn_info
-                
+
+        self.opaque_atmos_height_km = 30 # default value
+        if(specs.get("interSatelliteComm", None) is not None):
+            if(specs["interSatelliteComm"].get("opaqueAtmosphericHeight", None) is not None):
+                self.opaque_atmos_height_km = float(specs["interSatelliteComm"].get("opaqueAtmosphericHeight"))
+            
 
     @staticmethod
     def enumerate_orbits(constel=dict()):
@@ -288,7 +293,7 @@ class PreProcess():
         num_of_orbs = len(data)
         orbits = []
         for orb_i in range(0,num_of_orbs):
-            _orb = data[orb_i]
+            _orb = data[orb_i]                    
             orbits.append(OrbitParameters(_orb['@id'], _orb['sma'], _orb['ecc'], _orb['inc'],
                                           _orb['raan'], _orb['aop'], _orb['ta']))                   
         return orbits

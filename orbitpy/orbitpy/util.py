@@ -8,7 +8,7 @@
 import json
 from enum import Enum
 from numbers import Number
-import numpy
+import numpy as np
 import math
 from instrupy.util import *
 
@@ -147,3 +147,26 @@ class Satellite():
         self.dir_pth =  dir_pth if dir_pth is not None else None
 
 
+def calculate_inclination_circular_SSO(altitude_km):
+    # circular SSO with fixed altitude specified, 
+    e = 0
+    Re = Constants.radiusOfEarthInKM 
+    sma = Re + altitude_km
+    J2  = 0.0010826269      # Second zonal gravity harmonic of the Earth
+    we = 1.99106e-7    # Mean motion of the Earth in its orbit around the Sun [rad/s]
+    mu    = 398600.440      # Earth’s gravitational parameter [km^3/s^2]
+    n = np.sqrt(mu/(sma**3)) # Mean motion [s-1]
+    h = sma*(1 - e**2)    # note that here h is *NOT* the altitude!!
+
+    tol = 1e-10         # Error tolerance
+    # Initial guess for the orbital inclination
+    i0 = 180/np.pi*np.arccos(-2/3*(h/Re )**2*we/(n*J2))
+    print(i0)
+    err = 1e1
+    while(err >= tol):
+        # J2 perturbed mean motion
+        _np  = n*(1 + (1.5*J2*(Re/h))**2*np.sqrt(1 - e**2)*(1 - (3/2*np.sin(np.deg2rad(i0))**2)))
+        i = 180/np.pi*(np.arccos(-2/3*((h/Re)**2)*we/(_np*J2)))
+        err = abs(i - i0)
+        i0 = i
+    return i

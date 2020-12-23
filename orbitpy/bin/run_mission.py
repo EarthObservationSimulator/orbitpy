@@ -96,7 +96,7 @@ def main(user_dir):
     # Compute satellite-to-satellite contacts
     print(".......Computing satellite-to-satellite contact periods.......")
     t1 = time.process_time()    
-    opaque_atmos_height_km = 30
+    opaque_atmos_height_km = pi.opaque_atmos_height_km
     inter_sat_comm = communications.InterSatelliteComm(sat_ids, sat_state_fls, comm_dir, opaque_atmos_height_km)
     inter_sat_comm.compute_all_contacts() 
     t2 = time.process_time()       

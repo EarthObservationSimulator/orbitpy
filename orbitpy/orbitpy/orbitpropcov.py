@@ -411,8 +411,7 @@ class OrbitPropCovPoptsWithGrid:
             w = csv.writer(f)
            
             _v = dict({'accessTimeIndex':None, 'regi': None, 'gpi': None, 'lat[deg]': None, 'lon[deg]': None, 'pntopti': None})
-            w.writerow(_v.keys())
-            
+            w.writerow(_v.keys())          
             
             for indx in acc_indx:
                 time_i = int(access_info_df.loc[indx][0])
@@ -458,7 +457,7 @@ class OrbitPropCovPoptsWithGrid:
                       
             df_grp = df_per_popt.groupby('gpi')
             dfnew =  pd.DataFrame(columns=df_per_popt.columns)
-            # iterate over all the gorups (ground-points)
+            # iterate over all the groups (ground-points)
             for name, group in df_grp:
                 x = (group['TimeIndex'].shift(periods=1) - group['TimeIndex']) < -1
                 _intv = np.where(x == True)[0]            
