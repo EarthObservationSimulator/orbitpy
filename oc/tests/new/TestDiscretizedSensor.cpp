@@ -231,7 +231,7 @@ TEST(GetPoleHeadings,45_45_1_3)
 {
 	double tolerance = 0.00000000001;
 	DiscretizedSensor testSensor = DiscretizedSensor(pi/3.0,pi/3.0,1,3);
-	std::vector<Rvector3> poles = testSensor.generatePoles();
+	std::vector<Rvector3> poles = testSensor.getPoleHeadings();
 	
 	ASSERT_EQ(6,poles.size());
 	
