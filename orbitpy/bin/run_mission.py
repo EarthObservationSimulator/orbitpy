@@ -64,8 +64,8 @@ def main(user_dir):
     # Read in mssion specifications from user config file, coverage grid file (optional) 
     # and the ground stations specifications file in the user directory.
     usf = user_dir + 'MissionSpecs.json'
-    with open(usf, 'r') as orbit_specs_file:
-            miss_specs = util.FileUtilityFunctions.from_json(orbit_specs_file)      
+    with open(usf, 'r') as mission_specs_file:
+            miss_specs = util.FileUtilityFunctions.from_json(mission_specs_file)      
 
     # Preprocess
     print(".......Preprocessing user config file.......")
@@ -75,36 +75,43 @@ def main(user_dir):
     print(".......Done.......")
 
     # Run orbit propagation and coverage for each of the satellties (orbits) in the constellation
+    sat_ids = []
+    sat_dirs = []
+    sat_state_fls = []
     for orb_indx in range(0,len(prop_cov_param)):
         pcp = prop_cov_param[orb_indx]
         opc = orbitpropcov.OrbitPropCov(pcp)
         print(".......Running Orbit Propagation and Coverage for satellite.......", pcp.sat_id)
         opc.run()        
+        sat_ids.append(pcp.sat_id)
+        _dir = "/".join([str(x) for x in pcp.sat_state_fl.split("/")[0:-1]])+'/'
+        sat_dirs.append(_dir)
+        sat_state_fls.append(pcp.sat_state_fl)
         print(".......Done.......")
 
     comm_dir = pi.comm_dir
     gnd_stn_fl = pi.gnd_stn_fl
-    cov_grid_fl = pi.cov_grid_fl
-
-    sat_dirs =  glob.glob(user_dir+'sat*/')
-    sat_state_fls =  glob.glob(user_dir+'sat*/state')
+    ground_stn_info = pi.ground_stn_info
 
     # Compute satellite-to-satellite contacts
     print(".......Computing satellite-to-satellite contact periods.......")
     t1 = time.process_time()    
-    opaque_atmos_height_km = 30
-    inter_sat_comm = communications.InterSatelliteComm(sat_state_fls, comm_dir, opaque_atmos_height_km)
+    opaque_atmos_height_km = pi.opaque_atmos_height_km
+    inter_sat_comm = communications.InterSatelliteComm(sat_ids, sat_state_fls, comm_dir, opaque_atmos_height_km)
     inter_sat_comm.compute_all_contacts() 
     t2 = time.process_time()       
     print(".......DONE.......time taken (s): ", t2-t1)
 
-    # Compute satellite-to-ground-station contacts
-    print(".......Computing satellite-to-ground-station contact periods.......")
+    # Compute satellite-to-ground-station contacts    
     t1 = time.process_time() 
-    gnd_stn_comm = communications.GroundStationComm(sat_dirs, gnd_stn_fl)
-    gnd_stn_comm.compute_all_contacts()
-    t2 = time.process_time()   
-    print(".......DONE.......time taken (s): ", t2-t1)
+    if gnd_stn_fl is None and ground_stn_info is None:
+        print("No ground-stations specified, skip computation of graound-station contacts.")
+    else:
+        print(".......Computing satellite-to-ground-station contact periods.......")
+        gnd_stn_comm = communications.GroundStationComm(sat_dirs=sat_dirs, sat_state_fls=sat_state_fls, gnd_stn_fl=gnd_stn_fl, ground_stn_info=ground_stn_info)
+        gnd_stn_comm.compute_all_contacts()
+        t2 = time.process_time()   
+        print(".......DONE.......time taken (s): ", t2-t1)
 
     # Compute observational data-metrics
     print(".......Computing observational data metrics.......")
@@ -115,18 +122,19 @@ def main(user_dir):
     elif "satellite" in miss_specs:
         instru_specs = []
         for sat in miss_specs["satellite"]:
-            instru_specs.extend(sat["instrument"])
+            if("instrument" in sat):
+                instru_specs.extend(sat["instrument"])
 
-    obs = obsdatametrics.ObsDataMetrics(sat_dirs, cov_grid_fl, instru_specs)
-    obs.compute_all_obs_dmetrics()      
-    t2 = time.process_time()      
+    if(instru_specs is not None):
+        obs = obsdatametrics.ObsDataMetrics(pi.sats)
+        obs.compute_all_obs_metrics()      
+        t2 = time.process_time()      
+    else:
+        pass
     print(".......DONE.......time taken (s): ", t2-t1)
 
     end_time = time.process_time()
     print("Total time taken (s):", end_time - start_time)
-
-
-
 
 class readable_dir(argparse.Action):
     """Defines a custom argparse Action to identify a readable directory."""

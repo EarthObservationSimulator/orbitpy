@@ -116,7 +116,7 @@ However, what we require are the imaging oppourtunities, where a imaging opportu
 
 Pointing Options coverage calcuations approach
 ===============================================
-In this coverage calculation approach, a set of pointing options is supplied in a data-file by the user. Currently the pointing-options
+In this coverage calculation approach, a set of pointing options is supplied in a data-file by the user. The pointing-options
 are defined with respect to the Nadir-frame (see :code:`instrupy`, :code:`orienation` JSON object description). The complete set of pointing-options
 represent a discritized field-of-maneuverability. Hence the :code:`manuverability` JSON object need not be specified within the  
 :code:`instrument` JSON object.
@@ -127,6 +127,12 @@ is the intersection of the pointing-axis with a spherical Earth model to give ge
 The porpagation time-step determination is identical to the description above in :ref:`prop_time_step_determination`. However, instead of 
 field-of-regard, the field-of-**view** would be used, since the manueverability field is not included. Also, the user may set a higher
 :code:`customTimeResFactor`(from the default 0.25) in the :code:`settings` JSON object.  
+
+Pointing Options with Grid coverage calcuations approach
+==========================================================
+The sensor is oriented to each of the pointing-options specified by the user and the coverage is calculated for taking into account the 
+FOV of the sensor. 
+Sensor orientation and Manueverability options if specified, are ignored since the pointing options are defined with respect to the Nadir frame.
 
 Common issues:
 ==============

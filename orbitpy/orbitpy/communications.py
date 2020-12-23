@@ -13,7 +13,10 @@ from orbitpy.util import Constants, MathUtilityFunctions
 class InterSatelliteComm:
    """ Class to handle computation of inter-satellite communication intervals.
 
-       :ivar sat_state_fls: Satellite state filepaths
+       :ivar sat_ids: Satellite ids
+       :vartype sat_ids: list, str
+
+       :ivar sat_state_fls: Satellite state filepaths (associated with the sat_ids)
        :vartype sat_state_fls: list, str
 
        :ivar comm_dir: Inter-satellite comm directory path
@@ -23,7 +26,8 @@ class InterSatelliteComm:
        :vartype opaque_atmos_height_km: float
 
    """
-   def __init__(self, sat_state_fls, comm_dir, opaque_atmos_height_km):
+   def __init__(self, sat_ids, sat_state_fls, comm_dir, opaque_atmos_height_km):
+      self.sat_ids = sat_ids
       self.sat_state_fls = sat_state_fls
       self.comm_dir = comm_dir
       self.opaque_atmos_height_km = opaque_atmos_height_km     
@@ -40,10 +44,16 @@ class InterSatelliteComm:
       
       The states of all the satellites must be synced to the same time-series.
       """
-      number_of_files = len(self.sat_state_fls)
+      number_of_sats = len(self.sat_ids)
 
-      for indx1 in range(0,number_of_files):
+      SAT1_LIST = []
+      SAT2_LIST = []
+      DETAILED_FILE_LIST = []
+      CONCISE_FILE_LIST = []
 
+      for indx1 in range(0,number_of_sats):
+
+         sat1_id = self.sat_ids[indx1]
          sat1_fl = self.sat_state_fls[indx1]
          sat1 = pd.read_csv(sat1_fl, skiprows=5, header=None, delimiter=r",")
 
@@ -63,8 +73,9 @@ class InterSatelliteComm:
                   step_size = [row for idx, row in enumerate(reader) if idx == 2]
                   step_size = str(step_size)[3:-3]
          
-         for indx2 in range(indx1+1,number_of_files):
+         for indx2 in range(indx1+1,number_of_sats):
                
+               sat2_id = self.sat_ids[indx2]
                sat2_fl = self.sat_state_fls[indx2]            
 
                sat2 = pd.read_csv(sat2_fl, skiprows=5, header=None, delimiter=r",")
@@ -92,6 +103,13 @@ class InterSatelliteComm:
 
                InterSatelliteComm.compute_satA_to_satB_contact(time_i, sat1_x_km, sat1_y_km, sat1_z_km, sat2_x_km, sat2_y_km, sat2_z_km, 
                                                   output_concise_fl, output_detailed_fl, self.opaque_atmos_height_km)
+
+               SAT1_LIST.append(sat1_id)
+               SAT2_LIST.append(sat2_id)
+               DETAILED_FILE_LIST.append(output_concise_fl)
+               CONCISE_FILE_LIST.append(output_detailed_fl)
+
+      return [SAT1_LIST, SAT2_LIST, DETAILED_FILE_LIST, CONCISE_FILE_LIST]
    
    @staticmethod
    def compute_satA_to_satB_contact(time_indx, satA_x_km, satA_y_km, satA_z_km, satB_x_km, satB_y_km, satB_z_km,
@@ -193,13 +211,20 @@ class GroundStationComm:
    :ivar sat_dirs: List of all satellite directories
    :vartype sat_dirs: list, str
 
+   :ivar sat_state_fls: Satellite state filepaths
+   :vartype sat_state_fls: list, str
+
    :ivar gnd_stn_specs: Dataframe containing data of all the ground-stations.
    :vartype gnd_stn_specs: :class:`pandas.DataFrame`
 
    """
-   def __init__(self, sat_dirs = None, gnd_stn_fl = None):
+   def __init__(self, sat_dirs=None, sat_state_fls = None, gnd_stn_fl = None, ground_stn_info = None):
       self.sat_dirs = sat_dirs
-      self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")        
+      self.sat_state_fls = sat_state_fls
+      if(gnd_stn_fl):
+         self.gnd_stn_specs = pd.read_csv(gnd_stn_fl, header=0, delimiter=r",")  
+      elif(ground_stn_info):
+         self.gnd_stn_specs = pd.DataFrame(ground_stn_info)
 
    def compute_all_contacts(self):
       """ Iterate over all possible satellites and ground-stations, and compute their contact times. Accepts list of satellite state
@@ -213,10 +238,17 @@ class GroundStationComm:
 
       The ground-station coordinates and minimum elelvation requirements is read off the instance variable :code:`gnd_stn_specs`.
       """
+      gndstn_index = []
+      gndstncomm_concise_fl = []
+      gndstncomm_detailed_fl = []
+      if(not isinstance(self.sat_state_fls, list) ):
+         self.sat_state_fls = [self.sat_state_fls]
+         self.sat_dirs = [self.sat_dirs]
       # Iterate over all satellites
-      for indx1 in range(0,len(self.sat_dirs)):
+      for indx1 in range(0,len(self.sat_state_fls)):
 
-         sat_fl = self.sat_dirs[indx1] + 'state'
+         sat_fl = self.sat_state_fls[indx1] if isinstance(self.sat_state_fls, list) else self.sat_state_fls
+         sat_dir = self.sat_dirs[indx1] if isinstance(self.sat_dirs, list) else self.sat_dirs
          with open(sat_fl) as fd:
                   reader = csv.reader(fd)
                   epoch = [row for idx, row in enumerate(reader) if idx == 1]
@@ -247,7 +279,7 @@ class GroundStationComm:
                gnd_stn_minelv_deg = float(self.gnd_stn_specs.iloc[indx2]['minElevation[deg]'])
 
                # prepare output files
-               output_detailed_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_detailed"
+               output_detailed_fl = sat_dir + "gndStn"+str(gnd_stn_i)+"_contact_detailed"
                f = open(output_detailed_fl, "w")
                f.write(epoch)
                f.write("\n")
@@ -255,7 +287,7 @@ class GroundStationComm:
                f.write("\n")
                f.close()
 
-               output_concise_fl = self.sat_dirs[indx1] + "gndStn"+str(gnd_stn_i)+"_contact_concise"
+               output_concise_fl = sat_dir + "gndStn"+str(gnd_stn_i)+"_contact_concise"
                f = open(output_concise_fl, "w")
                f.write(epoch)
                f.write("\n")
@@ -265,7 +297,12 @@ class GroundStationComm:
 
                GroundStationComm.compute_sat_to_GS_contact(__epoch, __step_size, time_indx, sat_x_km, sat_y_km, sat_z_km, ground_stn_coords,
                                  output_concise_fl, output_detailed_fl, gnd_stn_minelv_deg)
+               
+               gndstn_index.append(gnd_stn_i)
+               gndstncomm_concise_fl.append(output_concise_fl)
+               gndstncomm_detailed_fl.append(output_detailed_fl)
 
+      return [gndstn_index, gndstncomm_concise_fl, gndstncomm_detailed_fl]
               
 
    @staticmethod

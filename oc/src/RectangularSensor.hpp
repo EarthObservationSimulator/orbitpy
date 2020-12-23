@@ -53,6 +53,11 @@ public:
    /// Set/Get angle height
    virtual void  SetAngleHeight(Real angleHeightIn);
    virtual Real  GetAngleHeight();
+   
+   /// New Functions
+   std::vector<Real> getClockAngles();
+   std::vector<Rvector3> getCornerHeadings(std::vector<Real> &clocks);
+   std::vector<Rvector3> getPoleHeadings(std::vector<Rvector3> &corners);
 
 protected:
    
@@ -60,5 +65,7 @@ protected:
    Real    angleWidth;
    /// Angle height
    Real    angleHeight;
+   
+   std::vector<Rvector3> poles;
 };
 #endif // RectangularSensor_hpp

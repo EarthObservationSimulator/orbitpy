@@ -50,7 +50,12 @@ public:
    virtual ~CoverageChecker();
    
    /// Check the point coverage and return the resulting index array
+   virtual IntegerArray      CheckPointCoverage(IntegerArray PointIndices);
    virtual IntegerArray      CheckPointCoverage();
+   virtual IntegerArray      CheckPointCoverage(const Rvector6 &theState,
+                                                Real           theTime,
+                                                const Rvector6 &cartState,
+                                                const IntegerArray &PointIndices);
    virtual IntegerArray      CheckPointCoverage(const Rvector6 &theState,
                                                 Real           theTime,
                                                 const Rvector6 &cartState);

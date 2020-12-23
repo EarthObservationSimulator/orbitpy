@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                               Mission
+//                    Coverage Calcs with Pointing Options
 //------------------------------------------------------------------------------
 //
 // Author: Vinay Ravindra
@@ -63,42 +63,6 @@ using namespace std;
 using namespace GmatMathUtil;
 using namespace GmatMathConstants;
 
-int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
-{/**Read coverage grid data file onto double arrays.**/
-
-    ifstream in(covGridFp.c_str());
-
-    if(!in){
-  		std::cerr << "Cannot open the Coverage Grid File : "<<covGridFp.c_str()<<std::endl;
-		return -1;
-    }
-
-    string line;
-    getline(in,line); // skip header
-    while (getline(in,line))
-    {
-      stringstream ss(line);
-      vector<string> vecStrOut;
-
-      while(ss.good()){
-         string substr;
-         std::getline( ss, substr, ',' );
-         vecStrOut.push_back( substr );
-      }
-      // The first two entries in the file are the region index and grid point index
-      Real lat = stod(vecStrOut[2]);
-      Real lon = stod(vecStrOut[3]);
-
-      lats.push_back( lat*RAD_PER_DEG );
-      lons.push_back( lon*RAD_PER_DEG );
-
-    }
-    in.close();
-
-    return 0;
-
-}
-
 /**
  * @param epoch mission epoch in UTCGregorian 
  * @param sma semi-major axis in kilometers
@@ -115,8 +79,8 @@ int readCovGridFile(const string &covGridFp, RealArray &lats, RealArray &lons)
  * @param fovCone sensor cone angles in degrees
  * @param yaw180_flag 
  * @param stepSize propagation step size
- * @param satStateFn Filename, path to write the satellite ECI states
- * @param satAccFn Filename, path to write the computed satellite access data
+ * @param satStateFp Filename, path to write the satellite ECI states
+ * @param satAccFp Filename, path to write the computed satellite access data
  *
  */
 int main(int argc, char *argv[])
@@ -150,8 +114,8 @@ int main(int argc, char *argv[])
   string _fovCone;
   bool yaw180_flag; 
   Real stepSize; 
-  string satStateFn;
-  string satAccFn;
+  string satStateFp;
+  string satAccFp;
 
   if(argc==18){            
       _epoch = argv[1];
@@ -169,8 +133,8 @@ int main(int argc, char *argv[])
       _fovCone = argv[13];
       yaw180_flag = bool(stoi(argv[14]));
       stepSize = Real(stod(argv[15]));
-      satStateFn = argv[16];
-      satAccFn = argv[17];
+      satStateFp = argv[16];
+      satAccFp = argv[17];
    }else{
       MessageInterface::ShowMessage("Please input right number of arguments.\n");
       exit(1);
@@ -225,8 +189,8 @@ int main(int argc, char *argv[])
       MessageInterface::ShowMessage("\n");
       MessageInterface::ShowMessage("yaw180_flag is %d \n", yaw180_flag);
       MessageInterface::ShowMessage("Step size is %16.9f \n", stepSize);
-      MessageInterface::ShowMessage("Satellite states file path, name is: %s \n", satStateFn.c_str());
-      MessageInterface::ShowMessage("Satellite access file path, name is: %s \n", satAccFn.c_str());
+      MessageInterface::ShowMessage("Satellite states file path, name is: %s \n", satStateFp.c_str());
+      MessageInterface::ShowMessage("Satellite access file path, name is: %s \n", satAccFp.c_str());
    #endif
    
    #ifdef DEBUG_CONSISE
@@ -234,7 +198,7 @@ int main(int argc, char *argv[])
    #endif
    /** Read in the coverage grid **/
    RealArray lats, lons;
-   readCovGridFile(covGridFp, lats, lons);  
+   oci_utils::readCovGridFile(covGridFp, lats, lons);  
    PointGroup               *pGroup = new PointGroup();
    pGroup->AddUserDefinedPoints(lats, lons);
    Integer numGridPoints = lats.size();
@@ -374,7 +338,7 @@ int main(int argc, char *argv[])
 
       // Satellite state file initialization
       ofstream satOut; 
-      satOut.open((satStateFn).c_str(),ios::binary | ios::out);
+      satOut.open((satStateFp).c_str(),ios::binary | ios::out);
       satOut << "Satellite states are in Earth-Centered-Inertial equatorial-plane frame.\n";
       satOut << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satOut << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
@@ -383,7 +347,7 @@ int main(int argc, char *argv[])
 
       // Keplerian elements as state output
       ofstream satOutKep; 
-      satOutKep.open((satStateFn+"_Keplerian").c_str(),ios::binary | ios::out);
+      satOutKep.open((satStateFp+"_Keplerian").c_str(),ios::binary | ios::out);
       satOutKep << "Satellite states as Keplerian elements.\n";
       satOutKep << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satOutKep << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";
@@ -393,7 +357,7 @@ int main(int argc, char *argv[])
       // Write the access file in matrix format with rows as the time and columns as ground-points. 
       // Each entry in a cell of the matrix corresponds to 0 (No Access) or 1 (Access).
       ofstream satAcc; 
-      satAcc.open(satAccFn.c_str(),ios::binary | ios::out);
+      satAcc.open(satAccFp.c_str(),ios::binary | ios::out);
       satAcc << "Satellite states are in Earth-Centered-Inertial equatorial-plane frame.\n";
       satAcc << "Epoch[JDUT1] is "<< std::fixed << std::setprecision(prc) << startDate <<"\n";
       satAcc << "Step size [s] is "<< std::fixed << std::setprecision(prc) << stepSize <<"\n";

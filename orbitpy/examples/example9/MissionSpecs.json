@@ -8,7 +8,7 @@
         "relativeSpacing":1,
         "inc":98.5,
         "alt": 710,
-        "ecc": 0.0001,
+        "ecc": 0.0000,
         "aop": 0
     }, 
     "instrument":    [{        
@@ -33,13 +33,13 @@
     }]
     ,
     "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
     },   
     "grid":{
         "@type": "customGrid",
-        "covGridFn": "covGrid"
+        "covGridFileName": "covGrid"
     },
-    "settings":{
+    "propagator":{
         "customTimeStep": 1               
     }
 }

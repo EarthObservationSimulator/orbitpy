@@ -1,0 +1,106 @@
+{
+    "epoch": "2018, 1, 15, 12, 0, 0",
+    "duration": 0.025,
+    "constellation":{
+        "@type": "Walkerdelta",
+        "numberSatellites": 1,
+        "numberPlanes": 1,
+        "relativeSpacing":1,
+        "inc":56,
+        "alt": 500,
+        "ecc": 0.0001,
+        "aop": 0
+    },       
+    "instrument": [{ "@type": "Basic Sensor",
+                     "@id": "pay1",  
+                     "mass": 28, 
+                     "volume": 0.12, 
+                     "power": 32, 
+                     "bitsPerPixel": 8, 
+                     "fieldOfView": {
+                         "sensorGeometry": "RECTANGULAR",
+                         "alongTrackFieldOfView":40,
+                         "crossTrackFieldOfView":40
+                     },
+                     "orientation": {
+                     "convention": "SIDE_LOOK",
+                     "sideLookAngle":0
+                    }       
+                    },
+                    {
+                        "@type": "Synthetic Aperture Radar",
+                        "name": "Seasat-A",  
+                        "@id": "pay2",
+                        "mass": 243, 
+                        "volume": 2.5, 
+                        "power": 500, 
+                        "orientation": {
+                            "convention": "SIDE_LOOK",
+                            "sideLookAngle": 20.5
+                        },
+                        "dataRate": 110,
+                        "pulseWidth": 33.4e-6,
+                        "antennaAlongTrackDim": 10.7,
+                        "antennaCrossTrackDim": 2.16, 
+                        "antennaApertureEfficiency": 0.6, 
+                        "operatingFrequency": 1.2757e9, 
+                        "peakTransmitPower": 1000, 
+                        "chirpBandwidth": 19e6,      
+                        "minimumPRF": 1463, 
+                        "maximumPRF": 1640, 
+                        "radarLosses": 3.5, 
+                        "sceneNoiseTemp": 290, 
+                        "altitude": 800,
+                        "bitsPerPixel": 5, 
+                        "systemNoiseFigure": 5.11,
+                        "sigmaNESZthreshold": -10, 
+                        "numStripsInScene":14392,
+                        "_references":  ["The Seasat-A Synthetic Aperture Radar System, Rolando L.Jordan 1980",
+                                 "Spaceborne SAR Study: LDRD ’92 Final Report",
+                                 "https://directory.eoportal.org/web/eoportal/satellite-missions/s/seasat"
+                                ]  
+                    } 
+              
+                    ],
+    "pointingOptions":[
+        {
+        "instrumentID": "pay2",
+        "referenceFrame": "NadirRefFrame",
+        "pntOptsFileName":"pOpts_pay2"              
+        },
+        {
+            "instrumentID": "pay1",
+            "referenceFrame": "NadirRefFrame",
+            "pntOptsFileName":"pOpts_pay1"              
+        }
+    ],
+    "grid":{
+        "@type": "autoGrid",
+        "regions":[{
+            "@id":1,
+            "latUpper":40,
+            "latLower":5,
+            "lonUpper":100,
+            "lonLower":65                
+        },
+        {
+            "@id":2,
+            "latUpper":56,
+            "latLower":46,
+            "lonUpper":15,
+            "lonLower":6
+        },
+        {
+            "@id":3,
+            "latUpper":50,
+            "latLower":30,
+            "lonUpper":150,
+            "lonLower":125
+        }
+        ],
+        "customGridRes": 1
+    },
+    "propagator":{
+        "customTimeStep": 1                         
+    }
+}

@@ -253,16 +253,22 @@ The ground point access capabilities of OrbitPy's :class:`orbitpy.orbitpropcov.O
 
 STK settings were matched to OrbitPy wherever possible. STK uses a variable time step for access calculations, so OrbitPy's one second time step wasn't matched exactly. Rather than reporting a binary access value for each grid point at each timestep, like OrbitPy does, STK simply outputs the access intervals for each grid point; the STK output was converted to OrbitPy's format for comparison.
 
-STK uses a different default coordinate frame definition for its sensors. Like in OrbitPy, the Z axis can be set to nadir alligned with the ECF velocity constraint. However, the X axis is alligned with the satellite's velocity vector, wherease in OrbitPy, the Y axis takes this position. In this report, orientations will be described using an intrinsic 213 Euler sequence in OrbitPy's sensor coordinate frame. The equivalent orientations were used in STK after performing a coordinate transformation.
+STK uses a different default coordinate frame definition for its sensors. Like in OrbitPy, the Z axis can be set to nadir alligned with the ECF velocity constraint. 
+However, the X axis is alligned with the satellite's velocity vector, wherease in OrbitPy, the Y axis takes this position. 
+This was taken into consideration and an intrinsic 213 Euler sequence was applied in OrbitPy's sensor coordinate frame to match with the (default) STK coordinate frame. 
 
-The results of each of the 12 scenarios tested were evaluated against STK according to the following four metrics:
+The results of each of the 12 scenarios (described below) tested were evaluated against STK according to the following four metrics:
 
 1.  Total number of grid points accessed.
-2.  Cumulative access time, summed accross all grid points.
-3.  Average number of grid points accessed per one-second time step.
-4.  Cumulative access time per grid point, averaged accross grid points accessed by both softwares.
+2.  Cumulative access time, summed across all grid points.
+3.  Average number of grid points accessed per propagation time step (1 second).
+4.  Cumulative access time per grid point, averaged across grid points accessed by both softwares.
 
-The absolute value of the percent difference in these metrics was compared for each test case. The algorithm used for access calculations is not made available in the STK documentation; these test cases are comparing two different models, without much prior understanding of any modelling differences present. For this reason, it was difficult to pin down an 'expected' or 'acceptable' bound for deviation in the results before running the test cases. The following bounds for passing each metric were decided after examination of the results.
+The absolute value of the percent difference in these metrics was compared for each test case. The algorithm used for access calculations 
+is not made available in the STK documentation; these test cases are comparing possibly two different coverage algorithms, without much prior 
+understanding of any algorithm differences present. For this reason, it was difficult to pin down an 'expected' or 'acceptable'
+bound for deviation in the results before running the test cases. 
+The following bounds for passing each metric were decided after examination of the results.
 
 1.  10%
 2.  5%
@@ -274,13 +280,13 @@ The STK scenario file used to produce these tests can be found at :code:`tests/v
 STK Coverage Tests: Inputs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The test cases were generated using combinations of the following inputs.
+The 12 test cases were generated using combinations of the following inputs.
 
 **Coverage Grids:**
 
-1.  A 3 degree spaced grid, spanning 3 degrees above and 3 degrees below the equator.
-2.  A 10 degree spaced grid, covering the entire globe.
-3.  A 1 degree spaced grid, covering the continental United States.
+1.  A 3 degree resolution grid, spanning lat=-3 to +3 degrees, lon = -180 to 180 degrees.
+2.  A 10 degree resolution grid, covering the entire globe.
+3.  A 1 degree resolution grid, covering the continental United States.
 
 **Orbits:**
 
@@ -317,15 +323,16 @@ The test cases were generated using combinations of the following inputs.
 
 **Sensors:**
 
-1.  A 10 degree conical sensor.
+1.  A 10 degree (fullcone angle) conical sensor.
 2.  A 10 degree along track, 15 degree across track rectangular sensor.
 3.  A 15 degree along track, 10 degree across track rectangular sensor.
 
 **Orientations:**
+213 (order = first Y, then X, then Z) Euler (instrinsic) rotations in degrees. 
 
-1.  (0,0,0)
-2.  (30,24,-6)
-3.  (-30,-25,5)
+1.  (Y = 0, X = 0, Z = 0)
+2.  (Y = 30, X = 24, Z = -6), instrinsic, 
+3.  (Y = -30, X = -25, Z = 5)
 
 
 .. list-table:: **Test Combinations**
@@ -422,7 +429,7 @@ The results of all of the test cases across each metric is shown in the table be
      - 10
      - 11
      - 12
-   * - Metric 1
+   * - Metric 1 [%]
      - 0
      - 0
      - 1.13
@@ -435,7 +442,7 @@ The results of all of the test cases across each metric is shown in the table be
      - 8.28
      - .351
      - .304
-   * - Metric 2
+   * - Metric 2 [%]
      - 3.26
      - 2.73
      - 4.82
@@ -448,7 +455,7 @@ The results of all of the test cases across each metric is shown in the table be
      - 1.47
      - .448
      - 2.38
-   * - Metric 3
+   * - Metric 3 [%]
      - 0
      - 0
      - 0
@@ -461,7 +468,7 @@ The results of all of the test cases across each metric is shown in the table be
      - 2.20
      - 1.15
      - 1.23
-   * - Metric 4
+   * - Metric 4 [%]
      - 3.26
      - 2.73
      - 4.83
@@ -478,7 +485,7 @@ The results of all of the test cases across each metric is shown in the table be
 
 Visual inspection of the test case results shows excellent agreement between OrbitPy and STK coverage. In this section, the most divergent results (highest percent difference) across each metric will be analyzed.
 
-For metric 1, test case 10 showed the highest percent difference at 8.28 percent. Test case 10 propagated a sun-synchronous orbit over a US grid, with a nadir-pointing rectangular sensor. The STK and OrbitPy results are shown below.
+For metric 1 (total number of grid points accessed), test case 10 showed the highest percent difference at 8.28 percent. Test case 10 propagated a sun-synchronous orbit over a continental US grid, with a nadir-pointing rectangular sensor. The STK and OrbitPy results are shown below.
 
 .. figure:: ./plots/OP_Acc_10.png
 	:scale: 75%
@@ -488,7 +495,7 @@ For metric 1, test case 10 showed the highest percent difference at 8.28 percent
 	:scale: 75%
 	:align: center
 	
-For metric 2, test case 3 showed the highest percent difference at 4.82 percent. Test case 3 propagated a near-equatorial orbit over a global grid with a nadir-pointing conical sensor. STK and OrbitPy results are shown below.
+For metric 2 (cumulative access time, summed across all grid points.), test case 3 showed the highest percent difference at 4.82 percent. Test case 3 propagated a near-equatorial orbit over a global grid with a nadir-pointing conical sensor. STK and OrbitPy results are shown below.
 
 .. figure:: ./plots/OP_Acc_3.png
 	:scale: 75%
@@ -498,7 +505,7 @@ For metric 2, test case 3 showed the highest percent difference at 4.82 percent.
 	:scale: 75%
 	:align: center
 	
-For metric 3, test case 4 showed the highest percent difference at 3.79 percent. Test case 4 propagated a polar orbit over a US grid with a nadir-pointing rectangular sensor. STK and OrbitPy results are shown below.
+For metric 3 (average number of grid points accessed per propagation time step (1 second)), test case 4 showed the highest percent difference at 3.79 percent. Test case 4 propagated a polar orbit over continental US grid with a nadir-pointing rectangular sensor. STK and OrbitPy results are shown below.
 
 .. figure:: ./plots/OP_Acc_4.png
 	:scale: 75%
@@ -508,7 +515,8 @@ For metric 3, test case 4 showed the highest percent difference at 3.79 percent.
 	:scale: 75%
 	:align: center
 
-For metric 4, test case 12 showed the highest percent difference at 25.6 percent. Test case 12 propagated a sun-synchronous orbit over a US grid with a pointed rectangular sensor. STK and OrbitPy results are shown below.
+For metric 4 (cumulative access time per grid point, averaged across grid points accessed by both softwares), test case 12 showed the highest percent difference at 25.6 percent. Test case 12 propagated a sun-synchronous orbit over continental US grid with a pointed rectangular sensor. STK and OrbitPy results are shown below.
+Please note that the color coding is confusing.
 
 .. figure:: ./plots/OP_Acc_12.png
 	:scale: 75%

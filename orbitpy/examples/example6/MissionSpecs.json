@@ -29,14 +29,14 @@
     }]
     ,
     "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
     },   
     "pointingOptions":[{
         "instrumentID": "sen1",
         "referenceFrame": "NadirRefFrame",
-        "pntOptsFn":"pOpts"              
+        "pntOptsFileName":"pOpts"              
     }],
-    "settings":{
+    "propagator":{
         "customTimeResFactor": 0.5                          
     }
 }

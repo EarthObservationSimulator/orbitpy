@@ -8,14 +8,16 @@
 import json
 from enum import Enum
 from numbers import Number
-import numpy
+import numpy as np
 import math
 from instrupy.util import *
 
 class CoverageCalculationsApproach(EnumEntity):
     """ Enumeration of recognized approaches to calculation coverage."""
+    PNTOPTS_WITH_GRIDPNTS = "PNTOPTS_WITH_GRIDPNTS"
     GRIDPNTS = "GRIDPNTS"
     PNTOPTS = "PNTOPTS"
+    SKIP = "SKIP"
 class PropagationCoverageParameters():
     """ Data structure holding propagation and coverage parameters.
     
@@ -81,12 +83,18 @@ class PropagationCoverageParameters():
 
     :ivar cov_calcs_app: Coverage caclulations approach
     :vartype cov_calcs_app: str
+
+    :ivar do_prop: Flag indicating if propagation calculation is to be performed.
+    :vartype do_prop: bool
+
+    :ivar do_cov: Flag indicating if coverage calculation is to be performed.
+    :vartype do_cov: bool
     
     """
     def __init__(self, sat_id=str(), epoch=str(), sma=float(), ecc=float(), inc=float(), raan=float(), aop=float(), ta=float(), 
                  duration=float(), cov_grid_fl=str(), sen_fov_geom=str(), sen_orien=str(), sen_clock=str(), 
                  sen_cone=str(), purely_sidelook = bool(), yaw180_flag = int(), step_size=float(), sat_state_fl=str(), 
-                 sat_acc_fl=str(), popts_fl=str(), cov_calcs_app = str()):
+                 sat_acc_fl=str(), popts_fl=str(), cov_calcs_app = str(), do_prop=bool(), do_cov=bool()):
         self.sat_id = str(sat_id)
         self.epoch = str(epoch) 
         self.sma = float(sma) 
@@ -98,20 +106,67 @@ class PropagationCoverageParameters():
         self.duration = float(duration) 
         self.cov_grid_fl = str(cov_grid_fl) if cov_grid_fl else None
         self.popts_fl = str(popts_fl) if popts_fl else None 
-        self.sen_fov_geom = str(sen_fov_geom) 
-        self.sen_orien = str(sen_orien) 
-        self.sen_clock = str(sen_clock) 
-        self.sen_cone = str(sen_cone) 
-        self.purely_sidelook = bool(purely_sidelook) 
-        self.yaw180_flag = int(yaw180_flag) 
+        self.sen_fov_geom = str(sen_fov_geom) if sen_fov_geom else None
+        self.sen_orien = str(sen_orien) if sen_orien else None
+        self.sen_clock = str(sen_clock) if sen_clock else None
+        self.sen_cone = str(sen_cone) if sen_cone else None
+        self.purely_sidelook = bool(purely_sidelook) if purely_sidelook else None
+        self.yaw180_flag = int(yaw180_flag) if yaw180_flag is not None else None
         self.step_size = float(step_size) 
         self.sat_state_fl = str(sat_state_fl) 
-        self.sat_acc_fl = str(sat_acc_fl) 
+        self.sat_acc_fl = str(sat_acc_fl) if sat_acc_fl else None
         self.cov_calcs_app = CoverageCalculationsApproach.get(cov_calcs_app) 
+        self.do_prop = bool(do_prop) if do_prop is not None else True
+        self.do_cov = bool(do_cov) if do_cov is not None else True
 
 class OrbitPyDefaults(object):
     """ Enumeration of various default values used by package **OrbitPy**.
     """
     grid_res_fac = 0.9
     time_res_fac = 0.25
+    
+class Satellite():
+    """ Data structure holding attributes of a Satellite. Note the implicit relation that the :code:`ics_fov`
+        and :code:`ics_for` lists are linkes. I.e. :code:`ics_fov[0]` and :code:`ics_for[0]` refer to the FOV 
+        and FOR of the first instrument on the satellite, and so on. 
+    
+    :ivar orbit: Orbital parameters of the satellite. 
+    :vartype orbit: :class:`orbitpy.preprocess.OrbitParameters` 
 
+    :ivar instru: List of Instruments
+    :vartype instru: :class:`instrupy.public_library.Instrument` 
+
+    :ivar dir_pth: Directory path which contains file relevant to the satellite
+    :vartype dir_pth: str
+
+    """ 
+    def __init__(self, orbit = None, instru =None, dir_pth=None):
+
+        self.orbit = orbit if orbit is not None else None
+        self.instru = instru if instru is not None else None
+        self.dir_pth =  dir_pth if dir_pth is not None else None
+
+
+def calculate_inclination_circular_SSO(altitude_km):
+    # circular SSO with fixed altitude specified, 
+    e = 0
+    Re = Constants.radiusOfEarthInKM 
+    sma = Re + altitude_km
+    J2  = 0.0010826269      # Second zonal gravity harmonic of the Earth
+    we = 1.99106e-7    # Mean motion of the Earth in its orbit around the Sun [rad/s]
+    mu    = 398600.440      # Earth’s gravitational parameter [km^3/s^2]
+    n = np.sqrt(mu/(sma**3)) # Mean motion [s-1]
+    h = sma*(1 - e**2)    # note that here h is *NOT* the altitude!!
+
+    tol = 1e-10         # Error tolerance
+    # Initial guess for the orbital inclination
+    i0 = 180/np.pi*np.arccos(-2/3*(h/Re )**2*we/(n*J2))
+    print(i0)
+    err = 1e1
+    while(err >= tol):
+        # J2 perturbed mean motion
+        _np  = n*(1 + (1.5*J2*(Re/h))**2*np.sqrt(1 - e**2)*(1 - (3/2*np.sin(np.deg2rad(i0))**2)))
+        i = 180/np.pi*(np.arccos(-2/3*((h/Re)**2)*we/(_np*J2)))
+        err = abs(i - i0)
+        i0 = i
+    return i

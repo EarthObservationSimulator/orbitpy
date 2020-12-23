@@ -73,7 +73,7 @@ void add_grid_points_in_region(const int regionID, const Real gridRes_deg, const
  * 
  * .. code-block:: bash
 
-      /../examples/example1/covGrid 0,-22.16,-24.04,133.75,131.62,100
+      /../examples/example1/covGrid 0,-22.16,-24.04,133.75,131.62,1
  *
  */
 int main(int argc, char *argv[])

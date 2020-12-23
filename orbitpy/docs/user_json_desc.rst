@@ -16,7 +16,7 @@ User JSON Input Description
    groundStations, :ref:`groundstations_json_object`, ,Ground station specifications.
    grid, :ref:`grid_json_object`, ,Coverage grid specifications. 
    pointingOptions, :ref:`popts_json_object`, ,Set of pointing options. 
-   settings, :ref:`settings_json_object`, ,Settings
+   propagator, :ref:`propagator_json_object`, ,Propagator related items.
 
 *Note that either :code:`grid` OR the :code:`pointingOptions` JSON object is to be defined, corresponding to grid-based coverage calculations
 or pointing-options based coverage caclulations.*
@@ -166,8 +166,50 @@ Example:
 :code:`groundStations` JSON object
 ####################################
 
-The ground station data can be specifed by specifying the name of the CSV file with the ground station data. The file has to be
-present in the user directory. An example of the data file (name: *groundStations*) is given below. The column headers 
+The ground station data can be specifed in two ways: 
+
+1. :code:`stationInfo` JSON object
+
+Within the :code:`stationInfo` JSOn field, a *list* of ground-stations can be specifyed. The required parameters for each region are:
+
+.. csv-table:: Expected parameters
+   :header: Parameter, Data type, Units, Description
+   :widths: 10,10,5,40
+
+   @id, str, ,Unique ground-station identifier
+   name, str, degrees, (Optional) name of the ground-station
+   lat, float, degrees, Latitude
+   lon,float, degrees, Longitude
+   alt,float, km, (Optional) Altitude. Default is 0km.
+   minElevation, float, degrees, Minimum elevation beyond which the ground-station cane see the satellite.
+
+.. code-block:: javascript
+   
+   "groundStations":{
+        "stationInfo":[
+            { "@id": "gs1",
+              "name": "Tacos",
+              "lat": 1,
+              "lon": 1.5,
+              "alt": 0,
+              "minElevation": 7
+            },
+            { "@id": "gs2",
+                "name": "Hilly",
+                "lat": 89,
+                "lon": -10,
+                "alt": 20,
+                "minElevation": 7
+            }
+        ]
+    }
+
+2. :code:`gndStnFileName` or :code:`gndStnFilePath`
+
+By means of a data file containing the ground station info. In case the 
+:code:`gndStnFileName` key, value pair is specified, the file has to be present in the user directory. Otherwise a :code:`gndStnFilePath`
+key, value pair may be used to give the complete path to the data-file.
+An example of the data file (name: *groundStations*) is given below. The column headers 
 need to be as indicated.
 
 Example:
@@ -175,7 +217,13 @@ Example:
 .. code-block:: javascript
    
    "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
+    }
+
+.. code-block:: javascript
+   
+   "groundStations":{
+        "gndStnFilePath":"C:\workspace\groundStations"
     }
 
 .. csv-table:: Example of the ground station data file.
@@ -184,6 +232,9 @@ Example:
 
    1,Svalbard,78.23,15.40,0,0
    2,TrollSat,-72.01,2.53,10,5
+
+
+
 
 .. _grid_json_object:
 
@@ -218,7 +269,6 @@ the generated grid.
    customGridRes, float, degrees, (Optional) Grid resolution. A warning is issued if the internal computed grid resolution is coarser than the user specified grid resolution. 
    customGridResFactor, float, , (Optional) Custom grid-resolution factor used to determine the grid-resolution. (Default value is 0.9.)
 
-
 Example:
 
 .. code-block:: javascript
@@ -245,8 +295,9 @@ Example:
 
 2. :code:`"@type":"customGrid"` option
 
-In this option the user supplies the grid points in a data file. The file has to be present in the user directory and
-the name can needs to be supplied in the :code:`covGridFn` key, value pair.
+In this option the user supplies the grid points in a data file. If the :code:`covGridFileName` key, value pair is used, 
+the file has to be present in the user directory. 
+If the :code:`covGridFilePath` key, value pair is used, the entire path to the file needs to be supplied.
 
 Example:
 
@@ -254,7 +305,14 @@ Example:
   
    "grid":{
         "@type": "customGrid",
-        "covGridFn": "covGridUSA"
+        "covGridFileName": "covGridUSA"
+    }
+
+.. code-block:: javascript
+  
+   "grid":{
+        "@type": "customGrid",
+        "covGridFilePath": "C:\workspace\covGridUSA.csv"
     }
 
 The datafile needs to be of CSV format as indicated in the example below. *regi* is the region index, *gpi* is the grid point index,
@@ -291,14 +349,16 @@ field having a format as follows:
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
-   instrumentID, str, , The instrument identifier to which the corresponding pointing-options data-file is to be used.
+   instrumentID, str, , The instrument identifier to which the corresponding pointing-options data-file is to be used. Multiple IDs separated by commas are allowed.
    referenceFrame, str, , Currently only the :code:`NadirRefFrame` is supported.
-   pntOptsFn, str, , Name of the data-file containing the set of pointing options. This file has to be present in the user-directory.
+   pntOptsFileName, str, , Name of the data-file containing the set of pointing options. This file has to be present in the user-directory.
+   pntOptsFilePath, str, , Path to the data-file containing the set of pointing options. (Specify :code:`pntOptsFilePath` **or** :code:`pntOptsFileName`) 
 
 .. warning:: In the case when the pointing-options approach is used for coverage calculations, the instrument identifier becomes a
              compulsory attribute of the :code:`Instrument` JSON field, since it is needed to reference the pointing-options files.
 
-.. warning:: The name of the data-file containing the pointing-options should not have any whitespaces.
+.. warning:: The name of the data-file containing the pointing-options should not have any whitespaces. The pointing-otions indicated in the file 
+             are strictly indexed from *0* onwards. 
 
 Example:
 
@@ -308,12 +368,12 @@ Example:
        {
        "instrumentID": "sen1",
        "referenceFrame": "NadirRefFrame",
-       "pntOptsFn":"pOpts_sen1"              
+       "pntOptsFileName":"pOpts_sen1"              
        },
        {
        "instrumentID": "sen2",
        "referenceFrame": "NadirRefFrame",
-       "pntOptsFn":"sen2_pOpts"              
+       "pntOptsFilePath":"C:\workspace\sen2_pOpts"              
        },
     ],
 
@@ -327,12 +387,12 @@ Example of the data-file:
     1,0,20,0
     2,0,-20,0
 
-.. _settings_json_object:
+.. _propagator_json_object:
 
-:code:`settings` JSON object
+:code:`propagator` JSON object
 ####################################
 
-This JSON object contains items which can be used to configure some of the orbit propagation and coverage parameters. 
+This JSON object contains items relating to the propagator. 
 
 .. csv-table:: Expected parameters
    :header: Parameter, Data type, Units, Description

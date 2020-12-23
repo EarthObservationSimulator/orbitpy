@@ -43,20 +43,20 @@
                     }
                     ],
     "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
     },   
     "pointingOptions":[
         {
         "instrumentID": "pay2",
         "referenceFrame": "NadirRefFrame",
-        "pntOptsFn":"pOpts_pay2"              
+        "pntOptsFileName":"pOpts_pay2"              
         },
         {
             "instrumentID": "pay1",
             "referenceFrame": "NadirRefFrame",
-            "pntOptsFn":"pOpts_pay1"              
+            "pntOptsFileName":"pOpts_pay1"              
         }],
-    "settings":{
+    "propagator":{
         "customTimeResFactor": 1                         
     }
 }

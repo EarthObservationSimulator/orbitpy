@@ -223,6 +223,18 @@ CoverageChecker::~CoverageChecker()
 }
 
 
+IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
+                                                 Real           theTime, 
+                                                 const Rvector6 &cartState)   
+{
+   const Integer numPts = pointGroup->GetNumPoints();
+   IntegerArray PointIndices;
+   for(int i=0; i < numPts; i++) // Coverage calculation done for all points in PointGroup object
+   {
+      PointIndices.push_back(i);
+   }
+   return CoverageChecker::CheckPointCoverage(theState, theTime, cartState, PointIndices);
+}
 //------------------------------------------------------------------------------
 // IntegerArray CheckPointCoverage(const Rvector6 &theState,
 //                                 Real           theTime,
@@ -237,7 +249,8 @@ CoverageChecker::~CoverageChecker()
 //------------------------------------------------------------------------------
 IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
                                                  Real           theTime, 
-                                                 const Rvector6 &cartState)   
+                                                 const Rvector6 &cartState,
+                                                 const IntegerArray &PointIndices)   
 {
    #ifdef DEBUG_COV_CHECK
       MessageInterface::ShowMessage("In CoverageChecker::CheckPointCoverage\n");
@@ -259,8 +272,8 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
                                      centralBodyFixedState[5]);
 
    Rvector3 rangeVector;
-   Integer  numPts = pointGroup->GetNumPoints();
-   
+   Integer  numPts = PointIndices.size();
+    
    #ifdef DEBUG_COV_CHECK
       MessageInterface::ShowMessage(" --- numPoints from pointGroup = %d\n",
                                      numPts);
@@ -268,22 +281,22 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
    #endif
    
    CheckGridFeasibility(centralBodyFixedPos);
-   for ( Integer pointIdx = 0; pointIdx < numPts; pointIdx++)
+   for ( Integer k = 0; k < numPts; k++)
    {
       // Simple line of site test for each point
 //      if (CheckGridFeasibility(pointIdx, centralBodyFixedPos)) // this is slower
-      if (feasibilityTest.at(pointIdx)) //  > 0)
+      if (feasibilityTest.at(PointIndices[k])) //  > 0)
       {
          #ifdef DEBUG_COV_CHECK
             MessageInterface::ShowMessage(
                               " --- feasibilty at point %d is TRUE!\n",
-                              pointIdx);
+                              PointIndices[k]);
          #endif
 
          Integer  sensorNum = 0; // 1; // Currently only works for one sensor!!
 
          bool     inView    = false;
-         Rvector3 pointLocation = (*pointArray.at(pointIdx)) *
+         Rvector3 pointLocation = (*pointArray.at(PointIndices[k])) *
                                    centralBody->GetRadius();
          Rvector3 satToTargetVec = pointLocation - centralBodyFixedPos;
 
@@ -303,9 +316,10 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
          else
          {
             // No sensor, just perform horizon test
+            // Vinay: Doubtful of the below code. 
             rangeVector              = -satToTargetVec;
             Real rangeMag            = rangeVector.GetMagnitude();
-            Real bodyFixedMag        = centralBodyFixedState.GetMagnitude();
+            Real bodyFixedMag        = centralBodyFixedPos.GetMagnitude(); // Vinay: previously => centralBodyFixedState.GetMagnitude();
             Real cosineOffNadirAngle = rangeVector * centralBodyFixedPos /
                                        rangeMag / bodyFixedMag;
             Real offNadirAngle       = GmatMathUtil::ACos(cosineOffNadirAngle);
@@ -339,10 +353,10 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
          #endif
          if (inView)
          {
-            result.push_back(pointIdx);   // covCount'th entry
+            result.push_back(PointIndices[k]);   // covCount'th entry
             covCount++;
-            numEventsPerPoint.at(pointIdx) = numEventsPerPoint.at(pointIdx) + 1;
-            timeSeriesData.at(pointIdx).push_back(timeIdx);
+            numEventsPerPoint.at(PointIndices[k]) = numEventsPerPoint.at(PointIndices[k]) + 1;
+            timeSeriesData.at(PointIndices[k]).push_back(timeIdx);
             if (computePOIGeometryData)
             {
 
@@ -350,7 +364,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
                // w/r/t coverage point
                Real lat;
                Real lon;
-               pointGroup->GetLatAndLon(pointIdx,lat,lon);
+               pointGroup->GetLatAndLon(PointIndices[k],lat,lon);
                Rvector3 topoRangeVec =
                      centralBody->FixedToTopocentric(-satToTargetVec, lat, lon);
                Real xLocal = topoRangeVec[0];
@@ -390,7 +404,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
                VisiblePOIReport visReport;
                visReport.SetEndDate(aDate);
                visReport.SetStartDate(aDate);
-               visReport.SetPOIIndex(pointIdx);
+               visReport.SetPOIIndex(PointIndices[k]);
                visReport.SetObsRange(obsRange);
                visReport.SetObsAzimuth(obsAzimuthAngle );
                visReport.SetObsZenith(obsZenithAngle);
@@ -400,7 +414,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
                Rvector3 inertialVel   = cartState.GetV();
                visReport.SetObsPosInertial(inertialPos);
                visReport.SetObsVelInertial(inertialVel);
-               discreteEventData[pointIdx].push_back(visReport);
+               discreteEventData[PointIndices[k]].push_back(visReport);
             }
             #ifdef DEBUG_COV_CHECK
                MessageInterface::ShowMessage(
@@ -469,6 +483,30 @@ IntegerArray CoverageChecker::AccumulateCoverageDataAtPreviousTimeIndex()
 // IntegerArray AccumulateCoverageData()
 //------------------------------------------------------------------------------
 /**
+ * Check point coverage at the current date and spacecraft state. Author: Vinay
+ *
+ * @param PointIndices: Indices of the points (of the respective PointGroup object)
+ *                      to be considered for coverage.
+ * 
+ * @return  array of indexes
+ *
+ */
+//------------------------------------------------------------------------------
+IntegerArray CoverageChecker::CheckPointCoverage(IntegerArray PointIndices)
+{
+   // Accumulates coverage data after propagation update
+   // Get the state and date here
+   Real     theDate   = sc->GetJulianDate();
+   Rvector6 cartState = sc->GetCartesianState();
+   Rvector6 theState  = GetEarthFixedSatState(theDate, cartState);
+   return CheckPointCoverage(theState, theDate, cartState, PointIndices);
+
+}
+
+//------------------------------------------------------------------------------
+// IntegerArray AccumulateCoverageData()
+//------------------------------------------------------------------------------
+/**
  * Check point coverage at the current date and spacecraft state.
  *
  * @return  array of indexes
@@ -477,12 +515,13 @@ IntegerArray CoverageChecker::AccumulateCoverageDataAtPreviousTimeIndex()
 //------------------------------------------------------------------------------
 IntegerArray CoverageChecker::CheckPointCoverage()
 {
-   // Accumulates coverage data after propagation update
-   // Get the state and date here
-   Real     theDate   = sc->GetJulianDate();
-   Rvector6 cartState = sc->GetCartesianState();
-   Rvector6 theState  = GetEarthFixedSatState(theDate, cartState);
-   return CheckPointCoverage(theState, theDate, cartState);
+   const Integer numPts = pointGroup->GetNumPoints();
+   IntegerArray PointIndices;
+   for(int i=0; i < numPts; i++) // Coverage calculation done for all points in PointGroup object
+   {
+      PointIndices.push_back(i);
+   }
+   return CoverageChecker::CheckPointCoverage(PointIndices);
 }
 
 //------------------------------------------------------------------------------

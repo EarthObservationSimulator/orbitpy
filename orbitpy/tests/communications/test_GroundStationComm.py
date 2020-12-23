@@ -52,6 +52,8 @@ class TestGroundStationComm(unittest.TestCase):
                         step_size = 0.1+random.random(), 
                         sat_state_fl = dir_path+"/temp/state", 
                         sat_acc_fl = dir_path+"/temp/access", 
+                        do_prop=True,
+                        do_cov=True,
                         cov_calcs_app= CoverageCalculationsApproach.GRIDPNTS)
 
 
@@ -133,6 +135,9 @@ class TestGroundStationComm(unittest.TestCase):
         gsc = GroundStationComm([dir_path+"/temp/sat11/",
                                  dir_path+"/temp/sat21/",
                                  dir_path+"/temp/sat31/" ], 
+                                 [dir_path+"/temp/sat11/state",
+                                 dir_path+"/temp/sat21/state",
+                                 dir_path+"/temp/sat31/state" ],
                                  dir_path + "/temp/groundStations")
         gsc.compute_all_contacts()
 
@@ -213,7 +218,7 @@ class TestGroundStationComm(unittest.TestCase):
 
         TestGroundStationComm.produce_gndstn_data(self, 0)
 
-        gsc = GroundStationComm([dir_path+"/temp/sat1/"], dir_path + "/temp/groundStations")
+        gsc = GroundStationComm([dir_path+"/temp/sat1/"],[dir_path+"/temp/sat1/state"], dir_path + "/temp/groundStations")
         gsc.compute_all_contacts()
 
         # check that the ground-stations contact at the middle of the contact intervals are also

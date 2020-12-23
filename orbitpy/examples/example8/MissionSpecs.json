@@ -1,16 +1,6 @@
 {
     "epoch": "2018, 1, 15, 12, 0, 0",
     "duration": 0.1,
-    "constellation":{
-        "@type": "Walkerdelta",
-        "numberSatellites": 3,
-        "numberPlanes": 3,
-        "relativeSpacing":1,
-        "inc":56,
-        "alt": 700,
-        "ecc": 0.0001,
-        "aop": 0
-    }, 
     "satellite":    [{
         "orbit": { "@id": 1,
                    "sma": 6878.137,
@@ -75,23 +65,32 @@
                         }
                        ]
 
+        },
+        {  
+            "orbit": { "@id": 3,
+                       "sma": 6878.137,
+                       "ecc": 0.2,
+                       "inc": 96.67657116,
+                       "raan": 60,
+                       "aop": 0,
+                       "ta": 30}
         }
     ],
     "groundStations":{
-        "gndStnFn":"groundStations"
+        "gndStnFileName":"groundStations"
     },   
     "pointingOptions":[{
         "instrumentID": "pay1_1, pay1_2",
         "referenceFrame": "NadirRefFrame",
-        "pntOptsFn":"pOpts"              
+        "pntOptsFileName":"pOpts"              
     },
     {
         "instrumentID": "pay2_1",
         "referenceFrame": "NadirRefFrame",
-        "pntOptsFn":"pOpts"              
+        "pntOptsFileName":"pOpts"              
     }
     ],
-    "settings":{
+    "propagator":{
         "customTimeResFactor": 1                         
     }
 }
