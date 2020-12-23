@@ -30,6 +30,7 @@
 
 using namespace GmatMathUtil; // for trig functions, and
                               // temporarily square root fn
+Real PI = GmatMathConstants::PI;
 
 
 //------------------------------------------------------------------------------
@@ -61,6 +62,9 @@ RectangularSensor::RectangularSensor(Real angleWidthIn, Real angleHeightIn) :
    // angular equivalent of length of hypotenuse of triangle for computing
    // length of a rectangle's diagonal from origin to (height, width)
    maxExcursionAngle = ACos( Cos(angleHeight)*Cos(angleWidth) );
+   std::vector<Real> clocks = getClockAngles();
+   std::vector<Rvector3> corners = getCornerHeadings(clocks);
+   poles = getPoleHeadings(corners);
 }
 
 //------------------------------------------------------------------------------
@@ -126,15 +130,19 @@ RectangularSensor::~RectangularSensor()
 bool RectangularSensor::CheckTargetVisibility(Real viewConeAngle,
                                               Real viewClockAngle)
 {
-   bool retVal = true;
-   // using <= assures that 0 width, 0 height FOV never has point in FOV
-   // if you want (0.0,0.0) to always be in FOV change to strict inequalities
-   if ((viewConeAngle  >= angleHeight) || (viewConeAngle  <= -angleHeight) ||
-       (viewClockAngle >= angleWidth)  || (viewClockAngle <= -angleWidth) )
-         retVal = false;
+   if(viewConeAngle >= PI/2.0)
+   	return false;
+   	
+   Real viewDec = PI/2.0 - viewConeAngle;
+   Rvector3 viewVector = RADECtoUnitVec(viewClockAngle,viewDec);
    
-   return retVal;
-      
+   if( poles[0]*viewVector < 0.0 && poles[1]*viewVector < 0.0 && 
+       poles[2]*viewVector < 0.0 && poles[3]*viewVector < 0.0 )
+   {
+   	return true;
+   }
+   
+   return false;     
 }
 
 //------------------------------------------------------------------------------
@@ -191,6 +199,49 @@ void  RectangularSensor::SetAngleHeight(Real angleHeightIn)
 Real RectangularSensor::GetAngleHeight()
 {
    return angleHeight;
+}
+
+std::vector<Real> RectangularSensor::getClockAngles()
+{
+	std::vector<Real> clocks(4);
+	
+	Real a = angleWidth/2.0;
+	Real b = angleHeight/2.0;
+	Real Lb = atan(tan(b)*cos(a));
+	
+	Real clock = ASin(Sin(Lb)/Sin(maxExcursionAngle));
+	clocks[0] = clock;
+	clocks[1] = PI - clock;
+	clocks[2] = PI + clock;
+	clocks[3] = 2.0*PI - clock;
+	
+	return clocks;
+}
+
+std::vector<Rvector3> RectangularSensor::getCornerHeadings(std::vector<Real> &clocks)
+{
+	std::vector<Rvector3> headings(4);
+	// Declination
+	Real dec = PI/2.0 - maxExcursionAngle;
+	
+	for(int i = 0; i < 4;i++)
+	{
+		headings[i] = RADECtoUnitVec(clocks[i],dec);
+	}
+	
+	return headings;
+}
+
+std::vector<Rvector3> RectangularSensor::getPoleHeadings(std::vector<Rvector3> &corners)
+{
+	std::vector<Rvector3> poles(4);
+	
+	poles[0] = Cross(corners[0],corners[1]);
+	poles[1] = Cross(corners[1],corners[2]);
+	poles[2] = Cross(corners[2],corners[3]);
+	poles[3] = Cross(corners[3],corners[0]);
+	
+	return poles;
 }
 
 
