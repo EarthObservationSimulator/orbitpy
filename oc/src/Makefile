@@ -50,7 +50,9 @@ OBJECTS = \
     Spacecraft.o \
     TATCException.o \
     VisibilityReport.o \
-    VisiblePOIReport.o 
+    VisiblePOIReport.o \
+    Projector.o \
+    DiscretizedSensor.o
 
 #
 # Default suffix rule
