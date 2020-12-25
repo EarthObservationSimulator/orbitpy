@@ -1,4 +1,5 @@
-DRIVER = orbitpropcov_grid genCovGrid orbitpropcov_popts j2_analytical_propagator gp_in_fov_cov_calc pnt_axis_sphere_intsec_cov_calc pnt_opts_with_gp_in_fov_cov_calc
+DRIVER =  sensor_fov_projector
+# orbitpropcov_grid genCovGrid orbitpropcov_popts j2_analytical_propagator gp_in_fov_cov_calc pnt_axis_sphere_intsec_cov_calc pnt_opts_with_gp_in_fov_cov_calc sensor_fov_projector
 
 # Define macros for locations
 BASE_ROOT = ../../oc

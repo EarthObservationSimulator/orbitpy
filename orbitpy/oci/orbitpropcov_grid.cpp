@@ -74,7 +74,7 @@ using namespace GmatMathConstants;
  * @param duration mission duration in days
  * @param covGridFp coverage grid file path and name
  * @param fovGeom sensor FOV geometry type
- * @param senOrien sensor orientation (euler angles in degrees and sequence)
+ * @param senOrien sensor orientation (sequence and euler angles in degrees, eg: "1,2,3,20,10,30")
  * @param fovClock sensor clock angles in degrees
  * @param fovCone sensor cone angles in degrees
  * @param yaw180_flag 
