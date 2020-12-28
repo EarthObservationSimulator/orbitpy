@@ -105,65 +105,88 @@ int main(int argc, char *argv[])
    
     coverage = new Projector(sat,sensor);
 	
-	std::vector<AnglePair> center_intersection, corner_intersection;
-    std::vector<Rvector3> pole_intersection;	
+	std::vector<AnglePair> center_intersection_cartesian, corner_intersection_geocoords;
+    std::vector<Rvector3> pole_intersection_cartesian;	
 	
-	center_intersection = coverage->checkIntersection();
-    corner_intersection = coverage->checkCornerIntersection();
-	pole_intersection = coverage->checkPoleIntersection();	
+	center_intersection_cartesian = coverage->checkIntersection();
+    corner_intersection_geocoords = coverage->checkCornerIntersection();
+	pole_intersection_cartesian = coverage->checkPoleIntersection();	
 
     /*
     MessageInterface::ShowMessage("Lat and lon of pixel-center \n");
-    for(int k=0; k<center_intersection.size(); k++){
+    for(int k=0; k<center_intersection_cartesian.size(); k++){
         // Lat and lon of pixel-center
         Real lat, lon;
-        lat = center_intersection[k][0];
-        lon = center_intersection[k][1];
+        lat = center_intersection_cartesian[k][0];
+        lon = center_intersection_cartesian[k][1];
         MessageInterface::ShowMessage("%f, %f \n", lat,lon);
     }
 
     MessageInterface::ShowMessage("Lat and lon of pixel-coorners \n");
-    for(int k=0; k<corner_intersection.size(); k++){
+    for(int k=0; k<corner_intersection_geocoords.size(); k++){
         // Lat and lon of pixel-coorners
         Real lat, lon;
-        lat = corner_intersection[k][0];
-        lon = corner_intersection[k][1];
+        lat = corner_intersection_geocoords[k][0];
+        lon = corner_intersection_geocoords[k][1];
         MessageInterface::ShowMessage("%f, %f \n", lat,lon);
     }
 
     MessageInterface::ShowMessage("EF Cartesian coords of poles \n");
-    for(int k=0; k<pole_intersection.size(); k++){
+    for(int k=0; k<pole_intersection_cartesian.size(); k++){
         // EF Cartesian coords of poles
-        MessageInterface::ShowMessage("%f, %f, %f \n", pole_intersection[k][0],pole_intersection[k][1],pole_intersection[k][2]);
+        MessageInterface::ShowMessage("%f, %f, %f \n", pole_intersection_cartesian[k][0],pole_intersection_cartesian[k][1],pole_intersection_cartesian[k][2]);
     }
     */
+    
+    Earth *centralBody;
+    centralBody = new Earth();
 
     // convert from radians to degrees
-    for(int k=0; k<center_intersection.size(); k++){
+    for(int k=0; k<center_intersection_cartesian.size(); k++){
         Real lat, lon;
-        center_intersection[k][0] = center_intersection[k][0]*GmatMathConstants::DEG_PER_RAD;
-        center_intersection[k][1] = center_intersection[k][1]*GmatMathConstants::DEG_PER_RAD;
+        center_intersection_cartesian[k][0] = center_intersection_cartesian[k][0]*GmatMathConstants::DEG_PER_RAD;
+        center_intersection_cartesian[k][1] = center_intersection_cartesian[k][1]*GmatMathConstants::DEG_PER_RAD;
     }
-    // convert from radians to degrees
-    for(int k=0; k<corner_intersection.size(); k++){
-        Real lat, lon;
-        corner_intersection[k][0] = corner_intersection[k][0]*GmatMathConstants::DEG_PER_RAD;
-        corner_intersection[k][1] = corner_intersection[k][1]*GmatMathConstants::DEG_PER_RAD;
-    }
-    // convert pole_intersection datatype to one compactible with the json class
+    // convert from radians to degrees and compute cartesian coords
     typedef std::array<Real,3> CartesianPositionVector;
-    std::vector<CartesianPositionVector> pole_intersection_json_compactable(pole_intersection.size());
-    for(int k=0; k<pole_intersection.size(); k++){
-        pole_intersection_json_compactable[k][0] = pole_intersection[k][0];
-        pole_intersection_json_compactable[k][1] = pole_intersection[k][1];
-        pole_intersection_json_compactable[k][2] = pole_intersection[k][2];
+    std::vector<CartesianPositionVector> corner_intersection_cartesian(corner_intersection_geocoords.size());
+    for(int k=0; k<corner_intersection_geocoords.size(); k++){
+
+        Real lat, lon;
+        Rvector3 sph = {corner_intersection_geocoords[k][0], corner_intersection_geocoords[k][1], 0};
+        Rvector3 cart = BodyFixedStateConverterUtil::SphericalToCartesian(sph,1,centralBody->GetRadius());
+
+        corner_intersection_geocoords[k][0] = corner_intersection_geocoords[k][0]*GmatMathConstants::DEG_PER_RAD;
+        corner_intersection_geocoords[k][1] = corner_intersection_geocoords[k][1]*GmatMathConstants::DEG_PER_RAD;
+        
+        corner_intersection_cartesian[k][0] = cart[0];
+        corner_intersection_cartesian[k][1] = cart[1];
+        corner_intersection_cartesian[k][2] = cart[2];
+    }
+    // convert pole_intersection_cartesian datatype to one compactible with the json class
+    
+    std::vector<CartesianPositionVector> pole_intersection_json_compactable(pole_intersection_cartesian.size());    
+    std::vector<AnglePair> pole_intersection_geocoords(pole_intersection_cartesian.size());
+
+    for(int k=0; k<pole_intersection_cartesian.size(); k++){
+        pole_intersection_json_compactable[k][0] = pole_intersection_cartesian[k][0];
+        pole_intersection_json_compactable[k][1] = pole_intersection_cartesian[k][1];
+        pole_intersection_json_compactable[k][2] = pole_intersection_cartesian[k][2];
+        
+        Rvector3 sphericalPos = BodyFixedStateConverterUtil::CartesianToSpherical(pole_intersection_cartesian[k],1,centralBody->GetRadius());
+        pole_intersection_geocoords[k][0] = sphericalPos[0]*GmatMathConstants::DEG_PER_RAD; // lat
+        pole_intersection_geocoords[k][1] = sphericalPos[1]*GmatMathConstants::DEG_PER_RAD; // lon
     }    
 
     json j;
     // add a number that is stored as double (note the implicit conversion of j to an object)
-    j["centerIntersection"] = {center_intersection};
-    j["cornerIntersection"] = {corner_intersection};
-    j["poleIntersection"] = {pole_intersection_json_compactable};
+    j["widthDetectors"] = widthDetectors;
+    j["heightDetectors"] = heightDetectors;
+    j["centerIntersectionGeoCoords"] = center_intersection_cartesian;
+    j["cornerIntersectionCartesian"] = corner_intersection_cartesian;
+    j["cornerIntersectionGeoCoords"] = corner_intersection_geocoords;
+    j["poleIntersectionCartesian"] = pole_intersection_json_compactable;
+    j["poleIntersectionGeocoords"] = pole_intersection_geocoords;
 
     std::ofstream o;
     o.open(outFilePath.c_str(),ios::binary | ios::out);
