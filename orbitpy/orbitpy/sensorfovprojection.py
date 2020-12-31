@@ -53,7 +53,6 @@ class SensorFOVProjection():
         outFilePath = user_dir + "oci_senFovProj.json" # temporary file TODO: delete later?
         
         try:
-            logger.info("...start computation of pixel positions...")
             result = subprocess.run([
                         os.path.join(dir_path, '..', 'oci', 'bin', 'sensor_fov_projector'),
                         str(date_JDUt1), str(state_eci), str(sat_orien), str(sen_orien), 
@@ -152,7 +151,6 @@ class SensorFOVProjection():
 
                 k = k + 1
 
-        logger.info("...ended computation of pixel positions...")
         return pixel
 
         #with open("../pixeldata.json", 'w') as fp:
