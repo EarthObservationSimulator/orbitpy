@@ -11,7 +11,7 @@ This package contain set of modules to compute orbit data of satellites. It perf
 
 ## Install
 
-Requires: `python 3.8`, `pip`, `gcc`, `gfortran`
+Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `gfortran`
 
 1. Make sure the `instrupy` package (dependency) has been installed. It can be installed by running `make` in the `instruments/instrupy/` directory.
 2. Navigate to the `orbits/oc/` directory and run `make`. 
@@ -21,6 +21,26 @@ Requires: `python 3.8`, `pip`, `gcc`, `gfortran`
    See the results in the `orbitpy/examples/example1/` folder. More description of the examples is given in the documentation.
 
 Find the documentation in: `/orbitpy/docs/_build/html/index.html#`
+
+## License and Copyright
+
+Copyright 2020 Bay Area Environmental Research Institute
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+## Credits and Acknowledgments
+
+This work has been funded by grants from the National Aeronautics and Space Administration (NASA) Earth Science Technology Office (ESTO) through the Advanced Information Systems Technology (AIST) Program.
 
 ## Questions?
 
