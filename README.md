@@ -14,9 +14,9 @@ This package contain set of modules to compute orbit data of satellites. It perf
 Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `gfortran`
 
 1. Make sure the `instrupy` package (dependency) has been installed. It can be installed by running `make` in the `instruments/instrupy/` directory.
-2. Navigate to the `orbits/oc/` directory and run `make`. 
-3. Navigate to the `orbits/orbitpy/` directory and run `make`.
-4. Execute `make runtest` to run tests and verify *OK* message. (Currently none.)
+2. Navigate to the `oc/` directory and run `make`. 
+3. Navigate to the `orbitpy/` directory and run `make`.
+4. Execute `make runtest` to run tests and verify *OK* message.
 5. Run an example, by running the following command from the `orbits` directory: `python orbitpy/bin/run_mission.py orbitpy/examples/example1/`.
    See the results in the `orbitpy/examples/example1/` folder. More description of the examples is given in the documentation.
 
