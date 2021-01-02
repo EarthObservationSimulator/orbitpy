@@ -95,18 +95,3 @@ needs_types = [dict(directive="req", title="Requirement", prefix="R_", color="#B
                dict(directive="need", title="Need", prefix="N_", color="#9856a5", style="node")
            ]
 
-# -- Extension 'sphinxcontrib.plantuml' settings -----------------------------
-on_rtd = os.environ.get('READTHEDOCS') == 'True'
-if on_rtd:
-    plantuml = 'java -Djava.awt.headless=true -jar /usr/share/plantuml/plantuml.jar'
-else:
-    cwd = os.getcwd()
-    plantuml = 'java -jar %s' % os.path.join(cwd, "utils/plantuml.1.2020.12.jar")
-
-# If we are running on windows, we need to manipulate the path,
-# otherwise plantuml will have problems.
-if os.name == "nt":
-    plantuml = plantuml.replace("/", "\\")
-    plantuml = plantuml.replace("\\", "\\\\")
-
-plantuml_output_format = 'png'
