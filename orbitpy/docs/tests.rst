@@ -49,22 +49,22 @@ Test Modules
 .. automodule:: test_OrbitPropCovGrid_3
    :members:
    
-:class:`test_GMAT_propagation`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:class:`test_GMAT_propagation_OrbitPropCovGrid`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_GMAT_propagation
+.. automodule:: test_GMAT_propagation_OrbitPropCovGrid
    :members:
 
-:class:`test_STK_propagation`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:class:`test_STK_propagation_OrbitPropCovGrid`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_STK_propagation
+.. automodule:: test_STK_propagation_OrbitPropCovGrid
    :members:
    
-:class:`test_STK_coverage`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:class:`test_STK_coverage_OrbitPropCovGrid`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_STK_coverage
+.. automodule:: test_STK_coverage_OrbitPropCovGrid
    :members:
 
 :class:`test_OrbitPropCovPopts_1`

@@ -33,7 +33,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
-        out_dir2 = os.path.join(dir_path,'temp/test_STK_coverage')
+        out_dir2 = os.path.join(dir_path,'temp/test_STK_coverage_OrbitPropCovGrid')
         if os.path.exists(out_dir2):
             shutil.rmtree(out_dir2)
         os.makedirs(out_dir2)
@@ -51,7 +51,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                         aop=0, 
                         ta=0, 
                         duration=1, 
-                        cov_grid_fl=dir_path+"/temp/test_STK_coverage/grid", 
+                        cov_grid_fl=dir_path+"/temp/test_STK_coverage_OrbitPropCovGrid/grid", 
                         sen_fov_geom="CONICAL", 
                         sen_orien="1,2,3,0,0,0",
                         sen_clock="0", 
@@ -59,8 +59,8 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                         purely_sidelook = 0, 
                         yaw180_flag = 0, 
                         step_size = 1.0, 
-                        sat_state_fl = dir_path+"/temp/test_STK_coverage/state", 
-                        sat_acc_fl = dir_path+"/temp/test_STK_coverage/acc", 
+                        sat_state_fl = dir_path+"/temp/test_STK_coverage_OrbitPropCovGrid/state", 
+                        sat_acc_fl = dir_path+"/temp/test_STK_coverage_OrbitPropCovGrid/acc", 
                         cov_calcs_app= CoverageCalculationsApproach.GRIDPNTS)
         
         # Establish thresholds for each metric
@@ -157,7 +157,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test an equatorial orbit on a global grid with a 5 degree conical sensor.""" 
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/01/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/01/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -165,17 +165,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param = copy.deepcopy(self.default_pcp)
         
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/Global_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/01/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/01/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/01/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/01/acc"
         
         # Run simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/Global_Grid_1.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/01/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_1.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/01/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -187,7 +187,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test an equatorial orbit on a global grid with a 15 deg AT, 10 deg CT sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/02/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/02/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -201,17 +201,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
         
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/Global_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/02/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/02/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/02/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/02/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/Global_Grid_2.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/02/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_2.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/02/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -223,7 +223,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a near-equatorial orbit on a global grid with a 5 deg conical sensor."""
         
          # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/03/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/03/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -237,17 +237,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.ta = 1
         
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/Global_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/03/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/03/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/03/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/03/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
          # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/Global_Grid_3.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/03/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_3.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/03/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -259,7 +259,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a polar orbit on a US grid with a 15 deg AT, 10 deg CT sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/04/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/04/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -279,17 +279,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
         
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/04/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/04/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/04/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/04/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/US_Grid_4.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/04/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_4.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/04/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -301,7 +301,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test an inclined orbit on a US grid with a 5 degree conical sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/05/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/05/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -316,17 +316,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.ta = 277.789
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/05/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/05/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/05/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/05/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/US_Grid_5.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/05/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_5.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/05/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -338,7 +338,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test an inclined orbit on a US grid with a 15 deg AT, 10 deg CT sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/06/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/06/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -359,17 +359,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/06/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/06/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/06/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/06/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
          # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/US_Grid_6.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/06/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_6.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/06/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -381,7 +381,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a sun-sync orbit on an equatorial grid with a 5 deg conical sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/07/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/07/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -396,17 +396,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.ta = 0
         
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/Equatorial_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/07/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/07/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/07/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/07/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
          # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/Equatorial_Grid_7.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/07/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_7.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/07/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -419,7 +419,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a sun-sync orbit on an equatorial grid with a 5 deg pointed conical sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/08/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/08/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -438,17 +438,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.sen_orien = "2,1,3,-30,-25,5"
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/Equatorial_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/08/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/08/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/08/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/08/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/Equatorial_Grid_8.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/08/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_8.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/08/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -461,7 +461,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a sun-sync orbit on an equatorial grid with a 10 deg AT, 15 deg CT pointed sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/09/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/09/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -484,17 +484,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/Equatorial_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/09/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/09/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/09/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/09/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/Equatorial_Grid_9.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/09/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_9.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/09/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -506,7 +506,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a sun-sync orbit on a US grid with a 15 deg AT, 10 deg CT sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/10/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/10/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -527,17 +527,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/10/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/10/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/10/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/10/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
          # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/US_Grid_10.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/10/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_10.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/10/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -550,7 +550,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a sun-sync orbit on a US grid with a 10 deg AT, 15 deg CT pointed sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/11/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/11/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -573,17 +573,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/11/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/11/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/11/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/11/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
          # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/US_Grid_11.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/11/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_11.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/11/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -596,7 +596,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         """Test a sun-sync orbit on a US grid with a 15 deg AT, 10 deg CT pointed sensor."""
         
         # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage/12/')
+        out_dir = os.path.join(self.dir_path,'temp/test_STK_coverage_OrbitPropCovGrid/12/')
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
@@ -619,17 +619,17 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage/12/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage/12/acc"
+        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
+        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/12/state"
+        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/12/acc"
         
         # Run Simulation
         opc_grid = OrbitPropCovGrid(prop_cov_param)
         opc_grid.run()
         
          # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage/Accesses/US_Grid_12.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage/12/acc_',prop_cov_param.cov_grid_fl)
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_12.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/12/acc_',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
