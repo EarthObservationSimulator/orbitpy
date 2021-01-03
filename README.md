@@ -15,12 +15,12 @@ Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `gfortran`
 
 1. Make sure the `instrupy` package (dependency) has been installed. It can be installed by running `make` in the `instruments/instrupy/` directory.
 2. Navigate to the `oc/` directory and run `make`. 
-3. Navigate to the `orbitpy/` directory and run `make`.
+3. Run `make` from the root repo directory (please make sure to complete step (2) before this step).
 4. Execute `make runtest` to run tests and verify *OK* message.
-5. Run an example, by running the following command from the `orbits` directory: `python orbitpy/bin/run_mission.py orbitpy/examples/example1/`.
+5. Run an example, by running the following command from the `orbits` directory: `python bin/run_mission.py examples/example1/`.
    See the results in the `orbitpy/examples/example1/` folder. More description of the examples is given in the documentation.
 
-Find the documentation in: `/orbitpy/docs/_build/html/index.html#`
+Find the documentation in: `/docs/_build/html/index.html#`
 
 ## License and Copyright
 
