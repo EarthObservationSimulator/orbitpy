@@ -30,7 +30,7 @@ HEADERS =   -I. \
 -I$(BASE_ROOT)/GMATsrc/util/interpolator \
 -I$(BASE_ROOT)/GMATsrc/util/matrixoperations \
 -I$(BASE_ROOT)/GMATsrc/console \
--I$(BASE_ROOT)/../orbitpy/oci/oci_util.h \
+-I$(BASE_ROOT)/../oci/oci_util.h \
 
 CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) $(TESTFLAGS) #TODO: Remove TESTFLAGS
 CPP = g++

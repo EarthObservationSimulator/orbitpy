@@ -1,7 +1,7 @@
 #include "Projector.hpp"
 #include "NadirPointingAttitude.hpp"
 #include "LagrangeInterpolator.hpp"
-#include "json.hpp"
+#include "../third-party-tools/json/json.hpp"
 #include <iomanip>
 #include "oci_utils.h"
 
