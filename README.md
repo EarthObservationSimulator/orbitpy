@@ -15,9 +15,9 @@ Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `gfortran`
 
 1. Make sure the `instrupy` package (dependency) has been installed. It can be installed by running `make` in the `instruments/instrupy/` directory.
 2. Navigate to the `oc/` directory and run `make`. 
-3. Run `make` from the root repo directory (please make sure to complete step (2) before this step).
+3. Run `make` from the repo root directory (please make sure to complete step (2) before this step).
 4. Execute `make runtest` to run tests and verify *OK* message.
-5. Run an example, by running the following command from the `orbits` directory: `python bin/run_mission.py examples/example1/`.
+5. Run an example, by running the following command from the repo root directory: `python bin/run_mission.py examples/example1/`.
    See the results in the `orbitpy/examples/example1/` folder. More description of the examples is given in the documentation.
 
 Find the documentation in: `/docs/_build/html/index.html#`
@@ -41,6 +41,11 @@ limitations under the License.
 ## Credits and Acknowledgments
 
 This work has been funded by grants from the National Aeronautics and Space Administration (NASA) Earth Science Technology Office (ESTO) through the Advanced Information Systems Technology (AIST) Program.
+
+OrbitPy uses:
+
+> Boost C++ libraries (https://www.boost.org/)
+> JSON for Modern C++ (https://github.com/nlohmann/json)
 
 ## Questions?
 

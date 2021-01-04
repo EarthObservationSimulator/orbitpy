@@ -11,13 +11,13 @@ Install
 *Requires:* Unix-like operating system (currently tested in Ubuntu 18.04.03, MacOS, CentOS-8), :code:`python 3.8`, :code:`pip`, :code:`gcc`, :code:`gfortran`
 
 1. Make sure the :code:`instrupy` package (dependency) has been installed. It can be installed by running :code:`make` in the :code:`instruments/instrupy/` directory.
-2. Navigate to the :code:`orbits/oc/` directory and run :code:`make`. 
-3. Navigate to the :code:`orbits/orbitpy/` directory and run :code:`make`.
+2. Navigate to the :code:`oc/` directory and run :code:`make`. 
+3. Navigate to the repo root directory and run :code:`make`.
 4. Execute :code:`make runtest` to run tests and verify *OK* message.
-5. Run an example, by running the following command from the :code:`orbits` directory: :code:`python orbitpy/bin/run_mission.py orbitpy/examples/example1/`.
-   See the results in the :code:`orbitpy/examples/example1/` folder. Description of the examples in given in :ref:`examples` page. 
+5. Run an example, by running the following command from the repo root directory: :code:`python bin/run_mission.py examples/example1/`.
+   See the results in the :code:`examples/example1/` folder. Description of the examples in given in :ref:`examples` page. 
 
-Find the documentation in: :code:`/orbitpy/docs/_build/html/index.html`
+Find the documentation in: :code:`/docs/_build/html/index.html`
 
 .. toctree::
    :maxdepth: 2
