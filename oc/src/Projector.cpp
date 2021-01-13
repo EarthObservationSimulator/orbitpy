@@ -1,5 +1,33 @@
 #include "Projector.hpp"
 
+Real Projector::constrainLongitude(Real lon)
+{
+	while (lon <= -GmatMathConstants::PI)
+		lon += GmatMathConstants::TWO_PI;
+	
+	while (lon > GmatMathConstants::PI)
+		lon -= GmatMathConstants::TWO_PI;
+	
+	return lon;	
+}
+
+AnglePair Projector::cartesianToLatLon(Rvector3 cart)
+{
+   // Calculate the longitude
+   Real lon = GmatMathUtil::ATan2(cart[1], cart[0]);
+   // constrain it
+   lon = constrainLongitude(lon);
+	
+   // Calculate the latitude
+   Real rMag      = cart.GetMagnitude();
+   Real lat  = GmatMathUtil::ASin(cart[2] / rMag);
+
+   AnglePair latLon;
+   latLon = {lat,lon};
+   
+   return latLon;
+}
+
 std::vector<AnglePair> Projector::unitVectorToClockCone(const std::vector<Rvector3> &cartesianHeadings)
 {
 	int numPts = cartesianHeadings.size();
@@ -11,6 +39,18 @@ std::vector<AnglePair> Projector::unitVectorToClockCone(const std::vector<Rvecto
 		clockConeHeadings[i] = {spherical[1],pi/2 - spherical[0]};
 	}
 	return clockConeHeadings;
+}
+
+Rvector3 Projector::latLonToCartesian(AnglePair latLon)
+{
+	Real latitude = latLon[0];
+	Real longitude = latLon[1];
+	
+	Rvector3 cartesian((GmatMathUtil::Cos(latitude) * GmatMathUtil::Cos(longitude)),
+                (GmatMathUtil::Cos(latitude) * GmatMathUtil::Sin(longitude)),
+                 GmatMathUtil::Sin(latitude));
+        
+        return cartesian*centralBody->GetRadius();
 }
 
 AnglePair Projector::projectionAlg(Real clock,Real cone,const Rvector3 &sphericalPos)
@@ -40,6 +80,8 @@ AnglePair Projector::projectionAlg(Real clock,Real cone,const Rvector3 &spherica
 		lonP = lonSSP + deltaL;
 	else
 		lonP = lonSSP - deltaL;
+		
+	lonP = constrainLongitude(lonP);
 		
 	latLonP = {latP,lonP};
 	
@@ -115,7 +157,7 @@ Rvector6 Projector::getEarthFixedState(Real jd,const Rvector6& state_I)
 	return earthFixedState;
 }
 
-std::vector<AnglePair> Projector::checkIntersection()
+CoordsPair Projector::checkIntersection()
 {
 	Real date = sc->GetJulianDate();
 	Rvector6 state_I = sc->GetCartesianState();
@@ -123,7 +165,7 @@ std::vector<AnglePair> Projector::checkIntersection()
 	return checkIntersection(state_ECF);
 }
 
-std::vector<Rvector3> Projector::checkPoleIntersection()
+CoordsPair Projector::checkPoleIntersection()
 {
 	Real date = sc->GetJulianDate();
 	Rvector6 state_I = sc->GetCartesianState();
@@ -131,20 +173,22 @@ std::vector<Rvector3> Projector::checkPoleIntersection()
 	return checkPoleIntersection(state_ECF);
 }
 
-std::vector<AnglePair> Projector::checkCornerIntersection()
+CoordsPair Projector::checkCornerIntersection()
 {
 	Real date = sc->GetJulianDate();
 	Rvector6 state_I = sc->GetCartesianState();
 	Rvector6 state_ECF  = getEarthFixedState(date, state_I);
 	return checkCornerIntersection(state_ECF);
 }
-std::vector<AnglePair> Projector::checkIntersection(const Rvector6 &state_ECF)
+CoordsPair Projector::checkIntersection(const Rvector6 &state_ECF)
 {
 	// In Sensor Frame
 	std::vector<Rvector3> centerHeadings = sensor->getCenterHeadings();
 	
 	int numPts = centerHeadings.size();
 	std::vector<AnglePair> latLonVector(numPts);
+	std::vector<Rvector3> cartesianVector(numPts);
+	CoordsPair pairVector;
 	
 	// Both in ECF coordinates
 	Rvector3 pos(state_ECF[0],state_ECF[1],state_ECF[2]);
@@ -165,17 +209,23 @@ std::vector<AnglePair> Projector::checkIntersection(const Rvector6 &state_ECF)
 	for(int i = 0;i < numPts;i++)
 	{
 		latLonVector[i] = projectionAlg(clockConeHeadings[i][0],clockConeHeadings[i][1],sphericalPos);
+		cartesianVector[i] = latLonToCartesian(latLonVector[i]);
 	}
 	
-	return latLonVector;
+	pairVector.first = latLonVector;
+	pairVector.second = cartesianVector;
+	
+	return pairVector;
 }
 
-std::vector<Rvector3> Projector::checkPoleIntersection(const Rvector6 &state_ECF)
+CoordsPair Projector::checkPoleIntersection(const Rvector6 &state_ECF)
 {
 	// In Sensor Frame
 	std::vector<Rvector3> poleHeadings = sensor->getPoleHeadings();
 	
 	int numPts = poleHeadings.size();
+	std::vector<AnglePair> latLonVector(numPts);
+	CoordsPair pairVector;
 	
 	// Only works for one sensor!
 	Rmatrix33 NS = getSensorToNadirMatrix();
@@ -188,17 +238,26 @@ std::vector<Rvector3> Projector::checkPoleIntersection(const Rvector6 &state_ECF
 		poleHeadings[i] = ECF_N*NS*poleHeadings[i];
 		// Re-normalize
 		poleHeadings[i].Normalize();
+		poleHeadings[i] = poleHeadings[i]*centralBody->GetRadius();
+		
+		latLonVector[i] = cartesianToLatLon(poleHeadings[i]);
 	}
-	return poleHeadings;
+	
+	pairVector.first = latLonVector;
+	pairVector.second = poleHeadings;
+	
+	return pairVector;
 }
 
-std::vector<AnglePair> Projector::checkCornerIntersection(const Rvector6 &state_ECF)
+CoordsPair Projector::checkCornerIntersection(const Rvector6 &state_ECF)
 {
 	// In Sensor Frame
 	std::vector<Rvector3> cornerHeadings = sensor->getCornerHeadings();
 	
 	int numPts = cornerHeadings.size();
 	std::vector<AnglePair> latLonVector(numPts);
+	std::vector<Rvector3> cartesianVector(numPts);
+	CoordsPair pairVector;
 	
 	// Both in ECF coordinates
 	Rvector3 pos(state_ECF[0],state_ECF[1],state_ECF[2]);
@@ -219,7 +278,11 @@ std::vector<AnglePair> Projector::checkCornerIntersection(const Rvector6 &state_
 	for(int i = 0;i < numPts;i++)
 	{
 		latLonVector[i] = projectionAlg(clockConeHeadings[i][0],clockConeHeadings[i][1],sphericalPos);
+		cartesianVector[i] = latLonToCartesian(latLonVector[i]);
 	}
 	
-	return latLonVector;
+	pairVector.first = latLonVector;
+	pairVector.second = cartesianVector;
+	
+	return pairVector;
 }

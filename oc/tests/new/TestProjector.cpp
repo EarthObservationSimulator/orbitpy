@@ -212,10 +212,14 @@ TEST_F(TestProjector,checkIntersection)
 	double tolerance = 0.00000000001;
 	Rvector6 state_ECF = {0,7000.0,0,-10.0,0,0};
 	
+	CoordsPair latLonCart;
+	
 	std::vector<AnglePair> intersection;
 	Real lat,lon,lonDiff,latSum;
 	
-	intersection = coverage->checkIntersection(state_ECF);
+	latLonCart = coverage->checkIntersection(state_ECF);
+	intersection = latLonCart.first;
+	
 	
 	// Lat and lon of center pixel
 	lat = intersection[1][0];
@@ -245,6 +249,8 @@ TEST_F(TestProjector_Corners,checkCornerIntersection)
 	Rvector6 state_ECF = {0,7000.0,0,-10.0,0,0};
 	std::vector<AnglePair> intersection;
 	
+	CoordsPair latLonCart;
+	
 	// Center column of corners should all have longitude
 	// equal to the longitude of the SSP
 	Real expectedLon = pi/2.0;
@@ -252,7 +258,8 @@ TEST_F(TestProjector_Corners,checkCornerIntersection)
 	// equal to the latitude of the SSP
 	Real expectedLat = 0.0;
 	
-	intersection = coverage->checkCornerIntersection(state_ECF);
+	latLonCart = coverage->checkCornerIntersection(state_ECF);
+	intersection = latLonCart.first;
 	
 	// Center column corresponds to index's 5-9
 	EXPECT_NEAR(expectedLon,intersection[5][1],tolerance);
@@ -304,7 +311,10 @@ TEST_F(TestProjector,checkPoleIntersection)
 	Rvector6 state_ECF(7000,0,0,0,7,0);
 	std::vector<Rvector3> poles;
 	
-	poles = coverage->checkPoleIntersection(state_ECF);	
+	CoordsPair latLonCart;
+	
+	latLonCart = coverage->checkPoleIntersection(state_ECF);	
+	poles = latLonCart.second;
 
 	// Check that there are 6 poles.
 	EXPECT_EQ(6,poles.size());
@@ -338,7 +348,10 @@ TEST_F(TestProjector,checkPoleIntersection_2)
 	Rvector6 state_ECF(0,7000,0,-7,0,0);
 	std::vector<Rvector3> poles;
 	
-	poles = coverage->checkPoleIntersection(state_ECF);	
+	CoordsPair latLonCart;
+	
+	latLonCart = coverage->checkPoleIntersection(state_ECF);
+	poles = latLonCart.second;	
 
 	// Check that there are 6 poles.
 	EXPECT_EQ(6,poles.size());
