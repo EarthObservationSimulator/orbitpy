@@ -1,5 +1,3 @@
-// NOTE: This class currently assumes that the sensor boresight is alligned with the +Y axis in the sensor frame.
-
 #ifndef DiscretizedSensor_hpp
 #define DiscretizedSensor_hpp
 

@@ -14,6 +14,7 @@ class TestProjector : public ::testing::Test {
 		sensor = new DiscretizedSensor(pi/3.0,pi/3.0,1,3);
 		attitude = new NadirPointingAttitude();
 		epoch = new AbsoluteDate();
+		epoch->SetJulianDate(GmatTimeConstants::JD_OF_J2000);
 		state = new OrbitState();
 		state->SetKeplerianState(7000.0,0.0,0.0,0.0,0.0,2.0);
 		interpolator = new LagrangeInterpolator();

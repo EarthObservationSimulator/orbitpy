@@ -134,12 +134,9 @@ std::vector<Rvector3> DiscretizedSensor::generatePoles()
 		// Index of next value of row i
 		int index2 = getIndex(i,1,numRowPoles);
 		
-		// NOTE: Need to determine north/south pole convention
 		poles[i] = Cross(cornerHeadings[index2],cornerHeadings[index1]);
 		poles[i].Normalize();
 		
-		
-		// New code
 		if(i >= numRowPoles/2)
 		{
 			poles[i] = Cross(cornerHeadings[index1],cornerHeadings[index2]);
