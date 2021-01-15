@@ -16,7 +16,6 @@
 #include "Rmatrix.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
-#include "ConsoleMessageReceiver.hpp"
 #include "AbsoluteDate.hpp"
 #include "Spacecraft.hpp"
 #include "Earth.hpp"

@@ -22,7 +22,6 @@
 #include "Rmatrix.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
-#include "ConsoleMessageReceiver.hpp"
 #include "AbsoluteDate.hpp"
 #include "Spacecraft.hpp"
 #include "Earth.hpp"
@@ -105,9 +104,6 @@ int main(int argc, char *argv[])
    /// ******** Set up the messaging and output
    std::string outFormat = "%16.9f ";
    
-   // Set up the message receiver and log file
-   ConsoleMessageReceiver *consoleMsg = ConsoleMessageReceiver::Instance();
-   MessageInterface::SetMessageReceiver(consoleMsg);
    std::string outPath = "./";
    MessageInterface::SetLogFile(outPath + "GmatLog.txt");
    MessageInterface::ShowMessage("%s\n",

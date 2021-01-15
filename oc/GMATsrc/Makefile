@@ -29,8 +29,6 @@ CPP = g++
 
 OBJECTS = \
     $(GMAT_DIR)/base/ExponentialAtmosphere.o \
-    $(GMAT_DIR)/console/ConsoleMessageReceiver.o \
-    $(GMAT_DIR)/console/ConsoleAppException.o \
     $(GMAT_DIR)/util/A1Date.o \
     $(GMAT_DIR)/util/A1Mjd.o \
     $(GMAT_DIR)/util/AttitudeConversionUtility.o \

@@ -30,7 +30,6 @@
 #include "Rmatrix.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
-#include "ConsoleMessageReceiver.hpp"
 #include "Earth.hpp"
 #include "PointGroup.hpp"
 #include "TimeTypes.hpp"

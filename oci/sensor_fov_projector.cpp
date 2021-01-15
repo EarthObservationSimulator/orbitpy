@@ -31,11 +31,6 @@ int main(int argc, char *argv[])
     /** Set up the messaging and output **/
     std::string outFormat = "%16.9f";
 
-    /** Set up the message receiver and log file **/
-    //Uncomment to set up receving debug messages on console 
-    ConsoleMessageReceiver *consoleMsg = ConsoleMessageReceiver::Instance();
-    MessageInterface::SetMessageReceiver(consoleMsg);
-
     /** Parse input arguments **/
     Real _date; 
     string _state_eci;
