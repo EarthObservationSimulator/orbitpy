@@ -24,7 +24,7 @@ Find the documentation in: `/docs/_build/html/index.html#`
 
 ## License and Copyright
 
-Copyright 2020 Bay Area Environmental Research Institute
+Copyright 2021 Bay Area Environmental Research Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ This work has been funded by grants from the National Aeronautics and Space Admi
 
 OrbitPy uses:
 
+> GMAT2020a `gmatutil` source (https://sourceforge.net/p/gmat/git/ci/GMAT-R2020a/tree/src/gmatutil/)
 > Boost C++ libraries (https://www.boost.org/)
 > JSON for Modern C++ (https://github.com/nlohmann/json)
 
