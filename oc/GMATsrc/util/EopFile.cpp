@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,6 +40,7 @@
 //#include "GmatGlobal.hpp"
 #include "EopFile.hpp"
 #include "TimeTypes.hpp"
+#include "FileUtil.hpp"
 #include "UtilityException.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
@@ -212,11 +213,27 @@ void EopFile::Initialize()
       std::string   firstWord;
       while ((!startNow) && (!eopFile.eof()))
       {
-         getline(eopFile,line);
+         bool lineRead = GmatFileUtil::GetLine(&eopFile,line);
+         if (lineRead == false)
+            throw UtilityException("Unable to read EopFile.");
          std::istringstream lineStr;
          lineStr.str(line);
          lineStr >> firstWord;
-         if (firstWord == "1962") startNow = true;
+         #ifdef DEBUG_EOP_INITIALIZE
+            MessageInterface::ShowMessage("--- firstWord =  %s ...\n",
+                                          firstWord.c_str());
+         #endif
+//         if (firstWord == "1962") startNow = true;
+         if (firstWord == "(0h") // last line of header - assume this remains unchanged!
+         {
+            startNow = true;
+            if (eopFile.eof())
+               throw UtilityException("NO data found on EopFile.");
+            // Get the next line (first line after header)
+            lineRead = GmatFileUtil::GetLine(&eopFile,line);
+            if (lineRead == false)
+               throw UtilityException("Unable to read EopFile.");
+         }
       }
       if (startNow == false)
          throw UtilityException("Unable to read EopFile.");
@@ -254,7 +271,12 @@ void EopFile::Initialize()
             tableSz++;
          }
          if (eopFile.eof())   done = true;
-         else                 getline(eopFile, line);
+         else
+         {
+            bool lineRead = GmatFileUtil::GetLine(&eopFile,line);
+            if (lineRead == false)
+               throw UtilityException("Unable to read EopFile.");
+         }
       }
    }
    else if (eopFType == GmatEop::FINALS)  // No longer supported!!
@@ -266,7 +288,9 @@ void EopFile::Initialize()
       bool        done = false;
       while (!done && (!eopFile.eof()))
       {
-         getline(eopFile, line);
+         bool lineRead = GmatFileUtil::GetLine(&eopFile,line);
+         if (lineRead == false)
+            throw UtilityException("Unable to read EopFile.");
          if (!IsBlank(line.c_str()))
          {
             std::istringstream lineS;

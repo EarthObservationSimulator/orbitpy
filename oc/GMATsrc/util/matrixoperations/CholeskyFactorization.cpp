@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,6 +32,7 @@
 #include "CholeskyFactorization.hpp"
 #include "RealUtilities.hpp"
 #include "UtilityException.hpp"
+#include "MessageInterface.hpp"
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -90,7 +91,7 @@ CholeskyFactorization& CholeskyFactorization::operator=(const
 }
 
 //------------------------------------------------------------------------------
-// void Factor(const Rmatrix inputMatrix, Rmatrix &R, Rmatrix &w)
+// void Factor(const Rmatrix &inputMatrix, Rmatrix &R, Rmatrix &w)
 //------------------------------------------------------------------------------
 /**
 * Matrix factorization routine using Cholesky decomposition
@@ -101,11 +102,27 @@ CholeskyFactorization& CholeskyFactorization::operator=(const
 *        function due to class structure, this matrix is not used for anything
 */
 //------------------------------------------------------------------------------
-void CholeskyFactorization::Factor(const Rmatrix inputMatrix, Rmatrix &R,
+void CholeskyFactorization::Factor(const Rmatrix &inputMatrix, Rmatrix &R,
                                    Rmatrix &blankMatrix)
 {
+   Factor(inputMatrix, R);
+}
+
+
+//------------------------------------------------------------------------------
+// void Factor(const Rmatrix inputMatrix, Rmatrix &R, Rmatrix &w)
+//------------------------------------------------------------------------------
+/**
+* Matrix factorization routine using Cholesky decomposition
+*
+* @param inputMatrix The matrix to be factored, packed in upper triangular form
+* @param R The matrix the factored result will be stored in
+*/
+//------------------------------------------------------------------------------
+void CholeskyFactorization::Factor(const Rmatrix &inputMatrix, Rmatrix &R)
+{
+   bool reportWarning = false;
    rowCount = inputMatrix.GetNumRows();
-   iError = 0;
 
    if (rowCount != inputMatrix.GetNumColumns())
    {
@@ -128,7 +145,7 @@ void CholeskyFactorization::Factor(const Rmatrix inputMatrix, Rmatrix &R,
 
    Real dPivot, dsum, tolerance;
 
-   const Real epsilon = 1.0e-8;
+   const Real epsilon = 1.0e-10;
    rowCountIf = 0;
    j = 1;
 
@@ -153,18 +170,19 @@ void CholeskyFactorization::Factor(const Rmatrix inputMatrix, Rmatrix &R,
             sum1[j - 1] = dsum * dPivot;
          else if (dsum > tolerance)
          {
-            dPivot = sqrt(dsum);
-            sum1[j - 1] = dPivot;
-            dPivot = 1.0 / dPivot;
-         }
-         else if (iError < 0)
-         {
-            iError = k - 1;
             dPivot = GmatMathUtil::Sqrt(dsum);
             sum1[j - 1] = dPivot;
             dPivot = 1.0 / dPivot;
          }
-         else if (dsum < 0.0)
+         else if (dsum > 0.0)
+         {
+            reportWarning = true;
+
+            dPivot = GmatMathUtil::Sqrt(dsum);
+            sum1[j - 1] = dPivot;
+            dPivot = 1.0 / dPivot;
+         }
+         else if (dsum <= 0.0)
          {
             std::string errMessage =
                "Matrix must be positive definite for Cholesky decomposition.";
@@ -185,6 +203,15 @@ void CholeskyFactorization::Factor(const Rmatrix inputMatrix, Rmatrix &R,
          R(ii, jj) = sum1[elementCount];
          elementCount++;
       }
+   }
+
+   if (reportWarning)
+   {
+      MessageInterface::ShowMessage("**** WARNING **** Cholesky "
+         "factorization calculated one or more squared diagonal elements "
+         "of the factored matrix below the tolerance %.2e.  Diagonal "
+         "elements were still calculated normally by square roots, but "
+         "may have become very small in magnitude.\n", tolerance);
    }
 }
 
@@ -293,12 +320,13 @@ Integer CholeskyFactorization::Invert(Real* sum1, Integer array_size)
 {
    Integer retval = -1;
    Integer rowCount = (Integer)((GmatMathUtil::Sqrt(1 + array_size * 8) - 1) / 2);
-   Integer i, i1, i2, i3, ist, iERowCount, iError = 0, il, il1, il2;
+   Integer i, i1, i2, i3, ist, iERowCount, il, il1, il2;
    Integer j, k, k1, kl, iLeRowCount, rowCountIf, iPivot;
    Real dPivot, din, dsum, tolerance;
    Real work;
+   bool reportWarning = false;
 
-   const Real epsilon = 1.0e-8;
+   const Real epsilon = 1.0e-10;
 
    rowCountIf = 0;
    j = 1;
@@ -324,21 +352,23 @@ Integer CholeskyFactorization::Invert(Real* sum1, Integer array_size)
             sum1[j - 1] = dsum * dPivot;
          else if (dsum > tolerance)
          {
-            dPivot = sqrt(dsum);
+            dPivot = GmatMathUtil::Sqrt(dsum);
             sum1[j - 1] = dPivot;
             dPivot = 1.0 / dPivot;
          }
-         else if (iError < 0)
+         else if (dsum > 0.0)
          {
-            iError = k - 1;
+            reportWarning = true;
+
             dPivot = GmatMathUtil::Sqrt(dsum);
             sum1[j - 1] = dPivot;
             dPivot = 1.0 / dPivot;
          }
          else if (dsum < 0.0)
          {
-            retval = 1;
-            break;            // Throw here?
+            std::string errMessage =
+               "Matrix must be positive definite for Cholesky decomposition.";
+            throw UtilityException(errMessage);
          }
 
          j = j + 1;
@@ -397,6 +427,16 @@ Integer CholeskyFactorization::Invert(Real* sum1, Integer array_size)
          il = il + rowCountIf;
       }
       retval = 0;
+   }
+
+   if (reportWarning)
+   {
+      MessageInterface::ShowMessage("**** WARNING **** Cholesky "
+         "factorization calculated one or more squared diagonal elements "
+         "of the factored matrix below the tolerance %.2e.  Diagonal elements "
+         "were still calculated normally by square roots, but may have "
+         "become very small in magnitude and affected inversion "
+         "computations.\n", tolerance);
    }
 
    return retval;

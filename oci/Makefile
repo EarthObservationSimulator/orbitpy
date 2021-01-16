@@ -19,7 +19,7 @@ LIB     = -L$(LIB_DIR)
 # How they are invoked on the compile  line
 LIBS    = -loc -lgmat
 
-OPTIMIZATIONS = -O3 -funroll-loops -Wall -g -std=gnu++11
+OPTIMIZATIONS = -O3 -funroll-loops -Wall -g -std=gnu++17
 
 # Define macros for the needed includes
 HEADERS =   -I. \

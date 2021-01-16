@@ -28,7 +28,7 @@ HEADERS =   -I. \
 -I$(BOOST_ROOT) \
 -I$(BOOST_ROOT)/boost/math/special_functions
 
-CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) -Wall -g -std=gnu++11
+CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) -Wall -g -std=gnu++17
 CPP = g++
 
 OBJECTS = \

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,7 +42,6 @@
 
 #include "GmatTime.hpp"
 
-
 class GMATUTIL_API UnimplementedException : public BaseException
 {
    public:
@@ -74,6 +73,14 @@ class GMATUTIL_API InvalidTimeException : public BaseException
 
 
 
+/**
+ * \ingroup API
+ * @brief Time system conversion routines
+ *
+ * GMAT supports time representations in several different time systems.  This
+ * class provides routimes to convert between these time systems, and to 
+ * show hte time as either a real modified Julian number or as a Gregorian date. 
+ */
 class GMATUTIL_API TimeSystemConverter
 {
 public:
@@ -109,7 +116,7 @@ public:
 
    static const std::string TIME_SYSTEM_TEXT[TimeSystemCount];
    
-   Integer     GetTimeTypeID(std::string &str);
+   Integer     GetTimeTypeID(const std::string &str);
    
    Real        Convert(const Real origValue,
                          const Integer fromType,
@@ -123,15 +130,15 @@ public:
                          Real refJd = GmatTimeConstants::JD_NOV_17_1858,
                          bool *insideLeapSec = NULL);
 
-   GmatTime    Convert(const GmatTime origValue, 
+   GmatTime    Convert(const GmatTime &origValue, 
                          const Integer fromType, 
                          const Integer toType, 
                          Real refJd = GmatTimeConstants::JD_JAN_5_1941,
                          bool *insideLeapSec = NULL);
-   GmatTime    ConvertToTaiMjd(Integer fromType, GmatTime origValue, 
+   GmatTime    ConvertToTaiMjd(Integer fromType, const GmatTime &origValue, 
                          Real refJd = GmatTimeConstants::JD_NOV_17_1858,
                          bool *insideLeapSec = NULL);
-   GmatTime    ConvertFromTaiMjd(Integer toType, GmatTime origValue, 
+   GmatTime    ConvertFromTaiMjd(Integer toType, const GmatTime &origValue,
                          Real refJd = GmatTimeConstants::JD_NOV_17_1858,
                          bool *insideLeapSec = NULL);
 
@@ -163,16 +170,16 @@ public:
                          const std::string &fromStr, const std::string &toType,
                          Real &toMjd, std::string &toStr, Integer format = 1,
                          bool *insideLeapSec = NULL);
-   
-   void        Convert(const char *fromType, GmatTime fromMjd, 
+
+   void        Convert(const char *fromType, const GmatTime &fromMjd, 
                          const char *fromStr, const char *toType, 
                          GmatTime &toMjd, std::string &toStr, Integer format = 1,
                          bool *insideLeapSec = NULL);
-   void        Convert(const char *fromType, GmatTime fromMjd, 
+   void        Convert(const char *fromType, const GmatTime &fromMjd,
                          const std::string &fromStr, const std::string &toType, 
                          GmatTime &toMjd, std::string &toStr, Integer format = 1,
                          bool *insideLeapSec = NULL);
-   void        Convert(const std::string &fromType, GmatTime fromMjd, 
+   void        Convert(const std::string &fromType, const GmatTime &fromMjd,
                          const std::string &fromStr, const std::string &toType, 
                          GmatTime &toMjd, std::string &toStr, Integer format = 1,
                          bool *insideLeapSec = NULL);
@@ -187,7 +194,7 @@ public:
 protected:
 
    bool        IsInLeapSecond(Real theTaiMjd);
-   bool        IsInLeapSecond(GmatTime theTaiMjd);
+   bool        IsInLeapSecond(const GmatTime &theTaiMjd);
    
 //   bool        HandleLeapSecond();
    

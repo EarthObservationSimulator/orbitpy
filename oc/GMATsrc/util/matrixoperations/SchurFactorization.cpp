@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -92,7 +92,7 @@ SchurFactorization& SchurFactorization::operator=(const SchurFactorization
 }
 
 //------------------------------------------------------------------------------
-// void Factor(const Rmatrix inputMatrix, Rmatrix &sdUnitary, Rmatrix &sdUpper)
+// void Factor(const Rmatrix &inputMatrix, Rmatrix &sdUnitary, Rmatrix &sdUpper)
 //------------------------------------------------------------------------------
 /**
 * Matrix factorization routine using the Schur identity
@@ -112,7 +112,7 @@ SchurFactorization& SchurFactorization::operator=(const SchurFactorization
 * @return 0 on success, anything else indicates a problem
 */
 //------------------------------------------------------------------------------
-void SchurFactorization::Factor(const Rmatrix inputMatrix, Rmatrix &sdUnitary,
+void SchurFactorization::Factor(const Rmatrix &inputMatrix, Rmatrix &sdUnitary,
                                 Rmatrix &sdUpper)
 {
 

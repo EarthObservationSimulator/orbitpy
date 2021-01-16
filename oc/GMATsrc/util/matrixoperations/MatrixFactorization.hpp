@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,7 +46,7 @@ public:
                                   &matrixfactorization);
 
    virtual void Invert(Rmatrix &inputMatrix) = 0;
-   virtual void Factor(const Rmatrix inputMatrix, Rmatrix &output1,
+   virtual void Factor(const Rmatrix &inputMatrix, Rmatrix &output1,
                        Rmatrix &output2) = 0;
 
    static Rmatrix CompressNormalMatrix(const Rmatrix &infMatrix,

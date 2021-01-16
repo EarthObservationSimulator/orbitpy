@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,6 +38,7 @@
 #include "StringTokenizer.hpp"    // for StringTokenizer()
 #include "GmatGlobal.hpp"         // for SetTestingMode()
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <iomanip>
 
@@ -247,7 +248,8 @@ bool FileManager::SetBinDirectory(const std::string &appName, const std::string 
       if (appFullPath[0] != '.')
       {
          std::string appPath = GmatFileUtil::ParsePathName(appFullPath);
-         std::string newPath = appPath + appName;
+         std::string newPath = appPath + appName; // HAS Windows name!!!
+
          if (GmatFileUtil::DoesFileExist(newPath))
          {
             mAbsBinDir = appPath;
@@ -611,6 +613,8 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                ("   BinDirectory            = '%s'\n", mAbsBinDir.c_str());
                MessageInterface::ShowMessage
                ("   CurrentWorkingDirectory = '%s'\n", GetCurrentWorkingDirectory().c_str());
+               MessageInterface::ShowMessage
+               ("   ApplicationPath = '%s'\n", GmatFileUtil::GetApplicationPath().c_str());
             #endif
             
             if (GmatFileUtil::IsPathRelative(fullname))
@@ -618,14 +622,24 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                // Check relative to script directory first
                // Then check relative to bin directory
                tempPath2 = mAbsBinDir + fullname;
-            }
-            else
-               tempPath2 = defaultPath + fullname;
-            
                #ifdef DEBUG_FIND_INPUT_PATH
                   MessageInterface::ShowMessage
-                        ("   => next search path = '%s' \n", tempPath2.c_str());
+                              ("LOOKING relative to bin directory\n");
                #endif
+            }
+            else
+            {
+               tempPath2 = defaultPath + fullname;
+               #ifdef DEBUG_FIND_INPUT_PATH
+                  MessageInterface::ShowMessage
+                              ("LOOKING relative to DEFAULT path for type\n");
+               #endif
+            }
+            
+            #ifdef DEBUG_FIND_INPUT_PATH
+               MessageInterface::ShowMessage
+                     ("   => next search path = '%s' \n", tempPath2.c_str());
+            #endif
             
             if (writeWarning && gmatPath != "" && writeFilePathInfo)
                MessageInterface::ShowMessage

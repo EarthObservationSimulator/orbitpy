@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -757,7 +757,7 @@ bool GmatFileUtil::HasNoPath(const std::string &fullPath)
 
 
 //------------------------------------------------------------------------------
-// bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk = true)
+// bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk)
 //------------------------------------------------------------------------------
 bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk)
 {
@@ -990,11 +990,14 @@ bool GmatFileUtil::GetLine(std::istream *is, std::string &line)
    
    char ch;
    std::string result;
-   
+
    while (is->get(ch) && ch != '\r' && ch != '\n' && ch != '\0' &&
           !is->eof()) 
       result += ch;
-   
+
+   if (ch == '\r' && is->peek() == '\n')
+      is->get();
+
    line = result;
    return true;
 }
@@ -1515,7 +1518,7 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
 // StringArray GetTextLines(const std::string &fileName)
 //------------------------------------------------------------------------------
 /*
- * Reads a text file and returns an array of string.
+ * Reads a text file and returns an array of strings.
  *
  * @param  dirName  Directory name
  * @return  String array containing file names in the directory
@@ -1525,7 +1528,7 @@ StringArray GmatFileUtil::GetTextLines(const std::string &fileName)
 {
    StringArray lines;
    
-   // check if file exist
+   // check if file exists
    std::ifstream inFile(fileName.c_str());
    
    if (!(inFile))
@@ -1540,7 +1543,10 @@ StringArray GmatFileUtil::GetTextLines(const std::string &fileName)
    
    while (!inFile.eof())
    {
-      inFile >> oneLine;
+      // // Old code: Breaks at white space rather than line by line
+      // inFile >> oneLine;
+      if (!GetLine(&inFile, oneLine))
+         break;
       lines.push_back(oneLine);
    }
    

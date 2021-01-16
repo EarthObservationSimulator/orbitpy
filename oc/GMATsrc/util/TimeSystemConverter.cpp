@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -122,7 +122,7 @@ TimeSystemConverter::TimeSystemConverter(const TimeSystemConverter &tcu) :
 //------------------------------------------------------------------------------
 // Integer GetTimeTypeID(std::string &str) 
 //------------------------------------------------------------------------------
-Integer TimeSystemConverter::GetTimeTypeID(std::string &str)
+Integer TimeSystemConverter::GetTimeTypeID(const std::string &str)
 {
     for (Integer i = 0; i < TimeSystemCount; i++)
     {
@@ -200,7 +200,7 @@ Real TimeSystemConverter::Convert(const Real origValue,
 }
 
 
-GmatTime TimeSystemConverter::Convert(const GmatTime origValue,
+GmatTime TimeSystemConverter::Convert(const GmatTime &origValue,
    const Integer fromType, const Integer toType, Real refJd, bool *insideLeapSec)
 {
 #ifdef DEBUG_FIRST_CALL
@@ -409,7 +409,7 @@ Real TimeSystemConverter::ConvertToTaiMjd(Integer fromType, Real origValue,
    return retTime;
 }
 
-GmatTime TimeSystemConverter::ConvertToTaiMjd(Integer fromType, GmatTime origValue,
+GmatTime TimeSystemConverter::ConvertToTaiMjd(Integer fromType, const GmatTime &origValue,
    Real refJd, bool *insideLeapSec)
 {
 #ifdef DEBUG_FIRST_CALL
@@ -515,8 +515,8 @@ GmatTime TimeSystemConverter::ConvertToTaiMjd(Integer fromType, GmatTime origVal
 
       // An approximation valid to the difference between TDB and TT; 1st term
       // here should be in TT rather than the input TDB, but we do not know TT
-      GmatTime t_TT = (origValue - tttOffset) / T_TT_COEFF1;
-      Real m_E = ((t_TT * M_E_COEFF1) + M_E_OFFSET).GetMjd() *
+      Real t_TT = (origValue - tttOffset).GetMjd() / T_TT_COEFF1;
+      Real m_E = ((t_TT * M_E_COEFF1) + M_E_OFFSET) *
          GmatMathConstants::RAD_PER_DEG;
 
       Real offset = ((TDB_COEFF1 *Sin(m_E)) + (TDB_COEFF2 * Sin(2 * m_E))) /
@@ -534,14 +534,14 @@ GmatTime TimeSystemConverter::ConvertToTaiMjd(Integer fromType, GmatTime origVal
       MessageInterface::ShowMessage("   M_E_COEFF1  = %.15le\n", M_E_COEFF1);
       MessageInterface::ShowMessage("   TDB_COEFF1  = %.15le\n", TDB_COEFF1);
       MessageInterface::ShowMessage("   TDB_COEFF2  = %.15le\n", TDB_COEFF2);
-      MessageInterface::ShowMessage("   origValue   = %.15le\n", origValue);
+      MessageInterface::ShowMessage("   origValue   = %.15le\n", origValue.GetMjd());
       MessageInterface::ShowMessage("   refJd       = %.15le\n", refJd);
       MessageInterface::ShowMessage("   t_TT        = %.15le\n", t_TT);
       MessageInterface::ShowMessage("   m_E         = %.15le\n", m_E);
       MessageInterface::ShowMessage("   offset      = %.15le\n", offset);
-      MessageInterface::ShowMessage("   ttJd        = %.15le\n", ttJd);
-      MessageInterface::ShowMessage("   taiJd       = %.15le\n", taiJd);
-      MessageInterface::ShowMessage("   tai         = %.15le\n", taiJd - refJd);
+      MessageInterface::ShowMessage("   ttJd        = %.15le\n", ttJd.GetMjd());
+      MessageInterface::ShowMessage("   taiJd       = %.15le\n", taiJd.GetMjd());
+      MessageInterface::ShowMessage("   tai         = %.15le\n", (taiJd - refJd).GetMjd());
 #endif
 
       retTime = taiJd;
@@ -622,7 +622,6 @@ Real TimeSystemConverter::ConvertFromTaiMjd(Integer toType, Real origValue,
       case UTCMJD:
       case UTC:
        {
-          //#ifdef DEBUG_TIMECONVERTER_DETAILS
           #ifdef DEBUG_TIME_TO_UTC
              MessageInterface::ShowMessage("      In the 'utc' block\n");
              MessageInterface::ShowMessage(
@@ -742,7 +741,7 @@ Real TimeSystemConverter::ConvertFromTaiMjd(Integer toType, Real origValue,
 }
 
 
-GmatTime TimeSystemConverter::ConvertFromTaiMjd(Integer toType, GmatTime origValue,
+GmatTime TimeSystemConverter::ConvertFromTaiMjd(Integer toType, const GmatTime &origValue,
    Real refJd, bool *insideLeapSec)
 {
 #ifdef DEBUG_FIRST_CALL
@@ -904,9 +903,9 @@ GmatTime TimeSystemConverter::ConvertFromTaiMjd(Integer toType, GmatTime origVal
       MessageInterface::ShowMessage("      In the 'tt' block\n");
 #endif
       //return (origValue + (GmatTimeConstants::TT_TAI_OFFSET / GmatTimeConstants::SECS_PER_DAY));
-      origValue.SetSec(origValue.GetSec() + (int)GmatTimeConstants::TT_TAI_OFFSET);
-      origValue.SetFracSec(origValue.GetFracSec() + GmatTimeConstants::TT_TAI_OFFSET - ((int)GmatTimeConstants::TT_TAI_OFFSET));
-      return origValue;
+      GmatTime newValue(origValue);
+      newValue.AddSeconds(GmatTimeConstants::TT_TAI_OFFSET);
+      return newValue;
    }
    default:
       ;
@@ -1257,7 +1256,7 @@ void TimeSystemConverter::Convert(const char *fromType, Real fromMjd,
                   std::string(toType), toMjd, toStr, format, insideLeapSec);
 }
 
-void TimeSystemConverter::Convert(const char *fromType, GmatTime fromMjd,
+void TimeSystemConverter::Convert(const char *fromType, const GmatTime &fromMjd,
                                 const char *fromStr,
                                 const char *toType, GmatTime &toMjd,
                                 std::string &toStr, Integer format,
@@ -1286,7 +1285,7 @@ void TimeSystemConverter::Convert(const char *fromType, Real fromMjd,
                   toStr, format, insideLeapSec);
 }
 
-void TimeSystemConverter::Convert(const char *fromType, GmatTime fromMjd,
+void TimeSystemConverter::Convert(const char *fromType, const GmatTime &fromMjd,
                                 const std::string &fromStr,
                                 const std::string &toType, GmatTime &toMjd,
                                 std::string &toStr, Integer format,
@@ -1464,7 +1463,7 @@ void TimeSystemConverter::Convert(const std::string &fromType, Real fromMjd,
 }
 
 
-void TimeSystemConverter::Convert(const std::string &fromType, GmatTime fromMjd,
+void TimeSystemConverter::Convert(const std::string &fromType, const GmatTime &fromMjd,
                                 const std::string &fromStr,
                                 const std::string &toType, GmatTime &toMjd,
                                 std::string &toStr, Integer format,
@@ -1473,7 +1472,7 @@ void TimeSystemConverter::Convert(const std::string &fromType, GmatTime fromMjd,
 #ifdef DEBUG_TIME_CONVERT
    MessageInterface::ShowMessage
       ("TimeSystemConverter::Convert() entered fromType=%s, fromMjd=%f, fromStr=%s\n"
-      "   toType=%s\n", fromType.c_str(), fromMjd, fromStr.c_str(), toType.c_str());
+      "   toType=%s\n", fromType.c_str(), fromMjd.GetMjd(), fromStr.c_str(), toType.c_str());
 #endif
 
    bool isUTC = false;
@@ -1557,7 +1556,7 @@ void TimeSystemConverter::Convert(const std::string &fromType, GmatTime fromMjd,
    }
 
 #ifdef DEBUG_TIME_CONVERT
-   MessageInterface::ShowMessage("===> fromMjdVal=%.12f\n", fromMjdVal);
+   MessageInterface::ShowMessage("===> fromMjdVal=%.12f\n", fromMjdVal.GetMjd());
    MessageInterface::ShowMessage("===> fromType=%s\n", fromType.c_str());
    MessageInterface::ShowMessage("===> toType=%s\n", toType.c_str());
 #endif
@@ -1811,7 +1810,7 @@ bool TimeSystemConverter::IsInLeapSecond(Real theTaiMjd)
 }
 
 
-bool TimeSystemConverter::IsInLeapSecond(GmatTime theTaiMjd)
+bool TimeSystemConverter::IsInLeapSecond(const GmatTime &theTaiMjd)
 {
    // Leap Second File reader expects the offset to be 1858
    Real offsetValue = GmatTimeConstants::JD_JAN_5_1941 -

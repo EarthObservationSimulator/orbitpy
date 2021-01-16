@@ -24,10 +24,10 @@ HEADERS =   -I. \
 -I$(GMAT_DIR)/util/matrixoperations \
 -I$(GMAT_DIR)/console
 
-CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) -Wall -g -std=gnu++11
+CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) -Wall -g -std=gnu++17
 CPP = g++
 
-OBJECTS = \
+OBJECTS = \ # Note that not all avaialble files are compiled.
     $(GMAT_DIR)/base/ExponentialAtmosphere.o \
     $(GMAT_DIR)/util/A1Date.o \
     $(GMAT_DIR)/util/A1Mjd.o \

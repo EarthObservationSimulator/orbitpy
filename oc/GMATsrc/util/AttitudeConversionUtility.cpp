@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002 - 2018 United States Government as represented by the
+// Copyright (c) 2002 - 2020 United States Government as represented by the
 // Administrator of the National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -250,6 +250,9 @@ Rmatrix33 AttitudeConversionUtility::ToCosineMatrix(const Rvector3 &eulerAngles,
 //------------------------------------------------------------------------------
  /**
  * Converts the input euler angles and sequence to a direction cosine matrix.
+ * Vinay: Intrinsic Euler rotations. Eg: 1-2-3 => R = R3.R2.R1, where each rotation matrix rotates the coordinate system (not the vector).
+ * https://mathworld.wolfram.com/RotationMatrix.html
+ * https://mathworld.wolfram.com/EulerAngles.html
  *
  * @param eulerAngles  the input euler angles (radians)
  * @param seq1         first entry of the euler sequence
@@ -257,10 +260,6 @@ Rmatrix33 AttitudeConversionUtility::ToCosineMatrix(const Rvector3 &eulerAngles,
  * @param seq3         third entry of the euler sequence
  *
  * @return the cosine direction matrix representation of the input attitude.
- * 
- * Vinay: Intrinsic Euler rotations. Eg: 1-2-3 => R = R3.R2.R1, where each rotation matrix rotates the coordinate system (not the vector).
- * https://mathworld.wolfram.com/RotationMatrix.html
- * https://mathworld.wolfram.com/EulerAngles.html
  */
 //------------------------------------------------------------------------------
 Rmatrix33 AttitudeConversionUtility::ToCosineMatrix(const Real *eulerAngles,
