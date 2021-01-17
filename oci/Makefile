@@ -1,10 +1,12 @@
 DRIVER =  orbitpropcov_grid genCovGrid orbitpropcov_popts j2_analytical_propagator gp_in_fov_cov_calc pnt_axis_sphere_intsec_cov_calc pnt_opts_with_gp_in_fov_cov_calc sensor_fov_projector
 
 # Define macros for locations
-BASE_ROOT = ../oc
-LIB_DIR = $(BASE_ROOT)/lib
-GMAT_LIB = $(LIB_DIR)/libgmat.a
-GMAT_OC_LIB = $(LIB_DIR)/liboc.a
+BASE_ROOT = .
+LIB_DIR = $(BASE_ROOT)/../propcov/lib
+GMATUTIL_LIB_DIR = $(LIB_DIR)/gmatutil
+PROPCOVCPP_LIB_DIR = $(LIB_DIR)/propcov-cpp
+GMATUTIL_LIB = $(GMATUTIL_LIB_DIR)/libgmatutil.a
+PROPCOVCPP_LIB = $(PROPCOVCPP_LIB_DIR)/libpropcov.a
 BIN_DIR = bin
 
 EXECUTABLE = $(patsubst %,$(BIN_DIR)/%,$(DRIVER)) 
@@ -15,28 +17,27 @@ DRIVER_OBJ = $(patsubst %,%.o,$(DRIVER))
 
 
 # LIB need to compile the EXECUTABLE  
-LIB     = -L$(LIB_DIR)
+LIB     = -L$(GMATUTIL_LIB_DIR)
 # How they are invoked on the compile  line
-LIBS    = -loc -lgmat
+LIBS    = -lpropcov -lgmatutil
 
 OPTIMIZATIONS = -O3 -funroll-loops -Wall -g -std=gnu++17
 
 # Define macros for the needed includes
 HEADERS =   -I. \
--I$(BASE_ROOT)/src \
--I$(BASE_ROOT)/GMATsrc/base \
--I$(BASE_ROOT)/GMATsrc/include \
--I$(BASE_ROOT)/GMATsrc/util \
--I$(BASE_ROOT)/GMATsrc/util/interpolator \
--I$(BASE_ROOT)/GMATsrc/util/matrixoperations \
--I$(BASE_ROOT)/GMATsrc/console \
--I$(BASE_ROOT)/../oci/oci_util.h \
+-I$(LIB_DIR)/propcov-cpp \
+-I$(LIB_DIR)/gmatutil/base \
+-I$(LIB_DIR)/gmatutil/include \
+-I$(LIB_DIR)/gmatutil/util \
+-I$(LIB_DIR)/gmatutil/util/interpolator \
+-I$(LIB_DIR)/gmatutil/util/matrixoperations \
+-I$(BASE_ROOT) \
 
 CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) $(TESTFLAGS) #TODO: Remove TESTFLAGS
 CPP = g++
 
 # Link specific flags
-LINK_FLAGS = $(LIB) $(LIBS) 
+LINK_FLAGS = -L$(PROPCOVCPP_LIB_DIR) -L$(GMATUTIL_LIB_DIR) -lpropcov -lgmatutil
 ifeq ($(shell uname -s), Darwin)
     LINK_FLAGS += /usr/lib/libstdc++.6.dylib \
                 -headerpad_max_install_names \
@@ -56,7 +57,7 @@ all: $(EXECUTABLE) install
 
 install: $(EXECUTABLE)
 
-$(EXECUTABLE): $(BIN_DIR)/% :%.o $(DRIVER_OBJ) $(GMAT_LIB) $(GMAT_OC_LIB)
+$(EXECUTABLE): $(BIN_DIR)/% :%.o $(DRIVER_OBJ) $(GMATUTIL_LIB) $(PROPCOVCPP_LIB)
 	@if [ ! -x $(BIN_DIR) ]; then mkdir $(BIN_DIR); fi 
 	$(CPP) $< $(LINK_FLAGS) -o $@
 	@chmod -R 755 $(BIN_DIR)
@@ -72,7 +73,6 @@ runtest: $(EXECUTABLE)
 clean:
 	$(patsubst %,rm -f %,$(DRIVER_OBJ)) 
 	$(patsubst %,rm -f %,$(EXECUTABLE)) 
-	rm -f core
 
 
 bare: clean

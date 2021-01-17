@@ -26,8 +26,8 @@ docs/_build/*
 docs/_templates/*
 !docs/_templates/.gitkeep
 
+propcov/tests/tests-cpp/bin/SystemTest_Analysis
 oci/bin/genCovGrid
-oc/tests/bin/SystemTest_Analysis
 oci/bin/orbitpropcov_grid
 oci/bin/orbitpropcov_popts
 oci/bin/pnt_opts_with_gp_in_fov_cov_calc
