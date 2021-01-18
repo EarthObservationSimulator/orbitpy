@@ -4,6 +4,7 @@ from setuptools import setup
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 
 import sys
+import glob
 
 __version__ = "0.0.1"
 
@@ -16,9 +17,15 @@ __version__ = "0.0.1"
 #   Sort input source files if you glob sources to ensure bit-for-bit
 #   reproducible builds (https://github.com/pybind/python_example/pull/53)
 
+#files = sorted(glob.glob('lib/**/*.hpp', recursive = True))
+#files.extend(sorted(glob.glob('lib/**/*.cpp', recursive = True)))
+#files.extend(["src/outer_Rvector.cpp"])
+files = ["src/outer_Rvector.cpp"]
+include_dirs= ["lib/gmatutil/base", "lib/gmatutil/include", "lib/gmatutil/util", "lib/propcov-cpp"]
 ext_modules = [
     Pybind11Extension("propcov",
-        ["src/main.cpp"],
+        files,
+        include_dirs = include_dirs,
         # Example: passing in the version to the compiled code
         define_macros = [('VERSION_INFO', __version__)],
         ),

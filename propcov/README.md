@@ -11,6 +11,5 @@
 └───tests 
     ├───tests-cpp (cpp tests on the `propcov-cpp` library)
     │   ├───bin
-    │   ├───new
     │   └───old
     └───tests-python (python tests on the wrapped `src`)
