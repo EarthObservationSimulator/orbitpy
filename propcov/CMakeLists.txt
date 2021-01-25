@@ -8,17 +8,25 @@ SET_PROPERTY(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS 17 14 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
-
-# Generate Python module
 add_subdirectory(lib/pybind11)
 add_subdirectory(lib/gmatutil)
 
 
+include_directories(BEFORE lib/gmatutil/include/ lib/gmatutil/util/interpolator lib/gmatutil/util/matrixoperations)
+
+pybind11_add_module(propcov MODULE src/Rvector_py.cpp)
+
+target_link_libraries(propcov PRIVATE pybind11::module GmatUtil)
 
 
-####################################################################################
-pybind11_add_module(propcov src/Rvector_py.cpp)
 
-# EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
-# define (VERSION_INFO) here.
-target_compile_definitions(propcov PRIVATE VERSION_INFO=${PROPCOV_VERSION_INFO})
+
+################ Perhaps below code is requried for APPLE. TODO: Verify and remove if not needed #############################
+if(UNIX AND NOT APPLE)
+    set_target_properties(propcov PROPERTIES INSTALL_RPATH "$ORIGIN/relative/path/to/supporting/library_dir")
+elseif(APPLE)
+    set_target_properties(propcov PROPERTIES INSTALL_RPATH "@loader_path/relative/path/to/supporting/library_dir")
+endif()
+
+set_target_properties(propcov PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+############################################################################################################################
