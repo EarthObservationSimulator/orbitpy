@@ -8,7 +8,7 @@
 # Author: Darrel J. Conway
 #  
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
-# Revision 2021-01-17: Modified to include 'base' folder and remove 'util/datawriter' folder
+# Revision 2021-01-25: Modified to include 'base' folder and remove 'util/datawriter' folder
 # in list of directories containing the source/header files, and the list of source files.
 # Modified from building shared to static library with flags POSITION_INDEPENDENT_CODE ON.
 # 
@@ -24,17 +24,17 @@ ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
 # list of directories containing source/header files
-SET(UTIL_DIRS
+SET(GMATUTIL_DIRS
   include
   util
-  util/datawriter
   util/interpolator
   util/matrixoperations
+  base
   )
 
 # ====================================================================
 # source files
-SET(UTIL_SRCS
+SET(GMATUTIL_SRCS
     util/A1Date.cpp
     util/A1Mjd.cpp
     util/AngleUtil.cpp
@@ -110,22 +110,23 @@ SET(UTIL_SRCS
     util/RepeatSunSync.cpp
     util/RepeatGroundTrack.cpp
     util/SunSync.cpp
+    base/ExponentialAtmosphere.cpp
 )
 
 # ====================================================================
 # Recursively find all include files, which will be added to IDE-based
 # projects (VS, XCode, etc.)
-FILE(GLOB_RECURSE UTIL_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
+FILE(GLOB_RECURSE GMATUTIL_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 
 # ====================================================================
 # add the install targets
 
 # Create GmatUtil as a static library
-ADD_LIBRARY(${TargetName} STATIC ${UTIL_SRCS} ${UTIL_HEADERS})
+ADD_LIBRARY(${TargetName} STATIC ${GMATUTIL_SRCS} ${GMATUTIL_HEADERS})
 SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEFINE_SYMBOL "GMATUTIL_EXPORTS" POSITION_INDEPENDENT_CODE ON)
 
 # Add necessary include directories
-TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${UTIL_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${GMATUTIL_DIRS})
 IF(GMAT_USE_BOOST_VARIANT)
   TARGET_INCLUDE_DIRECTORIES(${TargetName} PUBLIC ${Boost_INCLUDE_DIR})
 ENDIF()

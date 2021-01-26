@@ -11,12 +11,11 @@ SET(CMAKE_CXX_EXTENSIONS OFF)
 add_subdirectory(lib/pybind11)
 add_subdirectory(lib/gmatutil)
 
-
 include_directories(BEFORE lib/gmatutil/include/ lib/gmatutil/util/interpolator lib/gmatutil/util/matrixoperations)
 
 pybind11_add_module(propcov MODULE src/Rvector_py.cpp)
 
-target_link_libraries(propcov PRIVATE pybind11::module GmatUtil)
+target_link_libraries(propcov PUBLIC GmatUtil)
 
 
 
@@ -30,3 +29,6 @@ endif()
 
 set_target_properties(propcov PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 ############################################################################################################################
+
+################################  COMMENTS ################################
+# target_link_libraries(propcov PRIVATE pybind11::module GmatUtil)
