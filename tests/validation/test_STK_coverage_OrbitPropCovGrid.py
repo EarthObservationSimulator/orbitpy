@@ -177,7 +177,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_1.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/01/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/01/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -213,7 +213,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_2.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/02/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/02/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -249,7 +249,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_3.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/03/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/03/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -291,7 +291,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_4.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/04/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/04/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -328,7 +328,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_5.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/05/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/05/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -371,7 +371,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_6.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/06/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/06/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -408,7 +408,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_7.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/07/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/07/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -450,7 +450,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_8.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/08/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/08/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -496,7 +496,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_9.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/09/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/09/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -539,7 +539,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_10.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/10/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/10/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -585,7 +585,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_11.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/11/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/11/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -631,7 +631,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_12.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/12/acc_',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/12/acc',prop_cov_param.cov_grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
