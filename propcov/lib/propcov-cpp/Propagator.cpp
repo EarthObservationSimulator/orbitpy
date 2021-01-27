@@ -34,7 +34,7 @@
 #include "TATCException.hpp"
 #include "StateConversionUtil.hpp"
 #include "MessageInterface.hpp"
-#include "bessel.hpp"
+// #include "bessel.hpp"
 #include "ExponentialAtmosphere.hpp"
 #include "Earth.hpp"
 
@@ -571,9 +571,9 @@ void Propagator::ComputeDragEffects(Real sma, Real ecc, Real altitude,
 	
 	// Compute common terms
 	Real c  = sma * ecc / scaleHeight;
-	Real I0 = boost::math::cyl_bessel_i(0, c);
-	Real I1 = boost::math::cyl_bessel_i(1, c);
-	Real I2 = boost::math::cyl_bessel_i(2, c);
+	Real I0 = std::cyl_bessel_i(0, c);
+	Real I1 = std::cyl_bessel_i(1, c);
+	Real I2 = std::cyl_bessel_i(2, c);
 	Real commonFac = -2 * GmatMathConstants::PI *
                     (Cd * dragAreaKm2 / totalMass) *
                     sma * density * GmatMathUtil::Exp(-c);
