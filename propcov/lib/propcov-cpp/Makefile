@@ -1,11 +1,8 @@
 .DEFAULT_GOAL := all
 
 # Define macros for locations
-THIRD_PARTY_DIR = ../../../third-party-tools
-BASE_ROOT = ..
-GMATUTIL_DIR = $(BASE_ROOT)/gmatutil
-
-BOOST_ROOT = $(THIRD_PARTY_DIR)/boost_1_72_0
+BASE_ROOT = ../..
+GMATUTIL_DIR = $(BASE_ROOT)/extern/gmatutil
 
 # Program to make library
 LIB = libpropcov.a
@@ -19,8 +16,6 @@ HEADERS =   -I. \
 -I$(GMATUTIL_DIR)/util \
 -I$(GMATUTIL_DIR)/util/interpolator \
 -I$(GMATUTIL_DIR)/console \
--I$(BOOST_ROOT) \
--I$(BOOST_ROOT)/boost/math/special_functions
 
 CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) -Wall -g -std=gnu++17
 CPP = g++

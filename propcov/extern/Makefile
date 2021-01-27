@@ -1,5 +1,5 @@
 # Define macros for locations
-SUBS = propcov-cpp
+SUBS = gmatutil
 
 all install clean bare runtest:
 	-X=`pwd`; \

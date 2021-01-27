@@ -1,5 +1,5 @@
 # Define macros for locations
-SUBS = lib src tests
+SUBS = extern lib tests
 
 all install clean bare runtest:
 	-X=`pwd`; \

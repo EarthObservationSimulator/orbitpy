@@ -2,11 +2,12 @@ DRIVER =  orbitpropcov_grid genCovGrid orbitpropcov_popts j2_analytical_propagat
 
 # Define macros for locations
 BASE_ROOT = .
-LIB_DIR = $(BASE_ROOT)/../propcov/lib
-GMATUTIL_LIB_DIR = $(LIB_DIR)/gmatutil
-PROPCOVCPP_LIB_DIR = $(LIB_DIR)/propcov-cpp
-GMATUTIL_LIB = $(GMATUTIL_LIB_DIR)/libgmatutil.a
-PROPCOVCPP_LIB = $(PROPCOVCPP_LIB_DIR)/libpropcov.a
+
+GMATUTIL_DIR = $(BASE_ROOT)/../propcov/extern/gmatutil
+PROPCOVCPP_DIR = $(BASE_ROOT)/../propcov/lib/propcov-cpp
+
+GMATUTIL_LIB = $(GMATUTIL_DIR)/libgmatutil.a
+PROPCOVCPP_LIB = $(PROPCOVCPP_DIR)/libpropcov.a
 BIN_DIR = bin
 
 EXECUTABLE = $(patsubst %,$(BIN_DIR)/%,$(DRIVER)) 
@@ -15,29 +16,23 @@ EXECUTABLE = $(patsubst %,$(BIN_DIR)/%,$(DRIVER))
 DRIVER_SRC = $(patsubst %,%.cpp,$(DRIVER))
 DRIVER_OBJ = $(patsubst %,%.o,$(DRIVER))
 
-
-# LIB need to compile the EXECUTABLE  
-LIB     = -L$(GMATUTIL_LIB_DIR)
-# How they are invoked on the compile  line
-LIBS    = -lpropcov -lgmatutil
-
 OPTIMIZATIONS = -O3 -funroll-loops -Wall -g -std=gnu++17
 
 # Define macros for the needed includes
 HEADERS =   -I. \
--I$(LIB_DIR)/propcov-cpp \
--I$(LIB_DIR)/gmatutil/base \
--I$(LIB_DIR)/gmatutil/include \
--I$(LIB_DIR)/gmatutil/util \
--I$(LIB_DIR)/gmatutil/util/interpolator \
--I$(LIB_DIR)/gmatutil/util/matrixoperations \
+-I$(PROPCOVCPP_DIR) \
+-I$(GMATUTIL_DIR)/base \
+-I$(GMATUTIL_DIR)/include \
+-I$(GMATUTIL_DIR)/util \
+-I$(GMATUTIL_DIR)/util/interpolator \
+-I$(GMATUTIL_DIR)/util/matrixoperations \
 -I$(BASE_ROOT) \
 
 CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) $(TESTFLAGS) #TODO: Remove TESTFLAGS
 CPP = g++
 
 # Link specific flags
-LINK_FLAGS = -L$(PROPCOVCPP_LIB_DIR) -L$(GMATUTIL_LIB_DIR) -lpropcov -lgmatutil
+LINK_FLAGS = -L$(PROPCOVCPP_DIR) -L$(GMATUTIL_DIR) -lpropcov -lgmatutil
 ifeq ($(shell uname -s), Darwin)
     LINK_FLAGS += /usr/lib/libstdc++.6.dylib \
                 -headerpad_max_install_names \
