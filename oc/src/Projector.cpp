@@ -31,7 +31,7 @@ Real Projector::constrainLongitude(Real lon)
  * @return An AnglePair containing the latitude and longitude
  *
  */
-AnglePair Projector::cartesianToLatLon(Rvector3 cart)
+AnglePair Projector::cartesianToLatLon(Rvector3 &cart)
 {
    // Calculate the longitude
    Real lon = GmatMathUtil::ATan2(cart[1], cart[0]);

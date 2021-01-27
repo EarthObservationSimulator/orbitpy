@@ -39,7 +39,7 @@ public:
 	std::vector<AnglePair> unitVectorToClockCone(const std::vector<Rvector3> &cartesianHeadings);
 	Rvector6 getEarthFixedState(Real jd,const Rvector6 &state_I);
 	Rvector3 latLonToCartesian(AnglePair latLon);
-	AnglePair cartesianToLatLon(Rvector3 cart);
+	AnglePair cartesianToLatLon(Rvector3 &cart);
 	Real constrainLongitude(Real lon);
 	
 	// Matrix coordinate conversion
