@@ -175,7 +175,7 @@ std::vector<Rvector3> DiscretizedSensor::genCartesianHeadings(std::vector<AngleP
  * the ith row. The column poles are constructed by crossing the corner in the first row of the 
  * ith column with the corner in the second row of the ith column.
  *
- * @return @return A vector of cartesian unit vectors (Rvector3 objects) in the sensor frame
+ * @return  A vector of cartesian unit vectors (Rvector3 objects) in the sensor frame
  *
  */
 std::vector<Rvector3> DiscretizedSensor::generatePoles()

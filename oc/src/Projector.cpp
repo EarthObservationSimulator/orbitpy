@@ -1,5 +1,14 @@
 #include "Projector.hpp"
 
+/**
+ *
+ * Constrains longitude to be within -pi (inclusive) and pi.
+ *
+ * @param lon  The longitude in any boundary format
+ *
+ * @return  The longitude with constraints set
+ *
+ */
 Real Projector::constrainLongitude(Real lon)
 {
 	while (lon <= -GmatMathConstants::PI)
@@ -11,6 +20,17 @@ Real Projector::constrainLongitude(Real lon)
 	return lon;	
 }
 
+/**
+ *
+ * Converts a cartesian vector to a pair of lat/lon values
+ *
+ * Longitude is constrained to be within -pi (inclusive) and pi
+ *
+ * @param cart  A cartesian unit vector of type Rvector3
+ *
+ * @return An AnglePair containing the latitude and longitude
+ *
+ */
 AnglePair Projector::cartesianToLatLon(Rvector3 cart)
 {
    // Calculate the longitude
@@ -28,6 +48,15 @@ AnglePair Projector::cartesianToLatLon(Rvector3 cart)
    return latLon;
 }
 
+/**
+ *
+ * Converts a vector of cartesian headings to a vector of clock,cone pairs
+ *
+ * @param cartesianHeadings  A vector of cartesian headings of type Rvector3
+ *
+ * @return  A vecctor of AnglePairs containing the clock and cone angles
+ *
+ */
 std::vector<AnglePair> Projector::unitVectorToClockCone(const std::vector<Rvector3> &cartesianHeadings)
 {
 	int numPts = cartesianHeadings.size();
@@ -41,6 +70,15 @@ std::vector<AnglePair> Projector::unitVectorToClockCone(const std::vector<Rvecto
 	return clockConeHeadings;
 }
 
+/**
+ *
+ * Converts a pair of lat,lon values to a cartesian vector
+ *
+ * @param latLon  An AnglePair of lat, lon values
+ *
+ * @return  A cartesian vector of type Rvector3
+ *
+ */
 Rvector3 Projector::latLonToCartesian(AnglePair latLon)
 {
 	Real latitude = latLon[0];
@@ -53,6 +91,17 @@ Rvector3 Projector::latLonToCartesian(AnglePair latLon)
         return cartesian*centralBody->GetRadius();
 }
 
+/**
+ *
+ * An algorithm to project directions onto the surface of the earth
+ *
+ * @param clock  The clock angle in the spacecraft access frame
+ * @param cone  The cone angle in the spacecraft access frame
+ * @param sphericalPos  The spherical coordinates of the subsatellite point
+ *
+ * @return  An AnglePair of lat,lon values
+ *
+ */
 AnglePair Projector::projectionAlg(Real clock,Real cone,const Rvector3 &sphericalPos)
 {
 	Real r,latSSP,lonSSP,H;
@@ -88,6 +137,13 @@ AnglePair Projector::projectionAlg(Real clock,Real cone,const Rvector3 &spherica
 	return latLonP;
 }
 
+/**
+ *
+ * Get the DCM mapping the sensor frame to the nadir frame
+ *
+ * @return  The matrix NS of type Rmatrix 33
+ *
+ */
 Rmatrix33 Projector::getSensorToNadirMatrix()
 {
 	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
@@ -96,6 +152,13 @@ Rmatrix33 Projector::getSensorToNadirMatrix()
 	return NB*BS;
 }
 
+/**
+ *
+ * Get the DCM mapping the sensor frame to the spacecraft access frame
+ *
+ * @return  The matrix SA_S of type Rmatrix 33
+ *
+ */
 Rmatrix33 Projector::getSensorToSpacecraftAccessMatrix(const Rvector6 &state_ECF)
 {
 	Rmatrix33 NS,SA_N;
@@ -105,6 +168,17 @@ Rmatrix33 Projector::getSensorToSpacecraftAccessMatrix(const Rvector6 &state_ECF
 	
 	return SA_N*NS;
 }
+
+/**
+ *
+ * Get the DCM mapping the nadir frame to the spacecraft access frame
+ *
+ * The spacecraft access frame z axis points to nadir. Its x axis points
+ * north in the horizontal plane defined at the subsatellite point.
+ *
+ * @return  The matrix SA_N of type Rmatrix 33
+ *
+ */
 Rmatrix33 Projector::getNadirToSpacecraftAccessMatrix(const Rvector6 &state_ECF)
 {
 	Rvector3 pos_ECF(state_ECF[0],state_ECF[1],state_ECF[2]);   
@@ -115,7 +189,10 @@ Rmatrix33 Projector::getNadirToSpacecraftAccessMatrix(const Rvector6 &state_ECF)
 	Rvector3 vel_T= centralBody->FixedToTopocentric(vel_ECF,sphericalPos_ECF[0],sphericalPos_ECF[1]);
 	
 	// Transform velocity vector to Spacecraft Access coordinates and normalize
+	
+	// x axis switches directions from topocentric frame, where it points south
 	vel_T[0] = -vel_T[0];
+	// z axis switches directions from topocentric frame, where it points away from nadir
 	vel_T[2] = -vel_T[2];
 	vel_T.Normalize();
 	
@@ -130,6 +207,16 @@ Rmatrix33 Projector::getNadirToSpacecraftAccessMatrix(const Rvector6 &state_ECF)
 	return SA_N;
 }
 
+/**
+ *
+ * Constructor
+ *
+ * @param satIn  a Spacecraft object
+ * @param sensorIn  a DiscretizedSensor object
+ *
+ * @return  the constructed Projector object
+ *
+ */
 Projector::Projector(Spacecraft *satIn,DiscretizedSensor *sensorIn) :
 	sc(satIn),
 	sensor(sensorIn)
@@ -137,6 +224,14 @@ Projector::Projector(Spacecraft *satIn,DiscretizedSensor *sensorIn) :
 	centralBody = new Earth();
 }
 
+/**
+ * Returns the Earth-Fixed state at the specified time
+ * 
+ * @param jd  Julian date 
+ *
+ * @return  earth-fixed state at the input time
+ * 
+ */
 Rvector6 Projector::getEarthFixedState(Real jd,const Rvector6& state_I)
 {
 	// Converts state from Earth intertial to Earth fixed
@@ -157,6 +252,13 @@ Rvector6 Projector::getEarthFixedState(Real jd,const Rvector6& state_I)
 	return earthFixedState;
 }
 
+/**
+ *
+ * Produces the projected sensor pixel centers on the earth's surface
+ *
+ * @return  A pair of vectors of the projected points, in geographic and cartesian coordinates
+ *
+ */
 CoordsPair Projector::checkIntersection()
 {
 	Real date = sc->GetJulianDate();
@@ -165,6 +267,13 @@ CoordsPair Projector::checkIntersection()
 	return checkIntersection(state_ECF);
 }
 
+/**
+ *
+ * Produces the projected sensor poles on the earth's surface
+ *
+ * @return  A pair of vectors of the projected points, in geographic and cartesian coordinates
+ *
+ */
 CoordsPair Projector::checkPoleIntersection()
 {
 	Real date = sc->GetJulianDate();
@@ -173,6 +282,13 @@ CoordsPair Projector::checkPoleIntersection()
 	return checkPoleIntersection(state_ECF);
 }
 
+/**
+ *
+ * Produces the projected sensor pixel corners on the earth's surface
+ *
+ * @return  A pair of vectors of the projected points, in geographic and cartesian coordinates
+ *
+ */
 CoordsPair Projector::checkCornerIntersection()
 {
 	Real date = sc->GetJulianDate();
@@ -180,6 +296,15 @@ CoordsPair Projector::checkCornerIntersection()
 	Rvector6 state_ECF  = getEarthFixedState(date, state_I);
 	return checkCornerIntersection(state_ECF);
 }
+
+/**
+ *
+ * Produces the projected sensor pixel centers on the earth's surface
+ *
+ * @param state_ECF  the satellite state in earth-fixed coordinates
+ * @return  A pair of vectors of the projected points, in geographic and cartesian coordinates
+ *
+ */
 CoordsPair Projector::checkIntersection(const Rvector6 &state_ECF)
 {
 	// In Sensor Frame
@@ -218,6 +343,14 @@ CoordsPair Projector::checkIntersection(const Rvector6 &state_ECF)
 	return pairVector;
 }
 
+/**
+ *
+ * Produces the projected sensor poles on the earth's surface
+ *
+ * @param state_ECF  the satellite state in earth-fixed coordinates
+ * @return  A pair of vectors of the projected points, in geographic and cartesian coordinates
+ *
+ */
 CoordsPair Projector::checkPoleIntersection(const Rvector6 &state_ECF)
 {
 	// In Sensor Frame
@@ -249,6 +382,14 @@ CoordsPair Projector::checkPoleIntersection(const Rvector6 &state_ECF)
 	return pairVector;
 }
 
+/**
+ *
+ * Produces the projected sensor pixel corners on the earth's surface
+ *
+ * @param state_ECF  the satellite state in earth-fixed coordinates
+ * @return  A pair of vectors of the projected points, in geographic and cartesian coordinates
+ *
+ */
 CoordsPair Projector::checkCornerIntersection(const Rvector6 &state_ECF)
 {
 	// In Sensor Frame
