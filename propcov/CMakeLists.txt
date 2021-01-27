@@ -8,16 +8,17 @@ SET_PROPERTY(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS 17 14 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
-add_subdirectory(lib/pybind11)
-add_subdirectory(lib/gmatutil)
 
-include_directories(BEFORE lib/gmatutil/include/ lib/gmatutil/util/interpolator lib/gmatutil/util/matrixoperations)
+# ====================================================================
+add_subdirectory(extern/pybind11)
+add_subdirectory(extern/gmatutil)
+add_subdirectory(lib/propcov-cpp)
 
-pybind11_add_module(propcov MODULE src/Rvector_py.cpp)
+include_directories(BEFORE extern/gmatutil/include/ extern/gmatutil/util/interpolator extern/gmatutil/util/matrixoperations)
 
-target_link_libraries(propcov PUBLIC GmatUtil)
+pybind11_add_module(propcov MODULE src/main.cpp)
 
-
+target_link_libraries(propcov PUBLIC GmatUtil PropCovCpp)
 
 
 ################ Perhaps below code is requried for APPLE. TODO: Verify and remove if not needed #############################

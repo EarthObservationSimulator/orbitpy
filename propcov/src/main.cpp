@@ -1,43 +1,45 @@
+#include <sstream>
+
 #include <pybind11/pybind11.h>
-
-#define STRINGIFY(x) #x
-#define MACRO_STRINGIFY(x) STRINGIFY(x)
-
-int add(int i, int j) {
-    return i + j;
-}
+#include <pybind11/stl.h>
+#include "../extern/gmatutil/util/Rvector.hpp"
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(propcov, m) {
-    m.doc() = R"pbdoc(
-        Pybind11 example plugin
-        -----------------------
+template<typename T, typename A>
+std::string vector_to_string(std::vector<T,A> const& v){
+    std::stringstream ss;
+    for(size_t i = 0; i < v.size(); ++i)
+    {
+    if(i != 0)
+        ss << ",";
+    ss << v[i];
+    }
+    std::string s = ss.str();
+    return s;
+}
 
-        .. currentmodule:: python_example
+PYBIND11_MODULE(propcov, m)
+{
+    py::class_<Rvector>(m, "Rvector")
+        .def(py::init())
+        .def(py::init<int>(), py::arg("size"))
+        .def(py::init<const RealArray &>(), py::arg("ra"))
+        .def("GetMagnitude", &Rvector::GetMagnitude)
+        .def("__repr__",
+              [](const Rvector &x){
+                  std::string r("Rvector(");
+                  r += vector_to_string(x.GetRealArray());
+                  r += ")";
+                  return r;
+              }
+            )
+        
+        ;
+        
 
-        .. autosummary::
-           :toctree: _generate
-
-           add
-           subtract
-    )pbdoc";
-
-    m.def("add", &add, R"pbdoc(
-        Add two numbers
-
-        Some other explanation about the add function.
-    )pbdoc");
-
-    m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
-        Subtract two numbers
-
-        Some other explanation about the subtract function.
-    )pbdoc");
-
-#ifdef VERSION_INFO
-    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
-#else
-    m.attr("__version__") = "dev";
-#endif
+        // ,def_property_readonly("x", &Point::x) // To access member-function 'Point::x()' without ()
+        // .def_property("size_bound", &Criteria::size::bound, &Criteria::set_size_bound) # read, write property
+        // using py::arg to name and specify default values
+        // include __hash__, __eq__, __repr__ functions
 }
