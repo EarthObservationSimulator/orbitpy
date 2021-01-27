@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include "NadirPointingAttitude.hpp"
 #include "LagrangeInterpolator.hpp"
+#include <math.h>
 
 class TestProjector : public ::testing::Test {
 
@@ -203,6 +204,76 @@ TEST_F(TestProjector,projectionAlg_4)
 }
 
 
+// Test wide range of outputs at wide range of clock and cone angles
+// All cone angles are less than the horizon
+// Check if any NaN's are produced
+TEST_F(TestProjector,projectionAlg_5)
+{
+	const int numVals = 500;
+	double tolerance = 0.00000000001;
+	
+	Real h = 300;
+	Rvector3 sphericalPos(0,0,h);
+	Earth* centralBody = new Earth();
+	Real radius = centralBody->GetRadius();
+	
+	// Angular radius of the earth (horizon angle)
+	Real rho = asin(radius/(radius+h));
+	
+	// 5 degrees offset to make sure points don't reach horizon
+	Real offset = .0872;
+	Real maxAngle = rho - offset;
+	Real coneStep = maxAngle/numVals;
+	
+	Real clockStep = (2*pi)/numVals;
+	
+	Real clock = 0;
+	Real cone = 0;
+	AnglePair latLon;
+	for (int i = 0;i < numVals;i++)
+	{
+		clock = clock + clockStep;
+		cone = cone + coneStep;
+		
+		latLon = coverage->projectionAlg(clock,cone,sphericalPos);
+		
+		EXPECT_TRUE(!isnan(latLon[1]));
+		EXPECT_TRUE(!isnan(latLon[0]));
+	}
+}
+
+// Check that point on horizon is not NaN.
+// Check that point slightly past horizon is NaN.
+TEST_F(TestProjector,ProjectionAlg_6)
+{
+	double tolerance = 0.00000000001;
+	
+	Real h = 300;
+	Rvector3 sphericalPos(0,0,h);
+	Earth* centralBody = new Earth();
+	Real radius = centralBody->GetRadius();
+	
+	// Angular radius of the earth (horizon angle)
+	Real rho = asin(radius/(radius+h));
+	
+	Real clock = 0;
+	Real cone = rho;
+	AnglePair latLon;
+	
+	latLon = coverage->projectionAlg(clock,cone,sphericalPos);
+		
+	EXPECT_TRUE(!isnan(latLon[1]));
+	EXPECT_TRUE(!isnan(latLon[0]));
+	
+	// A little less than .01 deg
+	cone = rho + .001;
+	latLon = coverage->projectionAlg(clock,cone,sphericalPos);
+	
+	EXPECT_TRUE(isnan(latLon[1]));
+	EXPECT_TRUE(isnan(latLon[0]));
+}
+
+
 // Checks that nadir pointing sensor in equatorial orbit
 // is symmetric in latitude about the equator, with center 
 // pixel pointing to SSP.
@@ -220,17 +291,18 @@ TEST_F(TestProjector,checkIntersection)
 	latLonCart = coverage->checkIntersection(state_ECF);
 	intersection = latLonCart.first;
 	
-	
 	// Lat and lon of center pixel
 	lat = intersection[1][0];
 	lon = intersection[1][1];
 	
 	latSum = intersection[0][0] + intersection[2][0];
 	
+	
 	// Center pixel longitude should be pi/2
 	EXPECT_NEAR(pi/2,lon,tolerance);
 	// Center pixel latitude should be zero
 	EXPECT_NEAR(0,lat,tolerance);
+	
 	
 	// Should be no difference in longitude along a center column
 	// for nadir pointing sensor in equatorial orbit	
@@ -302,6 +374,7 @@ TEST_F(TestProjector_Corners,checkCornerIntersection)
 	EXPECT_TRUE(intersection[14][0] < expectedLat);
 }
 
+
 // Checks relative locations of poles for nadir pointing sensor
 // in equatorial orbit. Satellite position alligned with X axis,
 // velocity alligned with Y axis
@@ -309,13 +382,15 @@ TEST_F(TestProjector,checkPoleIntersection)
 {
 	double tolerance = 0.00000000001;
 	Rvector6 state_ECF(7000,0,0,0,7,0);
+	
 	std::vector<Rvector3> poles;
+	std::vector<AnglePair> anglePoles;
 	
 	CoordsPair latLonCart;
 	
-	latLonCart = coverage->checkPoleIntersection(state_ECF);	
+	latLonCart = coverage->checkPoleIntersection(state_ECF);
 	poles = latLonCart.second;
-
+	
 	// Check that there are 6 poles.
 	EXPECT_EQ(6,poles.size());
 	
@@ -337,6 +412,8 @@ TEST_F(TestProjector,checkPoleIntersection)
 	// The pole for second column should have negative Y value
 	EXPECT_TRUE(poles[5][1] > 0);
 }
+
+
 
 // Checks relative locations of poles for nadir pointing sensor
 // in equatorial orbit. Satellite position alligned with Y axis,
@@ -374,6 +451,7 @@ TEST_F(TestProjector,checkPoleIntersection_2)
 	// The pole for second column should have negative X value
 	EXPECT_TRUE(poles[5][0] < 0);
 }
+
 
 // Checks that the identity matrix is returned when the Nadir and
 // spacecraft access frames are alligned.
