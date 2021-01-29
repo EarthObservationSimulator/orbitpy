@@ -28,9 +28,9 @@ PYBIND11_MODULE(propcov, m)
         .def("GetMagnitude", &Rvector::GetMagnitude)
         .def("__repr__",
               [](const Rvector &x){
-                  std::string r("Rvector(");
+                  std::string r("Rvector([");
                   r += vector_to_string(x.GetRealArray());
-                  r += ")";
+                  r += "])";
                   return r;
               }
             )

@@ -1,0 +1,155 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2021-01-28 13:53:29
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft ISS;
+GMAT ISS.DateFormat = UTCGregorian;
+GMAT ISS.Epoch = '27 Jan 2021 19:26:09.000';
+GMAT ISS.CoordinateSystem = EarthMJ2000Eq;
+GMAT ISS.DisplayStateType = Keplerian;
+GMAT ISS.SMA = 6798.099999999995;
+GMAT ISS.ECC = 0.0002399000000006572;
+GMAT ISS.INC = 51.64650000000001;
+GMAT ISS.RAAN = 317.1909;
+GMAT ISS.AOP = 302.6503000000527;
+GMAT ISS.TA = 164.1535999999474;
+GMAT ISS.DryMass = 850;
+GMAT ISS.Cd = 2.2;
+GMAT ISS.Cr = 1.8;
+GMAT ISS.DragArea = 15;
+GMAT ISS.SRPArea = 1;
+GMAT ISS.NAIFId = -10000001;
+GMAT ISS.NAIFIdReferenceFrame = -9000001;
+GMAT ISS.OrbitColor = Red;
+GMAT ISS.TargetColor = Teal;
+GMAT ISS.OrbitErrorCovariance = [ 1e+070 0 0 0 0 0 ; 0 1e+070 0 0 0 0 ; 0 0 1e+070 0 0 0 ; 0 0 0 1e+070 0 0 ; 0 0 0 0 1e+070 0 ; 0 0 0 0 0 1e+070 ];
+GMAT ISS.CdSigma = 1e+070;
+GMAT ISS.CrSigma = 1e+070;
+GMAT ISS.Id = 'SatId';
+GMAT ISS.Attitude = CoordinateSystemFixed;
+GMAT ISS.SPADSRPScaleFactor = 1;
+GMAT ISS.ModelFile = 'aura.3ds';
+GMAT ISS.ModelOffsetX = 0;
+GMAT ISS.ModelOffsetY = 0;
+GMAT ISS.ModelOffsetZ = 0;
+GMAT ISS.ModelRotationX = 0;
+GMAT ISS.ModelRotationY = 0;
+GMAT ISS.ModelRotationZ = 0;
+GMAT ISS.ModelScale = 1;
+GMAT ISS.AttitudeDisplayStateType = 'Quaternion';
+GMAT ISS.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT ISS.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT ISS.EulerAngleSequence = '321';
+
+
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
+GMAT DefaultProp_ForceModel.Drag = None;
+GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.RelativisticCorrection = Off;
+GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.StmLimit = 100;
+GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT DefaultProp_ForceModel.GravityField.Earth.TideModel = 'None';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+GMAT DefaultProp.Type = RungeKutta89;
+GMAT DefaultProp.InitialStepSize = 60;
+GMAT DefaultProp.Accuracy = 9.999999999999999e-012;
+GMAT DefaultProp.MinStep = 0.001;
+GMAT DefaultProp.MaxStep = 1;
+GMAT DefaultProp.MaxStepAttempts = 50;
+GMAT DefaultProp.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView DefaultOrbitView;
+GMAT DefaultOrbitView.SolverIterations = Current;
+GMAT DefaultOrbitView.UpperLeft = [ 0.000588235294117647 0 ];
+GMAT DefaultOrbitView.Size = [ 0.2494117647058824 0.4447174447174447 ];
+GMAT DefaultOrbitView.RelativeZOrder = 25;
+GMAT DefaultOrbitView.Maximized = true;
+GMAT DefaultOrbitView.Add = {ISS, Earth};
+GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultOrbitView.DrawObject = [ true true ];
+GMAT DefaultOrbitView.DataCollectFrequency = 1;
+GMAT DefaultOrbitView.UpdatePlotFrequency = 50;
+GMAT DefaultOrbitView.NumPointsToRedraw = 0;
+GMAT DefaultOrbitView.ShowPlot = true;
+GMAT DefaultOrbitView.MaxPlotPoints = 20000;
+GMAT DefaultOrbitView.ShowLabels = true;
+GMAT DefaultOrbitView.ViewPointReference = Earth;
+GMAT DefaultOrbitView.ViewPointVector = [ 30000 0 0 ];
+GMAT DefaultOrbitView.ViewDirection = Earth;
+GMAT DefaultOrbitView.ViewScaleFactor = 1;
+GMAT DefaultOrbitView.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultOrbitView.ViewUpAxis = Z;
+GMAT DefaultOrbitView.EclipticPlane = Off;
+GMAT DefaultOrbitView.XYPlane = On;
+GMAT DefaultOrbitView.WireFrame = Off;
+GMAT DefaultOrbitView.Axes = On;
+GMAT DefaultOrbitView.Grid = Off;
+GMAT DefaultOrbitView.SunLine = Off;
+GMAT DefaultOrbitView.UseInitialView = On;
+GMAT DefaultOrbitView.StarCount = 7000;
+GMAT DefaultOrbitView.EnableStars = On;
+GMAT DefaultOrbitView.EnableConstellations = On;
+
+Create GroundTrackPlot DefaultGroundTrackPlot;
+GMAT DefaultGroundTrackPlot.SolverIterations = Current;
+GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.000588235294117647 0.4459459459459459 ];
+GMAT DefaultGroundTrackPlot.Size = [ 0.2494117647058824 0.4447174447174447 ];
+GMAT DefaultGroundTrackPlot.RelativeZOrder = 11;
+GMAT DefaultGroundTrackPlot.Maximized = false;
+GMAT DefaultGroundTrackPlot.Add = {ISS};
+GMAT DefaultGroundTrackPlot.DataCollectFrequency = 1;
+GMAT DefaultGroundTrackPlot.UpdatePlotFrequency = 50;
+GMAT DefaultGroundTrackPlot.NumPointsToRedraw = 0;
+GMAT DefaultGroundTrackPlot.ShowPlot = true;
+GMAT DefaultGroundTrackPlot.MaxPlotPoints = 20000;
+GMAT DefaultGroundTrackPlot.CentralBody = Earth;
+GMAT DefaultGroundTrackPlot.TextureMap = 'ModifiedBlueMarble.jpg';
+
+Create ReportFile ReportFile1;
+GMAT ReportFile1.SolverIterations = Current;
+GMAT ReportFile1.UpperLeft = [ 0.2258823529411765 0.2371007371007371 ];
+GMAT ReportFile1.Size = [ 0.5970588235294118 0.7960687960687961 ];
+GMAT ReportFile1.RelativeZOrder = 23;
+GMAT ReportFile1.Maximized = true;
+GMAT ReportFile1.Filename = 'ReportFile1.txt';
+GMAT ReportFile1.Precision = 16;
+GMAT ReportFile1.Add = {ISS.UTCGregorian, ISS.Earth.SMA, ISS.Earth.TA, ISS.EarthMJ2000Eq.RAAN, ISS.EarthMJ2000Eq.AOP, ISS.Earth.ECC, ISS.EarthMJ2000Eq.INC};
+GMAT ReportFile1.WriteHeaders = true;
+GMAT ReportFile1.LeftJustify = On;
+GMAT ReportFile1.ZeroFill = Off;
+GMAT ReportFile1.FixedWidth = true;
+GMAT ReportFile1.Delimiter = ' ';
+GMAT ReportFile1.ColumnWidth = 23;
+GMAT ReportFile1.WriteReport = true;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+Propagate DefaultProp(ISS) {ISS.ElapsedSecs = 86400};

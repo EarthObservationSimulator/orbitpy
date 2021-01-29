@@ -1,0 +1,126 @@
+{
+    "epoch": "2021, 1, 28, 15, 0, 0",
+    "duration": 2,
+    "satellite":    [{
+        "orbit": { "@id": "Sentinel1A",
+                   "sma": 7070.052000472739,
+                   "ecc": 0.0006318697105749462,
+                   "inc": 98.1852224430984,
+                   "raan": 38.39069816072309,
+                   "aop": 196.5334447649118,
+                   "ta": 135.7009006810358},
+        "instrument": [{"@type": "Synthetic Aperture Radar",
+                        "name": "CSAR1A",  
+                        "@id": "CSAR1A",
+                        "orientation": {
+                            "convention": "SIDE_LOOK",
+                            "sideLookAngle": 30
+                        },
+                        "pulseWidth": 43e-6,
+                        "antennaAlongTrackDim": 12.3,
+                        "antennaCrossTrackDim": 0.821, 
+                        "antennaApertureEfficiency": 0.5, 
+                        "operatingFrequency": 5.405e9, 
+                        "peakTransmitPower": 4368, 
+                        "chirpBandwidth": 50e6,      
+                        "minimumPRF": 1000, 
+                        "maximumPRF": 3000, 
+                        "radarLosses": 3.5, 
+                        "sceneNoiseTemp": 290, 
+                        "altitude": 700,
+                        "systemNoiseFigure": 3.2,
+                        "numStripsInScene":1000,
+                        "swathConfig":{
+                                        "@type": "fixed",
+                                        "fixedSwathSize": 80
+                                      },
+                        "polarization": {
+                            "@type": "compact" 
+                        
+                        }
+                      }
+                       ]
+        },
+        {  
+        "orbit": { "@id": "Sentinel1B",
+                   "sma":  7070.688121440737,
+                   "ecc":  0.0005755569537709292,
+                   "inc": 98.18526501753023,
+                   "raan": 38.21545263412436,
+                   "aop": 128.4350156317218,
+                   "ta": 26.55162234490189},
+        "instrument": [{"@type": "Synthetic Aperture Radar",
+                        "name": "CSAR1B",  
+                        "@id": "CSAR1B",
+                        "orientation": {
+                            "convention": "SIDE_LOOK",
+                            "sideLookAngle": 30
+                        },
+                        "pulseWidth": 43e-6,
+                        "antennaAlongTrackDim": 12.3,
+                        "antennaCrossTrackDim": 0.821, 
+                        "antennaApertureEfficiency": 0.5, 
+                        "operatingFrequency": 5.405e9, 
+                        "peakTransmitPower": 4368, 
+                        "chirpBandwidth": 50e6,      
+                        "minimumPRF": 1000, 
+                        "maximumPRF": 3000, 
+                        "radarLosses": 3.5, 
+                        "sceneNoiseTemp": 290, 
+                        "altitude": 700,
+                        "systemNoiseFigure": 3.2,
+                        "numStripsInScene":1000,
+                        "swathConfig":{
+                                        "@type": "fixed",
+                                        "fixedSwathSize": 80
+                                      },
+                        "polarization": {
+                           "@type": "compact" 
+                        
+                        }
+                      }
+                       ]
+
+        },
+        {  
+            "orbit": { "@id": "ISS",
+                       "sma": 6806.105884479364,
+                       "ecc": 0.0003303640879203458 ,
+                       "inc": 51.67213619188961,
+                       "raan": 313.1666332444946,
+                       "aop": 308.8861243613201,
+                       "ta": 21.93742673963972},
+            "instrument": [ 
+                          { "@type": "Basic Sensor",
+                            "@id": "GEDI",  
+                            "mass": 28, 
+                            "volume": 0.12, 
+                            "power": 32, 
+                            "bitsPerPixel": 8, 
+                            "fieldOfView": {
+                                "sensorGeometry": "RECTANGULAR",
+                                "alongTrackFieldOfView": 0.5898,
+                                "crossTrackFieldOfView": 8.4e-3
+                            },
+                            "orientation": {
+                                "convention": "NADIR"
+                            }       
+                        }
+                       ]
+        }
+    ],
+    "pointingOptions":[{
+        "instrumentID": "CSAR1A, CSAR1B",
+        "referenceFrame": "NadirRefFrame",
+        "pntOptsFileName":"pointingOptions_sentinelCSAR.csv"              
+    },
+    {
+        "instrumentID": "GEDI",
+        "referenceFrame": "NadirRefFrame",
+        "pntOptsFileName":"pointingOptions_ISSGEDI.csv"              
+    }
+    ],
+    "propagator":{
+        "customTimeStep": 1                         
+    }
+}
