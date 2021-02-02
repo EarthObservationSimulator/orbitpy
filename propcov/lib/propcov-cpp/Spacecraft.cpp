@@ -93,6 +93,7 @@ Spacecraft::Spacecraft(AbsoluteDate *epoch, OrbitState *state, Attitude *att,
    ComputeNadirToBodyMatrix();
 }
 
+
 //------------------------------------------------------------------------------
 //  Spacecraft(const Spacecraft &copy)
 //------------------------------------------------------------------------------
@@ -235,7 +236,7 @@ AbsoluteDate* Spacecraft::GetOrbitEpoch()
 //  Real GetJulianDate()
 //------------------------------------------------------------------------------
 /**
- * Returns the Spacecraft's Julian Date.
+ * Returns the Spacecraft's Julian Date at Epoch.
  *
  * @return  Spacecraft's JulianDate
  * 
@@ -245,6 +246,22 @@ Real Spacecraft::GetJulianDate()
 {
    return orbitEpoch->GetJulianDate();
 }
+
+//------------------------------------------------------------------------------
+//  Attitude GetAttitude()
+//------------------------------------------------------------------------------
+/**
+ * Returns the Spacecraft's attitude.
+ *
+ * @return  Spacecraft's attitude
+ * 
+ */
+//------------------------------------------------------------------------------
+Attitude* Spacecraft::GetAttitude()
+{
+   return attitude;
+}
+
 
 //------------------------------------------------------------------------------
 //  Rvector6 GetCartesianState()
@@ -749,6 +766,6 @@ void Spacecraft::ComputeNadirToBodyMatrix()
                                                     eulerSeq2, eulerSeq3);
 }
 
-Rmatrix33 Spacecraft::GetNadirTOBodyMatrix(){
+Rmatrix33 Spacecraft::GetNadirToBodyMatrix(){
    return R_BN;
 }

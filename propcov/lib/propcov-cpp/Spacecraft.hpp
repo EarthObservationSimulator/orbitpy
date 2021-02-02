@@ -57,6 +57,8 @@ public:
    virtual AbsoluteDate*  GetOrbitEpoch();
    /// Get the Julian date
    virtual Real           GetJulianDate();
+   /// Get the spacecraft attitude
+   virtual Attitude*      GetAttitude();
    /// Get the current cartesian state
    virtual Rvector6       GetCartesianState();
    /// Get the current Keplerian state  Author: Vinay
@@ -126,7 +128,7 @@ public:
    virtual Rvector6       Interpolate(Real toTime);
 
    // Author: Vinay
-   Rmatrix33 GetNadirTOBodyMatrix();
+   Rmatrix33 GetNadirToBodyMatrix();
    
 protected:
    

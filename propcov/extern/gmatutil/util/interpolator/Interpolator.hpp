@@ -60,6 +60,7 @@ public:
    virtual void    SetExtrapolation(bool flag);
    
    std::string     GetName();
+   Integer         GetDimension();
    bool            GetRange(Real &lower, Real &upper);
 
    //---------------------------------------------------------------------------

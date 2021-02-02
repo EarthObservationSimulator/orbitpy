@@ -49,7 +49,7 @@ AnglePair Projector::projectionAlg(Real clock,Real cone,const Rvector3 &spherica
 Rmatrix33 Projector::getSensorToNadirMatrix()
 {
 	Rmatrix33 BS = sensor->GetBodyToSensorMatrix(0).Transpose();
-	Rmatrix33 NB = sc->GetNadirTOBodyMatrix().Transpose();
+	Rmatrix33 NB = sc->GetNadirToBodyMatrix().Transpose();
 	
 	return NB*BS;
 }

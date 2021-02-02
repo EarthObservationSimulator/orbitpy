@@ -1,5 +1,5 @@
 MESSAGE("==============================")
-MESSAGE("GMAT util setup " ${VERSION}) 
+MESSAGE("propcov-cpp setup " ${VERSION}) 
 
 SET(TargetName PropCovCpp)
 
@@ -31,7 +31,7 @@ SET(PROPCOVCPP_SRCS
     VisiblePOIReport.cpp
     Projector.cpp
     DiscretizedSensor.cpp
-    
+       
 )
 
 

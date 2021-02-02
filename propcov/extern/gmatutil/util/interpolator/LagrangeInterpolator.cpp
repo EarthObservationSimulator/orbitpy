@@ -85,6 +85,19 @@ LagrangeInterpolator::LagrangeInterpolator(const std::string &name, Integer dim,
    AllocateArrays();
 }
 
+//------------------------------------------------------------------------------
+// Integer GetOrder()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the order assigned to this interpolator
+ *
+ * @return The instance name
+ */
+//------------------------------------------------------------------------------
+Integer LagrangeInterpolator::GetOrder()
+{
+   return order;
+}
 
 //------------------------------------------------------------------------------
 //  ~LagrangeInterpolator()

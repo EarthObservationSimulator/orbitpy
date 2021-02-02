@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
          /** Iterate over all pointing options **/
          for(int j=0;j<numPntOpts;j++){
             sat1->SetBodyNadirOffsetAngles(euler_angle1[j],euler_angle2[j],euler_angle3[j],1,2,3); 
-            Rmatrix33 R_N2B = sat1->GetNadirTOBodyMatrix();
+            Rmatrix33 R_N2B = sat1->GetNadirToBodyMatrix();
 
             Rvector6 earthFixedState  = earth->GetBodyFixedState(cartState, jd);
             Rmatrix33 R_EF2N = sat1->GetBodyFixedToReference(earthFixedState); // Earth fixed to Nadir

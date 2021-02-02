@@ -3,9 +3,17 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "../extern/gmatutil/util/Rvector.hpp"
+#include "../extern/gmatutil/util/TableTemplate.hpp"
+#include "../extern/gmatutil/util/Rmatrix.hpp"
+#include "../extern/gmatutil/util/Rvector3.hpp"
 #include "../extern/gmatutil/util/Rvector6.hpp"
+#include "../extern/gmatutil/util/interpolator/LagrangeInterpolator.hpp"
 #include "../lib/propcov-cpp/AbsoluteDate.hpp"
 #include "../lib/propcov-cpp/OrbitState.hpp"
+#include "../lib/propcov-cpp/Earth.hpp"
+#include "../lib/propcov-cpp/Attitude.hpp"
+#include "../lib/propcov-cpp/NadirPointingAttitude.hpp"
+#include "../lib/propcov-cpp/Spacecraft.hpp"
 
 namespace py = pybind11;
 
@@ -41,6 +49,22 @@ PYBIND11_MODULE(propcov, m)
         
         ;
     
+    py::class_<Rmatrix33>(m, "Rmatrix33")
+        .def(py::init())
+        .def(py::init<Real, Real, Real, Real, Real, Real, Real, Real, Real>(), py::arg("a00"), py::arg("a01"), py::arg("a02"), py::arg("a10"), py::arg("a11"), py::arg("a12"), py::arg("a20"), py::arg("a21"), py::arg("a22"))
+        .def("GetElement", &Rmatrix33::GetElement, py::arg("row"), py::arg("col"))
+        .def("__repr__",
+              [](const Rmatrix33 &x){
+                  std::string r("Rmatrix33(");
+                  r += std::to_string(x.GetElement(0,0)) + "," + std::to_string(x.GetElement(0,1)) + "," + std::to_string(x.GetElement(0,2)) + "," +
+                       std::to_string(x.GetElement(1,0)) + "," + std::to_string(x.GetElement(1,1)) + "," + std::to_string(x.GetElement(1,2)) + "," +
+                       std::to_string(x.GetElement(2,0)) + "," + std::to_string(x.GetElement(2,1)) + "," + std::to_string(x.GetElement(2,2))  ;
+                  r += ")";
+                  return r;
+              }
+            )
+        ;
+    
     py::class_<Rvector3>(m, "Rvector3")
         .def(py::init())
         .def(py::init<const RealArray&>())
@@ -55,7 +79,6 @@ PYBIND11_MODULE(propcov, m)
               }
             )
         ;
-
 
     py::class_<Rvector6>(m, "Rvector6")
         .def(py::init())
@@ -74,22 +97,21 @@ PYBIND11_MODULE(propcov, m)
               }
             )
 
-        ;
+        ;   
 
     py::class_<AbsoluteDate>(m, "AbsoluteDate")
         .def(py::init())
         .def("fromJulianDate", [](Real jd) { 
-                AbsoluteDate    *date;
-                date = new AbsoluteDate();
-                date->SetJulianDate(jd);
-                return date; 
+                AbsoluteDate    x;
+                x.SetJulianDate(jd);
+                return x; 
                 }, 
                 R"pbdoc(
                     Return an AbsoluteDate object initialized to the input Julian Date.
                     )pbdoc"
             )
-        .def("SetGregorianDate", &AbsoluteDate::SetGregorianDate)
-        .def("SetJulianDate", &AbsoluteDate::SetJulianDate)
+        .def("SetGregorianDate", &AbsoluteDate::SetGregorianDate, py::arg("year"), py::arg("month"), py::arg("day"), py::arg("hour"), py::arg("minute"), py::arg("second"))
+        .def("SetJulianDate", &AbsoluteDate::SetJulianDate, py::arg("jd"))
         .def("GetGregorianDate", &AbsoluteDate::GetGregorianDate)
         .def("GetJulianDate", &AbsoluteDate::GetJulianDate)
         .def("Advance", &AbsoluteDate::Advance)
@@ -102,10 +124,114 @@ PYBIND11_MODULE(propcov, m)
               }
             )
         ;
-    
+
     py::class_<OrbitState>(m, "OrbitState")
         .def(py::init())
+        .def("fromCartesianState", [](const Rvector6& cart) { 
+                OrbitState    x;
+                x.SetCartesianState(cart);
+                return x; 
+                },
+                R"pbdoc(
+                    Return an OrbitState object initialized to the input Keplerian state.
+                    )pbdoc"
+            )
+        .def("SetKeplerianState", &OrbitState::SetKeplerianState, py::arg("SMA"), py::arg("ECC"), py::arg("INC"), py::arg("RAAN"), py::arg("AOP"), py::arg("TA"))
+        .def("SetCartesianState", &OrbitState::SetCartesianState)
+        .def("GetKeplerianState", &OrbitState::GetKeplerianState)
+        .def("GetCartesianState", &OrbitState::GetCartesianState)
+        .def("__repr__",
+              [](OrbitState &x){ // const removed since OrbitState class throws error 
+                  Rvector6 cartstate;
+                  cartstate = x.GetCartesianState();
+                  std::string r("OrbitState.fromCartesianState(Rvector6([");
+                  r += vector_to_string(cartstate.GetRealArray());
+                  r += "]))";
+                  return r;
+              }
+            )
         ;
+
+    py::class_<Earth>(m, "Earth")
+        .def(py::init())
+        .def("ComputeGMT", &Earth::ComputeGMT)
+        .def("GetBodyFixedState", py::overload_cast<Rvector3, Real>(&Earth::GetBodyFixedState))
+        .def("GetBodyFixedState", py::overload_cast<Rvector6, Real>(&Earth::GetBodyFixedState))
+        .def("GetInertialToFixedRotation", &Earth::GetInertialToFixedRotation)
+        .def("Convert", &Earth::Convert)
+        .def("InertialToBodyFixed", &Earth::InertialToBodyFixed)
+        .def("__repr__",
+              [](Earth &x){ 
+                  std::string r("Earth()");
+                  return r;
+              }
+            )
+        ;
+       
+    py::class_<Attitude>(m, "Attitude")
+        ;
+
+    py::class_<NadirPointingAttitude, Attitude>(m, "NadirPointingAttitude")
+        .def(py::init())
+        .def("__repr__",
+              [](NadirPointingAttitude &x){ 
+                  std::string r("NadirPointingAttitude()");
+                  return r;
+              }
+            )
+        ;
+    
+    py::class_<LagrangeInterpolator>(m, "LagrangeInterpolator")
+        .def(py::init())
+        .def("__repr__",
+              [](LagrangeInterpolator &x){ 
+                  std::string r("LagrangeInterpolator(");
+                  r += x.GetName() + ',';
+                  r += std::to_string(x.GetDimension()) + ',';
+                  r += std::to_string(x.GetOrder());
+                  r += ")";
+                  return r;
+              }
+            )
+        ;
+    
+
+
+    py::class_<Spacecraft>(m, "Spacecraft")
+        /*
+        .def(py::init<AbsoluteDate*, OrbitState*, NadirPointingAttitude*, LagrangeInterpolator*, 
+                      Real, Real, Real, Integer, Integer, Integer>(), 
+                      py::arg("epoch"), py::arg("state"), py::arg("att"),py::arg("interp"), 
+                      py::arg("angle1"), py::arg("angle2"), py::arg("angle3"), 
+                      py::arg("seq1"), py::arg("seq2"), py::arg("seq3"))
+       
+        
+        
+        .def(py::init, [](AbsoluteDate& epoch, OrbitState& state, NadirPointingAttitude& att, LagrangeInterpolator& interp, 
+                      Real angle1, Real angle2, Real angle3, Integer seq1, Integer seq2, Integer seq3) {
+                      return std::unique_ptr<Spacecraft>(new Spacecraft(epoch, state, att, interp, angle1, angle2, angle3, seq1, seq2, seq3));       
+            })
+         */
+        .def(py::init<AbsoluteDate*, OrbitState*, Attitude*, LagrangeInterpolator*, 
+                      Real, Real, Real, Integer, Integer, Integer>())
+
+        .def("GetCartesianState", &Spacecraft::GetCartesianState)
+        .def("GetKeplerianState", &Spacecraft::GetKeplerianState)
+        .def("AddSensor", &Spacecraft::AddSensor)
+        .def("SetAttitude", &Spacecraft::SetAttitude)
+        .def("GetBodyFixedToInertial", &Spacecraft::GetBodyFixedToInertial)
+        .def("GetBodyFixedToReference", &Spacecraft::GetBodyFixedToReference)
+        .def("GetNadirToBodyMatrix", &Spacecraft::GetNadirToBodyMatrix)
+        .def("SetBodyNadirOffsetAngles", &Spacecraft::SetBodyNadirOffsetAngles)
+        /// @todo write __repr__
+        ;
+
+
+    m.def("test", [](Attitude* att) { return att->GetCartesianState(); }, R"pbdoc(
+        Subtract two numbers
+
+        Some other explanation about the subtract function.
+    )pbdoc");
         
 
         // ,def_property_readonly("x", &Point::x) // To access member-function 'Point::x()' without ()

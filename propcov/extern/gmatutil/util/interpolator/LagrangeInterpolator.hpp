@@ -51,6 +51,8 @@ public:
    
    // inherited from GmatBase
    virtual Interpolator*    Clone() const;
+
+   Integer GetOrder();
    
 protected:
    static const Integer MAX_BUFFER_SIZE = 80;
