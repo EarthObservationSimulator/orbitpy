@@ -230,6 +230,14 @@ CustomSensor::~CustomSensor()
 {
 }
 
+Rvector CustomSensor::GetConeAngleVector(){
+   return coneAngleVec;
+}
+
+Rvector CustomSensor::GetClockAngleVector(){
+   return clockAngleVec;
+}
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------

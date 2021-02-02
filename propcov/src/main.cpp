@@ -14,6 +14,14 @@
 #include "../lib/propcov-cpp/Attitude.hpp"
 #include "../lib/propcov-cpp/NadirPointingAttitude.hpp"
 #include "../lib/propcov-cpp/Spacecraft.hpp"
+#include "../lib/propcov-cpp/Sensor.hpp"
+#include "../lib/propcov-cpp/ConicalSensor.hpp"
+#include "../lib/propcov-cpp/CustomSensor.hpp"
+#include "../lib/propcov-cpp/Propagator.hpp"
+#include "../lib/propcov-cpp/CoverageChecker.hpp"
+#include "../lib/propcov-cpp/PointGroup.hpp"
+
+#include "../lib/propcov-cpp/testclass.hpp"
 
 namespace py = pybind11;
 
@@ -65,7 +73,7 @@ PYBIND11_MODULE(propcov, m)
             )
         ;
     
-    py::class_<Rvector3>(m, "Rvector3")
+    py::class_<Rvector3, Rvector>(m, "Rvector3")
         .def(py::init())
         .def(py::init<const RealArray&>())
         .def("Get", &Rvector3::Get)
@@ -80,7 +88,7 @@ PYBIND11_MODULE(propcov, m)
             )
         ;
 
-    py::class_<Rvector6>(m, "Rvector6")
+    py::class_<Rvector6, Rvector>(m, "Rvector6")
         .def(py::init())
         .def(py::init<const Real, const Real, const Real, const Real, const Real, const Real>())
         .def(py::init<const RealArray&>())
@@ -194,27 +202,13 @@ PYBIND11_MODULE(propcov, m)
               }
             )
         ;
-    
-
 
     py::class_<Spacecraft>(m, "Spacecraft")
-        /*
-        .def(py::init<AbsoluteDate*, OrbitState*, NadirPointingAttitude*, LagrangeInterpolator*, 
-                      Real, Real, Real, Integer, Integer, Integer>(), 
-                      py::arg("epoch"), py::arg("state"), py::arg("att"),py::arg("interp"), 
-                      py::arg("angle1"), py::arg("angle2"), py::arg("angle3"), 
-                      py::arg("seq1"), py::arg("seq2"), py::arg("seq3"))
-       
-        
-        
-        .def(py::init, [](AbsoluteDate& epoch, OrbitState& state, NadirPointingAttitude& att, LagrangeInterpolator& interp, 
-                      Real angle1, Real angle2, Real angle3, Integer seq1, Integer seq2, Integer seq3) {
-                      return std::unique_ptr<Spacecraft>(new Spacecraft(epoch, state, att, interp, angle1, angle2, angle3, seq1, seq2, seq3));       
-            })
-         */
-        .def(py::init<AbsoluteDate*, OrbitState*, Attitude*, LagrangeInterpolator*, 
-                      Real, Real, Real, Integer, Integer, Integer>())
 
+        .def(py::init<AbsoluteDate*, OrbitState*, Attitude*, LagrangeInterpolator*, Real, Real, Real, Integer, Integer, Integer>(),
+                        py::arg("epoch"), py::arg("state"), py::arg("att"),py::arg("interp"), 
+                        py::arg("angle1"), py::arg("angle2"), py::arg("angle3"), 
+                        py::arg("seq1"), py::arg("seq2"), py::arg("seq3"))
         .def("GetCartesianState", &Spacecraft::GetCartesianState)
         .def("GetKeplerianState", &Spacecraft::GetKeplerianState)
         .def("AddSensor", &Spacecraft::AddSensor)
@@ -227,12 +221,67 @@ PYBIND11_MODULE(propcov, m)
         ;
 
 
-    m.def("test", [](Attitude* att) { return att->GetCartesianState(); }, R"pbdoc(
-        Subtract two numbers
+    m.def("test", [](AbsoluteDate* epoch, OrbitState* state, Attitude* att, LagrangeInterpolator* interp) 
+                    { 
+                        AbsoluteDate* epoch_dup = epoch;
+                        OrbitState* state_dup = state;
+                        LagrangeInterpolator* interp_dup = interp;
+                        Attitude* att_dup = att;
 
-        Some other explanation about the subtract function.
-    )pbdoc");
-        
+                        epoch_dup->GetJulianDate();
+                        state_dup->GetCartesianState();
+
+                        return interp->GetOrder(); 
+                    }
+            );
+
+    py::class_<Sensor>(m, "Sensor")
+        ;
+
+    py::class_<ConicalSensor, Sensor>(m, "ConicalSensor")
+        .def(py::init<Real>(), py::arg("halfAngle"), "Initialize Conical Sensor with half-angle in radians.")
+        .def("SetFieldOfView", &ConicalSensor::SetFieldOfView)
+        .def("GetFieldOfView", &ConicalSensor::GetFieldOfView)
+        .def("__repr__",
+              [](ConicalSensor &x){ 
+                  std::string r("ConicalSensor(");
+                  r += std::to_string(x.GetFieldOfView());
+                  r += ")";
+                  return r;
+              }
+            )
+        ;
+    
+    py::class_<CustomSensor, Sensor>(m, "CustomSensor")
+        .def(py::init<Rvector&, Rvector&>(), py::arg("coneAngleVecIn"), py::arg("clockAngleVecIn"), "Initialize Custom Sensor with cone, clock angles in radians.")
+        .def("GetConeAngleVector", &CustomSensor::GetConeAngleVector)
+        .def("GetClockAngleVector", &CustomSensor::GetClockAngleVector)
+        .def("__repr__",
+              [](CustomSensor &x){ 
+                  Rvector coneAngleVec = x.GetConeAngleVector();
+                  Rvector clockAngleVec = x.GetClockAngleVector();
+                  std::string r("CustomSensor(Rvector(");
+                  r += vector_to_string(coneAngleVec.GetRealArray()) + "),Rvector(" ;
+                  r += vector_to_string(clockAngleVec.GetRealArray());
+                  r += "))";
+                  return r;
+              }
+            )
+        ;
+
+    py::class_<Propagator>(m, "Propagator")
+        ;
+
+    py::class_<CoverageChecker>(m, "CoverageChecker")
+        ;
+
+    py::class_<PointGroup>(m, "PointGroup")
+        ;
+
+
+
+    py::class_<testclass>(m, "testclass")
+        ;    
 
         // ,def_property_readonly("x", &Point::x) // To access member-function 'Point::x()' without ()
         // .def_property("size_bound", &Criteria::size::bound, &Criteria::set_size_bound) # read, write property

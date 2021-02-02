@@ -43,6 +43,9 @@ public:
    CustomSensor& operator= (const CustomSensor & copy);
    virtual ~CustomSensor();
    
+   Rvector GetConeAngleVector();
+   Rvector GetClockAngleVector();
+
    /// visibility methods
    /// Check the target visibility given the input cone and clock angles:
    /// determines whether or not the point is in the sensor FOV.

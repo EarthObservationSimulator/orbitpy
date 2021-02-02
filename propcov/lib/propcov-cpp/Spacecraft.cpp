@@ -32,6 +32,8 @@
 #include "AttitudeConversionUtility.hpp"
 #include "GmatConstants.hpp"
 
+#include <iostream>
+
 //#define DEBUG_STATES
 //#define DEBUG_CAN_INTERPOLATE
 
@@ -191,6 +193,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
 //------------------------------------------------------------------------------
 Spacecraft::~Spacecraft()
 {
+   // VInay: commented out to make it work with pybind11
+   /*
    if (orbitState)
       delete orbitState;
    if (orbitEpoch)
@@ -200,6 +204,7 @@ Spacecraft::~Spacecraft()
       delete interpolator;
    if (attitude)
       delete attitude;
+   */
 }
 
 //------------------------------------------------------------------------------
