@@ -1,0 +1,36 @@
+
+// Link step
+g++ ../tests/new/TestDiscretizedSensor.o -o ../tests/new/testExecutable *.o ../GMATsrc/util/*.o ../GMATsrc/base/*.o ../GMATsrc/util/matrixoperations/*.o ../GMATsrc/util/interpolator/*.o -lgtest -lpthread
+
+// Other File Link Step
+g++ ../tests/new/TestProjector.o -o ../tests/new/testExecutable *.o ../GMATsrc/util/*.o ../GMATsrc/base/*.o ../GMATsrc/util/matrixoperations/*.o ../GMATsrc/util/interpolator/*.o -lgtest -lpthread
+
+
+// Compile step
+g++ -c DiscretizedSensor.cpp -I ../GMATsrc/include -I ../GMATsrc/util
+
+
+// Other File Compile Step
+
+g++ -c Projector.cpp -I ../GMATsrc/include -I ../GMATsrc/util -I ../GMATsrc/util/interpolator
+
+
+// Other File test compile step
+
+gcc -c TestProjector.cpp -I ../../GMATsrc/include -I ../../GMATsrc/util -I ../../src -I ../../GMATsrc/util/interpolator
+
+// File test compile step
+gcc -c TestDiscretizedSensor.cpp -I ../../GMATsrc/include -I ../../GMATsrc/util -I ../../src -I ../../GMATsrc/util/interpolator
+
+// Polygon compile step
+g++ -std=c++17 -c Polygon.cpp -I ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/include -I ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/util
+
+// Sliced Polygon compile step
+g++ -std=c++17 -c SlicedPolygon.cpp -I ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/include -I ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/util
+
+// Sliced polygon tests compile step
+
+g++ -std=c++17 -c TestSlicedPolygon.cpp -I ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/include -I ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/util -I ../../src
+
+// Sliced polygon link step
+g++ -std=c++17 ../tests/new/TestSlicedPolygon.o -o ../tests/new/testExecutable *.o ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/util/*.o ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/base/*.o ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/util/matrixoperations/*.o -I ~/Documents/shield/repos/orbits/propcov/extern/gmatutil/util/interpolator/*.o -lgtest -lpthread
