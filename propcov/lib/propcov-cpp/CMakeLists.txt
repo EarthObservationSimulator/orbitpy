@@ -31,6 +31,7 @@ SET(PROPCOVCPP_SRCS
     VisiblePOIReport.cpp
     Projector.cpp
     DiscretizedSensor.cpp
+    testclass.cpp
        
 )
 

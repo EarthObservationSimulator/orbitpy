@@ -39,6 +39,7 @@ public:
    OrbitState();
    OrbitState( const OrbitState &copy);
    OrbitState& operator=(const OrbitState &copy);
+   bool operator==(const OrbitState &v)const;
    
    virtual ~OrbitState();
    
@@ -55,7 +56,7 @@ public:
    /// Return the Keplerian state
    virtual Rvector6 GetKeplerianState();
    /// Return the Cartesian state
-   virtual Rvector6 GetCartesianState();
+   virtual Rvector6 GetCartesianState() const;
    
    /// Clone the OrbitState object
    virtual OrbitState* Clone() const;

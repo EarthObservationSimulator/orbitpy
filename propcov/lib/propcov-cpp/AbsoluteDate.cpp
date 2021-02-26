@@ -92,6 +92,11 @@ AbsoluteDate& AbsoluteDate::operator=(const AbsoluteDate &copy)
    return *this;
 }
 
+bool AbsoluteDate::operator==(const AbsoluteDate &other) const
+{
+   return currentDate == other.GetJulianDate();
+}
+
 //------------------------------------------------------------------------------
 //  ~AbsoluteDate()
 //------------------------------------------------------------------------------

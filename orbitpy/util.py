@@ -10,8 +10,8 @@ from enum import Enum
 from numbers import Number
 import numpy as np
 import math
+import propcov
 from instrupy.util import *
-
 class CoverageCalculationsApproach(EnumEntity):
     """ Enumeration of recognized approaches to calculation coverage."""
     PNTOPTS_WITH_GRIDPNTS = "PNTOPTS_WITH_GRIDPNTS"
@@ -170,3 +170,161 @@ def calculate_inclination_circular_SSO(altitude_km):
         err = abs(i - i0)
         i0 = i
     return i
+
+class StateType(EnumEntity):
+    KEPLERIAN = "KEPLERIAN"
+    CARTESIAN_EARTH_CENTERED_INERTIAL = "CARTESIAN_EARTH_CENTERED_INERTIAL"
+    CARTESIAN_EARTH_FIXED = "CARTESIAN_EARTH_FIXED"
+
+class DateType(EnumEntity):
+    GREGORIAN_UTC = "GREGORIAN_UTC"
+    JULIAN_DATE_UT1 = "JULIAN_DATE_UT1"        
+
+class OrbitState(Entity):
+    """ Class to store the orbit state (i.e. the date, position and velocity of satellite).
+        The :class:`propcov.AbsoluteDate` and `propcov.OrbitState` objects are used to maintain the 
+        date and state respectively. 
+
+    :ivar date: Date at which the orbit state is defined.
+    :vartype date: propcov.AbsoluteDate
+
+    :ivar state: Orbit state (satellite position, velocity).
+    :vartype state: propcov.OrbitState
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+    
+    """
+    def __init__(self, date=None, state=None, _id=None):
+
+        self.date = date if date is not None and isinstance(date, propcov.AbsoluteDate) else None
+        self.state = state if state is not None and isinstance(state, propcov.OrbitState) else None
+        super(OrbitState, self).__init__(_id, "OrbitState")   
+
+    @staticmethod
+    def from_dict(d):
+        """ Parses orbit state from a dictionary.
+
+        :param d: Dictionary with the date and state description. 
+        
+        :return: Parsed python object. 
+        :rtype: :class:`orbitpy.util.InitialOrbitState`
+
+        """
+
+        date = OrbitState.set_date(d.get("date", None))
+        state = OrbitState.set_state(d.get("state", None))
+
+        return OrbitState(date=date, state=state, _id=d.get("@id", None))
+
+    def to_dict(self):
+        state = self.get_cartesian_earth_centered_inertial_state()
+        return dict({"date": { "dateType": "JULIAN_DATE_UT1", "jd": self.get_julian_date()}, 
+                     "state": {"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": state[0], "y": state[1], "z": state[2], "vx": state[3], "vy": state[4], "vz": state[5]}, 
+                     "@id": self._id})
+
+    def get_julian_date(self):
+        """ Get Julian Date UT1.
+
+        :returns: Julian date UT1
+        :rtype: float
+
+        """
+        return self.date.GetJulianDate()
+    
+
+    def get_cartesian_earth_centered_inertial_state(self):
+        """ Get Cartesian Earth Centered Inertial position, velocity.
+
+        :returns: Satellite position, velocity as a list.
+        :rtype: list, float
+
+        """
+        return self.state.GetCartesianState().GetRealArray()
+
+    def __eq__(self, other):
+        """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
+        """
+        return (self.date == other.date and self.state == other.state)
+
+    def __repr__(self):
+        return "OrbitState.from_dict({})".format(self.to_dict())
+
+    @staticmethod
+    def set_date(d):
+        """ Set the instance date attribute from the input dictionary.
+
+        :param d: Dictionary with the date description. 
+            
+            In case of ``GREGORIAN_UTC`` date type the following keys apply: year (int), month (int), day (int), hour (int), minute (int) and second (float).
+
+            In case of `JULIAN_DATE_UT1` date type the following keys apply: jd (float)
+
+        :paramtype d: dict
+
+        :returns: ``propcov`` date object.
+        :rtype: :class:`propcov.AbsoluteDate`
+
+        """
+
+        date = propcov.AbsoluteDate()
+        if d is not None:            
+            if(DateType.get(d["dateType"]) == DateType.GREGORIAN_UTC):
+                try:
+                    date.SetGregorianDate(year=d["year"], month=d["month"], day=d["day"], hour=d["hour"], minute=d["minute"], second=d["second"])
+                except:
+                    raise Exception("Something wrong in setting of Gregorian UTC date object. Check that the year, month, day, hour, second key/value pairs have been specified in the input dictionary.")
+        
+            elif(DateType.get(d["dateType"]) == DateType.JULIAN_DATE_UT1):
+                try:
+                    date.SetJulianDate(jd=d["jd"])
+                except:
+                    raise Exception("Something wrong in setting of Julian UT1 date object. Check that the jd key/value pair has been specified in the input dictionary.")
+        else:
+            raise Exception("Please specify a date.")
+        
+        return date
+
+    @staticmethod
+    def set_state(d):
+        """ Set the instance state attribute from the input dictionary.
+
+        :param d: Dictionary with the date description. 
+            
+            In case of ``KEPLERIAN`` date type the following keys apply: year (int), month (int), day (int), hour (int), minute (int) and second (float).
+
+            In case of `CARTESIAN_EARTH_CENTERED_INERTIAL` date type the following keys apply: 
+            
+            * x  : (km) satellite x-position
+            * y  : (km) satellite x-position
+            * z  : (km) satellite x-position
+            * vx : (km/s) satellite x-velocity
+            * vy : (km/s) satellite y-velocity
+            * vz : (km/s) satellite z-velocity
+
+        :paramtype d: dict
+
+        :returns: ``propcov`` date object.
+        :rtype: :class:`propcov.OrbitState`
+
+        """
+        state = propcov.OrbitState()
+        state_type = StateType.get(d.get('stateType', None))
+        
+        if state_type is not None:
+            if state_type == StateType.KEPLERIAN:
+                try:
+                    state.SetKeplerianState(SMA=d["sma"], ECC=d["ecc"], INC=d["inc"], RAAN=d["raan"], AOP=d["aop"], TA=d["ta"])
+                except:
+                    raise Exception("Something wrong in setting of state object with Keplerian parameters. Check that the sma, ecc, inc, raan, aop and ta key/value pairs have been specified in the input dictionary.")                
+            elif state_type == StateType.CARTESIAN_EARTH_CENTERED_INERTIAL:
+                try:
+                    state.SetCartesianState(propcov.Rvector6([d["x"], d["y"], d["z"], d["vx"], d["vy"], d["vz"]]))
+                except:
+                    raise Exception("Some wrong in setting of state object with Cartesian ECI parameters. Check that the x, y, z, vx, vy, vz key/value pairs are specified in the input dictionary.")
+            else:
+                raise NotImplementedError
+        else:
+            raise Exception("Please enter a stateType specification.")
+
+        return state

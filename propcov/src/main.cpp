@@ -104,18 +104,28 @@ PYBIND11_MODULE(propcov, m)
                   return r;
               }
             )
+        .def("__eq__", [](const Rvector6 &self, const Rvector6 &other) { return self==other; })
 
         ;   
 
     py::class_<AbsoluteDate>(m, "AbsoluteDate")
         .def(py::init())
-        .def("fromJulianDate", [](Real jd) { 
+        .def("fromJulianDate", [](const Real jd) { 
                 AbsoluteDate    x;
                 x.SetJulianDate(jd);
                 return x; 
                 }, 
                 R"pbdoc(
                     Return an AbsoluteDate object initialized to the input Julian Date.
+                    )pbdoc"
+            )
+        .def("fromGregorianDate", [](const Real year, const Real month, const Real day, const Real hour, const Real minute, const Real second) { 
+                AbsoluteDate    x;
+                x.SetGregorianDate(year, month, day, hour, minute, second);
+                return x; 
+                }, 
+                R"pbdoc(
+                    Return an AbsoluteDate object initialized to the input Gregorian Date.
                     )pbdoc"
             )
         .def("SetGregorianDate", &AbsoluteDate::SetGregorianDate, py::arg("year"), py::arg("month"), py::arg("day"), py::arg("hour"), py::arg("minute"), py::arg("second"))
@@ -131,6 +141,7 @@ PYBIND11_MODULE(propcov, m)
                   return r;
               }
             )
+        .def("__eq__", [](const AbsoluteDate &self, const AbsoluteDate &other) { return self==other; })
         ;
 
     py::class_<OrbitState>(m, "OrbitState")
@@ -138,6 +149,15 @@ PYBIND11_MODULE(propcov, m)
         .def("fromCartesianState", [](const Rvector6& cart) { 
                 OrbitState    x;
                 x.SetCartesianState(cart);
+                return x; 
+                },
+                R"pbdoc(
+                    Return an OrbitState object initialized to the input Cartesian state.
+                    )pbdoc"
+            )
+        .def("fromKeplerianState", [](const Real sma, const Real ecc, const Real inc, const Real raan, const Real aop, const Real ta) { 
+                OrbitState    x;
+                x.SetKeplerianState(sma, ecc, inc, raan, aop, ta);
                 return x; 
                 },
                 R"pbdoc(
@@ -158,6 +178,7 @@ PYBIND11_MODULE(propcov, m)
                   return r;
               }
             )
+        .def("__eq__", [](const OrbitState &self, const OrbitState &other) { return self==other; })
         ;
 
     py::class_<Earth>(m, "Earth")
@@ -220,21 +241,6 @@ PYBIND11_MODULE(propcov, m)
         /// @todo write __repr__
         ;
 
-
-    m.def("test", [](AbsoluteDate* epoch, OrbitState* state, Attitude* att, LagrangeInterpolator* interp) 
-                    { 
-                        AbsoluteDate* epoch_dup = epoch;
-                        OrbitState* state_dup = state;
-                        LagrangeInterpolator* interp_dup = interp;
-                        Attitude* att_dup = att;
-
-                        epoch_dup->GetJulianDate();
-                        state_dup->GetCartesianState();
-
-                        return interp->GetOrder(); 
-                    }
-            );
-
     py::class_<Sensor>(m, "Sensor")
         ;
 
@@ -270,13 +276,36 @@ PYBIND11_MODULE(propcov, m)
         ;
 
     py::class_<Propagator>(m, "Propagator")
+        .def(py::init<Spacecraft*>(),py::arg("spacecraft"))
+        .def("Propagate", &Propagator::Propagate)
+        .def("GetPropStartEnd", &Propagator::GetPropStartEnd)
+        .def("SetApplyDrag", &Propagator::SetApplyDrag)
+        .def("GetApplyDrag", &Propagator::GetApplyDrag)
+        /// @todo write __repr__
+        ;
+
+    py::class_<PointGroup>(m, "PointGroup", R"pbdoc(Lat, lons are in radians. Lat range is between -90 to +90 and lon range is between -180 to 180.)pbdoc")
+        .def(py::init())
+        .def("AddUserDefinedPoints", &PointGroup::AddUserDefinedPoints, py::arg("lats"), py::arg("lons"), "Add user defined latitude and longitude points in radians.")
+        .def("AddHelicalPointsByAngle", &PointGroup::AddHelicalPointsByAngle, py::arg("angleBetweenPoints"))
+        .def("GetPointPositionVector", &PointGroup::GetPointPositionVector, py::arg("index"))
+        //.def("GetLatAndLon", &PointGroup::GetLatAndLon, py::arg("index"), py::arg("lat"), py::arg("lon"))
+        .def("GetNumPoints", &PointGroup::GetNumPoints)
+        //.def("GetLatLonVectors", &PointGroup::GetLatLonVectors, py::arg("lats"), py::arg("lons"))
+        .def("SetLatLonBounds", &PointGroup::SetLatLonBounds, py::arg("latup"), py::arg("latlow"), py::arg("lonup"), py::arg("lonlow"))
+        ///@todo write __repr__
         ;
 
     py::class_<CoverageChecker>(m, "CoverageChecker")
+        .def(py::init<PointGroup*, Spacecraft*>(), py::arg("ptGroup"), py::arg("sat"))
+        .def("CheckPointCoverage", py::overload_cast<>(&CoverageChecker::CheckPointCoverage))
+        .def("CheckPointCoverage", py::overload_cast<IntegerArray>(&CoverageChecker::CheckPointCoverage), py::arg("PointIndices"))
+        .def("AccumulateCoverageData", py::overload_cast<>(&CoverageChecker::AccumulateCoverageData))
+        .def("AccumulateCoverageData", py::overload_cast<Real>(&CoverageChecker::AccumulateCoverageData), py::arg("atTime"))
+        .def("AccumulateCoverageDataAtPreviousTimeIndex", &CoverageChecker::AccumulateCoverageDataAtPreviousTimeIndex)
         ;
 
-    py::class_<PointGroup>(m, "PointGroup")
-        ;
+    
 
 
 

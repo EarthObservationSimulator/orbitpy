@@ -170,7 +170,7 @@ void PointGroup::AddUserDefinedPoints(const RealArray& lats,
                                       const RealArray& lons)
 {
    // Add user defined latitude and longitude points
-   // Inputs are real arrays of longitude and latitude in radians
+   // Inputs are real arrays of latitude and longitude in radians
    if (lats.size() != lons.size())
       throw TATCException(
                   "latitude and longitude arrays must have the same length\n");

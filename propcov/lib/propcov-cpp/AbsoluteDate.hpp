@@ -38,6 +38,7 @@ public:
    AbsoluteDate();
    AbsoluteDate( const AbsoluteDate &copy);
    AbsoluteDate& operator=(const AbsoluteDate &copy);
+   bool operator==(const AbsoluteDate &other) const;
    
    virtual ~AbsoluteDate();
    
@@ -53,8 +54,8 @@ public:
    /// Advance the time by stepInSec seconds
    virtual void     Advance(Real stepInSec);
    /// Clone the AbsoluteDate
-   virtual AbsoluteDate* Clone() const;
-   
+   virtual AbsoluteDate* Clone() const;  
+
 protected:
    
    /// Current date in Julian Day format
