@@ -13,29 +13,35 @@ import propcov
 
 class TestOrbitState(unittest.TestCase):
   
-    def test_set_date(self):
-        x = OrbitState.set_date({"dateType":"JULIAN_DATE_UT1", "jd":2459270.75})
+    def test_date_from_dict(self):
+        x = OrbitState.date_from_dict({"dateType":"JULIAN_DATE_UT1", "jd":2459270.75})
         self.assertIsInstance(x, propcov.AbsoluteDate)
 
-        y = OrbitState.set_date({"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0})
+        y = OrbitState.date_from_dict({"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0})
         self.assertIsInstance(y, propcov.AbsoluteDate)
 
         self.assertEqual(x, y)
 
-    def test_set_state(self):
-        x = OrbitState.set_state({"stateType": "KEPLERIAN", "sma": 6867, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25})
+    def test_state_from_dict(self):
+        x = OrbitState.state_from_dict({"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6867, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25})
         self.assertIsInstance(x, propcov.OrbitState)
 
         cart_state = x.GetCartesianState().GetRealArray()
 
-        y = OrbitState.set_state({"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": cart_state[0], "y": cart_state[1], "z": cart_state[2], "vx": cart_state[3], "vy": cart_state[4], "vz": cart_state[5]})
+        y = OrbitState.state_from_dict({"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": cart_state[0], "y": cart_state[1], "z": cart_state[2], "vx": cart_state[3], "vy": cart_state[4], "vz": cart_state[5]})
         self.assertIsInstance(y, propcov.OrbitState) 
 
         self.assertEqual(x, y)
 
-    def test_get_julian_date(self): #@TODO
+    def test_date_to_dict(self): #@TODO
         pass
 
+    def test_state_to_dict(self): #@TODO
+        pass
+    
+    def test_get_julian_date(self): #@TODO
+        pass
+    
     def test_get_cartesian_earth_centered_inertial_state(self): #@TODO
         pass
 
@@ -51,7 +57,7 @@ class TestOrbitState(unittest.TestCase):
 
         # Gregorian date, Keplerian state
         o = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
-                                  "state":{"stateType": "KEPLERIAN", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
+                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                                   })
         self.assertIsInstance(o, OrbitState)
         self.assertIsNone(o._id)
@@ -77,7 +83,7 @@ class TestOrbitState(unittest.TestCase):
 
         # Gregorian date, Keplerian state
         o = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
-                                  "state":{"stateType": "KEPLERIAN", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
+                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                                   "@id": "123"})
         d = o.to_dict()
         date = o.get_julian_date()
