@@ -11,7 +11,7 @@ import uuid
 
 import propcov
 from .util import DateType, OrbitState
-from instrupy.util import Constants
+from instrupy.util import Entity, Constants
 
 class ConstellationFactory:
     """ Factory class which allows to register and invoke the appropriate constellation-model class. 
@@ -33,9 +33,9 @@ class ConstellationFactory:
     """
     def __init__(self):
         self._creators = {}
-        self.register_constellation_model('Walker Delta', WalkerDeltaConstellation)
-        self.register_constellation_model('Custom', CustomConstellation)
-        self.register_constellation_model('Train', TrainConstellation)
+        self.register_constellation_model('Walker Delta Constellation', WalkerDeltaConstellation)
+        self.register_constellation_model('Custom Constellation', CustomConstellation)
+        self.register_constellation_model('Train Constellation', TrainConstellation)
 
     def register_constellation_model(self, _type, creator):
         """ Function to register constellations.
@@ -102,7 +102,7 @@ class WalkerDeltaConstellation(Entity):
     """
     def __init__(self, date=None, numberSatellites=None, numberPlanes=None, relativeSpacing=None, alt=None, ecc=None, inc=None, aop=None, _id=None):
         
-        self.date = float(date) if date is not None else None
+        self.date = date if date is not None and isinstance(date, propcov.AbsoluteDate) else None
         self.numberSatellites = int(numberSatellites) if numberSatellites is not None else None
         self.numberPlanes = int(numberPlanes) if numberPlanes is not None else None
         self.relativeSpacing = int(relativeSpacing) if relativeSpacing is not None else None
@@ -111,34 +111,46 @@ class WalkerDeltaConstellation(Entity):
         self.inc = float(inc) if inc is not None else None
         self.aop = float(aop) if aop is not None else None
 
-        super(WalkerDeltaConstellation, self).__init__(_id, "Walker Delta")        
+        super(WalkerDeltaConstellation, self).__init__(_id, "Walker Delta Constellation")        
 
     @staticmethod
     def from_dict(d):
-        """Parses an WalkerDeltaConstellation object from a normalized JSON dictionary. A random identifier is generated
-           if the "@id" key/value pair is missing in the input dictionary.
+        """Parses an WalkerDeltaConstellation object from a normalized JSON dictionary.
         
         :param d: Dictionary with the constellation specifications.
+
+                Following keys are to be specified.
+                
+                * "date": see :class:`orbitpy.util.OrbitState.date_from_dict`. Default: 2415019.5 JDUT1.
+                * "@id": (str) Constellation identifier (unique). Default: A random string.
+                * "numberSatellites": (int) Number of satellites in the constellation. Default: 3.
+                * "numberPlanes": (int) Number of orbit planes in the constellation. Default: 3.
+                * "relativeSpacing": (int) Factor controlling the spacing between the satellites in different planes. Default: 1.
+                * "alt": (float) Altitude in kilometers. Default: 500.
+                * "ecc": (float) Orbit eccentricity. Default: 0,
+                * "inc": (float) Orbit inclination in degrees. Default: 98.22. 
+                * "aop": (float) Orbit argument of perigee in degrees. Default: 135. 
+
         :paramtype d: dict
 
         :return: WalkerDeltaConstellation object.
         :rtype: :class:`orbitpy.constellation.WalkerDeltaConstellation`
 
         """
-        _id = d.get("_id",uuid.uuid4())
-        date_dict = d.get("date",None)
+        _id = d.get("@id",str(uuid.uuid4()))
+        date_dict = d.get("date",{"dateType": "JULIAN_DATE_UT1", "jd":2415019.5}) 
         if(date_dict):
-            date = OrbitState.load_date(date_dict)
+            date = OrbitState.date_from_dict(date_dict)
         else:
             raise Exception("Please input date in the Walker Delta constellation specifications.")
         return WalkerDeltaConstellation( date              =  date,
-                                         numberSatellites   = d.get("numberSatellites",None),
-                                         numberPlanes       = d.get("numberPlanes",None),
-                                         relativeSpacing    = d.get("relativeSpacing",None),
-                                         alt                = d.get("alt",None),
-                                         ecc                = d.get("ecc",None),
-                                         inc                = d.get("inc",None),
-                                         aop                = d.get("aop",None),
+                                         numberSatellites   = d.get("numberSatellites",3),
+                                         numberPlanes       = d.get("numberPlanes",3),
+                                         relativeSpacing    = d.get("relativeSpacing",1),
+                                         alt                = d.get("alt",500),
+                                         ecc                = d.get("ecc",0),
+                                         inc                = d.get("inc",98.22),
+                                         aop                = d.get("aop",135),
                                          _id                = _id
                                         )
 
@@ -211,7 +223,7 @@ class WalkerDeltaConstellation(Entity):
                     orb_id = str(pl_i+1) + str(sat_i+1)
                 ta = (ta_ref + sat_i * 360.0/num_sats_pp)%360
                 # construct the state object
-                state_dict = {"sma": sma, "ecc": ecc, "inc": inc, "raan": raan, "aop": aop, "ta": ta}
+                state_dict = {"stateType":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": sma, "ecc": ecc, "inc": inc, "raan": raan, "aop": aop, "ta": ta}
                 state = OrbitState.state_from_dict(state_dict)
                 # append to list of orbits
                 orbits.append(OrbitState(date, state, orb_id))
@@ -221,35 +233,72 @@ class WalkerDeltaConstellation(Entity):
 
 
 class CustomConstellation(Entity):
+    """A Custom constellation class. The satellite orbits are specified as a list of dictionaries, with each dictionary 
+        containing the orbit parameters (along with the date).
+      
+    :ivar orbit: List of :class:`orbitpy.util.OrbitState` objects where each object represents the orbit of a satellite in the constellation.
+    :vartype orbit: list, :class:`orbitpy.util.OrbitState`
 
-    def __init__(self):
-        pass
+    :ivar _id: Unique constellation identifier.
+    :vartype _id: str
+
+    """
+    def __init__(self, orbit=None, _id=None):
+        self.orbit = None
+        if orbit is not None:
+            if isinstance(orbit, list):
+                if all(isinstance(x, OrbitState) for x in orbit):
+                    self.orbit = orbit
+            elif isinstance(orbit, OrbitState):
+                self.orbit = [orbit] # make into list even if single element        
+        super(CustomConstellation, self).__init__(_id, "Custom Constellation")  
+
+    @staticmethod
+    def from_dict(d):
+        """Parses an CustomConstellation object from a normalized JSON dictionary. A random identifier is generated
+           if the "@id" key/value pair is missing in the input dictionary. Random identifiers are assigned to the 
+           individual orbits if the "@id" key/value pair is missing in the input orbit (sub)dictionaries.
+        
+        :param d: Dictionary with the constellation specifications. THe dictionary consists of the following keys:
+
+            * @id: (str) Constellation identifier
+            * orbit: (list) List of dictionaries with each dictionary describing an orbit with the date (GREGORIAN_UTC or JULIAN_DATE_UT1 format) 
+                            and state (KEPLERIAN_EARTH_CENTERED_INERTIAL or CARTESIAN_EARTH_CENTERED_INERTIAL format). Refer to :class:`orbitpy.util.OrbitState`
+                            for description on supported the dictionary keys.
+
+        :paramtype d: dict
+
+        :return: CustomConstellation object.
+        :rtype: :class:`orbitpy.constellation.CustomConstellation`
+
+        """
+        _id = d.get("@id",str(uuid.uuid4()))
+
+        orbit_dict = d.get("orbit", None)  
+        if orbit_dict is not None and not isinstance(orbit_dict, list):
+            orbit_dict = [orbit_dict] # make into list
+        
+        orbit = [] # list of orbits
+        for orb in orbit_dict:               
+            orbit.append(OrbitState.from_dict(orb)) 
+
+        return CustomConstellation( orbit = orbit,
+                                    _id   = _id
+                                  )
         
     def generate_orbits(self):
-        """ Make a list of orbits. Convert form list of dictionaries to list of :class:`orbitpy.preprocess.OrbitParameters`.
-
-        :param data: List of dictionaries containing the orbit ID and Keplerian parameters. A common date is separately 
-                     considered for all orbits.
-        :paramtype data: list, dict
+        """ Return list of orbits (of the satellites) in the constellation.
 
         :returns: List of orbits in the constellation
         :rtype: list, :class:`orbitpy.preprocess.OrbitParameters` 
         
-        
-        num_of_orbs = len(data)
-        orbits = []
-        for orb_i in range(0,num_of_orbs):
-            _orb = data[orb_i]                    
-            orbits.append(OrbitParameters(_orb['@id'], _orb['sma'], _orb['ecc'], _orb['inc'],
-                                          _orb['raan'], _orb['aop'], _orb['ta']))                   
-        return orbits
         """
-        pass
+        return self.orbit
 
 class TrainConstellation(Entity):
 
     def __init__(self):
-        pass
+        raise NotImplementedError
 
     def generate_orbits(self):
         pass

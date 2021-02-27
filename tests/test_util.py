@@ -45,6 +45,9 @@ class TestOrbitState(unittest.TestCase):
     def test_get_cartesian_earth_centered_inertial_state(self): #@TODO
         pass
 
+    def test_get_kepleiran_earth_centered_inertial_state(self): #@TODO
+        pass
+
     def test_from_dict(self):
         # Julian date, Cartesian state
         o = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, 
@@ -64,8 +67,8 @@ class TestOrbitState(unittest.TestCase):
         self.assertEqual(o.date, propcov.AbsoluteDate.fromGregorianDate(2021, 2, 25, 6 ,0, 0))
         self.assertEqual(o.state, propcov.OrbitState.fromKeplerianState(6878.137, 0.001, 45, 35, 145, -25))
     
-    def test_to_dict(self): #@TODO
-        # Julian date, Cartesian state
+    def test_to_dict(self): #@TODO test Keplerian state output
+        # Input: Julian date, Cartesian state
         o = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, 
                                   "state":{"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": 6878.137, "y": 0, "z": 0, "vx": 0, "vy": 7.6126, "vz": 0},
                                  })
@@ -81,7 +84,7 @@ class TestOrbitState(unittest.TestCase):
         self.assertEqual(d["state"]["vz"], 0)
         self.assertIsNone(d["@id"])
 
-        # Gregorian date, Keplerian state
+        # Input: Gregorian date, Keplerian state
         o = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
                                   "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                                   "@id": "123"})

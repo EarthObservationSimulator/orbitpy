@@ -182,8 +182,9 @@ class DateType(EnumEntity):
 
 class OrbitState(Entity):
     """ Class to store the orbit state (i.e. the date, position and velocity of satellite).
-        The :class:`propcov.AbsoluteDate` and `propcov.OrbitState` objects are used to maintain the 
-        date and state respectively. 
+        The :class:`propcov.AbsoluteDate` and :class:`propcov.OrbitState` objects are used to maintain the 
+        date and state respectively. Note that :class:`propcov.OrbitState` and :class:`orbitpy.util.OrbitState`
+        classes are different.
 
     :ivar date: Date at which the orbit state is defined.
     :vartype date: :class:`propcov.AbsoluteDate`
@@ -217,10 +218,18 @@ class OrbitState(Entity):
 
         return OrbitState(date=date, state=state, _id=d.get("@id", None))
 
-    def to_dict(self):
-        state = self.get_cartesian_earth_centered_inertial_state()
+    def to_dict(self, state_type=None):
+        """ Translate the OrbitState object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+
+        :param state_type: Indicate either "CARTESIAN_EARTH_CENTERED_INERTIAL" or "KEPLERIAN_EARTH_CENTERED_INERTIAL". Default is "CARTESIAN_EARTH_CENTERED_INERTIAL".
+        :paramtype state_type: str
+
+        :returns: OrbitState specifications as python dictionary.
+        :rtype: dict
+
+        """        
         return dict({"date": OrbitState.date_to_dict(self.date), 
-                     "state": OrbitState.state_to_dict(self.state), 
+                     "state": OrbitState.state_to_dict(self.state, state_type), 
                      "@id": self._id})
     
     def get_cartesian_earth_centered_inertial_state(self):
@@ -231,6 +240,15 @@ class OrbitState(Entity):
 
         """
         return self.state.GetCartesianState().GetRealArray()
+
+    def get_keplerian_earth_centered_inertial_state(self):
+        """ Get Keplerian Earth Centered Inertial position, velocity.
+
+        :returns: Orbit Keplerian elements as a list.
+        :rtype: list, float
+
+        """
+        return self.state.GetKeplerianState().GetRealArray()
 
     def __eq__(self, other):
         """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
@@ -305,12 +323,14 @@ class OrbitState(Entity):
 
         """
         state = propcov.OrbitState()
-        state_type = StateType.get(d.get('stateType', None))
+        stateType = d.get('stateType', None)
+        state_type = StateType.get(stateType) if stateType is not None else None
         
         if state_type is not None:
             if state_type == StateType.KEPLERIAN_EARTH_CENTERED_INERTIAL:
-                try:
-                    state.SetKeplerianState(SMA=d["sma"], ECC=d["ecc"], INC=d["inc"], RAAN=d["raan"], AOP=d["aop"], TA=d["ta"])
+                try: 
+                    # angles must be converted to radians
+                    state.SetKeplerianState(SMA=d["sma"], ECC=d["ecc"], INC=np.deg2rad(d["inc"]), RAAN=np.deg2rad(d["raan"]), AOP=np.deg2rad(d["aop"]), TA=np.deg2rad(d["ta"]))
                 except:
                     raise Exception("Something wrong in setting of state object with Keplerian parameters. Check that the sma, ecc, inc, raan, aop and ta key/value pairs have been specified in the input dictionary.")                
             elif state_type == StateType.CARTESIAN_EARTH_CENTERED_INERTIAL:
@@ -339,20 +359,30 @@ class OrbitState(Entity):
         return { "dateType": "JULIAN_DATE_UT1", "jd": date.GetJulianDate()}
 
     @staticmethod
-    def state_to_dict(state):
-        """ Get a Python dictionary representation of the input state. 
+    def state_to_dict(state, state_type=None):
+        """ Get a Python dictionary representation of the input state. Description shall be in 
+            CARTESIAN_EARTH_CENTERED_INERTIAL or KEPLERIAN_EARTH_CENTERED_INERTIAL.
 
         :param date: ``propcov`` state object.
         :paramtype date: :class:`propcov.OrbitState`
+
+        :param state_type: Indicate either "CARTESIAN_EARTH_CENTERED_INERTIAL" or "KEPLERIAN_EARTH_CENTERED_INERTIAL". Default is "CARTESIAN_EARTH_CENTERED_INERTIAL".
+        :paramtype state_type: str
 
         :returns: Python dictionary representation of the input state. 
         :rtype: dict
 
         """
-        state_list = state.GetCartesianState().GetRealArray()
-        return {"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": state_list[0], "y": state_list[1], "z": state_list[2], 
-                "vx": state_list[3], "vy": state_list[4], "vz": state_list[5]}
-    
+        state_type = StateType.get(state_type) if state_type is not None else StateType.CARTESIAN_EARTH_CENTERED_INERTIAL # default
+        if state_type == StateType.CARTESIAN_EARTH_CENTERED_INERTIAL:
+            state_list = state.GetCartesianState().GetRealArray()
+            return {"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": state_list[0], "y": state_list[1], "z": state_list[2], 
+                    "vx": state_list[3], "vy": state_list[4], "vz": state_list[5]}
+        elif state_type == StateType.KEPLERIAN_EARTH_CENTERED_INERTIAL:
+            state_list = state.GetKeplerianState().GetRealArray()
+            return {"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": state_list[0], "ecc": state_list[1], "inc": np.rad2deg(state_list[2]), 
+                "raan": np.rad2deg(state_list[3]), "aop": np.rad2deg(state_list[4]), "ta": np.rad2deg(state_list[5])}        
+
     def get_julian_date(self):
         """ Get Julian Date UT1.
 
