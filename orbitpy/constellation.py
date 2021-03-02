@@ -16,7 +16,7 @@ from instrupy.util import Entity, Constants
 class ConstellationFactory:
     """ Factory class which allows to register and invoke the appropriate constellation-model class. 
     
-    :class:`WalkerDeltaConstellation`, :class:`CustomConstellation` and :class:`TrainConstellation` constellation-model classes are registered 
+    :class:`WalkerDeltaConstellation`, :class:`CustomOrbit` and :class:`TrainConstellation` constellation-model classes are registered 
     in the factory. Additional user-defined constellation-model classes can be registered as shown below: 
 
     Usage: 
@@ -34,7 +34,6 @@ class ConstellationFactory:
     def __init__(self):
         self._creators = {}
         self.register_constellation_model('Walker Delta Constellation', WalkerDeltaConstellation)
-        self.register_constellation_model('Custom Constellation', CustomConstellation)
         self.register_constellation_model('Train Constellation', TrainConstellation)
 
     def register_constellation_model(self, _type, creator):
@@ -230,71 +229,6 @@ class WalkerDeltaConstellation(Entity):
                 print('{orb_id}, {sma}, {ecc}, {inc}, {raan}, {aop}, {ta}'.format(orb_id=orb_id, sma=sma, ecc=ecc, inc=inc, raan=raan, aop=aop, ta=ta))
         print(".......Done.......")
         return orbits
-
-
-class CustomConstellation(Entity):
-    """A Custom constellation class. The satellite orbits are specified as a list of dictionaries, with each dictionary 
-        containing the orbit parameters (along with the date).
-      
-    :ivar orbit: List of :class:`orbitpy.util.OrbitState` objects where each object represents the orbit of a satellite in the constellation.
-    :vartype orbit: list, :class:`orbitpy.util.OrbitState`
-
-    :ivar _id: Unique constellation identifier.
-    :vartype _id: str
-
-    """
-    def __init__(self, orbit=None, _id=None):
-        self.orbit = None
-        if orbit is not None:
-            if isinstance(orbit, list):
-                if all(isinstance(x, OrbitState) for x in orbit):
-                    self.orbit = orbit
-            elif isinstance(orbit, OrbitState):
-                self.orbit = [orbit] # make into list even if single element        
-        super(CustomConstellation, self).__init__(_id, "Custom Constellation")  
-
-    @staticmethod
-    def from_dict(d):
-        """Parses an CustomConstellation object from a normalized JSON dictionary. A random identifier is generated
-           if the "@id" key/value pair is missing in the input dictionary. Random identifiers are assigned to the 
-           individual orbits if the "@id" key/value pair is missing in the input orbit (sub)dictionaries.
-        
-        :param d: Dictionary with the constellation specifications. THe dictionary consists of the following keys:
-
-            * @id: (str) Constellation identifier
-            * orbit: (list) List of dictionaries with each dictionary describing an orbit with the date (GREGORIAN_UTC or JULIAN_DATE_UT1 format) 
-                            and state (KEPLERIAN_EARTH_CENTERED_INERTIAL or CARTESIAN_EARTH_CENTERED_INERTIAL format). Refer to :class:`orbitpy.util.OrbitState`
-                            for description on supported the dictionary keys.
-
-        :paramtype d: dict
-
-        :return: CustomConstellation object.
-        :rtype: :class:`orbitpy.constellation.CustomConstellation`
-
-        """
-        _id = d.get("@id",str(uuid.uuid4()))
-
-        orbit_dict = d.get("orbit", None)  
-        if orbit_dict is not None and not isinstance(orbit_dict, list):
-            orbit_dict = [orbit_dict] # make into list
-        
-        orbit = [] # list of orbits
-        for orb in orbit_dict:               
-            orbit.append(OrbitState.from_dict(orb)) 
-
-        return CustomConstellation( orbit = orbit,
-                                    _id   = _id
-                                  )
-        
-    def generate_orbits(self):
-        """ Return list of orbits (of the satellites) in the constellation.
-
-        :returns: List of orbits in the constellation
-        :rtype: list, :class:`orbitpy.preprocess.OrbitParameters` 
-        
-        """
-        return self.orbit
-
 class TrainConstellation(Entity):
 
     def __init__(self):

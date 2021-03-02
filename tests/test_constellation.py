@@ -8,19 +8,37 @@ import unittest
 
 import numpy as np
 from orbitpy.util import OrbitState
-from orbitpy.constellation import ConstellationFactory, WalkerDeltaConstellation, CustomConstellation, TrainConstellation
+from orbitpy.constellation import ConstellationFactory, WalkerDeltaConstellation, CustomOrbit, TrainConstellation
 import propcov
 
 RE = 6378.137 # radius of Earth in km
 
-def angle_difference(x, y):
-    """ Compute angle difference (in degrees) between two input angles (n degrees).
+def angle_difference(a, b):
+    """ Compute angle difference (b-a) in the range of -180 deg to 180 deg.
+
+    :param a: Angle in degrees.
+    :paramtype: float
+
+    :param b: Angle in degrees.
+    :paramtype b: float:
+
+    :returns: (b-a) in range of -180 deg to 180 deg.
+    :rtype: float
+
+    Usage:
+
+    .. code-block:: python
+
+        >> angle_difference(1,3)
+        2
+        >> angle_difference(1,358)
+        -3
+        
     """
-    x = np.deg2rad(x)
-    y = np.deg2rad(y)
-    c2 = (np.sin(x)-np.sin(y))**2 + (np.cos(x)-np.cos(y))**2
-    angle_diff = np.arccos((2.0 - c2)/2.0) # a = b = 1
-    return np.rad2deg(angle_diff)
+    c = (b - a) % 360
+    if c > 180:
+       c -= 360
+    return c
 
 class TestConstellationFactory(unittest.TestCase):
   
@@ -37,8 +55,6 @@ class TestConstellationFactory(unittest.TestCase):
         # test the built-in instrumnet models are registered
         self.assertIn('Walker Delta Constellation', factory._creators)
         self.assertEqual(factory._creators['Walker Delta Constellation'], WalkerDeltaConstellation)
-        self.assertIn('Custom Constellation', factory._creators)
-        self.assertEqual(factory._creators['Custom Constellation'], CustomConstellation)
         self.assertIn('Train Constellation', factory._creators)
         self.assertEqual(factory._creators['Train Constellation'], TrainConstellation)
     
@@ -50,8 +66,6 @@ class TestConstellationFactory(unittest.TestCase):
         # test the built-in instrumnet models remain registered after registration of new model
         self.assertIn('Walker Delta Constellation', factory._creators)
         self.assertEqual(factory._creators['Walker Delta Constellation'], WalkerDeltaConstellation)
-        self.assertIn('Custom Constellation', factory._creators)
-        self.assertEqual(factory._creators['Custom Constellation'], CustomConstellation)
         self.assertIn('Train Constellation', factory._creators)
         self.assertEqual(factory._creators['Train Constellation'], TrainConstellation)
 
@@ -66,10 +80,7 @@ class TestConstellationFactory(unittest.TestCase):
         specs = {"@type": 'Walker Delta Constellation', "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}} # in practice additional constellation specs shall be present in the dictionary
         wd_model = factory.get_constellation_model(specs)
         self.assertIsInstance(wd_model, WalkerDeltaConstellation)
-        # Custom Constellation  model
-        #specs = {"@type": 'Custom Constellation', "orbit": [{"date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}}]} # in practice additional constellation specs shall be present in the dictionary
-        #c_model = factory.get_constellation_model(specs)
-        #self.assertIsInstance(c_model, CustomConstellation)     
+
         # add test for train constellation   @TODO
 
         # DummyNewConstellation
@@ -161,8 +172,8 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
         
         # 3 satellites per plane, consecutive 3 satellites shall have the same RAAN
         plane1_raan = orbit_dict[0]["raan"]
-        self.assertAlmostEqual(angle_difference(plane1_raan, orbit_dict[1]["raan"]), 0, 6)
-        self.assertAlmostEqual(angle_difference(plane1_raan, orbit_dict[2]["raan"]), 0, 6)
+        self.assertAlmostEqual(angle_difference(plane1_raan, orbit_dict[1]["raan"]), 0)
+        self.assertAlmostEqual(angle_difference(plane1_raan, orbit_dict[2]["raan"]), 0)
 
         plane2_raan = orbit_dict[3]["raan"]
         self.assertAlmostEqual(plane2_raan, orbit_dict[4]["raan"])
@@ -270,5 +281,3 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
         self.assertAlmostEqual(orbit_dict[2]["ta"] - orbit_dict[0]["ta"], phase_diff)
         self.assertAlmostEqual(orbit_dict[4]["ta"] - orbit_dict[2]["ta"], phase_diff)
   
-class TestCustomConstellation(unittest.TestCase):
-    pass

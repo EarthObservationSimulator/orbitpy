@@ -11,7 +11,8 @@ from numbers import Number
 import numpy as np
 import math
 import propcov
-from instrupy.util import *
+from instrupy.util import Entity, EnumEntity, Constants, Orientation
+from instrupy import Instrument
 class CoverageCalculationsApproach(EnumEntity):
     """ Enumeration of recognized approaches to calculation coverage."""
     PNTOPTS_WITH_GRIDPNTS = "PNTOPTS_WITH_GRIDPNTS"
@@ -181,10 +182,11 @@ class DateType(EnumEntity):
     JULIAN_DATE_UT1 = "JULIAN_DATE_UT1"        
 
 class OrbitState(Entity):
-    """ Class to store the orbit state (i.e. the date, position and velocity of satellite).
+    """ Class to store and handle the orbit state (i.e. the date, position and velocity of satellite).
         The :class:`propcov.AbsoluteDate` and :class:`propcov.OrbitState` objects are used to maintain the 
         date and state respectively. Note that :class:`propcov.OrbitState` and :class:`orbitpy.util.OrbitState`
-        classes are different.
+        classes are different. The class also provides staticmethods to convert python-dict/ propcov-class representations 
+        to/from propcov-class/ python-dict inputs.
 
     :ivar date: Date at which the orbit state is defined.
     :vartype date: :class:`propcov.AbsoluteDate`
@@ -251,7 +253,7 @@ class OrbitState(Entity):
         return self.state.GetKeplerianState().GetRealArray()
 
     def __eq__(self, other):
-        """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
+        """ Simple equality check. Returns True if the class attributes are equal, else returns False.
         """
         return (self.date == other.date and self.state == other.state)
 
@@ -390,7 +392,154 @@ class OrbitState(Entity):
         :rtype: float
 
         """
-        return self.date.GetJulianDate()
-    
+        return self.date.GetJulianDate()     
 
+class SpacecraftBus(Entity):
+    """ Class to store and handle the spacecraft bus attributes.
+
+    :ivar name: Name of the bus.
+    :vartype name: str
+
+    :ivar mass: (kg) Mass of the bus.
+    :vartype mass: float
+
+    :ivar volume: (m3) Volume of the bus.
+    :vartype volume: float
+    
+    :ivar orientation: Bus orientation. Can be specified with respect to any one of the reference frames defined in :class:`instrupy.util.ReferenceFrame`
+    :vartype orientation: :class:`instrupy.util.Orientation`
+
+    :ivar solar_panel_config: Solar panel configuration
+    :vartype solar_panel_config: str #@TODO: revise
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+    
+    """
+    def __init__(self, name=None, mass=None, volume=None, orientation=None, solarPanelConfig=None, _id=None):
+
+        self.name = str(name) if name is not None else None
+        self.mass = float(mass) if mass is not None else None
+        self.volume = float(volume) if volume is not None else None
+        self.orientation = orientation if orientation is not None and isinstance(orientation, Orientation) else None
+        self.solarPanelConfig = solarPanelConfig if solarPanelConfig is not None else None
+        super(SpacecraftBus, self).__init__(_id, "SpacecraftBus")   
+
+    @staticmethod
+    def from_dict(d):
+        """ Parses ``SpacecraftBus`` object from a dictionary.
+
+        :param d: Dictionary with the spacecraft bus properties.
         
+        :return: Parsed python object. 
+        :rtype: :class:`orbitpy.util.SpacecraftBus`
+
+        """
+        default_orien = dict({"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}) #  default orientation = referenced and aligned to the NADIR_POINTING frame.
+        return SpacecraftBus(
+                name = d.get("name", None),
+                mass = d.get("mass", None),
+                volume = d.get("volume", None),
+                solarPanelConfig = d.get("solarPanelConfig", None),
+                orientation = Orientation.from_json(d.get("orientation", default_orien)),
+                _id = d.get("@id", None)
+                )
+
+    def to_dict(self, state_type=None):
+        """ Translate the SpacecraftBus object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+
+        :returns: SpacecraftBus specifications as python dictionary.
+        :rtype: dict
+
+        """        
+        orientation_dict = self.orientation.to_dict() if self.orientation is not None and isinstance(self.orientation, Orientation) else None
+        return dict({"name": self.name,
+                     "mass": self.mass,
+                     "volume": self.volume,
+                     "solarPanelConfig": self.solarPanelConfig, 
+                     "orientation": orientation_dict, 
+                     "@id": self._id
+                    })
+    
+    def __repr__(self):
+        return "SpacecraftBus.from_dict({})".format(self.to_dict())
+
+    def __eq__(self, other):
+        """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
+            Note that _id data attribute may be different.
+        """
+        return (self.name == other.name and self.mass == other.mass and self.volume == other.volume \
+                and self.orientation==other.orientation and self.solarPanelConfig == other.solarPanelConfig)
+
+class Spacecraft(Entity):
+    """ Class to store and handle the spacecraft attributes.
+
+    :ivar name: Name of the spacecraft.
+    :vartype name: str
+
+    :ivar orbitState: Orbit specifications of the spacecraft (defined at a specific time).
+    :vartype orbitState: :Class:`orbitpy.util.OrbitState`
+
+    :ivar spacecraftBus: Spacecraft bus.
+    :vartype spacecraftBus: :class:`orbitpy.util.SpacecraftBus`
+    
+    :ivar instrument: Instrument(s) belonging to the spacecraft.
+    :vartype instrument: list, :class:`instrupy.Instrument`
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+    
+    """
+    def __init__(self, name=None, orbitState=None, spacecraftBus=None, instrument=None, _id=None):
+
+        self.name = str(name) if name is not None else None
+        self.orbitState = orbitState if orbitState is not None and isinstance(orbitState, OrbitState) else None
+        self.spacecraftBus = spacecraftBus if spacecraftBus is not None and isinstance(spacecraftBus, SpacecraftBus) else None
+        self.instrument = instrument if instrument is not None and isinstance(instrument, Instrument) else None
+        super(Spacecraft, self).__init__(_id, "Spacecraft")   
+
+    @staticmethod
+    def from_dict(d):
+        """ Parses ``Spacecraft`` object from a dictionary.
+
+        :param d: Dictionary with the spacecraft properties.
+        
+        :return: Parsed python object. 
+        :rtype: :class:`orbitpy.util.Spacecraft`
+
+        """
+        return Spacecraft(
+                name = d.get("name", None),
+                orbitState = OrbitState.from_dict(d.get("orbitState", None)),
+                spacecraftBus = SpacecraftBus.from_dict(d.get("spacecraftBus", None)),
+                instrument = Instrument.from_dict(d.get("instrument", None)),
+                _id = d.get("@id", None)
+                )
+
+    def to_dict(self, state_type=None):
+        """ Translate the Spacecraft object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+
+        :returns: Spacecraft specifications as python dictionary.
+        :rtype: dict
+
+        """        
+        orbitState_dict = self.orbitState.to_dict() if self.orbitState is not None and isinstance(self.orbitState, OrbitState) else None
+        spacecraftBus_dict = self.spacecraftBus.to_dict() if self.spacecraftBus is not None and isinstance(self.spacecraftBus, SpacecraftBus) else None
+        instrument_dict = self.instrument.to_dict() if self.instrument is not None and isinstance(self.instrument, Instrument) else None
+        return dict({"name": self.name,
+                     "orbitState": orbitState_dict,
+                     "spacecraftBus": spacecraftBus_dict,
+                     "instrument": instrument_dict, 
+                     "@id": self._id
+                    })
+    
+    def __repr__(self):
+        return "Spacecraft.from_dict({})".format(self.to_dict())
+    
+    def __eq__(self, other):
+        """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
+            Note that _id data attribute may be different.
+        """
+        return (self.name == other.name and self.orbitState == other.orbitState and self.spacecraftBus == other.spacecraftBus \
+                and self.instrument==other.instrument)
+    
