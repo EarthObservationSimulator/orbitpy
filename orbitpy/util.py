@@ -1,8 +1,8 @@
 """ 
 .. module:: util
 
-:synopsis: *Collection of utlity functions used by the :code:`orbitpy` package. 
-            Note that many other utility functions are imported from the :code:`instrupy` package too.*
+:synopsis: *Collection of utility classes and functions used by the :code:`orbitpy` package. 
+            Note that some utility classes/functions are imported from the :code:`instrupy` package.*
 
 """
 import json
@@ -10,6 +10,8 @@ from enum import Enum
 from numbers import Number
 import numpy as np
 import math
+import uuid
+from collections import namedtuple
 import propcov
 from instrupy.util import Entity, EnumEntity, Constants, Orientation
 from instrupy import Instrument
@@ -246,16 +248,21 @@ class OrbitState(Entity):
     def get_keplerian_earth_centered_inertial_state(self):
         """ Get Keplerian Earth Centered Inertial position, velocity.
 
-        :returns: Orbit Keplerian elements as a list.
-        :rtype: list, float
+        :returns: The six orbit Keplerian elements.
+        :rtype: namedtuple, (float)
 
-        """
-        return self.state.GetKeplerianState().GetRealArray()
+        """        
+        state = self.state.GetKeplerianState().GetRealArray()
+        kep_state = namedtuple("KeplerianState", ["sma", "ecc", "inc", "raan", "aop", "ta"])
+        return kep_state(state[0], state[1], state[2], state[3], state[4], state[5])
 
     def __eq__(self, other):
         """ Simple equality check. Returns True if the class attributes are equal, else returns False.
         """
-        return (self.date == other.date and self.state == other.state)
+        if(isinstance(self, other.__class__)):
+            return (self.date == other.date and self.state == other.state)
+        else:
+            return NotImplemented
 
     def __repr__(self):
         return "OrbitState.from_dict({})".format(self.to_dict())
@@ -468,8 +475,11 @@ class SpacecraftBus(Entity):
         """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
             Note that _id data attribute may be different.
         """
-        return (self.name == other.name and self.mass == other.mass and self.volume == other.volume \
-                and self.orientation==other.orientation and self.solarPanelConfig == other.solarPanelConfig)
+        if(isinstance(self, other.__class__)):
+            return (self.name == other.name and self.mass == other.mass and self.volume == other.volume \
+                    and self.orientation==other.orientation and self.solarPanelConfig == other.solarPanelConfig)
+        else:
+            return NotImplemented
 
 class Spacecraft(Entity):
     """ Class to store and handle the spacecraft attributes.
@@ -483,7 +493,7 @@ class Spacecraft(Entity):
     :ivar spacecraftBus: Spacecraft bus.
     :vartype spacecraftBus: :class:`orbitpy.util.SpacecraftBus`
     
-    :ivar instrument: Instrument(s) belonging to the spacecraft.
+    :ivar instrument: List of instrument(s) belonging to the spacecraft. 
     :vartype instrument: list, :class:`instrupy.Instrument`
 
     :ivar _id: Unique identifier.
@@ -495,25 +505,37 @@ class Spacecraft(Entity):
         self.name = str(name) if name is not None else None
         self.orbitState = orbitState if orbitState is not None and isinstance(orbitState, OrbitState) else None
         self.spacecraftBus = spacecraftBus if spacecraftBus is not None and isinstance(spacecraftBus, SpacecraftBus) else None
-        self.instrument = instrument if instrument is not None and isinstance(instrument, Instrument) else None
+        self.instrument = None
+        if instrument is not None and isinstance(instrument, list):
+            if all(isinstance(x, Instrument) for x in instrument):
+                self.instrument = instrument
+        elif(isinstance(instrument, Instrument)): # make into list if not list
+            self.instrument = [instrument]
         super(Spacecraft, self).__init__(_id, "Spacecraft")   
 
     @staticmethod
     def from_dict(d):
         """ Parses ``Spacecraft`` object from a dictionary.
-
+c
         :param d: Dictionary with the spacecraft properties.
         
         :return: Parsed python object. 
         :rtype: :class:`orbitpy.util.Spacecraft`
 
         """
+        instru_dict = d.get("instrument", None)
+        instrument = None
+        if instru_dict is not None:
+            if isinstance(instru_dict, list): # multiple instruments in the spacecraft
+                instrument = [Instrument.from_dict(x) for x in instru_dict]
+            else:
+                instrument = [Instrument.from_dict(instru_dict)]
         return Spacecraft(
                 name = d.get("name", None),
                 orbitState = OrbitState.from_dict(d.get("orbitState", None)),
                 spacecraftBus = SpacecraftBus.from_dict(d.get("spacecraftBus", None)),
-                instrument = Instrument.from_dict(d.get("instrument", None)),
-                _id = d.get("@id", None)
+                instrument = instrument,
+                _id = d.get("@id", str(uuid.uuid4()))
                 )
 
     def to_dict(self, state_type=None):
@@ -525,7 +547,12 @@ class Spacecraft(Entity):
         """        
         orbitState_dict = self.orbitState.to_dict() if self.orbitState is not None and isinstance(self.orbitState, OrbitState) else None
         spacecraftBus_dict = self.spacecraftBus.to_dict() if self.spacecraftBus is not None and isinstance(self.spacecraftBus, SpacecraftBus) else None
-        instrument_dict = self.instrument.to_dict() if self.instrument is not None and isinstance(self.instrument, Instrument) else None
+        instrument_dict = None
+        if self.instrument is not None:
+            if isinstance(self.instrument, list): # multiple instruments in the spacecraft
+                instrument_dict = [x.to_dict() for x in self.instrument]
+            else:
+                instrument_dict = [self.instrument.to_dict()]
         return dict({"name": self.name,
                      "orbitState": orbitState_dict,
                      "spacecraftBus": spacecraftBus_dict,
@@ -536,10 +563,64 @@ class Spacecraft(Entity):
     def __repr__(self):
         return "Spacecraft.from_dict({})".format(self.to_dict())
     
+    def get_id(self):
+        """ Get spacecraft identifier.
+
+        :returns: spacecraft identifier.
+        :rtype: str
+
+        """
+        return self._id
+    
+    '''
     def __eq__(self, other):
         """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
             Note that _id data attribute may be different.
         """
         return (self.name == other.name and self.orbitState == other.orbitState and self.spacecraftBus == other.spacecraftBus \
                 and self.instrument==other.instrument)
+    '''
     
+def helper_extract_spacecraft_params(spacecraft):
+    """ Helper function for the time step and grid resolution computation which returns tuples 
+        of spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, FOR height and FOR width. 
+        The height and width of the sensor FOV/FOR correspond to the along-track and cross-track directions when the sensor
+        is aligned to the NADIR_POINTING_FRAME.
+
+    :param spacecraft: List of spacecrafts in the mission.
+    :paramtype spacecraft: list, :class:`orbitpy:util.Spacecraft`
+
+    :return: Tuples with spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, FOR height and FOR width
+             of all input spacecrafts.
+    :rtype: list, namedtuple, <str, str, str, float, float, float, float, float>
+
+    """
+    _p = namedtuple("sc_params", ["sc_id", "instru_id", "mode_id", "sma", "fov_height", "fov_width", "for_height", "for_width"])
+    params = []
+
+    for sc in spacecraft: # iterate over all satellites
+        sc_id = sc.get_id()
+        sma = sc.orbitState.get_keplerian_earth_centered_inertial_state().sma  
+
+        if sc.instrument is not None:
+            for instru in sc.instrument: # iterate over each instrument
+                instru_id = instru.get_id()
+
+                mode_id = instru.mode_id
+                num_of_mode = len(mode_id)
+
+                for m in range(0,num_of_mode):# iterate over each mode in the instrument
+
+                    field_of_view  = instru.get_field_of_view(mode_id[m])
+                    [fov_height, fov_width] = field_of_view.sph_geom.get_fov_height_and_width()
+
+                    field_of_regard  = instru.get_field_of_regard(mode_id[m]) 
+
+                    if field_of_regard is None or []: # if FOR is None, use FOV for FOR
+                        field_of_regard = [instru.get_field_of_view(mode_id[m])]
+                    
+                    for x in field_of_regard: # iterate over the field_of_regard list
+                        [for_height, for_width] = x.sph_geom.get_fov_height_and_width()
+
+                        params.append(_p(sc_id, instru_id, mode_id[m], sma, fov_height, fov_width, for_height, for_width))
+    return params

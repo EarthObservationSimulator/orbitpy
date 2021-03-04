@@ -52,7 +52,7 @@ class TestConstellationFactory(unittest.TestCase):
     def test___init__(self):
         factory = ConstellationFactory()
 
-        # test the built-in instrumnet models are registered
+        # test the built-in constellation models are registered
         self.assertIn('Walker Delta Constellation', factory._creators)
         self.assertEqual(factory._creators['Walker Delta Constellation'], WalkerDeltaConstellation)
         self.assertIn('Train Constellation', factory._creators)
@@ -63,7 +63,7 @@ class TestConstellationFactory(unittest.TestCase):
         factory.register_constellation_model('New Constellation 2021', TestConstellationFactory.DummyNewConstellation)
         self.assertIn('New Constellation 2021', factory._creators)
         self.assertEqual(factory._creators['New Constellation 2021'], TestConstellationFactory.DummyNewConstellation)
-        # test the built-in instrumnet models remain registered after registration of new model
+        # test the built-in constellation models remain registered after registration of new model
         self.assertIn('Walker Delta Constellation', factory._creators)
         self.assertEqual(factory._creators['Walker Delta Constellation'], WalkerDeltaConstellation)
         self.assertIn('Train Constellation', factory._creators)

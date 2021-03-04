@@ -53,7 +53,7 @@ class ConstellationFactory:
 
         :var specs: Constellation-model specifications which also contains a valid constellation
                     type in the "@type" dict key. The constellation type is valid if it has been
-                    registered with the ``Constellation`` instance.
+                    registered with the ``ConstellationFactory`` instance.
         :vartype _type: dict
         
         """
