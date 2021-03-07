@@ -402,7 +402,7 @@ class OrbitState(Entity):
         return self.date.GetJulianDate()     
 
 class SpacecraftBus(Entity):
-    """ Class to store and handle the spacecraft bus attributes.
+    """ Class to store and handle the spacecraft bus attributes. Note that this is different from ``propcov.Spacecraft`` class.
 
     :ivar name: Name of the bus.
     :vartype name: str

@@ -6,6 +6,7 @@
 """
 import numpy as np
 from collections import namedtuple
+import csv
 
 import propcov
 from instrupy.util import Entity, Constants
@@ -135,25 +136,21 @@ class J2AnalyticalPropagator(Entity):
 
     The instance variable(s) correspond to the propagator setting(s). 
 
-    :ivar timeStep: Orbit propagation time-step. Default is False.
-    :vartype timeStep: float
+    :ivar stepSize: Orbit propagation time-step. Default is False.
+    :vartype stepSize: float
 
-    :ivar timeStepResFac: Time-resolution factor used to determine the propagation time-step. (Default value is 0.25.)
-    :vartype timeStepResFac: float
-
-    :ivar _id: Unique constellation identifier.
+    :ivar _id: Unique identifier.
     :vartype _id: str
 
     """
-    def __init__(self, timeStep=None, timeStepResFac=None, _id=None):
-        timeStep = float(timeStep) if timeStep is not None and timeStep is not False else False
-        timeStepResFac = float(timeStepResFac) if timeStepResFac is not None else 0.25
+    def __init__(self, stepSize=None, _id=None):
+        self.stepSize = float(stepSize) if stepSize is not None and stepSize is not False else False
         super(J2AnalyticalPropagator, self).__init__(_id, "J2 Analytical Propagator")
 
     @staticmethod
     def from_dict(d):
-        return J2AnalyticalPropagator(timeStep = d.get('timeStep', None),
-                                      timeStepResFac = d.get('timeStepResFac', None))
+        return J2AnalyticalPropagator(stepSize = d.get('stepSize', None), 
+                                           _id = d.get('@id', None))
 
     def to_dict(self):
         """ Translate the J2AnalyticalPropagator object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
@@ -162,19 +159,98 @@ class J2AnalyticalPropagator(Entity):
         :rtype: dict
         
         """
-        pass
+        return dict({"@type": "J2 Analytical Propagator",
+                     "stepSize": self.stepSize,
+                     "@id": self._id})
 
     def __repr__(self):
         return "J2AnalyticalPropagator.from_dict({})".format(self.to_dict())
 
     def __eq__(self, other):
-        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different
         if(isinstance(self, other.__class__)):
-            return (self.timeStep == other.timeStep and self.timeStepResFac == other.timeStepResFac) 
+            return (self.stepSize == other.stepSize)
                 
         else:
             return NotImplemented
 
-    def execute(self, spacecraft, time_interval=None):
-        pass
+    def execute(self, spacecraft, start_date=None, out_file_cart=None, out_file_kep=None, duration=1):
+        """ Execute orbit propagation of the input spacecraft and write to a csv data-file.
+
+        :param spacecraft: Spacecraft whose orbit is to be propagated.
+        :paramtype spacecraft: :class:`orbitpy.util.Spacecraft`
+
+        :param out_file_cart: File name with path of the file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are written.
+        :paramtype out_file_cart: str
+
+        :param out_file_kep: File name with path of the file in which the orbit states in KEPLERIAN_EARTH_CENTERED_INERTIAL are written.
+        :paramtype out_file_kep: str
+
+        :param start_date: Time start for propagation. If None, the date at which the spacecraft orbit-state is referenced shall be used as the start date.
+        :paramtype start_date: :class:`orbitpy.propcov.AbsoluteDate`
+
+        :param duration: Time duration propagation in days.  Default is 1 day.
+        :paramtype duration: float
+
+        :return: 0 if success. The results are stored in a csv data-file at the indicated file-path.
+        :rtype: int
+
+        """
+        # form the propcov.Spacecraft object
+        earth = propcov.Earth()
+        attitude = propcov.NadirPointingAttitude()
+        interp = propcov.LagrangeInterpolator()
+        spc = propcov.Spacecraft(spacecraft.orbitState.date, spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
+        
+        if(start_date is None):
+            start_date = spacecraft.orbitState.date
+
+        # form the propcov.Propagator object
+        prop = propcov.Propagator(spc)
+
+        # Prepare output files in which results shall be written
+        if out_file_cart:
+            cart_file = open(out_file_cart, 'w', newline='')
+            cart_writer = csv.writer(cart_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            cart_writer.writerow(["Satellite states are in CARTESIAN_EARTH_CENTERED_INERTIAL (equatorial-plane) frame."])
+            cart_writer.writerow(["Epoch [JDUT1] is {}".format(start_date.GetJulianDate())])
+            cart_writer.writerow(["Step size [s] is {}".format(self.stepSize)])
+            cart_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+            cart_writer.writerow(['time index','x [km]','y [km]','z [km]','vx [km/s]','vy [km/s]','vz [km/s]'])
+
+        if out_file_kep:
+            kep_file = open(out_file_kep, 'w', newline='')
+            kep_writer = csv.writer(kep_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            kep_writer.writerow(["Satellite states as Keplerian elements."])
+            kep_writer.writerow(["Epoch [JDUT1] is {}".format(start_date.GetJulianDate())])
+            kep_writer.writerow(["Step size [s] is {}".format(self.stepSize)])
+            kep_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+            kep_writer.writerow(['time index','sma [km]','ecc','inc [deg]','raan [deg]','aop [deg]','ta [deg]'])
+
+        # propagate from to the start date since the date at which the orbit-state is defined
+        # could be different from the specified start_date (propagation could be either forwards or backwards)
+        prop.Propagate(start_date)
+        date = start_date
+        # Propagate at time-resolution = stepSize. Store the orbit-state at each time-step.
+        number_of_time_steps = int(duration*86400/ self.stepSize)
+        for idx in range(0,number_of_time_steps+1):            
+            # write state            
+            if out_file_cart:
+                cart_state = spc.GetCartesianState().GetRealArray()
+                cart_writer.writerow([idx, cart_state[0], cart_state[1], cart_state[2], cart_state[3], cart_state[4], cart_state[5]])
+            if out_file_kep:
+                kep_state = spc.GetKeplerianState().GetRealArray()
+                kep_writer.writerow([idx, kep_state[0], kep_state[1], np.rad2deg(kep_state[2]), 
+                                          np.rad2deg(kep_state[3]), np.rad2deg(kep_state[4]), np.rad2deg(kep_state[5])])
+            # propagate by 1 time-step
+            date.Advance(self.stepSize)
+            prop.Propagate(date)
+            
+        if out_file_cart:
+            cart_file.close()
+        if out_file_kep:
+            kep_file.close()
+
+        return 0
+
 
