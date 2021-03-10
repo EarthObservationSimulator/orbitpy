@@ -150,11 +150,11 @@ Rmatrix33 SlicedPolygon::generateTI()
 	// Z axis of coordinate system is known point given as input
 	Rvector3 z = contained;
 	z.Normalize();
-	// X axis is cross of Z and the first node (arbitrary)
-	Rvector3 x = Cross(z,nodes[0]);
-	x.Normalize();
-	Rvector3 y = Cross(z,x);
+	// Y axis is cross of Z and the first node
+	Rvector3 y = Cross(z,nodes[0]);
 	y.Normalize();
+	Rvector3 x = Cross(y,z);
+	x.Normalize();
 	
 	Rmatrix33 IT(x[0],y[0],z[0],
 		         x[1],y[1],z[1],

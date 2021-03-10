@@ -44,21 +44,16 @@ TEST_F(Poly_01,getTI)
 {
 	Rmatrix33 TI = grapefruit->getTI();
 
-	// Transformation should not change Z coordinate
+	// Should be identity
+
+	EXPECT_NEAR(1.0,TI.GetElement(0,0),tol);
+	EXPECT_NEAR(1.0,TI.GetElement(1,1),tol);
 	EXPECT_NEAR(1.0,TI.GetElement(2,2),tol);
-	// X should not be function of Z coordinate
+
+	EXPECT_NEAR(0.0,TI.GetElement(0,1),tol);
 	EXPECT_NEAR(0.0,TI.GetElement(0,2),tol);
-	// Y should not be function of Z coordinate
+	EXPECT_NEAR(0.0,TI.GetElement(1,0),tol);
 	EXPECT_NEAR(0.0,TI.GetElement(1,2),tol);
-
-	// X should be former Y coordinate
-	EXPECT_NEAR(1.0,TI.GetElement(0,1),tol);
-	// Y should be negative of former X coordinate
-	EXPECT_NEAR(-1.0,TI.GetElement(1,0),tol);
-
-	// All other elements should be zero
-	EXPECT_NEAR(0.0,TI.GetElement(0,0),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(1,1),tol);
 	EXPECT_NEAR(0.0,TI.GetElement(2,0),tol);
 	EXPECT_NEAR(0.0,TI.GetElement(2,1),tol);
 }
