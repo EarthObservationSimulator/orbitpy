@@ -1,9 +1,7 @@
-""" *Unit tests for :class:`orbitpy.orbitpropcov.OrbitPropCovGrid` covering checks on orbit state data when compared to GMAT output.*
+""" *Unit tests for :class:`orbitpy.propagate.J2AnalyticalPropagator` covering checks on orbit state data when compared to GMAT output.*
 """
 '''
-   :code:`/temp/` folder contains temporary files produced during the run of the tests below. Some of the parameters are chosen
-   randomly for the tests (and compared with corresponding outputs), hence each test is run with different inputs, and expected 
-   outputs. 
+   :code:`/temp/` folder contains temporary files produced during the run of the tests below.
 '''
 
 import unittest
@@ -48,8 +46,7 @@ class TestPropagation(unittest.TestCase):
         
     
     @staticmethod
-    def orbitpyStateArray(sat_state_fl):
-        
+    def orbitpyStateArray(sat_state_fl):        
         data = np.genfromtxt(sat_state_fl, delimiter=",",skip_header = 5) # 5th row header, 6th row onwards contains the data
         return data
     

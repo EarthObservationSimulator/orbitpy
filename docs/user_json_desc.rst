@@ -245,7 +245,7 @@ There are two ways to specify the grid:
 
 1. :code:`"@type":"autoGrid"` 
 
-Within the :code:`autoGrid` JSOn field, a *list* of regions can be specifyed. The required parameters for each region are:
+Within the :code:`autoGrid` JSOn field, a *list* of regions can be specified. The required parameters for each region are:
 
 .. csv-table:: Expected parameters
    :header: Parameter, Data type, Units, Description

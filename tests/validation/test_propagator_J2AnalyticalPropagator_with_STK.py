@@ -1,4 +1,4 @@
-""" *Unit tests for :class:`orbitpy.orbitpropcov.OrbitPropCovGrid` covering checks on orbit state data when compared to STK output.*
+""" *Unit tests for :class:`orbitpy.propagate.J2AnalyticalPropagator` covering checks on orbit state data when compared to STK output.*
 """
 '''
    :code:`/temp/` folder contains temporary files produced during the run of the tests below.
@@ -7,7 +7,6 @@
 import unittest
 import numpy as np
 import os, shutil
-import subprocess
 import copy
 
 from orbitpy.propagator import PropagatorFactory, J2AnalyticalPropagator

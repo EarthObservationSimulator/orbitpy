@@ -91,7 +91,7 @@ class PropagatorFactory:
         
         factory = orbitpy.PropagatorFactory()
         factory.register_propagator('SGP4', SGP4Propagator)
-        const1 = factory.get_constellation_model('SGP4')
+        prop = factory.get_propagator('SGP4')
 
     :ivar _creators: Dictionary mapping propagator type label to the appropriate propagator class. 
     :vartype _creators: dict
@@ -149,6 +149,21 @@ class J2AnalyticalPropagator(Entity):
 
     @staticmethod
     def from_dict(d):
+        """ Parses an J2AnalyticalPropagator object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the J2 analytical propagator specifications.
+
+                Following keys are to be specified.
+                
+                * "stepSize": (float) Step size in seconds.
+                * "@id": (str) Propagator identifier (unique). Default: A random string.
+
+        :paramtype d: dict
+
+        :return: J2AnalyticalPropagator object.
+        :rtype: :class:`orbitpy.propagate.J2AnalyticalPropagator`
+
+        """ 
         return J2AnalyticalPropagator(stepSize = d.get('stepSize', None), 
                                            _id = d.get('@id', None))
 
