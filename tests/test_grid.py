@@ -5,16 +5,60 @@ import numpy as np
 import os, shutil
 import copy
 import pandas as pd
+import random
 
 import propcov
 from orbitpy.grid import Grid
-from orbitpy.grid import compute_grid_res
+import orbitpy.grid 
+from orbitpy.util import OrbitState, Spacecraft
+from instrupy import Instrument
 
-RE = 6378.137 # radius of Earth in kilometers
 class TestPropagatorModuleFunction(unittest.TestCase):
 
     def test_compute_grid_res(self):
-        pass
+        """Test that the grid-resolution computed with precomputed for fixed values of orbit altitute and a sensor FOV (not the FOR)"""
+
+        RE = 6378.137 # radius of Earth in kilometers
+        instru1 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 20}}')
+        instru2 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 5}}')
+        instru3 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 15}}')
+        instru4 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 25}}')
+        instru5 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight":2, "angleWidth": 20}}')
+        instru6 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfView": {"shape": "Rectangular", "angleHeight": 25, "angleWidth": 25}}')
+        instru7 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 30, "angleWidth": 35}}')
+        instru8 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 25, "angleWidth": 55}}')
+        instru9 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 150, "angleWidth": 180}}')
+
+        orbit1 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+700, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit2 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+710, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit3 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+510, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit4 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1000, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit5 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1100, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+
+        # Test single sat, single instrument. The smallest fov dimension must be chosen.
+        sats = [Spacecraft(orbitState=orbit1, instrument=[instru1])]
+        self.assertAlmostEqual(orbitpy.grid.compute_grid_res(sats, 1), 1.100773132953890, delta = 0.01)
+
+        # test with multiple satellites, choose smallest grid resolution.
+        sats = [Spacecraft(orbitState=orbit2, instrument=[instru1]),
+                Spacecraft(orbitState=orbit2, instrument=[instru2, instru3]),
+                Spacecraft(orbitState=orbit3, instrument=[instru4]),
+                Spacecraft(orbitState=orbit3, instrument=[instru5])]
+        x = orbitpy.grid.compute_grid_res(sats, 1)
+        sats = [Spacecraft(orbitState=orbit3, instrument=[instru5])]
+        y = orbitpy.grid.compute_grid_res(sats, 1)
+        self.assertAlmostEqual(x, y)
+
+        # test with non-unitary grid-resolution factor
+        sats = [Spacecraft(orbitState=orbit5, instrument=[instru6, instru7, instru8])]
+        f = random.random()
+        self.assertAlmostEqual(orbitpy.grid.compute_grid_res(sats, f), 4.4012*f, delta = 0.01)
+
+        # test when along-track fov is larger than the horizon angle = 119.64321275051853 deg
+        sats = [Spacecraft(orbitState=orbit4,  instrument=[instru9])]
+        f = random.random()
+        self.assertAlmostEqual(orbitpy.grid.compute_grid_res(sats, f), 60.3568*f, delta = 1)
+        
 class TestGrid(unittest.TestCase):
     
     @classmethod
