@@ -32,6 +32,7 @@
 #include "TATCException.hpp"
 #include "MessageInterface.hpp"
 
+#include <utility>
 //#define DEBUG_HELICAL_POINTS
 //#define DEBUG_POINTS
 //#define DEBUG_LAT_LON
@@ -301,6 +302,16 @@ void PointGroup::GetLatLonVectors(RealArray &lats, RealArray &lons)
    
    lats = lat;
    lons = lon;
+}
+
+std::pair<RealArray, RealArray> PointGroup::GetLatLonVectors()
+{
+   // Returns the latitude and longitude vectors as a pair
+   
+   //Make sure there are points
+   CheckHasPoints();
+
+   return std::make_pair(lat, lon);
 }
 
 //------------------------------------------------------------------------------

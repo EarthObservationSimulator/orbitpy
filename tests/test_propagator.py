@@ -19,8 +19,7 @@ class TestPropagatorModuleFunction(unittest.TestCase):
 
     def test_compute_time_step(self):
         """ Test that the time-step computed with precomputed values for fixed orbit altitude and sensor Along-Track **FOR** """
-        RE = 6378.137 # radius of Earth in kilometers 
-
+        
         # FOR = FOV for the below cases since default "FIXED" manueverability is used. The crosstrack FOV does not influence the results.
         instru1 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 15, "angleWidth": 0.01}}')
         instru2 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 25, "angleWidth": 0.01}}')

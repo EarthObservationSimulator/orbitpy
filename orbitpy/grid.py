@@ -6,6 +6,7 @@
 """
 import numpy as np
 import pandas as pd
+from collections import namedtuple
 
 import propcov
 from instrupy.util import Entity, EnumEntity, Constants
@@ -14,39 +15,21 @@ import orbitpy.util
 class Grid(Entity):
     """ Class to handle grid related operations. 
 
-    Note that there is an implicit relationship that the entries at the same index of the respective lists
-    correspond to one another. E.g. the coords of pointIndex[5] = (lon[5], lat[5]).
-
-    :ivar gpi: List of indices of the grid points. The entries should be unique. 
-    :vartype gpi: list, int
-
-    :ivar lon: Longitude coordinates in degrees.
-    :vartype lon: list, float
-
-    :ivar lat: Latitude coordinates in degrees.
-    :vartype lat: list, float
+    :ivar point_group: A ``propcov`` object of the instance ``propcov.PointGroup``, used to store and handle 
+                       the grid locations (latitudes and longitudes). The grid-points are referred by indices starting from 0.
+                       E.g. Grid-point 0 refers to the first grid-point in the point_group object (which can be obtained 
+                       using the ``GetLatLon(.)``, ``GetPointPositionVector(.)`` function.).
+    :vartype lon: point_group, :class:`propcov.PointGroup`
 
     :ivar _id: Unique identifier of the grid. Could be used to indicate a region identifier, where the set of grid-points represent a region.
     :vartype _id: str
 
     """
 
-    def __init__(self, gpi=None, lon=None, lat=None, _id=None):
-        if gpi is not None:
-            if isinstance(gpi, list):
-                self.gpi = [float(x) for x in gpi]
-            else: # single element
-                self.gpi = [int(gpi)] # make into list
-        if lon is not None:
-            if isinstance(lon, list):
-                self.lon = [float(x) for x in lon]
-            else: # single element
-                self.lon = [float(lon)] # make into list
-        if lat is not None:
-            if isinstance(lat, list):
-                self.lat = [float(x) for x in lat]
-            else: # single element
-                self.lat = [float(lat)] # make into list
+    def __init__(self, point_group=None,_id=None):
+
+        self.point_group = point_group if point_group is not None and isinstance(point_group, propcov.PointGroup) else None
+        self.num_points = self.point_group.GetNumPoints()
         super(Grid, self).__init__(_id, "Grid")
 
     class Type(EnumEntity):
@@ -77,9 +60,22 @@ class Grid(Entity):
         if grid_type == Grid.Type.AUTOGRID:
             return Grid.from_autogrid_dict(d)
         elif grid_type == Grid.Type.CUSTOMGRID:
-            return Grid.from_custom_grid(d)
+            return Grid.from_customgrid_dict(d)
         else:
             raise Exception("Please specify a valid grid type.")
+
+    def to_dict(self, filepath):
+        """ Translate the Grid object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+            The grid data is stored in a file whose path is to supplied as an argument.
+        
+        :param filepath: Path to the file (with filename) where the grid data is to be stored.
+        :paramtype filepath: str
+        
+        :return: Grid object as python dictionary
+        :rtype: dict
+        """
+        self.write_to_file(filepath)
+        return {"@type": "CUSTOMGRID", "covGridFilePath": filepath, "@id": self._id}
 
     @staticmethod
     def from_autogrid_dict(d):
@@ -104,10 +100,13 @@ class Grid(Entity):
                 "@id":1,
                 "latUpper":20,
                 "latLower":15,
-                "lonUpper":360,
+                "lonUpper":45,
                 "lonLower":0,
                 "gridRes": 0.5               
             }
+
+        :return: Grid object
+        :rtype: :class:`orbitpy.grid.Grid`
 
         """
         latUp = np.deg2rad(d.get("latUpper", 90))
@@ -119,15 +118,14 @@ class Grid(Entity):
         point_group = propcov.PointGroup()
         point_group.SetLatLonBounds(latUp=latUp, latLow=latLow, lonUp=lonUp, lonLow=lonLow)
         point_group.AddHelicalPointsByAngle(angleBetweenPoints=angleBetweenPoints)
-        return Grid( gpi=data['gpi'].tolist(),
-                     lat=data['lat [deg]'].tolist(),
-                     lon=data['lon [deg]'].tolist(),
+        num_points = int(point_group.GetNumPoints())
+        gpi = list(range(0,num_points)) # point indices
+        return Grid( point_group=point_group,
                      _id = d.get('@id', None)
                     )
         
-
     @staticmethod
-    def from_custom_grid(d):
+    def from_customgrid_dict(d):
         """  Parses an ``Grid`` object from dictionary with ``customGrid`` specifications (i.e. "@type":"customGrid"). 
 
         Following keys are to be specified:
@@ -144,31 +142,36 @@ class Grid(Entity):
                 "covGridFilePath": "C:\workspace\covGridUSA.csv"
             }
 
-        The datafile needs to be of CSV format as indicated in the example below. *gpi* is the grid point index, *lat[deg]* is the latitude
-        in degrees, and *lon[deg]* is the longitude in degrees. **gpi must start from 0 and increment by 1 as shown in the example.**
+        The datafile needs to be of CSV format as indicated in the example below. *lat[deg]* is the latitude
+        in degrees, and *lon[deg]* is the longitude in degrees. The grid-points are referred by indices starting from 0.
 
         .. csv-table:: Example of the coverage grid data file.
-        :header: gpi,lat[deg],lon[deg]
-        :widths: 10,10,10
+        :header: lat[deg],lon[deg]
+        :widths: 10,10
         
-            0,9.9,20
-            1,9.9,20.1015
-            2,9.9,20.203
-            3,-49.1,21.9856
-            4,-49.1,22.1383
-            5,-49.1,22.291
-            6,-49.1,22.4438
-            7,-49.1,22.5965
-            8,-49.1,22.7493
-            9,-49.1,22.902
+            9.9,20
+            9.9,20.1015
+            9.9,20.203
+            -49.1,21.9856
+            -49.1,22.1383
+            -49.1,22.291
+            -49.1,22.4438
+            -49.1,22.5965
+            -49.1,22.7493
+            -49.1,22.902
 
         .. note:: Please specify latitudes in the range of -90 deg to +90 deg and longitudes in the range of -180 deg to +180 deg. Do *NOT* 
                   specify the longitudes in range of 0 deg to 360 deg.
+        
+        :return: Grid object
+        :rtype: :class:`orbitpy.grid.Grid`
+
         """
         data = pd.read_csv(d['covGridFilePath'])
-        return Grid( gpi=data['gpi'].tolist(),
-                     lat=data['lat [deg]'].tolist(),
-                     lon=data['lon [deg]'].tolist(),
+        data = data.multiply(np.pi/180) # convert angles to radians
+        point_group = propcov.PointGroup()
+        point_group.AddUserDefinedPoints(data['lat [deg]'].tolist(),data['lon [deg]'].tolist())
+        return Grid( point_group = point_group,
                      _id = d.get('@id', None)
                     )
 
@@ -180,10 +183,25 @@ class Grid(Entity):
         :paramtype filepath: str
 
         """
-        df = pd.DataFrame(list(zip(self.gpi, self.lat, self.lon)), 
-               columns =['gpi', 'lat [deg]','lon [deg]'])
-        df.to_csv(filepath)
+        grid_points = self.get_lat_lon()
+        df = pd.DataFrame(list(zip(grid_points.latitude, grid_points.longitude)), columns =['lat [deg]','lon [deg]'])
+        df.to_csv(filepath, index=False)
 
+    def get_lat_lon(self):
+        """ Get the grid points (coordinates).
+
+        :return: Grid points (latitudes and longitudes in degrees).
+        :rtype: namedtuple, (list, list), float
+
+        """
+        [lat, lon] = self.point_group.GetLatLonVectors()
+        # convert to degrees and round to two decimal places
+        lat= np.rad2deg(np.array(lat)).round(decimals=2)
+        lon= np.rad2deg(np.array(lon)).round(decimals=2)
+        
+        grid_point = namedtuple("grid_points", ["latitude", "longitude"])
+
+        return grid_point(lat, lon)
 
 def compute_grid_res(spacecraft, grid_res_fac=0.9):
     """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.

@@ -291,8 +291,8 @@ PYBIND11_MODULE(propcov, m)
         .def("GetPointPositionVector", &PointGroup::GetPointPositionVector, py::arg("index"))
         //.def("GetLatAndLon", &PointGroup::GetLatAndLon, py::arg("index"), py::arg("lat"), py::arg("lon"))
         .def("GetNumPoints", &PointGroup::GetNumPoints)
-        //.def("GetLatLonVectors", &PointGroup::GetLatLonVectors, py::arg("lats"), py::arg("lons"))
-        .def("SetLatLonBounds", &PointGroup::SetLatLonBounds, py::arg("latup"), py::arg("latlow"), py::arg("lonup"), py::arg("lonlow"))
+        .def("GetLatLonVectors", py::overload_cast<>(&PointGroup::GetLatLonVectors))
+        .def("SetLatLonBounds", &PointGroup::SetLatLonBounds, py::arg("latUp"), py::arg("latLow"), py::arg("lonUp"), py::arg("lonLow"))
         ///@todo write __repr__
         ;
 

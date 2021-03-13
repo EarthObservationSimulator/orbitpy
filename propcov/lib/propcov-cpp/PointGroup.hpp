@@ -62,6 +62,8 @@ public:
    virtual Integer   GetNumPoints();
    /// Get the latitude and longitude vectors
    virtual void      GetLatLonVectors(RealArray &lats, RealArray &lons);
+   virtual std::pair<RealArray, RealArray> GetLatLonVectors();
+
    /// Set the latitude and longitude bounds values
    virtual void      SetLatLonBounds(Real latUp, Real latLow,
                                      Real lonUp, Real lonLow);

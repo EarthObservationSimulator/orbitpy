@@ -279,7 +279,7 @@ Example:
             "@id":1,
             "latUpper":20,
             "latLower":15,
-            "lonUpper":360,
+            "lonUpper":75,
             "lonLower":0                
         },
         {
@@ -315,24 +315,24 @@ Example:
         "covGridFilePath": "C:\workspace\covGridUSA.csv"
     }
 
-The datafile needs to be of CSV format as indicated in the example below. *regi* is the region index, *gpi* is the grid point index,
-*lat[deg]* is the latitude in degrees, and *lon[deg]* is the longitude in degrees. **gpi must start from 0 and increment by 1 as shown 
-in the example.**
+The datafile needs to be of CSV format as indicated in the example below. 
+*lat[deg]* is the latitude in degrees, and *lon[deg]* is the longitude in degrees. 
+The grid-points are referred by indices starting from 0.
 
 .. csv-table:: Example of the coverage grid data file.
-   :header: regi,gpi,lat[deg],lon[deg]
-   :widths: 10,10,10,10
+   :header:lat[deg],lon[deg]
+   :widths: 10,10
    
-    1,0,9.9,20
-    1,1,9.9,20.1015
-    1,2,9.9,20.203
-    2,3,-49.1,21.9856
-    2,4,-49.1,22.1383
-    2,5,-49.1,22.291
-    2,6,-49.1,22.4438
-    2,7,-49.1,22.5965
-    2,8,-49.1,22.7493
-    2,9,-49.1,22.902
+    9.9,20
+    9.9,20.1015
+    9.9,20.203
+    -49.1,21.9856
+    -49.1,22.1383
+    -49.1,22.291
+    -49.1,22.4438
+    -49.1,22.5965
+    -49.1,22.7493
+    -49.1,22.902
 
 .. note:: Please specify latitudes in the range of -90 deg to +90 deg and longitudes in the range of -180 deg to +180 deg. Do *NOT* 
           specify the longitudes in range of 0 deg to 360 deg.
