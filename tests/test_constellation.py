@@ -5,8 +5,8 @@ import json
 import os
 import sys
 import unittest
-
 import numpy as np
+
 from orbitpy.util import OrbitState
 from orbitpy.constellation import ConstellationFactory, WalkerDeltaConstellation, CustomOrbit, TrainConstellation
 import propcov

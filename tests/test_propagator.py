@@ -91,7 +91,7 @@ class TestPropagatorFactory(unittest.TestCase):
         # register dummy propagator
         factory.register_propagator('New Propagator', TestPropagatorFactory.DummyNewPropagator)
         
-        # test the constellation model classes can be obtained depending on the input specifications
+        # test the propgator model classes can be obtained depending on the input specifications
         # J2 Analytical Propagator
         specs = {"@type": 'J2 Analytical Propagator'} # in practice additional propagator specs shall be present in the dictionary
         j2_prop = factory.get_propagator(specs)

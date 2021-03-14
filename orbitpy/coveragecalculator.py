@@ -40,6 +40,8 @@ class CoverageCalculatorFactory:
     def __init__(self):
         self._creators = {}
         self.register_coverage_calculator('Grid Coverage', GridCoverage)
+        self.register_coverage_calculator('Pointing Options Coverage', PointingOptionsCoverage)
+        self.register_coverage_calculator('Pointing Options With Grid Coverage', PointingOptionsWithGridCoverage)
 
     def register_coverage_calculator(self, _type, creator):
         """ Function to register coverage calculators.
@@ -89,52 +91,51 @@ class GridCoverage(Entity):
 
     @staticmethod
     def from_dict(d):
-        return GridCoverage(grid = Grid.from_dict(d.get('grid_filepath', None)), 
+        grid_dict = d.get('grid', None)
+        return GridCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
                             _id  = d.get('@id', None))
 
-    def to_dict(self):
-        """ Translate the J2AnalyticalPropagator object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
-        
-        :return: J2AnalyticalPropagator object as python dictionary
-        :rtype: dict
-        
-        """
-        return dict({"@type": "J2 Analytical Propagator",
-                     "stepSize": self.stepSize,
-                     "@id": self._id})
+class PointingOptionsCoverage(Entity):
+    """A coverage calculator which calculates coverage over a grid.
 
-    def __repr__(self):
-        return "J2AnalyticalPropagator.from_dict({})".format(self.to_dict())
+    The instance variable(s) correspond to the coverage calculator setting(s). 
 
-    def __eq__(self, other):
-        # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different
-        if(isinstance(self, other.__class__)):
-            return (self.stepSize == other.stepSize)
-                
-        else:
-            return NotImplemented
+    :ivar grid: Array of locations (longitudes, latitudes) over which coverage calculation is performed.
+    :vartype grid: :class:`orbitpy.util.grid`
 
-    def execute(self, spacecraft, start_date=None, out_file_cart=None, out_file_kep=None, duration=1):
-        """ Execute orbit propagation of the input spacecraft and write to a csv data-file.
+    :ivar _id: Unique identifier.
+    :vartype _id: str
 
-        :param spacecraft: Spacecraft whose orbit is to be propagated.
-        :paramtype spacecraft: :class:`orbitpy.util.Spacecraft`
+    """
+    def __init__(self, grid=None, _id=None):
+        self.grid = grid if grid is not None and isinstance(grid, Grid) else None
+        super(PointingOptionsCoverage, self).__init__(_id, "Pointing Options Coverage")
 
-        :param out_file_cart: File name with path of the file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are written.
-        :paramtype out_file_cart: str
+    @staticmethod
+    def from_dict(d):
+        grid_dict = d.get('grid', None)
+        return PointingOptionsCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
+                            _id  = d.get('@id', None))
 
-        :param out_file_kep: File name with path of the file in which the orbit states in KEPLERIAN_EARTH_CENTERED_INERTIAL are written.
-        :paramtype out_file_kep: str
 
-        :param start_date: Time start for propagation. If None, the date at which the spacecraft orbit-state is referenced shall be used as the start date.
-        :paramtype start_date: :class:`orbitpy.propcov.AbsoluteDate`
+class PointingOptionsWithGridCoverage(Entity):
+    """A coverage calculator which calculates coverage over a grid.
 
-        :param duration: Time duration propagation in days.  Default is 1 day.
-        :paramtype duration: float
+    The instance variable(s) correspond to the coverage calculator setting(s). 
 
-        :return: 0 if success. The results are stored in a csv data-file at the indicated file-path.
-        :rtype: int
+    :ivar grid: Array of locations (longitudes, latitudes) over which coverage calculation is performed.
+    :vartype grid: :class:`orbitpy.util.grid`
 
-        """
-        # form the propcov.Spacecraft object
-        earth = propcov.Earth()
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+
+    """
+    def __init__(self, grid=None, _id=None):
+        self.grid = grid if grid is not None and isinstance(grid, Grid) else None
+        super(PointingOptionsWithGridCoverage, self).__init__(_id, "Pointing Options With Grid Coverage")
+
+    @staticmethod
+    def from_dict(d):
+        grid_dict = d.get('grid', None)
+        return PointingOptionsWithGridCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
+                            _id  = d.get('@id', None))
