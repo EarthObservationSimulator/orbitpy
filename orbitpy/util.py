@@ -605,22 +605,20 @@ def helper_extract_spacecraft_params(spacecraft):
         if sc.instrument is not None:
             for instru in sc.instrument: # iterate over each instrument
                 instru_id = instru.get_id()
+                mode_id = instru.get_mode_id()
 
-                mode_id = instru.mode_id
-                num_of_mode = len(mode_id)
+                for mode_id in instru.get_mode_id():# iterate over each mode in the instrument
 
-                for m in range(0,num_of_mode):# iterate over each mode in the instrument
-
-                    field_of_view  = instru.get_field_of_view(mode_id[m])
+                    field_of_view  = instru.get_field_of_view(mode_id)
                     [fov_height, fov_width] = field_of_view.sph_geom.get_fov_height_and_width()
 
-                    field_of_regard  = instru.get_field_of_regard(mode_id[m]) 
+                    field_of_regard  = instru.get_field_of_regard(mode_id) 
 
                     if field_of_regard is None or []: # if FOR is None, use FOV for FOR
-                        field_of_regard = [instru.get_field_of_view(mode_id[m])]
+                        field_of_regard = [instru.get_field_of_view(mode_id)]
                     
                     for x in field_of_regard: # iterate over the field_of_regard list
                         [for_height, for_width] = x.sph_geom.get_fov_height_and_width()
 
-                        params.append(_p(sc_id, instru_id, mode_id[m], sma, fov_height, fov_width, for_height, for_width))
+                        params.append(_p(sc_id, instru_id, mode_id, sma, fov_height, fov_width, for_height, for_width))
     return params

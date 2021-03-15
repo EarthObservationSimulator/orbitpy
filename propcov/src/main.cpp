@@ -237,11 +237,12 @@ PYBIND11_MODULE(propcov, m)
         .def("GetBodyFixedToInertial", &Spacecraft::GetBodyFixedToInertial)
         .def("GetBodyFixedToReference", &Spacecraft::GetBodyFixedToReference)
         .def("GetNadirToBodyMatrix", &Spacecraft::GetNadirToBodyMatrix)
-        .def("SetBodyNadirOffsetAngles", &Spacecraft::SetBodyNadirOffsetAngles)
+        .def("SetBodyNadirOffsetAngles", &Spacecraft::SetBodyNadirOffsetAngles, py::arg("angle1"), py::arg("angle2"), py::arg("angle3"), py::arg("seq1"), py::arg("seq2"), py::arg("seq3"))
         /// @todo write __repr__
         ;
 
     py::class_<Sensor>(m, "Sensor")
+        .def("SetSensorBodyOffsetAngles", &Sensor::SetSensorBodyOffsetAngles, py::arg("angle1"), py::arg("angle2"), py::arg("angle3"), py::arg("seq1"), py::arg("seq2"), py::arg("seq3"))
         ;
 
     py::class_<ConicalSensor, Sensor>(m, "ConicalSensor")

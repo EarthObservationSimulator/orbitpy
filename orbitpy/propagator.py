@@ -190,18 +190,20 @@ class J2AnalyticalPropagator(Entity):
             return NotImplemented
 
     def execute(self, spacecraft, start_date=None, out_file_cart=None, out_file_kep=None, duration=1):
-        """ Execute orbit propagation of the input spacecraft and write to a csv data-file.
+        """ Execute orbit propagation of the input spacecraft (single) and write to a csv data-file.
 
         :param spacecraft: Spacecraft whose orbit is to be propagated.
         :paramtype spacecraft: :class:`orbitpy.util.Spacecraft`
 
         :param out_file_cart: File name with path of the file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are written.
+                                 If ``None`` the file is not written.
         :paramtype out_file_cart: str
 
         :param out_file_kep: File name with path of the file in which the orbit states in KEPLERIAN_EARTH_CENTERED_INERTIAL are written.
+                                If ``None`` the file is not written.
         :paramtype out_file_kep: str
 
-        :param start_date: Time start for propagation. If None, the date at which the spacecraft orbit-state is referenced shall be used as the start date.
+        :param start_date: Time start for propagation. If ``None``, the date at which the spacecraft orbit-state is referenced shall be used as the start date.
         :paramtype start_date: :class:`orbitpy.propcov.AbsoluteDate`
 
         :param duration: Time duration propagation in days.  Default is 1 day.
@@ -215,7 +217,7 @@ class J2AnalyticalPropagator(Entity):
         earth = propcov.Earth()
         attitude = propcov.NadirPointingAttitude()
         interp = propcov.LagrangeInterpolator()
-        spc = propcov.Spacecraft(spacecraft.orbitState.date, spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
+        spc = propcov.Spacecraft(spacecraft.orbitState.date, spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3) # TODO: initialization to the correct orientation of spacecraft is not necessary, so ignored for time-being.
         
         if(start_date is None):
             start_date = spacecraft.orbitState.date
