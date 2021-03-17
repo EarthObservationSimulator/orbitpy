@@ -14,6 +14,7 @@ import subprocess
 import copy
 import pandas as pd
 import random
+import warnings
 
 from orbitpy.orbitpropcov import OrbitPropCovGrid
 from orbitpy.util import PropagationCoverageParameters, CoverageCalculationsApproach

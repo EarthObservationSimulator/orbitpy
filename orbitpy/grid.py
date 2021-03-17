@@ -118,8 +118,6 @@ class Grid(Entity):
         point_group = propcov.PointGroup()
         point_group.SetLatLonBounds(latUp=latUp, latLow=latLow, lonUp=lonUp, lonLow=lonLow)
         point_group.AddHelicalPointsByAngle(angleBetweenPoints=angleBetweenPoints)
-        num_points = int(point_group.GetNumPoints())
-        gpi = list(range(0,num_points)) # point indices
         return Grid( point_group=point_group,
                      _id = d.get('@id', None)
                     )

@@ -236,8 +236,8 @@ class GridCoverage(Entity):
         ###### form the propcov.Spacecraft object ######
         attitude = propcov.NadirPointingAttitude()
         interp = propcov.LagrangeInterpolator()
+
         spc = propcov.Spacecraft(self.spacecraft.orbitState.date, self.spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
-        
         # orient the spacecraft
         spc_orien = self.spacecraft.spacecraftBus.orientation
         if spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING:            
@@ -245,7 +245,6 @@ class GridCoverage(Entity):
                                          seq1=spc_orien.euler_seq1, seq2=spc_orien.euler_seq2, seq3=spc_orien.euler_seq3)            
         else:
             raise NotImplementedError # only NADIR_POINTING reference frame is supported.
-
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
         if use_field_of_regard is True:
@@ -261,7 +260,6 @@ class GridCoverage(Entity):
         for _view_geom in sensor_view_geom:
             
             ###### build the sensor object ######
-            _orien = _view_geom.orien
             _sph_geom = _view_geom.sph_geom
             if(_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(_sph_geom.diameter)) # input angle in radians
@@ -270,25 +268,34 @@ class GridCoverage(Entity):
                                               clockAngleVecIn=np.deg2rad(np.array(_sph_geom.clock_angle_vec)))         
             else:
                 raise Exception("please input valid sensor spherical geometry shape.")
-            sensor.SetSensorBodyOffsetAngles(angle1=_orien.euler_angle1, angle2=_orien.euler_angle2, angle3=_orien.euler_angle3, # input angles are in degrees
+
+            _orien = _view_geom.orien
+            if _orien.ref_frame == ReferenceFrame.SC_BODY_FIXED or _orien.ref_frame == ReferenceFrame.NADIR_POINTING: # in present implementation the spacecraft body aligned to NADIR_POINTING frame is supported, thus is sensor is to be nadir pointing, the bodyoffset angles should be all 0.
+                sensor.SetSensorBodyOffsetAngles(angle1=_orien.euler_angle1, angle2=_orien.euler_angle2, angle3=_orien.euler_angle3, # input angles are in degrees
                                              seq1=_orien.euler_seq1, seq2=_orien.euler_seq2, seq3=_orien.euler_seq3)
+            else:
+                raise NotImplementedError
+            
             ###### attach the sensor ######
             spc.AddSensor(sensor)
-
             ###### make propcov coverage checker object ######
             cov_checker = propcov.CoverageChecker(self.grid.point_group, spc)
-
             ###### iterate over the propagated states ######
-            for index, state in states_df.iterrows():
-                _date = epoch_JDUT1 + index*step_size*DAYS_PER_SEC
+            #states_df.reset_index()
+            for idx, state in states_df.iterrows():
+                time_index = int(state['time index'])
+                _date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
                 date.SetJulianDate(_date)
+                
                 cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
-                spc.SetOrbitState(date, propcov.Rvector6(cart_state))
+                cart_state = propcov.Rvector6(cart_state)
+                spc.SetOrbitStateCartesian(date, cart_state)
+                
                 # compute coverage
                 points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
                 if len(points)>0: #If no ground-points are accessed at this time, skip writing the row altogether.
                     for pnt in points:
-                        access_writer.writerow([index, pnt])
+                        access_writer.writerow([time_index, pnt])
 
         ##### Close files #####                
         if access_file:

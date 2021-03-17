@@ -31,7 +31,7 @@
 #include "Rmatrix33.hpp"
 #include "TATCException.hpp"
 #include "MessageInterface.hpp"
-
+#include <iostream>
 
 //#define DEBUG_COV_CHECK
 //#define DEBUG_COV_CHECK_FOV
@@ -311,7 +311,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
             // the R_SB to detmine the visibility
 //            inView = sc->CheckTargetVisibility(viewVector, sensorNum);
             inView = sc->CheckTargetVisibility(theState, satToTargetVec,
-                                               theTime,  sensorNum);
+                                               theTime,  sensorNum);                 
          }
          else
          {
