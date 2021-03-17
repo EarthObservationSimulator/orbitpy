@@ -257,22 +257,23 @@ class GridCoverage(Entity):
         # initialize variables to be used in the loop
         date = propcov.AbsoluteDate()
 
-        for _view_geom in sensor_view_geom:
+        for sen_view_geom in sensor_view_geom:
             
             ###### build the sensor object ######
-            _sph_geom = _view_geom.sph_geom
-            if(_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
-                sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(_sph_geom.diameter)) # input angle in radians
-            elif(_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or _sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
-                sensor = propcov.CustomSensor(coneAngleVecIn=np.deg2rad(np.array(_sph_geom.cone_angle_vec)),  # input angle in radians  
-                                              clockAngleVecIn=np.deg2rad(np.array(_sph_geom.clock_angle_vec)))         
+            sen_sph_geom = sen_view_geom.sph_geom
+            if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
+                sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
+            elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
+                sensor = propcov.CustomSensor( coneAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                                              clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
+                                             )         
             else:
                 raise Exception("please input valid sensor spherical geometry shape.")
 
-            _orien = _view_geom.orien
-            if _orien.ref_frame == ReferenceFrame.SC_BODY_FIXED or _orien.ref_frame == ReferenceFrame.NADIR_POINTING: # in present implementation the spacecraft body aligned to NADIR_POINTING frame is supported, thus is sensor is to be nadir pointing, the bodyoffset angles should be all 0.
-                sensor.SetSensorBodyOffsetAngles(angle1=_orien.euler_angle1, angle2=_orien.euler_angle2, angle3=_orien.euler_angle3, # input angles are in degrees
-                                             seq1=_orien.euler_seq1, seq2=_orien.euler_seq2, seq3=_orien.euler_seq3)
+            sen_orien = sen_view_geom.orien
+            if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): # The second condition is equivalent of orienting sensor w.r.t spacecraft body if the spacecraft body is aligned to nadir-frame
+                sensor.SetSensorBodyOffsetAngles(angle1=sen_orien.euler_angle1, angle2=sen_orien.euler_angle2, angle3=sen_orien.euler_angle3, # input angles are in degrees
+                                             seq1=sen_orien.euler_seq1, seq2=sen_orien.euler_seq2, seq3=sen_orien.euler_seq3)
             else:
                 raise NotImplementedError
             
@@ -288,8 +289,7 @@ class GridCoverage(Entity):
                 date.SetJulianDate(_date)
                 
                 cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
-                cart_state = propcov.Rvector6(cart_state)
-                spc.SetOrbitStateCartesian(date, cart_state)
+                spc.SetOrbitStateCartesian(date, propcov.Rvector6(cart_state))
                 
                 # compute coverage
                 points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
