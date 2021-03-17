@@ -5,27 +5,40 @@ Output Description
 
 Satellite States Data
 =========================
-The satellite states data is produced by invoking the :class:`orbitpy.orbitpropcov` module. The module is initialized by 
+The satellite states data is produced by invoking the :class:`orbitpy.propagator` module. The module is initialized by 
 the relevant propagation and coverage parameters which can be produced by the :class:`orbitpy.preprocess` module (which
 processes JSON formatted files containing mission specifications). The format of the produced data is a CSV file containing 
 the satellite states at the propagated time-steps. 
 
+The format of the data of the output file is as follows:
 The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
 in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
 The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
-Description of the data is given below:
+Description of the data (in either ``CARTESIAN_EARTH_CENTERED_INERTIAL`` or ``KEPLERIAN_EARTH_CENTERED_INERTIAL``) is given below:
 
-.. csv-table:: State data description
+.. csv-table:: CARTESIAN_EARTH_CENTERED_INERTIAL state data description
    :header: Column, Data type, Units, Description
    :widths: 10,10,5,40
 
-   TimeIndex, int, , Time-index
-   X[km], float, kilometers, X component of Satellite position in ECI-equatorial frame
-   Y[km], float, kilometers, Y component of Satellite position in ECI-equatorial frame
-   Z[km], float, kilometers, Z component of Satellite position in ECI-equatorial frame
-   VX[km], float, kilometers, X component of Satellite velocity in ECI-equatorial frame
-   VY[km], float, kilometers, Y component of Satellite velocity in ECI-equatorial frame
-   VZ[km], float, kilometers, Z component of Satellite velocity in ECI-equatorial frame
+time index, int, , Time-index
+x [km], float, kilometers, X component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
+y [km], float, kilometers, Y component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
+z [km], float, kilometers, Z component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
+vx [km], float, kilometers per sec, X component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
+vy [km], float, kilometers per sec, Y component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
+vz [km], float, kilometers per sec, Z component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
+
+.. csv-table:: KEPLERIAN_EARTH_CENTERED_INERTIAL state data description
+   :header: Column, Data type, Units, Description
+   :widths: 10,10,5,40
+
+time index, int, , Time-index
+sma [km], float, kilometers, Orbit semi-major axis dimension.
+ecc, float, , Orbit eccentricity
+inc [deg], float, degrees, Orbit inclination
+raan [deg], float, degrees, Orbit right ascension of ascending node
+aop [deg], float, degrees, Orbit argument of Perigee
+ta [deg], float, degrees, True Anomaly
 
 Access Data
 ==============

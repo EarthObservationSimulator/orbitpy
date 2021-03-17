@@ -151,6 +151,20 @@ class TestGrid(unittest.TestCase):
         self.assertTrue((data['lon [deg]']<=80).all())
         self.assertTrue((data['lon [deg]']>=45).all())
 
+    def test_get_lat_lon_from_index(self):
+        o = Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
+
+        cdata = o.get_lat_lon() # complete data
+        # single input index
+        self.assertEqual(o.get_lat_lon_from_index(0), (cdata.latitude[0], cdata.longitude[0]))
+        self.assertEqual(o.get_lat_lon_from_index(10), (cdata.latitude[10], cdata.longitude[10]))
+        self.assertEqual(o.get_lat_lon_from_index([-1]), (cdata.latitude[-1], cdata.longitude[-1]))
+        # multiple input indices
+        self.assertEqual(o.get_lat_lon_from_index([0,1,2]), ([cdata.latitude[0], cdata.latitude[1], cdata.latitude[2]], 
+                                                             [cdata.longitude[0], cdata.longitude[1], cdata.longitude[2]]))
+        self.assertEqual(o.get_lat_lon_from_index([10,1,5]), ([cdata.latitude[10], cdata.latitude[1], cdata.latitude[5]], 
+                                                             [cdata.longitude[10], cdata.longitude[1], cdata.longitude[5]]))
+
     def test_get_lat_lon(self): #TODO
         pass
 

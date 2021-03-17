@@ -3,11 +3,11 @@ Miscellaneous
 
 .. _grid_pnts_cov_calc_app:
 
-Grid-points coverage calcuations approach
+Grid-points coverage calculations approach
 ==========================================
-This section describes the "Grid-point" approach towards coverage calculations. In this approach, the coverage caclulator is given a 
+This section describes the "Grid-point" approach towards coverage calculations. In this approach, the coverage calculator is given a 
 set of predefined grid-points (lat, lon values). The satellite is propagated and at each time, and it is determined if a grid-point falls
-within the sensor projected footprint on the Earth's surface at that time. A conitnuous collection of such times corresponds to 
+within the sensor projected footprint on the Earth's surface at that time. A continuous collection of such times corresponds to 
 an access interval: i.e. the time-interval over which the ground-point is visible to the satellite sensor.
 The key aspects relating to this approach are described below:
 

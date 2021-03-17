@@ -109,12 +109,12 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
                     
     return params
 
-def find_in_cov_params_list( cov_params_list, sensor_id, mode_id ):
+def find_in_cov_params_list(cov_param_list, sensor_id=None, mode_id=None):
     """ For an input instrument-id, mode-id, find the corresponding FOV, FOR in an input list of coverage-parameters 
         (list of tuples of (sensor_id, mode_id, field-of-view, field-of-regard)). 
 
-    :param cov_params_list: List of tuples of (instrument id, mode id, field-of-view, field-of-regard).
-    :paramtype cov_params_list: list, namedtuple, <str or int, str or int, :class:`instrupy.util.ViewGeometry`, :class:`instrupy.util.ViewGeometry`>
+    :param cov_param_list: List of tuples of (instrument id, mode id, field-of-view, field-of-regard).
+    :paramtype cov_param_list: list, namedtuple, <str or int, str or int, :class:`instrupy.util.ViewGeometry`, :class:`instrupy.util.ViewGeometry`>
 
     :param sensor_id: Instrument identifier. If ``None``, the first tuple in the list of coverage parameters is considered.
     :paramtype sensor_id: str (or) int
@@ -127,28 +127,18 @@ def find_in_cov_params_list( cov_params_list, sensor_id, mode_id ):
     :rtype: namedtuple, <str or int, str or int, :class:`instrupy.util.ViewGeometry`, :class:`instrupy.util.ViewGeometry`>
 
     """ 
-    if sensor_id is None:
-        return (cov_params_list[0])
-    for a,b,c,d in cov_params_list:
-        if a == sensor_id and mode_id is None:
-            return (a,b,c,d)
-        elif a == sensor_id and b == mode_id:
-            return (a,b,c,d)
-        else:
-            raise Exception('instrument and mode corresponding to {}, {} was not found on the spacecraft.'.format(sensor_id, mode_id))
-
-def extract_auxillary_info_from_state_file(state_file):
-    epoch_JDUT1 = pd.read_csv(state_file, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
-    epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
-
-    step_size = pd.read_csv(state_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
-    step_size = float(step_size[0][0].split()[4])
-
-    duration = pd.read_csv(state_file, skiprows = [0,1,2], nrows=1, header=None).astype(str) # 4th row contains the mission duration
-    duration = float(duration[0][0].split()[4])
-
-    state_aux_info = namedtuple("state_aux_info", ["epoch_JDUT1", "step_size", "duration"])
-    return state_aux_info(epoch_JDUT1, step_size, duration)
+    if cov_param_list is not None and cov_param_list != []:
+        if sensor_id is None:
+            return (cov_param_list[0])
+        for a,b,c,d in cov_param_list:
+            if a == sensor_id and mode_id is None:
+                return (a,b,c,d)
+            elif a == sensor_id and b == mode_id:
+                return (a,b,c,d)
+            
+        raise Exception('Entry corresponding to the input instrument-id and mode-id was not found.')
+    else:
+        return None
 
 class GridCoverage(Entity):
     """A coverage calculator which handles coverage calculation for a spacecraft over a grid. Each coverage object is specific to 
@@ -178,6 +168,24 @@ class GridCoverage(Entity):
 
     @staticmethod
     def from_dict(d):
+        """ Parses an GridCoverage object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the GridCoverage specifications.
+
+                Following keys are to be specified.
+                
+                * "grid":                  (dict) Refer to :class:`orbitpy.grid.Grid.from_dict`
+                * "spacecraft":            (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
+                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in 
+                                             CARTESIAN_EARTH_CENTERED_INERTIAL. Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
+                * "@id":                    (str or int) Unique identifier of the coverage calculator object.
+
+        :paramtype d: dict
+
+        :return: GridCoverage object.
+        :rtype: :class:`orbitpy.coveragecalculator.GridCoverage`
+
+        """
         grid_dict = d.get('grid', None)
         spc_dict = d.get('spacecraft', None)
         return GridCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
@@ -212,8 +220,8 @@ class GridCoverage(Entity):
 
         """
         ###### read in the propagated states and auxillary information ######               
-        (epoch_JDUT1, step_size, duration) = extract_auxillary_info_from_state_file(self.state_cart_file)
-        states_df = pd.read_csv(self.state_cart_file)
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.state_cart_file)
+        states_df = pd.read_csv(self.state_cart_file, skiprows=4)
 
         ###### Prepare output file in which results shall be written ######
         if out_file_access:
@@ -226,13 +234,12 @@ class GridCoverage(Entity):
             access_writer.writerow(['time index','GP index'])
 
         ###### form the propcov.Spacecraft object ######
-        earth = propcov.Earth()
         attitude = propcov.NadirPointingAttitude()
         interp = propcov.LagrangeInterpolator()
         spc = propcov.Spacecraft(self.spacecraft.orbitState.date, self.spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
         
         # orient the spacecraft
-        spc_orien = spc.spacecraftBus.orientation
+        spc_orien = self.spacecraft.spacecraftBus.orientation
         if spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING:            
             spc.SetBodyNadirOffsetAngles(angle1=spc_orien.euler_angle1, angle2=spc_orien.euler_angle2, angle3=spc_orien.euler_angle3, # input angles are in degrees
                                          seq1=spc_orien.euler_seq1, seq2=spc_orien.euler_seq2, seq3=spc_orien.euler_seq3)            
@@ -254,7 +261,7 @@ class GridCoverage(Entity):
         for _view_geom in sensor_view_geom:
             
             ###### build the sensor object ######
-            _orien = _view_geom.orientation
+            _orien = _view_geom.orien
             _sph_geom = _view_geom.sph_geom
             if(_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(_sph_geom.diameter)) # input angle in radians
@@ -276,7 +283,7 @@ class GridCoverage(Entity):
                 _date = epoch_JDUT1 + index*step_size*DAYS_PER_SEC
                 date.SetJulianDate(_date)
                 cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
-                spc.SetOrbitState(date, cart_state)
+                spc.SetOrbitState(date, propcov.Rvector6(cart_state))
                 # compute coverage
                 points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
                 if len(points)>0: #If no ground-points are accessed at this time, skip writing the row altogether.

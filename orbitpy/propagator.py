@@ -155,7 +155,7 @@ class J2AnalyticalPropagator(Entity):
 
                 Following keys are to be specified.
                 
-                * "stepSize": (float) Step size in seconds.
+                * "stepSize": (float) Step size in seconds. Default value is 60s.
                 * "@id": (str) Propagator identifier (unique). Default: A random string.
 
         :paramtype d: dict
@@ -164,7 +164,7 @@ class J2AnalyticalPropagator(Entity):
         :rtype: :class:`orbitpy.propagate.J2AnalyticalPropagator`
 
         """ 
-        return J2AnalyticalPropagator(stepSize = d.get('stepSize', None), 
+        return J2AnalyticalPropagator(stepSize = d.get('stepSize', 60), 
                                            _id = d.get('@id', None))
 
     def to_dict(self):
@@ -192,15 +192,50 @@ class J2AnalyticalPropagator(Entity):
     def execute(self, spacecraft, start_date=None, out_file_cart=None, out_file_kep=None, duration=1):
         """ Execute orbit propagation of the input spacecraft (single) and write to a csv data-file.
 
+        
         :param spacecraft: Spacecraft whose orbit is to be propagated.
         :paramtype spacecraft: :class:`orbitpy.util.Spacecraft`
 
         :param out_file_cart: File name with path of the file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are written.
-                                 If ``None`` the file is not written.
+                               If ``None`` the file is not written.
+
+                               The format of the data of the output file is as follows:
+                               The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
+                               in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
+                               The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+                               Description of the data is given below:
+
+                               .. csv-table:: CARTESIAN_EARTH_CENTERED_INERTIAL State data description
+                                    :header: Column, Data type, Units, Description
+                                    :widths: 10,10,5,40
+
+                               time index, int, , Time-index
+                               x [km], float, kilometers, X component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
+                               y [km], float, kilometers, Y component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
+                               z [km], float, kilometers, Z component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
+                               vx [km], float, kilometers per sec, X component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
+                               vy [km], float, kilometers per sec, Y component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
+                               vz [km], float, kilometers per sec, Z component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
+
+
         :paramtype out_file_cart: str
 
         :param out_file_kep: File name with path of the file in which the orbit states in KEPLERIAN_EARTH_CENTERED_INERTIAL are written.
-                                If ``None`` the file is not written.
+                                If ``None`` the file is not written. The output data format is similar to the data format of the *out_file_cart*
+                                file, except the columns headers are as follows:
+
+                                .. csv-table:: KEPLERIAN_EARTH_CENTERED_INERTIAL State data description
+                                    :header: Column, Data type, Units, Description
+                                    :widths: 10,10,5,40
+
+                               time index, int, , Time-index
+                               sma [km], float, kilometers, Orbit semi-major axis dimension.
+                               ecc, float, , Orbit eccentricity
+                               inc [deg], float, degrees, Orbit inclination
+                               raan [deg], float, degrees, Orbit right ascension of ascending node
+                               aop [deg], float, degrees, Orbit argument of Perigee
+                               ta [deg], float, degrees, True Anomaly
+
         :paramtype out_file_kep: str
 
         :param start_date: Time start for propagation. If ``None``, the date at which the spacecraft orbit-state is referenced shall be used as the start date.
@@ -211,6 +246,7 @@ class J2AnalyticalPropagator(Entity):
 
         :return: 0 if success. The results are stored in a csv data-file at the indicated file-path.
         :rtype: int
+        
 
         """
         # form the propcov.Spacecraft object
@@ -238,7 +274,7 @@ class J2AnalyticalPropagator(Entity):
         if out_file_kep:
             kep_file = open(out_file_kep, 'w', newline='')
             kep_writer = csv.writer(kep_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            kep_writer.writerow(["Satellite states as Keplerian elements."])
+            kep_writer.writerow(["Satellite states as KEPLERIAN_EARTH_CENTERED_INERTIAL elements."])
             kep_writer.writerow(["Epoch [JDUT1] is {}".format(start_date.GetJulianDate())])
             kep_writer.writerow(["Step size [s] is {}".format(self.stepSize)])
             kep_writer.writerow(["Mission Duration [Days] is {}".format(duration)])

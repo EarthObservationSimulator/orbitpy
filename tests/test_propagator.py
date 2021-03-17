@@ -138,7 +138,8 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         self.j2_prop.execute(self.spacecraft, None, self.out_file_cart, self.out_file_kep, self.duration)
 
 
-    def test_from_json(self):
+    def test_from_json(self):       
+
         o = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 0.5})
         self.assertIsInstance(o, J2AnalyticalPropagator)
         self.assertEqual(o.stepSize, 0.5)
@@ -153,6 +154,12 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         self.assertIsInstance(o, J2AnalyticalPropagator)
         self.assertEqual(o.stepSize, 1.5)
         self.assertEqual(o._id, 123)
+
+        # test default step size
+        o = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator"})
+        self.assertIsInstance(o, J2AnalyticalPropagator)
+        self.assertEqual(o.stepSize, 60)
+        self.assertIsNone(o._id)
 
     def test_to_dict(self):
         pass
@@ -199,8 +206,8 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         _step_size = float(_step_size[0][0].split()[4])
         self.assertAlmostEqual(_step_size, self.step_size)
 
-        duration = pd.read_csv(self.out_file_kep, skiprows = [0,1,2], nrows=1, header=None).astype(str) # 4th row contains the mission duration
-        duration = float(duration[0][0].split()[4])
+        _duration = pd.read_csv(self.out_file_kep, skiprows = [0,1,2], nrows=1, header=None).astype(str) # 4th row contains the mission duration
+        _duration = float(_duration[0][0].split()[4])
         self.assertAlmostEqual(_duration, self.duration)
 
         column_headers = pd.read_csv(self.out_file_kep, skiprows = [0,1,2,3], nrows=1, header=None).astype(str) # 5th row contains the columns headers
@@ -215,6 +222,7 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         data = pd.read_csv(self.out_file_kep, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
         self.assertEqual(data["time index"].iloc[0],0)
         self.assertEqual(data["time index"].iloc[1],1)
+        # check that the number of time-steps is reasonable
         self.assertAlmostEqual((data["time index"].iloc[-1] + 1)*_step_size, self.duration*86400, delta=self.step_size) # almost equal, probably due to errors introduced by floating-point arithmetic
     
     def test_execute_2(self):

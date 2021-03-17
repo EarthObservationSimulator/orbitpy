@@ -12,6 +12,8 @@ import numpy as np
 import math
 import uuid
 from collections import namedtuple
+import pandas as pd
+
 import propcov
 from instrupy.util import Entity, EnumEntity, Constants, Orientation
 from instrupy import Instrument
@@ -622,3 +624,26 @@ def helper_extract_spacecraft_params(spacecraft):
 
                         params.append(_p(sc_id, instru_id, mode_id, sma, fov_height, fov_width, for_height, for_width))
     return params
+
+def extract_auxillary_info_from_state_file(state_file):
+    """ Extract auxillary information (epoch, step-size, duration) from the propgated states file.
+
+    :param state_file: 
+    :paramtype state_file: str
+
+    :return: Tuple of Epoch in Julian Date UT1, propagation step-size in seconds and propagation duration in days.
+    :rtype: nametuple, (float, float, float)
+
+    """
+    epoch_JDUT1 = pd.read_csv(state_file, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
+    epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
+
+    step_size = pd.read_csv(state_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+    step_size = float(step_size[0][0].split()[4])
+
+    duration = pd.read_csv(state_file, skiprows = [0,1,2], nrows=1, header=None).astype(str) # 4th row contains the mission duration
+    duration = float(duration[0][0].split()[4])
+
+    state_aux_info = namedtuple("state_aux_info", ["epoch_JDUT1", "step_size", "duration"])
+    
+    return state_aux_info(epoch_JDUT1, step_size, duration)

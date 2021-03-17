@@ -13,6 +13,8 @@ from orbitpy.util import OrbitState, SpacecraftBus, Spacecraft
 import orbitpy.util
 import propcov
 
+from .util import spc1, spc2, spc3
+
 class TestOrbitState(unittest.TestCase):
   
     def test_date_from_dict(self):
@@ -183,106 +185,50 @@ class TestSpacecraftBus(unittest.TestCase):
 class TestSpacecraft(unittest.TestCase):
 
     def test_from_json(self):
-        # typical case 1 instrument
-        o = Spacecraft.from_json('{"@id": "sp1", "name": "Spock", \
-                                   "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
-                                                    "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
-                                                   }, \
-                                   "instrument": {"name": "Alpha", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
-                                                  "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
-                                                  "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
-                                                  "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
-                                                  "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
-                                                  } \
-                                  }')
-        
-        self.assertEqual(o.name, "Spock")
-        self.assertEqual(o.spacecraftBus, SpacecraftBus.from_json('{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
+        # typical case 1 instrument       
+        self.assertEqual(spc1.name, "Mars")
+        self.assertEqual(spc1.spacecraftBus, SpacecraftBus.from_json('{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
                                                     "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }'))
-        self.assertEqual(o.instrument, [Instrument.from_json('{"name": "Alpha", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
+        self.assertEqual(spc1.instrument, [Instrument.from_json('{"name": "Alpha", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
                                                   "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}')])
-        self.assertEqual(o.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+        self.assertEqual(spc1.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                               "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
-        self.assertEqual(o._id, "sp1")
+        self.assertEqual(spc1._id, "sp1")
 
-        # no instruments
-        o = Spacecraft.from_json('{"@id": 12, "name": "Spock", \
-                                   "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
-                                                    "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
-                                                   }, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
-                                                  } \
-                                  }')
-        
-        self.assertEqual(o.name, "Spock")
-        self.assertEqual(o.spacecraftBus, SpacecraftBus.from_json('{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
+        # no instruments        
+        self.assertEqual(spc2.name, "Jupyter")
+        self.assertEqual(spc2.spacecraftBus, SpacecraftBus.from_json('{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
                                                     "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }'))
-        self.assertIsNone(o.instrument)
-        self.assertEqual(o.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+        self.assertIsNone(spc2.instrument)
+        self.assertEqual(spc2.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                               "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
-        self.assertEqual(o._id, 12)
+        self.assertEqual(spc2._id, 12)
 
-        # 3 instruments with multiple modes, no spacecraft id assignment
-        o = Spacecraft.from_json('{"name": "Spock", \
-                                   "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
-                                                    "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
-                                                   }, \
-                                     "instrument": [ \
-                                                    {   "name": "Alpha", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
-                                                        "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
-                                                        "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
-                                                        "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
-                                                        "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor" \
-                                                    }, \
-                                                    {   "name": "Beta", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
-                                                        "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
-                                                        "maneuver":{"maneuverType": "SINGLE_ROLL_ONLY", "A_rollMin":10, "A_rollMax":15}, \
-                                                        "mode": [{"@id":101, "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}} \
-                                                                ], \
-                                                        "numberDetectorRows":5, "numberDetectorCols":10, "@type":"Basic Sensor" \
-                                                    }, \
-                                                    {   "name": "Gamma", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
-                                                        "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":10 }, \
-                                                        "maneuver":{"maneuverType": "Double_Roll_Only", "A_rollMin":10, "A_rollMax":15, "B_rollMin":-15, "B_rollMax":-10}, \
-                                                        "mode": [{"@id":0, "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}}, \
-                                                                {"@id":1, "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle": 25}}, \
-                                                                { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle": -25}}  \
-                                                                ], \
-                                                        "numberDetectorRows":5, "numberDetectorCols":10, "@id": "bs3", "@type":"Basic Sensor" \
-                                                    } \
-                                                  ], \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
-                                                  } \
-                                  }')
-        
-        self.assertEqual(o.name, "Spock")
-        self.assertEqual(o.spacecraftBus, SpacecraftBus.from_json('{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
+        # 3 instruments with multiple modes, no spacecraft id assignment        
+        self.assertEqual(spc3.name, "Saturn")
+        self.assertEqual(spc3.spacecraftBus, SpacecraftBus.from_json('{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
                                                     "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }'))
-        self.assertEqual(len(o.instrument), 3)
+        self.assertEqual(len(spc3.instrument), 3)
         # 1st instrument
-        self.assertEqual(o.instrument[0].get_id(), 'bs1')
-        self.assertEqual(o.instrument[0].get_mode_id()[0], '0')
+        self.assertEqual(spc3.instrument[0].get_id(), 'bs1')
+        self.assertEqual(spc3.instrument[0].get_mode_id()[0], '0')
         # 2nd instrument
-        self.assertIsNotNone(o.instrument[1].get_id())
-        self.assertIsNotNone(o.instrument[1].get_mode_id()[0], '0')
+        self.assertIsNotNone(spc3.instrument[1].get_id())
+        self.assertIsNotNone(spc3.instrument[1].get_mode_id()[0], '0')
         # 3rd instrument
-        self.assertEqual(o.instrument[2].get_id(), 'bs3')
-        self.assertEqual(o.instrument[2].get_mode_id()[0], 0)
-        self.assertEqual(o.instrument[2].get_mode_id()[1], 1)
-        self.assertIsNotNone(o.instrument[2].get_mode_id()[2])
-        self.assertEqual(o.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+        self.assertEqual(spc3.instrument[2].get_id(), 'bs3')
+        self.assertEqual(spc3.instrument[2].get_mode_id()[0], 0)
+        self.assertEqual(spc3.instrument[2].get_mode_id()[1], 1)
+        self.assertIsNotNone(spc3.instrument[2].get_mode_id()[2])
+        self.assertEqual(spc3.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                               "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
-        self.assertIsNotNone(o._id)
+        self.assertIsNotNone(spc3._id)
 
     
     def test_get_id(self): #TODO
@@ -535,3 +481,6 @@ class TestUtilModuleFunction(unittest.TestCase):
         self.assertAlmostEqual(x[8]. fov_width, 10.0)
         self.assertAlmostEqual(x[8].for_height, 5.0) 
         self.assertAlmostEqual(x[8].for_width, 15.0)
+    
+    def test_extract_auxillary_info_from_state_file(self): # TODO
+        pass

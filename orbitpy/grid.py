@@ -201,7 +201,28 @@ class Grid(Entity):
         
         grid_point = namedtuple("grid_points", ["latitude", "longitude"])
 
+        return grid_point(list(lat), list(lon))
+    
+    def get_lat_lon_from_index(self, indexes):
+        """ Get the grid points (coordinates) corresponding to the input (list of) point-indices.
+        
+        :param indexes: List of indices.
+        :paramtype indexes: list, int
+
+        :return: Grid points (latitudes and longitudes in degrees) corresponding to the input indices.
+        :rtype: namedtuple, (list, list), float
+
+        """
+        (_lat, _lon) = self.get_lat_lon()
+        # make indexes into a list if not list
+        indexes = [indexes] if not isinstance(indexes, list) else indexes
+        # filter
+        lat = [_lat[x] for x in indexes]
+        lon = [_lon[x] for x in indexes]
+        grid_point = namedtuple("grid_points", ["latitude", "longitude"])
+
         return grid_point(lat, lon)
+
 
 def compute_grid_res(spacecraft, grid_res_fac=0.9):
     """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.
