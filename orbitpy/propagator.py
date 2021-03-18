@@ -7,6 +7,7 @@
 import numpy as np
 from collections import namedtuple
 import csv
+import copy 
 
 import propcov
 from instrupy.util import Entity, Constants
@@ -253,9 +254,11 @@ class J2AnalyticalPropagator(Entity):
         earth = propcov.Earth()
         attitude = propcov.NadirPointingAttitude()
         interp = propcov.LagrangeInterpolator()
+
         spc = propcov.Spacecraft(spacecraft.orbitState.date, spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3) # TODO: initialization to the correct orientation of spacecraft is not necessary, so ignored for time-being.
         
         if(start_date is None):
+            # following code sequence is required to make an *independent/8 copy of the spacecraft.orbitState.date object. 
             start_date = spacecraft.orbitState.date
 
         # form the propcov.Propagator object

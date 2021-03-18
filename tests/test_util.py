@@ -13,7 +13,7 @@ from orbitpy.util import OrbitState, SpacecraftBus, Spacecraft
 import orbitpy.util
 import propcov
 
-from .util import spc1, spc2, spc3
+from .util import spc1_json, spc2_json, spc3_json
 
 class TestOrbitState(unittest.TestCase):
   
@@ -185,7 +185,11 @@ class TestSpacecraftBus(unittest.TestCase):
 class TestSpacecraft(unittest.TestCase):
 
     def test_from_json(self):
-        # typical case 1 instrument       
+        spc1 = Spacecraft.from_json(spc1_json)  
+        spc2 = Spacecraft.from_json(spc2_json)  
+        spc3 = Spacecraft.from_json(spc3_json)  
+
+        # typical case 1 instrument      
         self.assertEqual(spc1.name, "Mars")
         self.assertEqual(spc1.spacecraftBus, SpacecraftBus.from_json('{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
                                                     "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \

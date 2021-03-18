@@ -562,6 +562,13 @@ c
                      "@id": self._id
                     })
     
+    
+    def get_copy(self):
+        """
+        """
+        spacecraft_dict =  self.to_dict()
+        return Spacecraft.from_dict(spacecraft_dict)
+
     def __repr__(self):
         return "Spacecraft.from_dict({})".format(self.to_dict())
     

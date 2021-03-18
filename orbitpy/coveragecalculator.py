@@ -130,11 +130,13 @@ def find_in_cov_params_list(cov_param_list, sensor_id=None, mode_id=None):
     if cov_param_list is not None and cov_param_list != []:
         if sensor_id is None:
             return (cov_param_list[0])
+        idx = 0
         for a,b,c,d in cov_param_list:
             if a == sensor_id and mode_id is None:
-                return (a,b,c,d)
+                return cov_param_list[idx]
             elif a == sensor_id and b == mode_id:
-                return (a,b,c,d)
+                return cov_param_list[idx]
+            idx = idx + 1
             
         raise Exception('Entry corresponding to the input instrument-id and mode-id was not found.')
     else:
