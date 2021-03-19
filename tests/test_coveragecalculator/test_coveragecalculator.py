@@ -31,15 +31,25 @@ from instrupy.util import ViewGeometry, Orientation, SphericalGeometry
 from instrupy import Instrument
 
 sys.path.append('../')
-from tests.util import spc1, spc2, spc3
+from tests.util import spc1_json, spc2_json, spc3_json
 
 RE = 6378.137 # radius of Earth in kilometers
 
 class TestCoverageCalculatorFunctions(unittest.TestCase):   
                                 
+    @classmethod
+    def setUpClass(cls):
+        # Create new working directory to store output of all the class functions. 
+        cls.dir_path = os.path.dirname(os.path.realpath(__file__))
+        cls.out_dir = os.path.join(cls.dir_path, 'temp')
+        if os.path.exists(cls.out_dir):
+            shutil.rmtree(cls.out_dir)
+        os.makedirs(cls.out_dir)
+
     def test_helper_extract_coverage_parameters_of_spacecraft(self):
         
         # spc1 spacecraft, 1 instrument, 1 mode 
+        spc1 = Spacecraft.from_json(spc1_json)
         x = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc1)
         self.assertEqual(len(x), 1)
         self.assertEqual(x[0].instru_id, 'bs1')
@@ -52,10 +62,12 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
                                          "sphericalGeometry":{'shape': 'CIRCULAR', 'diameter': 15.0, '@id': None}})])
         
         # spc2 spacecraft, no instruments 
+        spc2 = Spacecraft.from_json(spc2_json)
         x = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc2)
         self.assertEqual(x,[])
 
         # spc3 spacecraft, 3 instruments, 1st and 2nd instrument have 1 mode and 3rd instrument has 3 modes 
+        spc3 = Spacecraft.from_json(spc3_json)
         x = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc3)
         self.assertEqual(len(x), 5)
         # instrument 1        
@@ -118,7 +130,8 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
       
     
     def test_find_in_cov_params_list(self):
-        # spc1 spacecraft, 1 instrument, 1 mode 
+        # spc1 spacecraft, 1 instrument, 1 mode
+        spc1 = Spacecraft.from_json(spc1_json) 
         cov_param_list = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc1)
         self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs1', mode_id='0'), 
                          cov_param_list[0])
@@ -133,10 +146,12 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
             orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs1', mode_id='1') # invalid mode-id
 
         # spc2 spacecraft, no instruments 
+        spc2 = Spacecraft.from_json(spc2_json)
         cov_param_list = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc2)
         self.assertIsNone(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list))
 
         # spc3 spacecraft, 3 instruments, 1st and 2nd instrument have 1 mode and 3rd instrument has 3 modes 
+        spc3 = Spacecraft.from_json(spc3_json)
         cov_param_list = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc3)
         self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs3', mode_id=1), 
                          cov_param_list[3])
@@ -147,6 +162,27 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         with self.assertRaises(Exception):
             orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='axe', mode_id='1') # invalid sensor-id
             orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs1', mode_id='1') # invalid mode-id
+
+    def test_filter_mid_interval_access(self):
+        """ Check the behavior of this function is as expected using pre-run results.
+        """
+        # file input, file output
+        inp_acc_fl = self.dir_path + '/../test_data/accessData.csv'
+        out_acc_fl = self.out_dir + '/test_filter_mid_interval_access.csv' 
+        true_mid_interval_acc_fl = self.dir_path + '/../test_data/midIntervalAccessData.csv'
+        orbitpy.coveragecalculator.filter_mid_interval_access(inp_acc_fl=inp_acc_fl, out_acc_fl=out_acc_fl)
+        result_df = pd.read_csv(out_acc_fl, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+        truth_df = pd.read_csv(true_mid_interval_acc_fl, skiprows = [0,1,2,3])
+        self.assertTrue(result_df.equals(truth_df))
+
+        # dataframe input, dataframe output
+        inp_data = { 'time index': [ 0,  1,  2,  3,  4,  4,  4,  5,  5,  6,  6,  7,  8], 
+                     'GP index'  : [10, 11, 11, 11, 12, 13, 14, 12, 13, 12, 10, 10, 11] }    
+        inp_acc_df = pd.DataFrame(data = inp_data) 
+        truth_df = pd.DataFrame({ 'time index': [  0,  2,  4,  4,  5,   7,  8 ], 
+                                  'GP index'  : [ 10, 11, 13,  14, 12, 10, 11 ] })
+        result_df = orbitpy.coveragecalculator.filter_mid_interval_access(inp_acc_df=inp_acc_df)
+        self.assertTrue(result_df.equals(truth_df))
 
     def test_extract_auxillary_info_from_state_file(self): #TODO
         pass

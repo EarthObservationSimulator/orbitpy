@@ -142,6 +142,97 @@ def find_in_cov_params_list(cov_param_list, sensor_id=None, mode_id=None):
     else:
         return None
 
+def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None):
+        """ Extract the access times at middle of access intervals. The input can be a path to a file or a dataframe. 
+
+        This function can be used for "correction" of access files for purely side-looking instruments with narrow (along-track) FOV described below:
+
+        In case of purely side-looking instruments with narrow-FOV (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place
+        when the grid-point is seen with no squint angle and the access is relatively instantaneous (i.e. access duration is very small). 
+        The field-of-regard coverage calculations are carried out with the corresponding *sceneFOV* (see :code:`instrupy` package documentation). 
+
+        The access files list rows of access-time, ground-points, and thus independent access opportunities for the instrument
+        when the field-of-regard is used for coverage calculations. 
+        If the generated access files from the field-of-regard coverage calculations (using sceneFOV) of purely side-looking, narrow-FOV instruments are
+        interpreted in the same manner, it would be erroneous.
+
+        Thus the generated access files are then *corrected* to show access only at approximately (to the nearest propagation time-step) 
+        the middle of the access interval. 
+        This should be coupled with the required scene-scan-duration (from sceneFOV) to get complete information about the access. 
+
+        For example, consider a SAR instrument pointing sideways as shown in the figure below. The along-track FOV is narrow
+        corresponding to narrow strips, and a scene is built from concatenated strips. A SceneFOV is associated with the SAR and is used for access 
+        calculation over the grid point shown in the figure. Say the propagation time-step is 1s as shown in the figure. An access interval between
+        t=100s to t=105s is registered. However as shown the actual access takes place over a small interval of time at t=103.177s. 
+
+        An approximation can be applied (i.e. correction is made) that the observation time of the ground point is at the middle of the access
+        interval rounded of to the nearest propagation time as calculated using the SceneFOV, i.e. :math:`t= 100 + ((105-100)/2) % 1 = 103s`. The state 
+        of the spacecraft at :math:`t=103s` and access duration corresponding to the instrument FOV (note: *not* the sceneFOV) (can be determined analytically) 
+        is to be used for the data-metrics calculation.
+
+        .. figure:: sar_access.png
+            :scale: 75 %
+            :align: center
+
+        .. warning:: The correction method is to be used only when the instrument access-duration is smaller than the propagation time step (which is determined from sceneFOV). 
+
+        :ivar inp_acc_df: Dataframe with the access data which needs to be filtered. The rows correspond to pair of 
+                          access time and corresponding ground-point index. The columns are to be named as: ``time index`` and ``GP index``.
+                          If ``None``, the ``inp_acc_fl`` input argument must be specified.
+        :vartype inp_acc_df: pd.DataFrame
+
+        :ivar inp_acc_fl: Input access file (filepath with filename). Refer to the ``execute`` method in the respective coverage calculator classes
+                          for description of the file format. If ``None``, the ``inp_acc_df`` input argument must be specified.
+        :vartype inp_acc_fl: str
+
+        :ivar out_acc_fl: Output access file (filepath with filename). The format is the same as that of the input access file. If ``None`` the file is not written.
+        :vartype out_acc_fl: str
+
+        :returns: Dataframe with the resultant access data.
+        :rtype: pd.DataFrame
+
+        """
+        if inp_acc_fl: # If input file is specified, the data is taken from it. 
+            df = pd.read_csv(inp_acc_fl, skiprows = 4)            
+        else:
+            df = inp_acc_df
+        df_grp = df.groupby('GP index') # group according to ground-point indices
+        # iterate over all the groups (ground-point indices)
+        max_num_acc = len(df.index)
+        data = np.zeros((max_num_acc,2), dtype=int)
+        k = 0
+        data_indx = 0
+        for name, group in df_grp:
+            x = (group['time index'].shift(periods=1) - group['time index']) < -1
+            _intv = np.where(x == True)[0]            
+            interval_indices = [0] # add the very first interval start index
+            interval_indices.extend(_intv)
+            interval_indices.extend((_intv - 1).tolist())
+            interval_indices.append(len(group)-1) # add the very last interval end index
+            interval_indices.sort()
+            mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
+            mid_points = [int(np.round(x)) for x in mid_points]
+            _data = group.iloc[mid_points].to_numpy()
+            m = _data.shape[0]
+            data[data_indx:data_indx+m,:] = _data
+            data_indx = data_indx + m
+
+        data = data[0:data_indx]
+        out_df = pd.DataFrame(data = data, columns = ['time index', 'GP index'])
+        if inp_acc_fl:
+            with open(inp_acc_fl, 'r') as f1:
+                head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
+                with open(out_acc_fl, 'w') as f2:
+                    for k in range(0,len(head)):
+                        f2.write(str(head[k]))
+
+        out_df.sort_values(by=['time index'], inplace=True)
+        out_df = out_df.reset_index(drop=True)
+        if out_acc_fl:
+            with open(out_acc_fl, 'a') as f2:
+                out_df.to_csv(f2, index=False, header=True, line_terminator='\n')
+        return out_df
+
 class GridCoverage(Entity):
     """A coverage calculator which handles coverage calculation for a spacecraft over a grid. Each coverage object is specific to 
         a particular grid and spacecraft.  
@@ -215,10 +306,23 @@ class GridCoverage(Entity):
         :paramtype use_field_of_regard: bool
 
         :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
+                
+                The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
+                in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
+                The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+                Description of the data (comma-seperated) is given below:
+
+                .. csv-table:: Observation data metrics description
+                :header: Column, Data type, Units, Description
+                :widths: 10,10,5,40
+
+                time index, int, , Access time-index.
+                GP index, integer, , Grid-point index (refer to the instance ``grid` attribute to get the latitude, longitude coordinates). 
+        
         :paramtype out_file_access: str
 
-        :return: 0 if success. The results are stored in a csv data-file at the indicated file-path.
-        :rtype: int
+        :return: None
+        :rtype: None
 
         """
         ###### read in the propagated states and auxillary information ######               
@@ -234,7 +338,6 @@ class GridCoverage(Entity):
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             access_writer.writerow(['time index','GP index'])
-
         
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
@@ -244,10 +347,6 @@ class GridCoverage(Entity):
             sensor_view_geom = [cov_param.field_of_view] # make into list 
         
         ###### iterate and calculate coverage seperately for each sensor_view_geom element. TODO: Streamline this behavior ######
-        
-        # initialize variables to be used in the loop
-        
-
         for sen_view_geom in sensor_view_geom:
             
             ###### form the propcov.Spacecraft object ######
@@ -304,8 +403,6 @@ class GridCoverage(Entity):
         ##### Close files #####                
         if access_file:
             access_file.close()
-
-        return 0
             
 class PointingOptionsCoverage(Entity):
     """A coverage calculator which calculates coverage over a grid.

@@ -63,7 +63,6 @@ class TestGridCoverage(unittest.TestCase):
         self.assertEqual(o.spacecraft, Spacecraft.from_json(spc1_json))
         self.assertEqual(o.state_cart_file, "../../state.csv")
 
-    '''
     def test_execute_0(self):
         """ Check the produced access file format.
         """        
@@ -598,7 +597,7 @@ class TestGridCoverage(unittest.TestCase):
             self.assertEqual(len(access_data1.merge(access_data2)), len(access_data1)) 
         else:
             warnings.warn('No data was generated in test_execute_8(.). Run the test again.')
-    '''
+            
     def test_execute_9(self):
         """ Test coverage with DOUBLE_ROLL_ONLY maneuver will which result in 2 ``ViewGeometry`` objects for the 
             field-of-regard.

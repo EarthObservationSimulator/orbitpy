@@ -58,17 +58,16 @@ object in the user-defined JSON configuration file.
 
 In case of purely side-looking instruments with narrow-FOV (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place
 when the grid-point is seen with no squint angle and the access is relatively instantaneous (i.e. access duration is very small). 
-The orbit propagation and coverage calculations are carried out for a corresponding *sceneFOV* (see :code:`instrupy` package documentation). 
+The field-of-regard coverage calculations are carried out with the corresponding *sceneFOV* (see :code:`instrupy` package documentation). 
 
-Recall that the access files list rows of access-time, ground-points, and thus independent access opportunities for the instrument. 
-If the generated access files from the coverage calculations of purely side-looking, narrow-FOV instruments are to be interpreted in the same manner, 
-it would be erroneous.
+The access files list rows of access-time, ground-points, and thus independent access opportunities for the instrument
+when the field-of-regard is used for coverage calculations. 
+If the generated access files from the field-of-regard coverage calculations (using sceneFOV) of purely side-looking, narrow-FOV instruments are
+interpreted in the same manner, it would be erroneous.
 
-Thus the generated access files (from the coverage calculations using sceneFOV) are then *corrected* to show access only at approximately the 
-middle of the access interval. 
-This should be coupled with the scene-access-duration (from sceneFOV) and the instrument-access-duration (from instrument FOV) to get 
-complete information about the access. The access-durations can be calculated analytically (the scene-access-duration can also be determined from the
-results of the un-corrected access files).
+Thus the generated access files are then *corrected* to show access only at approximately (to the nearest propagation time-step) 
+the middle of the access interval. 
+This should be coupled with the required scene-scan-duration (from sceneFOV) to get complete information about the access. 
 
 For example, consider a SAR instrument pointing sideways as shown in the figure below. The along-track FOV is narrow
 corresponding to narrow strips, and a scene is built from concatenated strips. A SceneFOV is associated with the SAR and is used for access 
@@ -77,17 +76,12 @@ t=100s to t=105s is registered. However as shown the actual access takes place o
 
 An approximation can be applied (i.e. correction is made) that the observation time of the ground point is at the middle of the access
 interval rounded of to the nearest propagation time as calculated using the SceneFOV, i.e. :math:`t= 100 + ((105-100)/2) % 1 = 103s`. The state 
-of the spacecraft at :math:`t=103s` and access duration corresponding to the instrument FOV (note: not the sceneFOV) is utilized for the 
-data-metrics calculation.
+of the spacecraft at :math:`t=103s` and access duration corresponding to the instrument FOV (note: *not* the sceneFOV) (can be determined analytically) 
+is to be used for the data-metrics calculation.
 
 .. figure:: sar_access.png
     :scale: 75 %
     :align: center
-
-The correction of the access files is handled by the :class:`orbitpy.orbitpropcov` module which requires as inputs: list of access files (to be revised). The original access files are renamed to :code:`...._old` and the corrected access files are
-produced with the same name as the original access files at the same location. An additional message is displayed within the file as follows:
-   
-   *Access listed below corresponds to approximate access instants at the grid-points at a side-look target geometry. The scene scan time should be used along with the below data to get complete access information.*
 
 .. warning:: The correction method is to be used only when the instrument access-duration is smaller than the propagation time step (which is determined from sceneFOV). 
 

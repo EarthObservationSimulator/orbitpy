@@ -204,7 +204,7 @@ class J2AnalyticalPropagator(Entity):
                                The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
                                in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
                                The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
-                               Description of the data is given below:
+                               Description of the data (comma-seperated) is given below:
 
                                .. csv-table:: CARTESIAN_EARTH_CENTERED_INERTIAL State data description
                                     :header: Column, Data type, Units, Description
