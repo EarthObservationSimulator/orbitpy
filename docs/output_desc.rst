@@ -43,7 +43,7 @@ ta [deg], float, degrees, True Anomaly
 Access Data
 ==============
 The format of the access data is produced by the :class:`orbitpy.orbitpropcov` module.
-The time data of both the states and access are synced. Seperate access data files are produced for per satellite payload. The intermediate access
+The time data of both the states and access are synced. Separate access data files are produced for per satellite payload. The intermediate access
 files produced by the :ref:`grid_pnts_cov_calc_app` is different from the intermediate file produced by the :ref:`pnt_opts_cov_calc_app`. 
 
 Grid-point based coverage calculations intermediate access file-format
