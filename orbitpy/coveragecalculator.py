@@ -235,18 +235,7 @@ class GridCoverage(Entity):
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             access_writer.writerow(['time index','GP index'])
 
-        ###### form the propcov.Spacecraft object ######
-        attitude = propcov.NadirPointingAttitude()
-        interp = propcov.LagrangeInterpolator()
-
-        spc = propcov.Spacecraft(self.spacecraft.orbitState.date, self.spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
-        # orient the spacecraft
-        spc_orien = self.spacecraft.spacecraftBus.orientation
-        if spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING:            
-            spc.SetBodyNadirOffsetAngles(angle1=spc_orien.euler_angle1, angle2=spc_orien.euler_angle2, angle3=spc_orien.euler_angle3, # input angles are in degrees
-                                         seq1=spc_orien.euler_seq1, seq2=spc_orien.euler_seq2, seq3=spc_orien.euler_seq3)            
-        else:
-            raise NotImplementedError # only NADIR_POINTING reference frame is supported.
+        
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
         if use_field_of_regard is True:
@@ -257,17 +246,30 @@ class GridCoverage(Entity):
         ###### iterate and calculate coverage seperately for each sensor_view_geom element. TODO: Streamline this behavior ######
         
         # initialize variables to be used in the loop
-        date = propcov.AbsoluteDate()
+        
 
         for sen_view_geom in sensor_view_geom:
             
+            ###### form the propcov.Spacecraft object ######
+            attitude = propcov.NadirPointingAttitude()
+            interp = propcov.LagrangeInterpolator()
+
+            spc = propcov.Spacecraft(self.spacecraft.orbitState.date, self.spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
+            # orient the spacecraft
+            spc_orien = self.spacecraft.spacecraftBus.orientation
+            if spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING:            
+                spc.SetBodyNadirOffsetAngles(angle1=spc_orien.euler_angle1, angle2=spc_orien.euler_angle2, angle3=spc_orien.euler_angle3, # input angles are in degrees
+                                            seq1=spc_orien.euler_seq1, seq2=spc_orien.euler_seq2, seq3=spc_orien.euler_seq3)            
+            else:
+                raise NotImplementedError # only NADIR_POINTING reference frame is supported.           
+
             ###### build the sensor object ######
             sen_sph_geom = sen_view_geom.sph_geom
             if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
             elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
-                sensor = propcov.CustomSensor( coneAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
-                                              clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
+                sensor = propcov.CustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                                               clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
                                              )         
             else:
                 raise Exception("please input valid sensor spherical geometry shape.")
@@ -284,7 +286,7 @@ class GridCoverage(Entity):
             ###### make propcov coverage checker object ######
             cov_checker = propcov.CoverageChecker(self.grid.point_group, spc)
             ###### iterate over the propagated states ######
-            #states_df.reset_index()
+            date = propcov.AbsoluteDate()
             for idx, state in states_df.iterrows():
                 time_index = int(state['time index'])
                 _date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC

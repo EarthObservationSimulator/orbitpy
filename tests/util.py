@@ -91,3 +91,23 @@ spc4_json = '{"name": "PlanetX", \
                                             "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 0, "raan": 35, "aop": 145, "ta": -25} \
                                             } \
                             }'
+
+# 1 instruments with multiple modes
+spc5_json = '{"name": "PlanetX", \
+                            "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
+                                            "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                            }, \
+                                "instrument": [ \
+                                            {   "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":10 }, \
+                                                "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
+                                                "mode": [{"@id":0, "maneuver":{"maneuverType": "single_Roll_Only", "A_rollMin":10, "A_rollMax":15}}, \
+                                                        {"@id":1, "maneuver":{"maneuverType": "single_Roll_Only", "A_rollMin":-15, "A_rollMax":-10}}, \
+                                                        { "@id":2, "maneuver":{"maneuverType": "Double_Roll_Only", "A_rollMin":10, "A_rollMax":15, "B_rollMin":-15, "B_rollMax":-10}}  \
+                                                        ], \
+                                                "numberDetectorRows":5, "numberDetectorCols":10, "@id": "sen1", "@type":"Basic Sensor" \
+                                            } \
+                                            ], \
+                            "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":18, "hour":12, "minute":10, "second":0}, \
+                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -225} \
+                                            } \
+                            }'

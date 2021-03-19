@@ -33,7 +33,7 @@ from instrupy.util import ViewGeometry, Orientation, SphericalGeometry
 from instrupy import Instrument
 
 sys.path.append('../')
-from tests.util import spc1_json, spc2_json, spc3_json, spc4_json
+from tests.util import spc1_json, spc2_json, spc3_json, spc4_json, spc5_json
 
 RE = 6378.137 # radius of Earth in kilometers
     
@@ -504,7 +504,7 @@ class TestGridCoverage(unittest.TestCase):
             self.assertTrue(access_data1.equals(access_data2))
         else:
             warnings.warn('No data was generated in test_execute_6(.). Run the test again.')
-    '''
+    
     def test_execute_7(self):
         """ Test spacecraft with multiple sensors. spc4 spacecraft is on equatorial orbit and has 3 instruments with 
             progressively larger FOVs. The third instrument has 3 modes with roll =0, 25, -25. 
@@ -522,10 +522,11 @@ class TestGridCoverage(unittest.TestCase):
         # execute propagator
         self.j2_prop.execute(spacecraft=spc4, out_file_cart=state_cart_file, duration=duration)   
         # set output file path
-        out_file_access = self.out_dir+'/test_cov_access1.csv'
-        # run the coverage calculator
+        out_file_access = self.out_dir+'/test_cov_access.csv'
+        # form the coverage calculator object
         cov = GridCoverage(grid=grid, spacecraft=spc4, state_cart_file=state_cart_file)
-        
+
+        # run the different simulations
         cov.execute(sensor_id='bs1', out_file_access=out_file_access) 
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data   
         
@@ -576,19 +577,17 @@ class TestGridCoverage(unittest.TestCase):
         state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
         # execute propagator
         self.j2_prop.execute(spacecraft=spc1, out_file_cart=state_cart_file, duration=duration)   
-        # set output file path
-        out_file_access = self.out_dir+'/test_cov_access1.csv'
-        # run the coverage calculator
+        
+        # form the coverage calculator object
         cov = GridCoverage(grid=grid, spacecraft=spc1, state_cart_file=state_cart_file)
         
         # run the coverage calculator: FOV considered
+        out_file_access = self.out_dir+'/test_cov_access1.csv'
         cov.execute(sensor_id='bs1', use_field_of_regard=False, out_file_access=out_file_access)
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
-        out_file_access = self.out_dir+'/test_cov_access2.csv'
         # run the coverage calculator: FOR considered
-        cov = GridCoverage(grid=grid, spacecraft=spc1, state_cart_file=state_cart_file)
-        
+        out_file_access = self.out_dir+'/test_cov_access2.csv'               
         cov.execute(sensor_id='bs1', use_field_of_regard=True, out_file_access=out_file_access) 
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
@@ -599,12 +598,49 @@ class TestGridCoverage(unittest.TestCase):
             self.assertEqual(len(access_data1.merge(access_data2)), len(access_data1)) 
         else:
             warnings.warn('No data was generated in test_execute_8(.). Run the test again.')
-    
+    '''
     def test_execute_9(self):
         """ Test coverage with DOUBLE_ROLL_ONLY maneuver will which result in 2 ``ViewGeometry`` objects for the 
             field-of-regard.
+            Use Spacecraft spc5. 
+            Compare results of 3 simulations (1) SINGLE_ROLL_ONLY manuever (positive) (2) SINGLE_ROLL_ONLY manuever (positive) 
+            and (3) DOUBLE_ROLL_ONLY maneuver. The results of (3) should be the union of the results of (1) and (2). Note 
+            that the coverage from (1) does not intersect the coverage from (2) due to the way the maneuver is configured in spacecraft spc5.
+
         """
+        duration = 0.1
         
+        grid = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":90, "latLower":-90, "lonUpper":180, "lonLower":-180, "gridRes": 2})
+        
+        spc5 = Spacecraft.from_json(spc5_json)
+        state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
+        # execute propagator
+        self.j2_prop.execute(spacecraft=spc5, out_file_cart=state_cart_file, duration=duration)          
+
+        # form the coverage calculator object
+        cov = GridCoverage(grid=grid, spacecraft=spc5, state_cart_file=state_cart_file)
+
+        # run mode with SINGLE_ROLL_ONLY manuever (positive)
+        out_file_access = self.out_dir+'/test_cov_access1.csv'
+        cov.execute(sensor_id="sen1", mode_id=0, use_field_of_regard=True, out_file_access=out_file_access)
+        access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+
+        # run mode with SINGLE_ROLL_ONLY manuever (negative)
+        out_file_access = self.out_dir+'/test_cov_access2.csv'
+        cov.execute(sensor_id="sen1", mode_id=1, use_field_of_regard=True, out_file_access=out_file_access)
+        access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+
+        # run mode with DOUBLE_ROLL_ONLY manuever
+        out_file_access = self.out_dir+'/test_cov_access3.csv'
+        cov.execute(sensor_id="sen1", mode_id=2, use_field_of_regard=True, out_file_access=out_file_access)
+        access_data3 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+
+        # compare the results from the different simulations
+        # join access_data1, access_data_2
+        dfs = [access_data1, access_data2]
+        df = pd.concat( dfs,axis=0,ignore_index=True)
+        self.assertTrue(access_data3.equals(df))
+    
         
 
 
