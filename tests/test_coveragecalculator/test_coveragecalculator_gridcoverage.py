@@ -8,7 +8,10 @@
 * ``test_execute_3``: Pitch Circular sensor tests
 * ``test_execute_4``: Roll Rectangular sensor tests
 * ``test_execute_5``: Pitch Rectangular sensor tests
-* ``test_execute_6``: Satellite orientation vs sensor orientation tests
+* ``test_execute_6``: Satellite-bus orientation vs sensor orientation tests
+* ``test_execute_7``: Test spacecraft with multiple sensors.
+* ``test_execute_8``: Test FOV vs FOR coverage. Coverage of FOR >= Coverage of FOV.
+* ``test_execute_9``:  Test coverage with DOUBLE_ROLL_ONLY maneuver will which result in 2 ``ViewGeometry`` objects for the field-of-regard.
 
 """
 
@@ -449,8 +452,8 @@ class TestGridCoverage(unittest.TestCase):
         self.assertEqual(access_data2["time index"][25], 129)
     
     def test_execute_6(self):
-        """ Check that (1) simulation with orienting spacecraft w.r.t NADIR_POINTING frame and sensor aligned to spacecraft body yields the same results as 
-            (2) simulation with orienting sensor w.r.t spacecraft and spacecraft aligned to NADIR_POINTING frame.
+        """ Check that (1) simulation with orienting spacecraft-body (bus) w.r.t NADIR_POINTING frame and sensor aligned to spacecraft-body yields the same results as 
+            (2) simulation with orienting sensor w.r.t spacecraft-body and spacecraft-body aligned to NADIR_POINTING frame.
         """ 
         ############ Common attributes for both simulations ############
         duration = 0.1
@@ -597,7 +600,7 @@ class TestGridCoverage(unittest.TestCase):
             self.assertEqual(len(access_data1.merge(access_data2)), len(access_data1)) 
         else:
             warnings.warn('No data was generated in test_execute_8(.). Run the test again.')
-            
+
     def test_execute_9(self):
         """ Test coverage with DOUBLE_ROLL_ONLY maneuver will which result in 2 ``ViewGeometry`` objects for the 
             field-of-regard.

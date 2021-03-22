@@ -60,7 +60,9 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         self.assertEqual(x[0].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
                             [ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 0.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'CIRCULAR', 'diameter': 15.0, '@id': None}})])
-        
+        self.assertEqual(x[0].pointing_option, [Orientation.from_dict({"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":2.5, "zRotation":0}),
+                                                Orientation.from_dict({"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":-2.5, "zRotation":0})])
+
         # spc2 spacecraft, no instruments 
         spc2 = Spacecraft.from_json(spc2_json)
         x = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc2)
@@ -79,6 +81,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         self.assertEqual(x[0].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
                             [ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 0.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'CIRCULAR', 'diameter': 15.0, '@id': None}})])
+        self.assertIsNone(x[0].pointing_option)
         # instrument 2             
         self.assertIsNotNone(x[1].instru_id)
         self.assertEqual(x[1].mode_id, 101)
@@ -88,6 +91,8 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         self.assertEqual(x[1].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
                             [ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 12.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                           "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5.0, 'angleWidth': 10, '@id': None}})])
+        self.assertEqual(x[1].pointing_option, [Orientation.from_dict({"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":10}),
+                                                Orientation.from_dict({"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":15})])
         # instrument 3, mode 1         
         self.assertEqual(x[2].instru_id, 'bs3')
         self.assertEqual(x[2].mode_id, 0)
@@ -103,6 +108,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
                                                  "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}})
                                 ]
                         )
+        self.assertIsNone(x[2].pointing_option)
         # instrument 3, mode 2
         self.assertEqual(x[3].instru_id, 'bs3')
         self.assertEqual(x[3].mode_id, 1)        
@@ -115,6 +121,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
                                  ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 347.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                               "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}})]
                         )
+        self.assertIsNone(x[3].pointing_option)
         # instrument 3, mode 3
         self.assertEqual(x[4].instru_id, 'bs3')
         self.assertIsNotNone(x[4].mode_id)        
@@ -127,6 +134,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
                                  ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 347.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                               "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}})]
                         )
+        self.assertIsNone(x[4].pointing_option)
       
     
     def test_find_in_cov_params_list(self):
@@ -239,14 +247,14 @@ class TestCoverageCalculatorFactory(unittest.TestCase):
         self.assertIsInstance(grid_cov, GridCoverage)
         # Pointing Options Coverage
         specs = {"@type": 'Pointing Options Coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
-        grid_cov = factory.get_coverage_calculator(specs)
-        self.assertIsInstance(grid_cov, PointingOptionsCoverage)
+        popt_cov = factory.get_coverage_calculator(specs)
+        self.assertIsInstance(popt_cov, PointingOptionsCoverage)
         # Pointing Options With Grid Coverage
         specs = {"@type": 'Pointing Options With Grid Coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
-        grid_cov = factory.get_coverage_calculator(specs)
-        self.assertIsInstance(grid_cov, PointingOptionsWithGridCoverage)
+        popt_with_grid_cov = factory.get_coverage_calculator(specs)
+        self.assertIsInstance(popt_with_grid_cov, PointingOptionsWithGridCoverage)
 
         # DummyNewCoverageCalculator
         specs = {"@type": 'New Coverage Calc'} # in practice additional coverage calculator specs shall be present in the dictionary
-        new_prop = factory.get_coverage_calculator(specs)
-        self.assertIsInstance(new_prop, TestCoverageCalculatorFactory.DummyNewCoverageCalculator)
+        new_cov = factory.get_coverage_calculator(specs)
+        self.assertIsInstance(new_cov, TestCoverageCalculatorFactory.DummyNewCoverageCalculator)

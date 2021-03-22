@@ -78,19 +78,19 @@ class CoverageCalculatorFactory:
         return creator.from_dict(specs)
 
 def helper_extract_coverage_parameters_of_spacecraft(spc):
-    """ Helper function to extract tuples of (sensor_id, mode_id, field-of-view, field-of-regard).
+    """ Helper function to extract tuples of (instrument_id, mode_id, field-of-view, field-of-regard, pointing_option(s)).
         Only these parameters of a spacecraft are relevant to coverage calculations.
     
     :param spc: (Single) spacecraft of which coverage parameters are to be extracted.
     :paramtype spc: :class:`orbitpy.util.Spacecraft`
 
-    :return: Tuples with instrument-id, mode-id, field-of-view, field-of-regard.
-    :rtype: list, namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list,:class:`instrupy.util.ViewGeometry`>)
+    :return: Tuples with instrument-id, mode-id, field-of-view, field-of-regard and pointing_option(s).
+    :rtype: list, namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list,:class:`instrupy.util.ViewGeometry`>, <list,:class:`instrupy.util.Orientation`>)
 
-    .. note::  The field-of-regard parameter is a list in the tuple. 
+    .. note::  The field-of-regard parameter and pointing_option parameter is a list in the tuple. 
 
     """
-    _p = namedtuple("spc_cov_params", ["instru_id", "mode_id", "field_of_view", "field_of_regard"])
+    _p = namedtuple("spc_cov_params", ["instru_id", "mode_id", "field_of_view", "field_of_regard", "pointing_option"])
     params = []
 
     if spc.instrument is not None:
@@ -101,20 +101,21 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
 
                 field_of_view  = instru.get_field_of_view(mode_id)
                 field_of_regard  = instru.get_field_of_regard(mode_id) 
+                pointing_option = instru.get_pointing_option(mode_id)
 
                 if field_of_regard is None or []: # if FOR is None, use FOV for FOR
                     field_of_regard = [instru.get_field_of_view(mode_id)]
                 
-                params.append(_p(instru_id, mode_id, field_of_view, field_of_regard))
+                params.append(_p(instru_id, mode_id, field_of_view, field_of_regard, pointing_option))
                     
     return params
 
 def find_in_cov_params_list(cov_param_list, sensor_id=None, mode_id=None):
-    """ For an input instrument-id, mode-id, find the corresponding FOV, FOR in an input list of coverage-parameters 
-        (list of tuples of (sensor_id, mode_id, field-of-view, field-of-regard)). 
+    """ For an input instrument-id, mode-id, find the corresponding FOV, FOR and pointing_option(s) in an input list of coverage-parameters 
+        (list of tuples of (sensor_id, mode_id, field-of-view, field-of-regard, pointing_option)). 
 
-    :param cov_param_list: List of tuples of (instrument id, mode id, field-of-view, field-of-regard).
-    :paramtype cov_param_list: list, namedtuple, <str or int, str or int, :class:`instrupy.util.ViewGeometry`, :class:`instrupy.util.ViewGeometry`>
+    :param cov_param_list: List of tuples of (instrument id, mode id, field-of-view, field-of-regard, pointing_option).
+    :paramtype cov_param_list: list, namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list, :class:`instrupy.util.ViewGeometry`>, <list,:class:`instrupy.util.Orientation`>)
 
     :param sensor_id: Instrument identifier. If ``None``, the first tuple in the list of coverage parameters is considered.
     :paramtype sensor_id: str (or) int
@@ -122,16 +123,16 @@ def find_in_cov_params_list(cov_param_list, sensor_id=None, mode_id=None):
     :param mode_id: Mode identifier. If ``None``, the first tuple in the list of coverage parameters is considered.
     :paramtype mode_id: str (or) int
 
-    :return: (Single) Tuples of (instrument id, mode id, field-of-view, field-of-regard), such that the instrument-id and 
-             the mode-id match the (corresponding) input identifiers.
-    :rtype: namedtuple, <str or int, str or int, :class:`instrupy.util.ViewGeometry`, :class:`instrupy.util.ViewGeometry`>
+    :return: (Single) Tuples of (instrument id, mode id, field-of-view, field-of-regard, pointing-option(s)), such that the instrument-id and 
+             the mode-id match the input identifiers (sensor_id, mode_id).
+    :rtype: namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list, :class:`instrupy.util.ViewGeometry`> , <list,:class:`instrupy.util.Orientation`> )
 
     """ 
     if cov_param_list is not None and cov_param_list != []:
         if sensor_id is None:
             return (cov_param_list[0])
         idx = 0
-        for a,b,c,d in cov_param_list:
+        for a,b,c,d,e in cov_param_list:
             if a == sensor_id and mode_id is None:
                 return cov_param_list[idx]
             elif a == sensor_id and b == mode_id:
@@ -261,7 +262,7 @@ class GridCoverage(Entity):
 
     @staticmethod
     def from_dict(d):
-        """ Parses an GridCoverage object from a normalized JSON dictionary.
+        """ Parses an ``GridCoverage`` object from a normalized JSON dictionary.
         
         :param d: Dictionary with the GridCoverage specifications.
 
@@ -354,7 +355,7 @@ class GridCoverage(Entity):
             interp = propcov.LagrangeInterpolator()
 
             spc = propcov.Spacecraft(self.spacecraft.orbitState.date, self.spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
-            # orient the spacecraft
+            # orient the spacecraft-bus
             spc_orien = self.spacecraft.spacecraftBus.orientation
             if spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING:            
                 spc.SetBodyNadirOffsetAngles(angle1=spc_orien.euler_angle1, angle2=spc_orien.euler_angle2, angle3=spc_orien.euler_angle3, # input angles are in degrees
@@ -405,26 +406,139 @@ class GridCoverage(Entity):
             access_file.close()
             
 class PointingOptionsCoverage(Entity):
-    """A coverage calculator which calculates coverage over a grid.
+    """A coverage calculator which handles coverage calculation for a spacecraft with specified set of pointing-options.
+       A pointing-option refers to orientation of the instrument in the NADIR_POINTING frame. Set of pointing-options 
+       present all the possible orientations of the instrument due to maneuverability of the instrument and/or satellite-bus.
+       The ground-locations for each pointing-option, at each propagation time-step is calculated as the coverage result.      
 
-    The instance variable(s) correspond to the coverage calculator setting(s). 
+    :ivar spacecraft: Spacecraft for which the coverage calculation is performed.
+    :vartype spacecraft: :class:`orbitpy.util.Spacecraft`
 
-    :ivar grid: Array of locations (longitudes, latitudes) over which coverage calculation is performed.
-    :vartype grid: :class:`orbitpy.util.grid`
+    :ivar state_cart_file: File name with path of the (input) file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are available.
+    :vartype state_cart_file: str
+
+    :ivar pointing_options_file: File name with path of the (input) file in which the list of pointing-options are given. 
+
+            .. csv-table:: Expected parameters
+                :header: Parameter, Data type, Units, Description
+                :widths: 10,10,5,40
+
+                instrumentID, str, , The instrument identifier to which the corresponding pointing-options data-file is to be used. Multiple IDs separated by commas are allowed.
+                referenceFrame, str, , Currently only the :code:`NadirRefFrame` is supported.
+                pntOptsFileName, str, , Name of the data-file containing the set of pointing options. This file has to be present in the user-directory.
+                pntOptsFilePath, str, , Path to the data-file containing the set of pointing options. (Specify :code:`pntOptsFilePath` **or** :code:`pntOptsFileName`) 
+
+            .. warning:: In the case when the pointing-options approach is used for coverage calculations, the instrument identifier becomes a
+                        compulsory attribute of the :code:`Instrument` JSON field, since it is needed to reference the pointing-options files.
+
+            .. warning:: The name of the data-file containing the pointing-options should not have any whitespaces. The pointing-otions indicated in the file 
+                        are strictly indexed from *0* onwards. 
+
+            Example:
+
+            .. code-block:: javascript
+
+            "pointingOptions":[
+                {
+                "instrumentID": "sen1",
+                "referenceFrame": "NadirRefFrame",
+                "pntOptsFileName":"pOpts_sen1"              
+                },
+                {
+                "instrumentID": "sen2",
+                "referenceFrame": "NadirRefFrame",
+                "pntOptsFilePath":"C:\workspace\sen2_pOpts"              
+                },
+                ],
+
+            Example of the data-file:
+
+            .. code-block:: javascript
+
+                Euler (intrinsic) rotations with sequence 1,2,3 assumed, i.e. R = R3R2R1, with rotation matrix representing rotation of the coordinate system.
+                index,euler_angle1[deg],euler_angle2[deg],euler_angle3[deg] 
+                0,0,0,0
+                1,0,20,0
+                2,0,-20,0
+
+    :vartype pointing_options_file: str
 
     :ivar _id: Unique identifier.
     :vartype _id: str
 
     """
-    def __init__(self, grid=None, _id=None):
-        self.grid = grid if grid is not None and isinstance(grid, Grid) else None
+    def __init__(self, grid=None, spacecraft=None, state_cart_file=None, _id=None):
+        self.spacecraft = spacecraft if spacecraft is not None and isinstance(spacecraft, Spacecraft) else None
+        self.state_cart_file = str(state_cart_file) if state_cart_file is not None else None
+        # Extract the coverage related parameters
+        self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.spacecraft) if self.spacecraft is not None else None
+
         super(PointingOptionsCoverage, self).__init__(_id, "Pointing Options Coverage")
 
     @staticmethod
     def from_dict(d):
+        """ Parses an ``PointingOptionsCoverage`` object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the GridCoverage specifications.
+
+                Following keys are to be specified.
+                
+                * "grid":                  (dict) Refer to :class:`orbitpy.grid.Grid.from_dict`
+                * "spacecraft":            (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
+                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in 
+                                             CARTESIAN_EARTH_CENTERED_INERTIAL. Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
+                * "@id":                    (str or int) Unique identifier of the coverage calculator object.
+
+        :paramtype d: dict
+
+        :return: GridCoverage object.
+        :rtype: :class:`orbitpy.coveragecalculator.GridCoverage`
+
+        """
         grid_dict = d.get('grid', None)
+        spc_dict = d.get('spacecraft', None)
         return PointingOptionsCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
+                            spacecraft = Spacecraft.from_dict(spc_dict) if spc_dict else None, 
+                            state_cart_file = d.get('cartesianStateFilePath', None),
                             _id  = d.get('@id', None))
+
+    
+    def execute(self, sensor_id=None, mode_id=None, out_file_access=None):
+        """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
+            input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
+            same as the time resolution at which the spacecraft states are available. The complete-access output corresponds 
+            to the data with **all** the access-times over (all) the grid of ground-points. The mid-access data 
+            file corresponds to the access-time only **at the middle of an access-interval** over (all) the grid
+            of ground-points.        
+
+        :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
+        :paramtype sensor_id: str (or) int
+
+        :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
+        :paramtype mode_id: str (or) int
+
+        
+
+        :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
+                
+                The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
+                in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
+                The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+                Description of the data (comma-seperated) is given below:
+
+                .. csv-table:: Observation data metrics description
+                :header: Column, Data type, Units, Description
+                :widths: 10,10,5,40
+
+                time index, int, , Access time-index.
+                GP index, integer, , Grid-point index (refer to the instance ``grid` attribute to get the latitude, longitude coordinates). 
+        
+        :paramtype out_file_access: str
+
+        :return: None
+        :rtype: None
+
+        """
 
 
 class PointingOptionsWithGridCoverage(Entity):

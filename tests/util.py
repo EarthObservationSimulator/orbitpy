@@ -10,27 +10,31 @@ spc1_json = '{"@id": "sp1", "name": "Mars", \
                                             "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
                                             "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                             "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
-                                            "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
+                                            "numberDetectorRows":5, "numberDetectorCols":10, \
+                                            "pointingOption": [{"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":2.5, "zRotation":0}, \
+                                            {"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":-2.5, "zRotation":0}  \
+                                            ], \
+                                            "@id":"bs1", "@type":"Basic Sensor"}, \
                             "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                             "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                             } \
-                            }'
+                   }'
+
 # no instruments
 spc2_json = '{"@id": 12, "name": "Jupyter", \
-                            "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
-                                            "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
-                                            }, \
-                            "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
-                                            } \
-                            }'
+              "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
+                               "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                              }, \
+              "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                             "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                            } \
+            }'
 # 3 instruments with multiple modes, no spacecraft id assignment
 spc3_json = '{"name": "Saturn", \
                             "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
                                             "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                             }, \
-                                "instrument": [ \
-                                            {   "name": "Alpha", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
+                            "instrument": [ {   "name": "Alpha", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
                                                 "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
                                                 "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                 "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
@@ -41,6 +45,9 @@ spc3_json = '{"name": "Saturn", \
                                                 "maneuver":{"maneuverType": "SINGLE_ROLL_ONLY", "A_rollMin":10, "A_rollMax":15}, \
                                                 "mode": [{"@id":101, "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}} \
                                                         ], \
+                                                "pointingOption": [{"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":10}, \
+                                                                   {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":15}  \
+                                                                  ], \
                                                 "numberDetectorRows":5, "numberDetectorCols":10, "@type":"Basic Sensor" \
                                             }, \
                                             {   "name": "Gamma", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
