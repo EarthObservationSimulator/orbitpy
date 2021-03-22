@@ -287,14 +287,23 @@ class GridCoverage(Entity):
                             state_cart_file = d.get('cartesianStateFilePath', None),
                             _id  = d.get('@id', None))
 
-    
+    def to_dict(self):
+        """ Translate the GridCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: GridCoverage object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "Grid Coverage",
+                     "grid": self.grid.to_dict,
+                     "spacecraft": self.to_dict,
+                     "cartesianStateFilePath": self.state_cart_file,
+                     "@id": self._id})
+
     def execute(self, sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None):
         """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
-            same as the time resolution at which the spacecraft states are available. The complete-access output corresponds 
-            to the data with **all** the access-times over (all) the grid of ground-points. The mid-access data 
-            file corresponds to the access-time only **at the middle of an access-interval** over (all) the grid
-            of ground-points.        
+            same as the time resolution at which the spacecraft states are available. 
 
         :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
         :paramtype sensor_id: str (or) int
@@ -314,8 +323,8 @@ class GridCoverage(Entity):
                 Description of the data (comma-seperated) is given below:
 
                 .. csv-table:: Observation data metrics description
-                :header: Column, Data type, Units, Description
-                :widths: 10,10,5,40
+                    :header: Column, Data type, Units, Description
+                    :widths: 10,10
 
                 time index, int, , Access time-index.
                 GP index, integer, , Grid-point index (refer to the instance ``grid` attribute to get the latitude, longitude coordinates). 
@@ -334,7 +343,7 @@ class GridCoverage(Entity):
         if out_file_access:
             access_file = open(out_file_access, 'w', newline='')
             access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["Complete access data file."])
+            access_writer.writerow(["Grid Coverage data file."])
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
@@ -389,8 +398,8 @@ class GridCoverage(Entity):
             date = propcov.AbsoluteDate()
             for idx, state in states_df.iterrows():
                 time_index = int(state['time index'])
-                _date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
-                date.SetJulianDate(_date)
+                jd_date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
+                date.SetJulianDate(jd_date)
                 
                 cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
                 spc.SetOrbitStateCartesian(date, propcov.Rvector6(cart_state))
@@ -401,7 +410,7 @@ class GridCoverage(Entity):
                     for pnt in points:
                         access_writer.writerow([time_index, pnt])
 
-        ##### Close files #####                
+        ##### Close file #####                
         if access_file:
             access_file.close()
             
@@ -411,63 +420,17 @@ class PointingOptionsCoverage(Entity):
        present all the possible orientations of the instrument due to maneuverability of the instrument and/or satellite-bus.
        The ground-locations for each pointing-option, at each propagation time-step is calculated as the coverage result.      
 
-    :ivar spacecraft: Spacecraft for which the coverage calculation is performed.
+    :ivar spacecraft: Spacecraft for which the coverage calculation is performed. The pointing options are included in the instrument definitions of the spacecraft. 
     :vartype spacecraft: :class:`orbitpy.util.Spacecraft`
 
     :ivar state_cart_file: File name with path of the (input) file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are available.
     :vartype state_cart_file: str
 
-    :ivar pointing_options_file: File name with path of the (input) file in which the list of pointing-options are given. 
-
-            .. csv-table:: Expected parameters
-                :header: Parameter, Data type, Units, Description
-                :widths: 10,10,5,40
-
-                instrumentID, str, , The instrument identifier to which the corresponding pointing-options data-file is to be used. Multiple IDs separated by commas are allowed.
-                referenceFrame, str, , Currently only the :code:`NadirRefFrame` is supported.
-                pntOptsFileName, str, , Name of the data-file containing the set of pointing options. This file has to be present in the user-directory.
-                pntOptsFilePath, str, , Path to the data-file containing the set of pointing options. (Specify :code:`pntOptsFilePath` **or** :code:`pntOptsFileName`) 
-
-            .. warning:: In the case when the pointing-options approach is used for coverage calculations, the instrument identifier becomes a
-                        compulsory attribute of the :code:`Instrument` JSON field, since it is needed to reference the pointing-options files.
-
-            .. warning:: The name of the data-file containing the pointing-options should not have any whitespaces. The pointing-otions indicated in the file 
-                        are strictly indexed from *0* onwards. 
-
-            Example:
-
-            .. code-block:: javascript
-
-            "pointingOptions":[
-                {
-                "instrumentID": "sen1",
-                "referenceFrame": "NadirRefFrame",
-                "pntOptsFileName":"pOpts_sen1"              
-                },
-                {
-                "instrumentID": "sen2",
-                "referenceFrame": "NadirRefFrame",
-                "pntOptsFilePath":"C:\workspace\sen2_pOpts"              
-                },
-                ],
-
-            Example of the data-file:
-
-            .. code-block:: javascript
-
-                Euler (intrinsic) rotations with sequence 1,2,3 assumed, i.e. R = R3R2R1, with rotation matrix representing rotation of the coordinate system.
-                index,euler_angle1[deg],euler_angle2[deg],euler_angle3[deg] 
-                0,0,0,0
-                1,0,20,0
-                2,0,-20,0
-
-    :vartype pointing_options_file: str
-
     :ivar _id: Unique identifier.
     :vartype _id: str
 
     """
-    def __init__(self, grid=None, spacecraft=None, state_cart_file=None, _id=None):
+    def __init__(self, spacecraft=None, state_cart_file=None, _id=None):
         self.spacecraft = spacecraft if spacecraft is not None and isinstance(spacecraft, Spacecraft) else None
         self.state_cart_file = str(state_cart_file) if state_cart_file is not None else None
         # Extract the coverage related parameters
@@ -483,41 +446,89 @@ class PointingOptionsCoverage(Entity):
 
                 Following keys are to be specified.
                 
-                * "grid":                  (dict) Refer to :class:`orbitpy.grid.Grid.from_dict`
-                * "spacecraft":            (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
+                * "spacecraft":             (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
                 * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in 
                                              CARTESIAN_EARTH_CENTERED_INERTIAL. Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
                 * "@id":                    (str or int) Unique identifier of the coverage calculator object.
 
         :paramtype d: dict
 
-        :return: GridCoverage object.
-        :rtype: :class:`orbitpy.coveragecalculator.GridCoverage`
+        :return: PointingOptionsCoverage object.
+        :rtype: :class:`orbitpy.coveragecalculator.PointingOptionsCoverage`
 
         """
-        grid_dict = d.get('grid', None)
         spc_dict = d.get('spacecraft', None)
-        return PointingOptionsCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
-                            spacecraft = Spacecraft.from_dict(spc_dict) if spc_dict else None, 
-                            state_cart_file = d.get('cartesianStateFilePath', None),
-                            _id  = d.get('@id', None))
+        return PointingOptionsCoverage(spacecraft = Spacecraft.from_dict(spc_dict) if spc_dict else None, 
+                                       state_cart_file = d.get('cartesianStateFilePath', None),
+                                            _id  = d.get('@id', None))
 
     
+    def to_dict(self):
+        """ Translate the PointingOptionsCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: PointingOptionsCoverage object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "Pointing Options Coverage",
+                     "spacecraft": self.to_dict,
+                     "cartesianStateFilePath": self.state_cart_file,
+                     "@id": self._id})
+
+    @staticmethod
+    def intersect_vector_sphere(r, o, vec_direc):
+        """  Find intersection of an input vector with a sphere. The origin of the reference-frame (in which the input vector is expressed)
+             is assumed to be at the center of the sphere.
+             https://en.wikipedia.org/wiki/Line%E2%80%93sphere_intersection  
+        
+        :param r: Radius of sphere.
+        :paramtype r: float
+
+        :param o: Cartesian coordinates of the start position of the vector.
+        :paramtype o: list, float
+
+        :param vec_direc: Direction of the vector.
+        :paramtype vec_direc: list, float
+
+        :return: Cartesian coordinates of the intersection point if valid intersection, else ``False`` to indicate no intersection.
+        :rtype: list, float
+
+        """
+        o = np.array(o)
+        vec_direc = np.array(vec_direc)
+        # normalize direction vector        
+        norm = np.linalg.norm(vec_direc)
+        if(norm == 0):
+            raise Exception("Encountered division by zero in vector normalization function.")
+        l = vec_direc/norm 
+
+        under_root = np.dot(l, o)**2 - (np.dot(o,o)-np.dot(r,r))
+        if under_root > 0:
+            d1 = -1*np.dot(l, o) - np.sqrt(under_root)
+            d2 = -1*np.dot(l, o) + np.sqrt(under_root)
+            if np.abs(d1) < np.abs(d2): # find the point closest to the sphere wrt the vector origin
+                intersect_point = o + np.dot(l,d1)
+            else:
+                intersect_point = o + np.dot(l,d2)
+            
+        elif under_root == 0:
+            d = -1*np.dot(l,o)
+            intersect_point = o + np.dot(l,d)
+        else:
+            return False
+        
+        return intersect_point.tolist()
+
     def execute(self, sensor_id=None, mode_id=None, out_file_access=None):
         """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
-            same as the time resolution at which the spacecraft states are available. The complete-access output corresponds 
-            to the data with **all** the access-times over (all) the grid of ground-points. The mid-access data 
-            file corresponds to the access-time only **at the middle of an access-interval** over (all) the grid
-            of ground-points.        
+            same as the time resolution at which the spacecraft states are available.
 
         :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
         :paramtype sensor_id: str (or) int
 
         :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
-        :paramtype mode_id: str (or) int
-
-        
+        :paramtype mode_id: str (or) int        
 
         :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
                 
@@ -527,11 +538,13 @@ class PointingOptionsCoverage(Entity):
                 Description of the data (comma-seperated) is given below:
 
                 .. csv-table:: Observation data metrics description
-                :header: Column, Data type, Units, Description
-                :widths: 10,10,5,40
+                    :header: Column, Data type, Units, Description
+                    :widths: 10,10,10,10
 
                 time index, int, , Access time-index.
-                GP index, integer, , Grid-point index (refer to the instance ``grid` attribute to get the latitude, longitude coordinates). 
+                pnt-opt index, int, , Pointing options index.
+                lat [deg], float, , (degrees) Latitude of accessed ground-location.
+                lon [deg], float, , (degrees) Longitude of accessed ground-location.
         
         :paramtype out_file_access: str
 
@@ -539,7 +552,73 @@ class PointingOptionsCoverage(Entity):
         :rtype: None
 
         """
+        ###### read in the propagated states and auxillary information ######               
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.state_cart_file)
+        states_df = pd.read_csv(self.state_cart_file, skiprows=4)
 
+        earth = propcov.Earth()
+
+        ###### Prepare output file in which results shall be written ######
+        if out_file_access:
+            access_file = open(out_file_access, 'w', newline='')
+            access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            access_writer.writerow(["Pointing Options Coverage data file."])
+            access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+            access_writer.writerow(["Step size [s] is {}".format(step_size)])
+            access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+            access_writer.writerow(['time index', 'pnt-opt index', 'lat [deg]', 'lon [deg]'])
+        
+        ###### find the pointing-options corresponding to the input sensor-id, mode-id  ######
+        cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
+        pointing_option = cov_param.pointing_option
+        if pointing_option is None:
+            print("No pointing options specified for the particular sensor, mode. Exiting PointingOptionsCoverage.")
+            return
+
+        ###### iterate over the propagated states ######
+        date = propcov.AbsoluteDate()
+        for idx, state in states_df.iterrows():
+            time_index = int(state['time index'])
+            jd_date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
+            date.SetJulianDate(jd_date)
+            
+            cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
+            orbit_state = propcov.OrbitState.fromCartesianState(propcov.Rvector6(cart_state))
+            
+            # iterate over all pointing options
+
+            for pnt_opt_idx, pnt_opt in enumerate(pointing_option):
+                ###### form the propcov.Spacecraft object ######
+                attitude = propcov.NadirPointingAttitude()
+                interp = propcov.LagrangeInterpolator()
+
+                spc = propcov.Spacecraft(date, orbit_state, attitude, interp, 0, 0, 0, 1, 2, 3)
+
+                # orient the spacecraft-bus according to the pointing-option. Assumed that the instrument-pointing axis is aligned to the spacecraft-bus z-axis.
+                if pnt_opt.ref_frame == ReferenceFrame.NADIR_POINTING:            
+                    spc.SetBodyNadirOffsetAngles(angle1=pnt_opt.euler_angle1, angle2=pnt_opt.euler_angle2, angle3=pnt_opt.euler_angle3, # input angles are in degrees
+                                                seq1=pnt_opt.euler_seq1, seq2=pnt_opt.euler_seq2, seq3=pnt_opt.euler_seq3)            
+                else:
+                    raise NotImplementedError # only NADIR_POINTING reference frame is supported.
+                
+                rot_N2B = spc.GetNadirToBodyMatrix()
+                earth_fixed_state = earth.GetBodyFixedState(propcov.Rvector6(cart_state), jd_date)
+                rot_EF2N = spc.GetBodyFixedToReference(earth_fixed_state) # Earth fixed to Nadir
+                rot_EF2B = rot_N2B * rot_EF2N
+                # find the direction of the pointing axis (z-axis of the satellite body) in the Earth-Fixed frame                
+                pnt_axis = [rot_EF2B.GetElement(2,0), rot_EF2B.GetElement(2,1), rot_EF2B.GetElement(2,2)] # Equivalelent to pnt_axis = R_EF2B.Transpose() * Rvector3(0,0,1)
+                earth_fixed_state = earth_fixed_state.GetRealArray()
+                earth_fixed_pos = [earth_fixed_state[0], earth_fixed_state[1], earth_fixed_state[2]]
+
+                intersect_point = PointingOptionsCoverage.intersect_vector_sphere(earth.GetRadius(), earth_fixed_pos, pnt_axis)
+
+                if intersect_point is not False:
+                    geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
+                    access_writer.writerow([time_index, pnt_opt_idx, np.rad2deg(geo_coords[0]).round(decimals=2), np.rad2deg(geo_coords[1]).round(decimals=2)])
+
+        ##### Close file #####                
+        if access_file:
+            access_file.close()
 
 class PointingOptionsWithGridCoverage(Entity):
     """A coverage calculator which calculates coverage over a grid.

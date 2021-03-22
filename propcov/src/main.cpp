@@ -2,6 +2,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/operators.h> // In operator overloading, to use the more convenient py::self notation, the additional header file pybind11/operators.h must be included.
 #include "../extern/gmatutil/util/Rvector.hpp"
 #include "../extern/gmatutil/util/TableTemplate.hpp"
 #include "../extern/gmatutil/util/Rmatrix.hpp"
@@ -61,6 +62,7 @@ PYBIND11_MODULE(propcov, m)
         .def(py::init())
         .def(py::init<Real, Real, Real, Real, Real, Real, Real, Real, Real>(), py::arg("a00"), py::arg("a01"), py::arg("a02"), py::arg("a10"), py::arg("a11"), py::arg("a12"), py::arg("a20"), py::arg("a21"), py::arg("a22"))
         .def("GetElement", &Rmatrix33::GetElement, py::arg("row"), py::arg("col"))
+        .def(py::self * py::self)
         .def("__repr__",
               [](const Rmatrix33 &x){
                   std::string r("Rmatrix33(");
@@ -184,6 +186,7 @@ PYBIND11_MODULE(propcov, m)
     py::class_<Earth>(m, "Earth")
         .def(py::init())
         .def("ComputeGMT", &Earth::ComputeGMT)
+        .def("GetRadius", &Earth::GetRadius)
         .def("GetBodyFixedState", py::overload_cast<Rvector3, Real>(&Earth::GetBodyFixedState))
         .def("GetBodyFixedState", py::overload_cast<Rvector6, Real>(&Earth::GetBodyFixedState))
         .def("GetInertialToFixedRotation", &Earth::GetInertialToFixedRotation)

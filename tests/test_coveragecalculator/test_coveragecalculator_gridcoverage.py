@@ -1,4 +1,4 @@
-"""Unit tests for orbitpy.coveragecalculator module.
+"""Unit tests for orbitpy.coveragecalculator.gridcoverage class.
 
 ``TestGridCoverage`` class:
 
@@ -26,8 +26,7 @@ import warnings
 import json 
 
 import propcov
-from orbitpy.coveragecalculator import CoverageCalculatorFactory, GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
-import orbitpy.coveragecalculator
+from orbitpy.coveragecalculator import CoverageCalculatorFactory, GridCoverage
 from orbitpy.grid import Grid
 from orbitpy.util import Spacecraft, OrbitState, SpacecraftBus
 from orbitpy.propagator import PropagatorFactory
@@ -65,6 +64,9 @@ class TestGridCoverage(unittest.TestCase):
         self.assertEqual(o.grid, Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":25, "latLower":-25, "lonUpper":180, "lonLower":-180, "gridRes": 2}))
         self.assertEqual(o.spacecraft, Spacecraft.from_json(spc1_json))
         self.assertEqual(o.state_cart_file, "../../state.csv")
+
+    def test_to_dict(self): #TODO
+        pass
 
     def test_execute_0(self):
         """ Check the produced access file format.

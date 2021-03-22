@@ -251,7 +251,6 @@ class J2AnalyticalPropagator(Entity):
 
         """
         # form the propcov.Spacecraft object
-        earth = propcov.Earth()
         attitude = propcov.NadirPointingAttitude()
         interp = propcov.LagrangeInterpolator()
 
