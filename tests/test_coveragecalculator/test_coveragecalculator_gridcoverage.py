@@ -72,7 +72,7 @@ class TestGridCoverage(unittest.TestCase):
         """ Check the produced access file format.
         """        
         # setup spacecraft with some parameters setup randomly     
-        duration=random.random()
+        duration=0.05
         orbit_dict = {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+random.uniform(350,850), 
                             "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
@@ -91,7 +91,7 @@ class TestGridCoverage(unittest.TestCase):
         # execute propagator
         self.j2_prop.execute(spacecraft=sat, start_date=None, out_file_cart=state_cart_file, duration=duration)
         # generate grid object
-        grid = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":0, "latLower":-10, "lonUpper":10, "lonLower":0, "gridRes": 1})
+        grid = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":90, "latLower":-90, "lonUpper":180, "lonLower":-180, "gridRes": 1})
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator

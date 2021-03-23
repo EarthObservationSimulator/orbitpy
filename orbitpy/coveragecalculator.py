@@ -238,7 +238,7 @@ class GridCoverage(Entity):
     """A coverage calculator which handles coverage calculation for a spacecraft over a grid. Each coverage object is specific to 
         a particular grid and spacecraft.  
 
-    :ivar grid: Array of locations (longitudes, latitudes) over which coverage calculation is performed.
+    :ivar grid: Locations (longitudes, latitudes) over which coverage calculation is performed.
     :vartype grid: :class:`orbitpy.util.grid`
 
     :ivar spacecraft: Spacecraft for which the coverage calculation is performed.
@@ -621,23 +621,174 @@ class PointingOptionsCoverage(Entity):
             access_file.close()
 
 class PointingOptionsWithGridCoverage(Entity):
-    """A coverage calculator which calculates coverage over a grid.
+    """A coverage calculator which handles coverage calculation for a spacecraft over a grid for a set of pointing-options.         
+        A pointing-option refers to orientation of the instrument in the NADIR_POINTING frame. Set of pointing-options 
+        present all the possible orientations of the instrument due to maneuverability of the instrument and/or satellite-bus.
+        A access opportunities (set of access-time, grid-point) is calculated seperately for each pointing-option at each propagation time-step.
+        Each coverage object is specific to a particular grid and spacecraft.
 
-    The instance variable(s) correspond to the coverage calculator setting(s). 
-
-    :ivar grid: Array of locations (longitudes, latitudes) over which coverage calculation is performed.
+    :ivar grid: Locations (longitudes, latitudes) over which coverage calculation is performed.
     :vartype grid: :class:`orbitpy.util.grid`
+
+    :ivar spacecraft: Spacecraft for which the coverage calculation is performed.
+    :vartype spacecraft: :class:`orbitpy.util.Spacecraft`
+
+    :ivar state_cart_file: File name with path of the (input) file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are available.
+    :vartype state_cart_file: str
 
     :ivar _id: Unique identifier.
     :vartype _id: str
 
     """
-    def __init__(self, grid=None, _id=None):
+    def __init__(self, grid=None, spacecraft=None, state_cart_file=None, _id=None):
         self.grid = grid if grid is not None and isinstance(grid, Grid) else None
+        self.spacecraft = spacecraft if spacecraft is not None and isinstance(spacecraft, Spacecraft) else None
+        self.state_cart_file = str(state_cart_file) if state_cart_file is not None else None
+        # Extract the coverage related parameters
+        self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.spacecraft) if self.spacecraft is not None else None
+
         super(PointingOptionsWithGridCoverage, self).__init__(_id, "Pointing Options With Grid Coverage")
 
     @staticmethod
     def from_dict(d):
+        """ Parses an ``PointingOptionsWithGridCoverage`` object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the PointingOptionsWithGridCoverage specifications.
+
+                Following keys are to be specified.
+                
+                * "grid":                  (dict) Refer to :class:`orbitpy.grid.Grid.from_dict`
+                * "spacecraft":            (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
+                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in 
+                                             CARTESIAN_EARTH_CENTERED_INERTIAL. Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
+                * "@id":                    (str or int) Unique identifier of the coverage calculator object.
+
+        :paramtype d: dict
+
+        :return: PointingOptionsWithGridCoverage object.
+        :rtype: :class:`orbitpy.coveragecalculator.PointingOptionsWithGridCoverage`
+
+        """
         grid_dict = d.get('grid', None)
-        return PointingOptionsWithGridCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
+        spc_dict = d.get('spacecraft', None)
+        return GridCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
+                            spacecraft = Spacecraft.from_dict(spc_dict) if spc_dict else None, 
+                            state_cart_file = d.get('cartesianStateFilePath', None),
                             _id  = d.get('@id', None))
+
+    def to_dict(self):
+        """ Translate the GridCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: GridCoverage object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "Pointing Options With Grid Coverage",
+                     "grid": self.grid.to_dict,
+                     "spacecraft": self.to_dict,
+                     "cartesianStateFilePath": self.state_cart_file,
+                     "@id": self._id})
+
+    def execute(self, sensor_id=None, mode_id=None, out_file_access=None):
+        """ Perform orbit coverage calculation for a specific instrument and mode. 
+            The field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
+            Coverage is calculated for the period over which the input spacecraft propagated states are available. 
+            The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
+            The access-times, grid-points are calculated seperately for each pointing-option.
+
+        :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
+        :paramtype sensor_id: str (or) int
+
+        :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
+        :paramtype mode_id: str (or) int
+
+        :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
+                
+                The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
+                in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
+                The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+                Description of the data (comma-seperated) is given below:
+
+                .. csv-table:: Observation data metrics description
+                    :header: Column, Data type, Units, Description
+                    :widths: 10,10
+
+                time index, int, , Access time-index.
+                pnt-opt index, int, , Pointing options index.
+                GP index, integer, , Grid-point index (refer to the instance ``grid` attribute to get the latitude, longitude coordinates). 
+        
+        :paramtype out_file_access: str
+
+        :return: None
+        :rtype: None
+
+        """
+        ###### read in the propagated states and auxillary information ######               
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.state_cart_file)
+        states_df = pd.read_csv(self.state_cart_file, skiprows=4)
+
+        ###### Prepare output file in which results shall be written ######
+        if out_file_access:
+            access_file = open(out_file_access, 'w', newline='')
+            access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            access_writer.writerow(["Grid Coverage data file."])
+            access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+            access_writer.writerow(["Step size [s] is {}".format(step_size)])
+            access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+            access_writer.writerow(['time index','pnt-opt index', 'GP index'])
+        
+        ###### find the coverage-parameters of the input sensor-id, mode-id  ######
+        cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
+        sen_sph_geom = cov_param.field_of_view.sph_geom # only the spherical geometry of the sensor is required. the orientation is ignored, since the pointing-option gives the orientation of the pointing-axis in the NADIR_POINTING frame.
+        pointing_option = cov_param.pointing_option
+        if pointing_option is None:
+            print("No pointing options specified for the particular sensor, mode. Exiting PointingOptionsWithGridCoverage.")
+            return
+
+        ###### iterate and calculate coverage seperately for each pointing-option.
+        for pnt_opt_idx, pnt_opt in enumerate(pointing_option):
+            
+            ###### form the propcov.Spacecraft object ######
+            attitude = propcov.NadirPointingAttitude()
+            interp = propcov.LagrangeInterpolator()
+            spc = propcov.Spacecraft(self.spacecraft.orbitState.date, self.spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3) # align spacecraft to NADIR_POINTING frame
+          
+            ###### build the sensor object ######
+            if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
+                sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
+            elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
+                sensor = propcov.CustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                                               clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
+                                             )         
+            else:
+                raise Exception("please input valid sensor spherical geometry shape.")
+            # orient sensor according to the pointing-option
+            if (pnt_opt.ref_frame == ReferenceFrame.NADIR_POINTING): 
+                sensor.SetSensorBodyOffsetAngles(angle1=pnt_opt.euler_angle1, angle2=pnt_opt.euler_angle2, angle3=pnt_opt.euler_angle3, # input angles are in degrees
+                                                   seq1=pnt_opt.euler_seq1, seq2=pnt_opt.euler_seq2, seq3=pnt_opt.euler_seq3)
+            else:
+                raise NotImplementedError
+            
+            ###### attach the sensor ######
+            spc.AddSensor(sensor)
+            ###### make propcov coverage checker object ######
+            cov_checker = propcov.CoverageChecker(self.grid.point_group, spc)
+            ###### iterate over the propagated states ######
+            date = propcov.AbsoluteDate()
+            for idx, state in states_df.iterrows():
+                time_index = int(state['time index'])
+                jd_date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
+                date.SetJulianDate(jd_date)
+                
+                cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
+                spc.SetOrbitStateCartesian(date, propcov.Rvector6(cart_state))
+                
+                # compute coverage
+                points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
+                if len(points)>0: #If no ground-points are accessed at this time, skip writing the row altogether.
+                    for pnt in points:
+                        access_writer.writerow([time_index, pnt_opt_idx, pnt])
+
+        ##### Close file #####                
+        if access_file:
+            access_file.close()

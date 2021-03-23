@@ -6,6 +6,8 @@
 * ``test_execute_1``: For a random circular orbit, test that pointing of the Euler angles, sequence (0,0,x,1,2,3) shall yield access points equal to the satellite position.
 * ``test_execute_2``: For a equatorial orbit, test the accessed ground-points against an analytical result.
 
+TODO: tests to check behavior with multiple sensors, modes
+
 """
 
 import json
@@ -60,7 +62,6 @@ class TestPointingOptionsCoverage(unittest.TestCase):
     def test_to_dict(self): #TODO
         pass
 
-    '''
     def test_execute_0(self):
         """ Check the produced access file format.
         """        
@@ -170,7 +171,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
             access_lon = group['lon [deg]'].to_numpy()
             self.assertTrue(np.allclose(sat_lat, access_lat))
             self.assertTrue(np.allclose(sat_lon, access_lon))
-    '''
+    
     def test_execute_2(self):
         """ Test that the pointing for the case of equatorial orbit at randomly chosen altitudes. Pointing to the nadir with any random yaw shall result
             in covering latitude 0 deg always (throughout the mission). Pointing with a random roll (only) orientation (at some random altitude) shall result
