@@ -581,6 +581,28 @@ c
         """
         return self._id
     
+    def get_instrument(self, sensor_id=None):
+        """ Get ``Instrument`` object (from a list of instruments present in the ``Spacecraft`` object.) corresponding to the specified sensor id.
+
+        :param sensor_id: Instrument identifier. If ``None``, the first instrument in the list of instruments is returned.
+        :paramtype sensor_id: str or int
+
+        :return: Instrument corresponding to the input sensor id. If not match not found, return ``None``.
+        :rtype: :class:`instrupy.Instrument` or None
+
+        """
+        # check if spacecraft has no instruments and return None
+        if self.instrument is None:
+            return None
+        # if sensor_id is not specified, return first instrument in the list
+        if(sensor_id==None):
+            return self.instrument[0]
+        # search matching instrument id
+        for x in self.instrument:
+            if(x.get_id() == sensor_id):
+                return x
+        return None
+
     '''
     def __eq__(self, other):
         """ Simple equality check. Returns True if the class attributes are equal, else returns False. 

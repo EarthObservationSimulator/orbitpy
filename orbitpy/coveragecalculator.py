@@ -117,13 +117,13 @@ def find_in_cov_params_list(cov_param_list, sensor_id=None, mode_id=None):
     :param cov_param_list: List of tuples of (instrument id, mode id, field-of-view, field-of-regard, pointing_option).
     :paramtype cov_param_list: list, namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list, :class:`instrupy.util.ViewGeometry`>, <list,:class:`instrupy.util.Orientation`>)
 
-    :param sensor_id: Instrument identifier. If ``None``, the first tuple in the list of coverage parameters is considered.
+    :param sensor_id: Instrument identifier. If ``None``, the first tuple in the list of coverage parameters is returned.
     :paramtype sensor_id: str (or) int
 
-    :param mode_id: Mode identifier. If ``None``, the first tuple in the list of coverage parameters is considered.
+    :param mode_id: Mode identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute with the matching sensor_id is returned.
     :paramtype mode_id: str (or) int
 
-    :return: (Single) Tuples of (instrument id, mode id, field-of-view, field-of-regard, pointing-option(s)), such that the instrument-id and 
+    :return: (Single) Tuple of (instrument id, mode id, field-of-view, field-of-regard, pointing-option(s)), such that the instrument-id and 
              the mode-id match the input identifiers (sensor_id, mode_id).
     :rtype: namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list, :class:`instrupy.util.ViewGeometry`> , <list,:class:`instrupy.util.Orientation`> )
 
@@ -141,7 +141,7 @@ def find_in_cov_params_list(cov_param_list, sensor_id=None, mode_id=None):
             
         raise Exception('Entry corresponding to the input instrument-id and mode-id was not found.')
     else:
-        return None
+        raise Exception('cov_param_list input argument is empty.')
 
 def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None):
         """ Extract the access times at middle of access intervals. The input can be a path to a file or a dataframe. 
@@ -317,17 +317,20 @@ class GridCoverage(Entity):
 
         :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
                 
-                The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
+                The first four rows contain general information. The first row contains the coverage calculation type.
+                The second row containing the mission epoch in Julian Day UT1. The time
                 in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
                 The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
                 Description of the data (comma-seperated) is given below:
 
                 .. csv-table:: Observation data metrics description
                     :header: Column, Data type, Units, Description
-                    :widths: 10,10
+                    :widths: 10,10,10,30
 
                 time index, int, , Access time-index.
-                GP index, integer, , Grid-point index (refer to the instance ``grid` attribute to get the latitude, longitude coordinates). 
+                GP index, integer, , Grid-point index.
+                lat [deg], float, , Latitude in degrees corresponding to the GP index.
+                lon [deg], float, , Longitude in degrees corresponding to the GP index.
         
         :paramtype out_file_access: str
 
@@ -343,11 +346,11 @@ class GridCoverage(Entity):
         if out_file_access:
             access_file = open(out_file_access, 'w', newline='')
             access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["Grid Coverage data file."])
+            access_writer.writerow(["Grid Coverage"])
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index','GP index'])
+            access_writer.writerow(['time index','GP index', 'lat [deg]', 'lon [deg]'])
         
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
@@ -386,7 +389,7 @@ class GridCoverage(Entity):
             sen_orien = sen_view_geom.orien
             if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): # The second condition is equivalent of orienting sensor w.r.t spacecraft body if the spacecraft body is aligned to nadir-frame
                 sensor.SetSensorBodyOffsetAngles(angle1=sen_orien.euler_angle1, angle2=sen_orien.euler_angle2, angle3=sen_orien.euler_angle3, # input angles are in degrees
-                                             seq1=sen_orien.euler_seq1, seq2=sen_orien.euler_seq2, seq3=sen_orien.euler_seq3)
+                                                 seq1=sen_orien.euler_seq1, seq2=sen_orien.euler_seq2, seq3=sen_orien.euler_seq3)
             else:
                 raise NotImplementedError
             
@@ -408,7 +411,8 @@ class GridCoverage(Entity):
                 points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
                 if len(points)>0: #If no ground-points are accessed at this time, skip writing the row altogether.
                     for pnt in points:
-                        access_writer.writerow([time_index, pnt])
+                        coords = self.grid.get_lat_lon_from_index(pnt)
+                        access_writer.writerow([time_index, pnt, coords.latitude, coords.longitude])
 
         ##### Close file #####                
         if access_file:
@@ -424,6 +428,7 @@ class PointingOptionsCoverage(Entity):
     :vartype spacecraft: :class:`orbitpy.util.Spacecraft`
 
     :ivar state_cart_file: File name with path of the (input) file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are available.
+                           Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
     :vartype state_cart_file: str
 
     :ivar _id: Unique identifier.
@@ -532,14 +537,15 @@ class PointingOptionsCoverage(Entity):
 
         :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
                 
-                The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
+                The first four rows contain general information. The first row contains the coverage calculation type.
+                The second row containing the mission epoch in Julian Day UT1. The time
                 in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
                 The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
                 Description of the data (comma-seperated) is given below:
 
                 .. csv-table:: Observation data metrics description
                     :header: Column, Data type, Units, Description
-                    :widths: 10,10,10,10
+                    :widths: 10,10,10,30
 
                 time index, int, , Access time-index.
                 pnt-opt index, int, , Pointing options index.
@@ -562,7 +568,7 @@ class PointingOptionsCoverage(Entity):
         if out_file_access:
             access_file = open(out_file_access, 'w', newline='')
             access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["Pointing Options Coverage data file."])
+            access_writer.writerow(["Pointing Options Coverage"])
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
@@ -634,6 +640,7 @@ class PointingOptionsWithGridCoverage(Entity):
     :vartype spacecraft: :class:`orbitpy.util.Spacecraft`
 
     :ivar state_cart_file: File name with path of the (input) file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are available.
+                           Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
     :vartype state_cart_file: str
 
     :ivar _id: Unique identifier.
@@ -704,18 +711,21 @@ class PointingOptionsWithGridCoverage(Entity):
 
         :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
                 
-                The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
+                The first four rows contain general information. The first row contains the coverage calculation type.
+                The second row containing the mission epoch in Julian Day UT1. The time
                 in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
                 The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
                 Description of the data (comma-seperated) is given below:
 
                 .. csv-table:: Observation data metrics description
                     :header: Column, Data type, Units, Description
-                    :widths: 10,10
+                    :widths: 10,10,10,30
 
                 time index, int, , Access time-index.
                 pnt-opt index, int, , Pointing options index.
-                GP index, integer, , Grid-point index (refer to the instance ``grid` attribute to get the latitude, longitude coordinates). 
+                GP index, integer, , Grid-point index.
+                lat [deg], float, , Latitude in degrees corresponding to the GP index.
+                lon [deg], float, , Longitude in degrees corresponding to the GP index.
         
         :paramtype out_file_access: str
 
@@ -731,11 +741,11 @@ class PointingOptionsWithGridCoverage(Entity):
         if out_file_access:
             access_file = open(out_file_access, 'w', newline='')
             access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["Grid Coverage data file."])
+            access_writer.writerow(["Pointing Options With Grid Coverage"])
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index','pnt-opt index', 'GP index'])
+            access_writer.writerow(['time index','pnt-opt index', 'GP index', 'lat [deg]', 'lon [deg]'])
         
         ###### find the coverage-parameters of the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
@@ -787,7 +797,8 @@ class PointingOptionsWithGridCoverage(Entity):
                 points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
                 if len(points)>0: #If no ground-points are accessed at this time, skip writing the row altogether.
                     for pnt in points:
-                        access_writer.writerow([time_index, pnt_opt_idx, pnt])
+                        coords = self.grid.get_lat_lon_from_index(pnt)
+                        access_writer.writerow([time_index, pnt_opt_idx, pnt, coords.latitude, coords.longitude])
 
         ##### Close file #####                
         if access_file:

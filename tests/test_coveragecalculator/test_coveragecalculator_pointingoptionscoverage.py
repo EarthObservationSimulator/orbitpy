@@ -93,6 +93,10 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
 
         # check the outputs
+        cov_calc_type = pd.read_csv(out_file_access, nrows=1, header=None).astype(str) # 1st row contains the coverage calculation type
+        cov_calc_type = str(cov_calc_type[0][0])
+        self.assertEqual(cov_calc_type, 'Pointing Options Coverage')
+
         epoch_JDUT1 = pd.read_csv(out_file_access, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
         self.assertEqual(epoch_JDUT1, 2458265.0)

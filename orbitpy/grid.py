@@ -12,6 +12,7 @@ import propcov
 from instrupy.util import Entity, EnumEntity, Constants
 import orbitpy.util
 
+GridPoint = namedtuple("GridPoint", ["latitude", "longitude"])
 class Grid(Entity):
     """ Class to handle grid related operations. 
 
@@ -195,11 +196,9 @@ class Grid(Entity):
         [lat, lon] = self.point_group.GetLatLonVectors()
         # convert to degrees and round to two decimal places
         lat= np.rad2deg(np.array(lat)).round(decimals=2)
-        lon= np.rad2deg(np.array(lon)).round(decimals=2)
-        
-        grid_point = namedtuple("grid_points", ["latitude", "longitude"])
+        lon= np.rad2deg(np.array(lon)).round(decimals=2)   
 
-        return grid_point(list(lat), list(lon))
+        return GridPoint(latitude=list(lat), longitude=list(lon))
     
     def get_lat_lon_from_index(self, indexes):
         """ Get the grid points (coordinates) corresponding to the input (list of) point-indices.
@@ -211,15 +210,23 @@ class Grid(Entity):
         :rtype: namedtuple, (list, list), float
 
         """
+        # if only one index specified
+        if isinstance(indexes, int):
+            (lat, lon) = self.point_group.GetLatAndLon(indexes)
+            return GridPoint(latitude=np.rad2deg(lat).round(decimals=2), longitude=np.rad2deg(lon).round(decimals=2))
+        elif isinstance(indexes, list):
+            if len(indexes)==1:
+                (lat, lon) = self.point_group.GetLatAndLon(indexes[0])
+                return GridPoint(latitude=np.rad2deg(lat).round(decimals=2), longitude=np.rad2deg(lon).round(decimals=2))
+
         (_lat, _lon) = self.get_lat_lon()
         # make indexes into a list if not list
         indexes = [indexes] if not isinstance(indexes, list) else indexes
         # filter
         lat = [_lat[x] for x in indexes]
-        lon = [_lon[x] for x in indexes]
-        grid_point = namedtuple("grid_points", ["latitude", "longitude"])
+        lon = [_lon[x] for x in indexes]        
 
-        return grid_point(lat, lon)
+        return GridPoint(latitude=lat, longitude=lon)
 
 
 def compute_grid_res(spacecraft, grid_res_fac=0.9):

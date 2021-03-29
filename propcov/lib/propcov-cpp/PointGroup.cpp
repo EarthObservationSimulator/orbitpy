@@ -267,6 +267,18 @@ void PointGroup::GetLatAndLon(Integer idx, Real &theLat, Real &theLon)
    theLon = lon.at(idx);
 }
 
+std::pair<Real, Real> PointGroup::GetLatAndLon(Integer idx)
+{
+   // Returns body fixed location of point given point index
+   // Make sure there are points
+   CheckHasPoints();
+   
+   Real theLat = lat.at(idx);
+   Real theLon = lon.at(idx);
+
+   return std::make_pair(theLat, theLon);
+}
+
 //------------------------------------------------------------------------------
 // Integer GetNumPoints()
 //------------------------------------------------------------------------------

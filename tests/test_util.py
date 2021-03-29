@@ -235,6 +235,24 @@ class TestSpacecraft(unittest.TestCase):
         self.assertIsNotNone(spc3._id)
 
     
+    def test_get_instrument(self):
+        spc1 = Spacecraft.from_json(spc1_json)  
+        spc2 = Spacecraft.from_json(spc2_json)  
+        spc3 = Spacecraft.from_json(spc3_json)
+
+        # spc1 has 1 instrument with id 'bs1'
+        self.assertEqual(spc1.get_instrument(sensor_id='bs1'), spc1.instrument[0])
+        self.assertEqual(spc1.get_instrument(), spc1.instrument[0]) # no sensor_id specification
+        self.assertIsNone(spc1.get_instrument('bs2')) # wrong sensor_id
+        
+        # spc2 has no instruments
+        self.assertIsNone(spc2.get_instrument())
+
+        # spc3 has three instruments
+        self.assertEqual(spc3.get_instrument(sensor_id='bs1'), spc3.instrument[0])
+        self.assertEqual(spc3.get_instrument(), spc3.instrument[0])
+        self.assertEqual(spc3.get_instrument(sensor_id='bs3'), spc3.instrument[2])
+
     def test_get_id(self): #TODO
         pass
     

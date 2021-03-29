@@ -67,7 +67,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         """ Check the produced access file format.
         """        
         # setup spacecraft with some parameters setup randomly     
-        duration=0.05
+        duration=0.005
         orbit_dict = {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+random.uniform(350,850), 
                             "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
@@ -96,6 +96,10 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         PointingOptionsWithGridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
 
         # check the outputs
+        cov_calc_type = pd.read_csv(out_file_access, nrows=1, header=None).astype(str) # 1st row contains the coverage calculation type
+        cov_calc_type = str(cov_calc_type[0][0])
+        self.assertEqual(cov_calc_type, 'Pointing Options With Grid Coverage')
+
         epoch_JDUT1 = pd.read_csv(out_file_access, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
         self.assertEqual(epoch_JDUT1, 2458265.0)
@@ -112,7 +116,18 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         self.assertEqual(column_headers.iloc[0][0],"time index")
         self.assertEqual(column_headers.iloc[0][1],"pnt-opt index")
         self.assertEqual(column_headers.iloc[0][2],"GP index")
-    
+        self.assertEqual(column_headers.iloc[0][3],"lat [deg]")
+        self.assertEqual(column_headers.iloc[0][4],"lon [deg]")
+
+        # check that the grid indices are interpreted correctly
+        access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
+        if not access_data.empty:
+            (lat, lon) = grid.get_lat_lon_from_index(access_data['GP index'].tolist())
+            self.assertTrue(lat==access_data['lat [deg]'].tolist())
+            self.assertTrue(lon==access_data['lon [deg]'].tolist())
+        else:
+            warnings.warn('No data was generated in test_execute_0(.). Run the test again.')
+    '''
     def test_execute_1(self):
         """ Test the result of PointingOptionsWithGridCoverage with separate runs of GridCoverage.
         """
@@ -178,4 +193,5 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
 
         self.assertTrue(np.allclose(group1['time index'].to_numpy(), access_data3['time index'].to_numpy()))
         self.assertTrue(np.allclose(group1['GP index'].to_numpy(), access_data3['GP index'].to_numpy()))
+    '''
         

@@ -13,7 +13,7 @@ import orbitpy.grid
 from orbitpy.util import OrbitState, Spacecraft
 from instrupy import Instrument
 
-class TestPropagatorModuleFunction(unittest.TestCase):
+class TestGridModuleFunction(unittest.TestCase):
 
     def test_compute_grid_res(self):
         """Test that the grid-resolution computed with precomputed for fixed values of orbit altitute and a sensor FOV (not the FOR)"""
@@ -158,7 +158,7 @@ class TestGrid(unittest.TestCase):
         # single input index
         self.assertEqual(o.get_lat_lon_from_index(0), (cdata.latitude[0], cdata.longitude[0]))
         self.assertEqual(o.get_lat_lon_from_index(10), (cdata.latitude[10], cdata.longitude[10]))
-        self.assertEqual(o.get_lat_lon_from_index([-1]), (cdata.latitude[-1], cdata.longitude[-1]))
+        self.assertEqual(o.get_lat_lon_from_index([100]), (cdata.latitude[100], cdata.longitude[100]))
         # multiple input indices
         self.assertEqual(o.get_lat_lon_from_index([0,1,2]), ([cdata.latitude[0], cdata.latitude[1], cdata.latitude[2]], 
                                                              [cdata.longitude[0], cdata.longitude[1], cdata.longitude[2]]))

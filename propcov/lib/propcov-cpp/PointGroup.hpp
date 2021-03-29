@@ -58,6 +58,7 @@ public:
    virtual Rvector3* GetPointPositionVector(Integer idx);
    /// Get the latitude and longitude for the given index
    virtual void      GetLatAndLon(Integer idx, Real &theLat, Real &theLon);
+   std::pair<Real, Real> GetLatAndLon(Integer idx);
    /// Get the number of points
    virtual Integer   GetNumPoints();
    /// Get the latitude and longitude vectors

@@ -98,6 +98,10 @@ class TestGridCoverage(unittest.TestCase):
         GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
 
         # check the outputs
+        cov_calc_type = pd.read_csv(out_file_access, nrows=1, header=None).astype(str) # 1st row contains the coverage calculation type
+        cov_calc_type = str(cov_calc_type[0][0])
+        self.assertEqual(cov_calc_type, 'Grid Coverage')
+
         epoch_JDUT1 = pd.read_csv(out_file_access, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
         self.assertEqual(epoch_JDUT1, 2458265.0)
@@ -113,6 +117,17 @@ class TestGridCoverage(unittest.TestCase):
         column_headers = pd.read_csv(out_file_access, skiprows = [0,1,2,3], nrows=1, header=None).astype(str) # 5th row contains the columns headers
         self.assertEqual(column_headers.iloc[0][0],"time index")
         self.assertEqual(column_headers.iloc[0][1],"GP index")
+        self.assertEqual(column_headers.iloc[0][2],"lat [deg]")
+        self.assertEqual(column_headers.iloc[0][3],"lon [deg]")
+
+        # check that the grid indices are interpreted correctly
+        access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
+        if not access_data.empty:
+            (lat, lon) = grid.get_lat_lon_from_index(access_data['GP index'].tolist())
+            self.assertTrue(lat==access_data['lat [deg]'].tolist())
+            self.assertTrue(lon==access_data['lon [deg]'].tolist())
+        else:
+            warnings.warn('No data was generated in test_execute_0(.). Run the test again.')
     
     def test_execute_1(self):
         """ Orient the sensor with roll, and an equatorial orbit and check that the ground-points captured are on either
