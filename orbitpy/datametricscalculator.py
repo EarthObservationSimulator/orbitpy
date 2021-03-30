@@ -41,7 +41,7 @@ class DataMetricsCalculator(Entity):
     def __init__(self, spacecraft=None, state_cart_file=None, access_file_info=None, _id=None):
         self.spacecraft = spacecraft if spacecraft is not None and isinstance(spacecraft, Spacecraft) else None
         self.state_cart_file = str(state_cart_file) if state_cart_file is not None else None
-        self.access_file_info = None        
+        self.access_file_info = [] # empty list        
         if isinstance(access_file_info, list):
              if all(isinstance(x, AccessFileInfo) for x in access_file_info):
                 self.access_file_info = access_file_info
@@ -207,14 +207,15 @@ class DataMetricsCalculator(Entity):
 
         # copy info rows from the original access file
         with open(acc_filepath, 'r') as f:
-            head = [next(f) for x in [0,1,2]] 
+            head = [next(f) for x in [0,1,2,3]] 
 
         # erase any old file and create new one
         with open(out_datametrics_fl,'w') as f:
-            f.write('Datametrics file \n')
-            next(iter(head)) # skip first line
-            for r in head:
-                f.write(str(r))                 
+            for idx, r in enumerate(head):
+                if idx==0:
+                    f.write("Datametrics file based on " + str(r))    
+                else:
+                    f.write(str(r))             
         
         with open(out_datametrics_fl,'a+', newline='') as f:
             w = csv.writer(f)
