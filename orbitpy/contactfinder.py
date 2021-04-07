@@ -190,19 +190,36 @@ class ContactFinder(Entity):
 
             A_pos = np.array([A_x_km[idx], A_y_km[idx], A_z_km[idx]]).astype(float)
             B_pos = np.array([B_x_km[idx], B_y_km[idx], B_z_km[idx]]).astype(float)
-            access_log[idx] = GeoUtilityFunctions.checkLOSavailability(A_pos, B_pos, Constants.radiusOfEarthInKM + opaque_atmos_height)
-            if out_type == 'DETAIL':
-                AB_km = B_pos - A_pos
-                r_AB_km = np.sqrt(np.dot(AB_km, AB_km))
-                range_log[idx] = r_AB_km
-
-                if isinstance(entityB, GroundStation):
-                    # calculate elevation angle, i.e. angle between ground-plane and ground-station to satellite line.
+            
+            los = GeoUtilityFunctions.checkLOSavailability(A_pos, B_pos, Constants.radiusOfEarthInKM + opaque_atmos_height)
+            
+            if isinstance(entityB, GroundStation): # additional checks that the elevation angle should be OK
+                # calculate elevation angle, i.e. angle between ground-plane and ground-station to satellite line.
+                elv_angle = None                    
+                # Satellite is in line-of-sight of the ground station
+                if(los):
+                    AB_km = B_pos - A_pos
                     ground_stn_to_sat = -1 * AB_km
                     unit_ground_stn_to_sat = MathUtilityFunctions.normalize(ground_stn_to_sat)
                     unit_ground_stn = MathUtilityFunctions.normalize(B_pos)
-                    elv_angle = np.pi/2 - np.arccos(np.dot(unit_ground_stn, unit_ground_stn_to_sat))
-                    elv_log[idx] = np.rad2deg(elv_angle)
+                    elv_angle = np.pi/2 - np.arccos(np.dot(unit_ground_stn, unit_ground_stn_to_sat))            
+                    # Check if the satellite fulfills the elevation condition                     
+                    if(elv_angle > np.deg2rad(entityB.minimumElevation)):
+                        access_log[idx] = True
+                    else:
+                        access_log[idx] = False
+                else:
+                    access_log[idx] = False
+            else: # satellite-to-satellite communication,
+                access_log[idx] = los
+
+            if out_type == 'DETAIL':
+                AB_km = B_pos - A_pos # TODO repeated calc sometimes, make it more efficient.
+                r_AB_km = np.sqrt(np.dot(AB_km, AB_km))
+                range_log[idx] = r_AB_km
+
+                if isinstance(entityB, GroundStation):                    
+                    elv_log[idx] = np.rad2deg(elv_angle) if elv_angle else None
 
         if out_type == 'DETAIL':
             # Write DETAIL output file

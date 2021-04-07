@@ -5,6 +5,7 @@ import os, shutil
 import sys
 import pandas as pd
 import csv
+import datetime
 
 from instrupy.util import Entity, Constants, MathUtilityFunctions, GeoUtilityFunctions
 import orbitpy.util
@@ -26,7 +27,7 @@ class TestContactFinder(unittest.TestCase):
         # make and run the propagator for the spacecraft
         factory = PropagatorFactory()
         cls.step_size = 1
-        cls.duration = 0.1
+        cls.duration = 1
         j2_prop = factory.get_propagator({"@type": 'J2 Analytical Propagator', "stepSize": cls.step_size})
         
         # sentinel1A
@@ -37,19 +38,19 @@ class TestContactFinder(unittest.TestCase):
         j2_prop.execute(spacecraft=cls.spcA, out_file_cart=cls.state_cart_file_sentinel1A, duration=cls.duration)
 
         # sentinel1B
-        cls.spcB = Spacecraft.from_dict({"name":"sentinel1B", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
-                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
+        cls.spcB = Spacecraft.from_dict({"name":"sentinel1B", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":12, "minute":38, "second":58}, \
+                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1816, "raan": 38.1151, "aop": 84.837, "ta": 275.3} \
                                          }})
         cls.state_cart_file_sentinel1B = cls.out_dir + '/test_cov_cart_states_sentinel1B.csv'
         j2_prop.execute(spacecraft=cls.spcB, out_file_cart=cls.state_cart_file_sentinel1B, duration=cls.duration)
 
         # Ground stations
-        cls.gs1 = GroundStation.from_dict({"@id":1231, "name": "gs1", "latitude": 85, "longitude": -45, "minElevation":7 })
-        cls.gs2 = GroundStation.from_dict({"@id":833, "name": "gs2", "latitude": -88, "longitude": 25, "minElevation":12 })
+        cls.gs1 = GroundStation.from_dict({"@id":1231, "name": "gs1", "latitude": 85, "longitude": -45 }) # by default "minimumElevation":7
+        cls.gs2 = GroundStation.from_dict({"@id":833, "name": "gs2", "latitude": -88, "longitude": 25, "minimumElevation":12 })
 
     def test_execute_data_format(self):
 
-        ########### entityA = Spacecraft, entityB = GroundStation ###########
+        ########### entityA = Spacecraft, entityB = GroundStation, INTERVAL out_type, default output filename ###########
         ContactFinder.execute(self.spcA, self.gs1, self.out_dir, self.state_cart_file_sentinel1A, None, None, 'INTERVAL', 0)
 
         out_file = self.out_dir + "/sentinel1A_to_gs1.csv"
@@ -70,7 +71,7 @@ class TestContactFinder(unittest.TestCase):
         self.assertEqual(list(data.columns)[0], 'start index')
         self.assertEqual(list(data.columns)[1], 'end index')
 
-        ########### entityA = GroundStation, entityB = Spacecraft ###########
+        ########### entityA = GroundStation, entityB = Spacecraft, DETAIL out_type, default output filename ###########
         ContactFinder.execute(self.gs2, self.spcB, self.out_dir, None, self.state_cart_file_sentinel1B, None, 'DETAIL', 0)
 
         out_file = self.out_dir + "/sentinel1B_to_gs2.csv"
@@ -81,7 +82,7 @@ class TestContactFinder(unittest.TestCase):
 
         epoch_JDUT1 = pd.read_csv(out_file, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
-        self.assertAlmostEqual(epoch_JDUT1, 2459243.0618287036)
+        self.assertAlmostEqual(epoch_JDUT1, 2459243.027060185)
 
         _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
         _step_size = float(_step_size[0][0].split()[4])
@@ -96,6 +97,7 @@ class TestContactFinder(unittest.TestCase):
         self.assertAlmostEqual((data["time index"].iloc[-1] + 1)*_step_size, self.duration*86400, delta=self.step_size) # almost equal, probably due to errors introduced by floating-point arithmetic
 
         ########### entityA = Spacecraft, entityB = Spacecraft. output filename specified ###########
+        """
         ContactFinder.execute(self.spcA, self.spcB, self.out_dir, self.state_cart_file_sentinel1A, self.state_cart_file_sentinel1B, 'spcA_to_spcB.csv', 'DETAIL', 10)
         out_file = self.out_dir + "/spcA_to_spcB.csv"
 
@@ -115,15 +117,17 @@ class TestContactFinder(unittest.TestCase):
         self.assertEqual(list(data.columns)[0], 'time index')
         self.assertEqual(list(data.columns)[1], 'access')
         self.assertEqual(list(data.columns)[2], 'range [km]')
-        
-        ########### entityA = GroundStation, entityB = GroundStation ###########
+        """
+        ########### entityA = GroundStation, entityB = GroundStation, should raise Error ###########
         with self.assertRaises(Exception):
             ContactFinder.execute(self.gs1, self.gs2, self.out_dir, None, None, None, 'INTERVAL', 0)
 
 
-    def test_execute_ground_stn_contact(self):
+    def test_execute_ground_stn_contact_Sentinel1A_gs1(self):
         """ Test against GMAT truth data. This validates both the propgation of the satellite and the 
-            ground-station contacts.
+            ground-station contacts. The results are approximately equal.
+            
+        The Sentinel1A satellite was simulated in GMAT with gs1  ground-stations in the ``setUpClass``, to yield the following contact data:
 
         GMAT contact data results:
         
@@ -150,6 +154,67 @@ class TestContactFinder(unittest.TestCase):
 
         Number of events : 15
 
+        """
+        ContactFinder.execute(self.spcA, self.gs1, self.out_dir, self.state_cart_file_sentinel1A, None, None, 'INTERVAL', 0)
+        data = pd.read_csv(self.out_dir + "/sentinel1A_to_gs1.csv", skiprows = [0,1,2])
+        # Epoch: 2021 Jan 28, 13:29:2
+        epoch = datetime.datetime(2021, 1, 28, 13, 29, 2)
+        
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 13, 48, 50)-epoch).total_seconds(), data['start index'][0], delta=3)
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 13, 59, 14)-epoch).total_seconds(), data['end index'][0], delta=7)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28,  15,26,51)-epoch).total_seconds(), data['start index'][1], delta=14)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 15,37,17)-epoch).total_seconds(), data['end index'][1], delta=18)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 17,4,57)-epoch).total_seconds(), data['start index'][2], delta=26)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 17,15,19)-epoch).total_seconds(), data['end index'][2], delta=29)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 18,43,14)-epoch).total_seconds(), data['start index'][3], delta=37)    
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 18,53,25)-epoch).total_seconds(), data['end index'][3], delta=41)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 20,21,47)-epoch).total_seconds(), data['start index'][4], delta=49)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 20,31,39)-epoch).total_seconds(), data['end index'][4], delta=52)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 22,0,41)-epoch).total_seconds(), data['start index'][5], delta=61)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 22,10,1)-epoch).total_seconds(), data['end index'][5], delta=64)  
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 23,39,53)-epoch).total_seconds(), data['start index'][6], delta=73)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 23,48,36)-epoch).total_seconds(), data['end index'][6], delta=75) 
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 1,19,15)-epoch).total_seconds(), data['start index'][7], delta=85)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 1,27,25)-epoch).total_seconds(), data['end index'][7], delta=87)  
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 2,58,34)-epoch).total_seconds(), data['start index'][8], delta=97)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 3,6,31)-epoch).total_seconds(), data['end index'][8], delta=99)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 4,37,40)-epoch).total_seconds(), data['start index'][9], delta=108)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 4,45,50)-epoch).total_seconds(), data['end index'][9], delta=112)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 6,16,29)-epoch).total_seconds(), data['start index'][10], delta=119)    
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 6,25,12)-epoch).total_seconds(), data['end index'][10], delta=123) 
+       
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 7,55,4)-epoch).total_seconds(), data['start index'][11], delta=129)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 8,4,24)-epoch).total_seconds(), data['end index'][11], delta=134)  
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 9,33,27)-epoch).total_seconds(), data['start index'][12], delta=140)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 9,43,18)-epoch).total_seconds(), data['end index'][12], delta=145)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 11,11,40)-epoch).total_seconds(), data['start index'][13], delta=151) 
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 11,21,51)-epoch).total_seconds(), data['end index'][13], delta=156)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 12,49,46)-epoch).total_seconds(), data['start index'][14], delta=162)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 13,0,8)-epoch).total_seconds(), data['end index'][14], delta=167)
+        
+
+     
+    def test_execute_ground_stn_contact_Sentinel1B_gs2(self):
+        """ Test against GMAT truth data. This validates both the propgation of the satellite and the 
+            ground-station contacts. The results are approximately equal.
+            
+        The Sentinel1B satellite was simulated in GMAT with gs2 ground-stations in the ``setUpClass``, to yield the following contact data:
+
+        GMAT contact data results:
+
         Target: Sentinel1B
 
         Observer: GroundStation1
@@ -173,7 +238,53 @@ class TestContactFinder(unittest.TestCase):
         Number of events : 14
 
         """
-        pass
+        ContactFinder.execute(self.spcB, self.gs2, self.out_dir, self.state_cart_file_sentinel1B, None, None, 'INTERVAL', 0)
+        data = pd.read_csv(self.out_dir + "/sentinel1B_to_gs2.csv", skiprows = [0,1,2])
+        # Epoch: 2021 Jan 28, 13:29:2
+        epoch = datetime.datetime(2021, 1, 28, 12, 38, 58)
+        
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 13, 49, 42)-epoch).total_seconds(), data['start index'][0], delta=11)
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 13, 56, 54)-epoch).total_seconds(), data['end index'][0], delta=14)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 15,28,16)-epoch).total_seconds(), data['start index'][1], delta=22)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 15,35,45)-epoch).total_seconds(), data['end index'][1], delta=25)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 17,6,45)-epoch).total_seconds(), data['start index'][2], delta=34)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 17,14,30)-epoch).total_seconds(), data['end index'][2], delta=36)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 18,45,10)-epoch).total_seconds(), data['start index'][3], delta=45)    
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 18,53,7)-epoch).total_seconds(), data['end index'][3], delta=48)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 20,23,32)-epoch).total_seconds(), data['start index'][4], delta=56)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 20,31,36)-epoch).total_seconds(), data['end index'][4], delta=60)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 22,1,54)-epoch).total_seconds(), data['start index'][5], delta=67)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 22,10,1)-epoch).total_seconds(), data['end index'][5], delta=71)  
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 23,40,17)-epoch).total_seconds(), data['start index'][6], delta=79)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 28, 23,48,23)-epoch).total_seconds(), data['end index'][6], delta=82) 
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 1,18,46)-epoch).total_seconds(), data['start index'][7], delta=90)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 1,26,45)-epoch).total_seconds(), data['end index'][7], delta=93)  
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 2,57,20)-epoch).total_seconds(), data['start index'][8], delta=102)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 3,5,9)-epoch).total_seconds(), data['end index'][8], delta=105)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 4,36,3)-epoch).total_seconds(), data['start index'][9], delta=113)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 4,43,36)-epoch).total_seconds(), data['end index'][9], delta=116)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 6,14,52)-epoch).total_seconds(), data['start index'][10], delta=125)    
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 6,22,9)-epoch).total_seconds(), data['end index'][10], delta=128) 
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 7,53,45)-epoch).total_seconds(), data['start index'][11], delta=137)  
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 8,0,47)-epoch).total_seconds(), data['end index'][11], delta=140)  
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 9,32,40)-epoch).total_seconds(), data['start index'][12], delta=148)   
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 9,39,33)-epoch).total_seconds(), data['end index'][12], delta=152)
+
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 11,11,31)-epoch).total_seconds(), data['start index'][13], delta=160) 
+        self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 11,18,25)-epoch).total_seconds(), data['end index'][13], delta=163)
+
 
     def test_find_all_pairs(self):
         pass
