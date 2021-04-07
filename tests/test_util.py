@@ -506,3 +506,6 @@ class TestUtilModuleFunction(unittest.TestCase):
     
     def test_extract_auxillary_info_from_state_file(self): # TODO
         pass
+
+class TestGroundStation(unittest.TestCase): #TODO
+    pass

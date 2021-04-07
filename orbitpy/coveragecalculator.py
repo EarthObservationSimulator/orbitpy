@@ -78,19 +78,19 @@ class CoverageCalculatorFactory:
         return creator.from_dict(specs)
 
 def helper_extract_coverage_parameters_of_spacecraft(spc):
-    """ Helper function to extract tuples of (instrument_id, mode_id, field-of-view, field-of-regard, pointing_option(s)).
+    """ Helper function to extract tuples of (instrument_id, mode_id, scene-field-of-view, field-of-regard, pointing_option(s)).
         Only these parameters of a spacecraft are relevant to coverage calculations.
     
     :param spc: (Single) spacecraft of which coverage parameters are to be extracted.
     :paramtype spc: :class:`orbitpy.util.Spacecraft`
 
-    :return: Tuples with instrument-id, mode-id, field-of-view, field-of-regard and pointing_option(s).
+    :return: Tuples with instrument-id, mode-id, scene-field-of-view, field-of-regard and pointing_option(s).
     :rtype: list, namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list,:class:`instrupy.util.ViewGeometry`>, <list,:class:`instrupy.util.Orientation`>)
 
     .. note::  The field-of-regard parameter and pointing_option parameter is a list in the tuple. 
 
     """
-    _p = namedtuple("spc_cov_params", ["instru_id", "mode_id", "field_of_view", "field_of_regard", "pointing_option"])
+    _p = namedtuple("spc_cov_params", ["instru_id", "mode_id", "scene_field_of_view", "field_of_regard", "pointing_option"])
     params = []
 
     if spc.instrument is not None:
@@ -99,14 +99,14 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
 
             for mode_id in instru.get_mode_id():# iterate over each mode in the instrument
 
-                field_of_view  = instru.get_field_of_view(mode_id)
+                scene_field_of_view  = instru.get_scene_field_of_view(mode_id)
                 field_of_regard  = instru.get_field_of_regard(mode_id) 
                 pointing_option = instru.get_pointing_option(mode_id)
 
                 if field_of_regard is None or []: # if FOR is None, use FOV for FOR
                     field_of_regard = [instru.get_field_of_view(mode_id)]
                 
-                params.append(_p(instru_id, mode_id, field_of_view, field_of_regard, pointing_option))
+                params.append(_p(instru_id, mode_id, scene_field_of_view, field_of_regard, pointing_option))
                     
     return params
 
@@ -236,7 +236,7 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
 
 class GridCoverage(Entity):
     """A coverage calculator which handles coverage calculation for a spacecraft over a grid. Each coverage object is specific to 
-        a particular grid and spacecraft.  
+        a particular grid and spacecraft.
 
     :ivar grid: Locations (longitudes, latitudes) over which coverage calculation is performed.
     :vartype grid: :class:`orbitpy.util.grid`
@@ -303,7 +303,8 @@ class GridCoverage(Entity):
     def execute(self, sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None):
         """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
-            same as the time resolution at which the spacecraft states are available. 
+            same as the time resolution at which the spacecraft states are available. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV)
+            is used for coverage calculations.
 
         :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
         :paramtype sensor_id: str (or) int
@@ -329,8 +330,8 @@ class GridCoverage(Entity):
 
                 time index, int, , Access time-index.
                 GP index, integer, , Grid-point index.
-                lat [deg], float, , Latitude in degrees corresponding to the GP index.
-                lon [deg], float, , Longitude in degrees corresponding to the GP index.
+                lat [deg], float, degrees, Latitude corresponding to the GP index.
+                lon [deg], float, degrees, Longitude corresponding to the GP index.
         
         :paramtype out_file_access: str
 
@@ -355,12 +356,12 @@ class GridCoverage(Entity):
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
         if use_field_of_regard is True:
-            sensor_view_geom = cov_param.field_of_regard # a list
+            view_geom = cov_param.field_of_regard # a list
         else:
-            sensor_view_geom = [cov_param.field_of_view] # make into list 
+            view_geom = [cov_param.scene_field_of_view] # make into list 
         
-        ###### iterate and calculate coverage seperately for each sensor_view_geom element. TODO: Streamline this behavior ######
-        for sen_view_geom in sensor_view_geom:
+        ###### iterate and calculate coverage seperately for each view_geom element. TODO: Streamline this behavior ######
+        for __view_geom in view_geom:
             
             ###### form the propcov.Spacecraft object ######
             attitude = propcov.NadirPointingAttitude()
@@ -376,7 +377,7 @@ class GridCoverage(Entity):
                 raise NotImplementedError # only NADIR_POINTING reference frame is supported.           
 
             ###### build the sensor object ######
-            sen_sph_geom = sen_view_geom.sph_geom
+            sen_sph_geom = __view_geom.sph_geom
             if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
             elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
@@ -386,7 +387,7 @@ class GridCoverage(Entity):
             else:
                 raise Exception("please input valid sensor spherical geometry shape.")
 
-            sen_orien = sen_view_geom.orien
+            sen_orien = __view_geom.orien
             if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): # The second condition is equivalent of orienting sensor w.r.t spacecraft body if the spacecraft body is aligned to nadir-frame
                 sensor.SetSensorBodyOffsetAngles(angle1=sen_orien.euler_angle1, angle2=sen_orien.euler_angle2, angle3=sen_orien.euler_angle3, # input angles are in degrees
                                                  seq1=sen_orien.euler_seq1, seq2=sen_orien.euler_seq2, seq3=sen_orien.euler_seq3)
@@ -549,8 +550,8 @@ class PointingOptionsCoverage(Entity):
 
                 time index, int, , Access time-index.
                 pnt-opt index, int, , Pointing options index.
-                lat [deg], float, , (degrees) Latitude of accessed ground-location.
-                lon [deg], float, , (degrees) Longitude of accessed ground-location.
+                lat [deg], float, degrees, Latitude of accessed ground-location.
+                lon [deg], float, degrees, Longitude of accessed ground-location.
         
         :paramtype out_file_access: str
 
@@ -678,7 +679,7 @@ class PointingOptionsWithGridCoverage(Entity):
         """
         grid_dict = d.get('grid', None)
         spc_dict = d.get('spacecraft', None)
-        return GridCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
+        return PointingOptionsWithGridCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
                             spacecraft = Spacecraft.from_dict(spc_dict) if spc_dict else None, 
                             state_cart_file = d.get('cartesianStateFilePath', None),
                             _id  = d.get('@id', None))
@@ -702,6 +703,7 @@ class PointingOptionsWithGridCoverage(Entity):
             Coverage is calculated for the period over which the input spacecraft propagated states are available. 
             The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
             The access-times, grid-points are calculated seperately for each pointing-option.
+            Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations.
 
         :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
         :paramtype sensor_id: str (or) int
@@ -724,8 +726,8 @@ class PointingOptionsWithGridCoverage(Entity):
                 time index, int, , Access time-index.
                 pnt-opt index, int, , Pointing options index.
                 GP index, integer, , Grid-point index.
-                lat [deg], float, , Latitude in degrees corresponding to the GP index.
-                lon [deg], float, , Longitude in degrees corresponding to the GP index.
+                lat [deg], float, degrees, Latitude corresponding to the GP index.
+                lon [deg], float, degrees, Longitude corresponding to the GP index.
         
         :paramtype out_file_access: str
 
@@ -749,7 +751,7 @@ class PointingOptionsWithGridCoverage(Entity):
         
         ###### find the coverage-parameters of the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
-        sen_sph_geom = cov_param.field_of_view.sph_geom # only the spherical geometry of the sensor is required. the orientation is ignored, since the pointing-option gives the orientation of the pointing-axis in the NADIR_POINTING frame.
+        sen_sph_geom = cov_param.scene_field_of_view.sph_geom # only the spherical geometry of the sensor is required. the orientation is ignored, since the pointing-option gives the orientation of the pointing-axis in the NADIR_POINTING frame.
         pointing_option = cov_param.pointing_option
         if pointing_option is None:
             print("No pointing options specified for the particular sensor, mode. Exiting PointingOptionsWithGridCoverage.")

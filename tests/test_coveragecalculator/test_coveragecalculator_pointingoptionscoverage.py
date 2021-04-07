@@ -56,6 +56,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
                                                 "cartesianStateFilePath":"../../state.csv",
                                                 "@id": 15})
         self.assertEqual(o._id, 15)
+        self.assertEqual(o._type, 'Pointing Options Coverage')
         self.assertEqual(o.spacecraft, Spacecraft.from_json(spc1_json))
         self.assertEqual(o.state_cart_file, "../../state.csv")
 

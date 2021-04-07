@@ -8,7 +8,7 @@ import unittest
 import numpy as np
 
 from orbitpy.util import OrbitState
-from orbitpy.constellation import ConstellationFactory, WalkerDeltaConstellation, CustomOrbit, TrainConstellation
+from orbitpy.constellation import ConstellationFactory, WalkerDeltaConstellation, TrainConstellation
 import propcov
 
 RE = 6378.137 # radius of Earth in km

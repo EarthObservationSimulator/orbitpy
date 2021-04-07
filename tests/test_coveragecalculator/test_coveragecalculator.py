@@ -54,7 +54,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         self.assertEqual(len(x), 1)
         self.assertEqual(x[0].instru_id, 'bs1')
         self.assertEqual(x[0].mode_id, '0')
-        self.assertEqual(x[0].field_of_view, 
+        self.assertEqual(x[0].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 0.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'CIRCULAR', 'diameter': 5.0, '@id': None}}))
         self.assertEqual(x[0].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
@@ -75,7 +75,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         # instrument 1        
         self.assertEqual(x[0].instru_id, 'bs1')
         self.assertEqual(x[0].mode_id, '0')
-        self.assertEqual(x[0].field_of_view, 
+        self.assertEqual(x[0].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 0.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'CIRCULAR', 'diameter': 5.0, '@id': None}}))
         self.assertEqual(x[0].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
@@ -85,7 +85,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         # instrument 2             
         self.assertIsNotNone(x[1].instru_id)
         self.assertEqual(x[1].mode_id, 101)
-        self.assertEqual(x[1].field_of_view, 
+        self.assertEqual(x[1].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 0.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'CIRCULAR', 'diameter': 5.0, '@id': None}}))
         self.assertEqual(x[1].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
@@ -97,7 +97,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         self.assertEqual(x[2].instru_id, 'bs3')
         self.assertEqual(x[2].mode_id, 0)
         
-        self.assertEqual(x[2].field_of_view, 
+        self.assertEqual(x[2].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 0.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5.0, 'angleWidth': 10, '@id': None}}))
         self.assertEqual(x[2].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
@@ -112,7 +112,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         # instrument 3, mode 2
         self.assertEqual(x[3].instru_id, 'bs3')
         self.assertEqual(x[3].mode_id, 1)        
-        self.assertEqual(x[3].field_of_view, 
+        self.assertEqual(x[3].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 25.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5.0, 'angleWidth': 10, '@id': None}}))
         self.assertEqual(x[3].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
@@ -125,7 +125,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         # instrument 3, mode 3
         self.assertEqual(x[4].instru_id, 'bs3')
         self.assertIsNotNone(x[4].mode_id)        
-        self.assertEqual(x[4].field_of_view, 
+        self.assertEqual(x[4].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': -25.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5.0, 'angleWidth': 10, '@id': None}}))
         self.assertEqual(x[4].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
@@ -156,7 +156,8 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         # spc2 spacecraft, no instruments 
         spc2 = Spacecraft.from_json(spc2_json)
         cov_param_list = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc2)
-        self.assertIsNone(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list))
+        with self.assertRaises(Exception):
+            self.assertIsNone(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list)) # empty cov_param_list since spc2 has no instruments
 
         # spc3 spacecraft, 3 instruments, 1st and 2nd instrument have 1 mode and 3rd instrument has 3 modes 
         spc3 = Spacecraft.from_json(spc3_json)

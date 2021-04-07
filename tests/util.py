@@ -51,7 +51,8 @@ spc3_json = '{"name": "Saturn", \
                                                 "numberDetectorRows":5, "numberDetectorCols":10, "@type":"Basic Sensor" \
                                             }, \
                                             {   "name": "Gamma", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12, \
-                                                "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":10 }, \
+                                                "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":0.25, "angleWidth":10 }, \
+                                                "sceneFieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":10 }, \
                                                 "maneuver":{"maneuverType": "Double_Roll_Only", "A_rollMin":10, "A_rollMax":15, "B_rollMin":-15, "B_rollMax":-10}, \
                                                 "mode": [{"@id":0, "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}}, \
                                                         {"@id":1, "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle": 25}}, \
@@ -105,7 +106,8 @@ spc5_json = '{"name": "PlanetX", \
                                             "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                             }, \
                                 "instrument": [ \
-                                            {   "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":10 }, \
+                                            {   "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":0.1, "angleWidth":10 }, \
+                                                "sceneFieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":10 }, \
                                                 "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
                                                 "mode": [{"@id":0, "maneuver":{"maneuverType": "single_Roll_Only", "A_rollMin":10, "A_rollMax":15}}, \
                                                         {"@id":1, "maneuver":{"maneuverType": "single_Roll_Only", "A_rollMin":-15, "A_rollMax":-10}}, \

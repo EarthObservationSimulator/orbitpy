@@ -56,6 +56,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
                                      "cartesianStateFilePath":"../../state.csv",
                                      "@id": 12})
         self.assertEqual(o._id, 12)
+        self.assertEqual(o._type, 'Pointing Options With Grid Coverage')
         self.assertEqual(o.grid, Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":25, "latLower":-25, "lonUpper":180, "lonLower":-180, "gridRes": 2}))
         self.assertEqual(o.spacecraft, Spacecraft.from_json(spc1_json))
         self.assertEqual(o.state_cart_file, "../../state.csv")
@@ -127,7 +128,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
             self.assertTrue(lon==access_data['lon [deg]'].tolist())
         else:
             warnings.warn('No data was generated in test_execute_0(.). Run the test again.')
-    '''
+    
     def test_execute_1(self):
         """ Test the result of PointingOptionsWithGridCoverage with separate runs of GridCoverage.
         """
@@ -193,5 +194,5 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
 
         self.assertTrue(np.allclose(group1['time index'].to_numpy(), access_data3['time index'].to_numpy()))
         self.assertTrue(np.allclose(group1['GP index'].to_numpy(), access_data3['GP index'].to_numpy()))
-    '''
+    
         

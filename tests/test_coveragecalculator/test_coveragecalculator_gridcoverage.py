@@ -61,6 +61,7 @@ class TestGridCoverage(unittest.TestCase):
                                      "cartesianStateFilePath":"../../state.csv",
                                      "@id": 12})
         self.assertEqual(o._id, 12)
+        self.assertEqual(o._type, 'Grid Coverage')
         self.assertEqual(o.grid, Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":25, "latLower":-25, "lonUpper":180, "lonLower":-180, "gridRes": 2}))
         self.assertEqual(o.spacecraft, Spacecraft.from_json(spc1_json))
         self.assertEqual(o.state_cart_file, "../../state.csv")

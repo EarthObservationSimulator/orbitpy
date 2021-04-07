@@ -483,6 +483,94 @@ class SpacecraftBus(Entity):
         else:
             return NotImplemented
 
+class GroundStation(Entity):
+    """ Class to store and handle the ground-station attributes.
+
+    :ivar name: Name of the ground-station
+    :vartype name: str
+
+    :ivar latitude: [deg] Geocentric latitude coordinates of the ground-station.
+    :vartype latitude: float
+
+    :ivar longitude: [deg] Geocentric longitude coordinates of the ground-station.
+    :vartype longitude: float
+    
+    :ivar altitude: [km] Altitude of the ground-station.
+    :vartype altitude: float
+
+    :ivar minimumElevation: [deg] Minmum required elevation (angle from ground-plane to satellite) for communication with satellite. 
+    :vartype minimumElevation: float
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+    
+    """
+    def __init__(self, name=None, latitude=None, longitude=None, altitude=None, minimumElevation=None, _id=None):
+
+        self.name = str(name) if name is not None else None
+        self.latitude = float(latitude) if latitude is not None else None
+        self.longitude = float(longitude) if longitude is not None else None
+        self.altitude = float(altitude) if altitude is not None else None
+        self.minimumElevation = float(minimumElevation) if minimumElevation is not None else None
+
+        super(GroundStation, self).__init__(_id, "GroundStation")   
+
+    @staticmethod
+    def from_dict(d):
+        """ Parses ``GroundStation`` object from a dictionary.
+
+        :param d: Dictionary with the ground-station properties.
+        
+        :return: Parsed python object. 
+        :rtype: :class:`orbitpy.util.GroundStation`
+
+        """
+        return GroundStation(
+                name = d.get("name", None),
+                latitude = d.get("latitude", None),
+                longitude = d.get("longitude", None),
+                altitude = d.get("altitude", 0), # Altitude default value is 0km
+                minimumElevation = d.get("minimumElevation", 7), # 7 deg minimum elevation default
+                _id = d.get("@id", uuid.uuid4()) # random default id
+                )
+
+    def to_dict(self, state_type=None):
+        """ Translate the GroundStation object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+
+        :returns: GroundStation specifications as python dictionary.
+        :rtype: dict
+
+        """        
+        return dict({"name": self.name,
+                     "latitude": self.latitude,
+                     "longitude": self.longitude,
+                     "altitude": self.altitude, 
+                     "minimumElevation": self.minimumElevation, 
+                     "@id": self._id
+                    })
+    
+    def __repr__(self):
+        return "GroundStation.from_dict({})".format(self.to_dict())
+
+    def __eq__(self, other):
+        """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
+            Note that _id data attribute may be different.
+        """
+        if(isinstance(self, other.__class__)):
+            return (self.name == other.name and self.lat == other.lat and self.lon == other.lon \
+                    and self.altitude==other.altitude and self.minimumElevation == other.minimumElevation)
+        else:
+            return NotImplemented
+    
+    def get_coords(self):
+        """ Get coordinates of the ground-station.
+
+        :return: Ground-station position (latitude in degrees, longitude in degrees, altitude in kilometers)
+        :rtype: tuple, (float, float, float)
+        
+        """
+        return (self.latitude, self.longitude, self.altitude)
+
 class Spacecraft(Entity):
     """ Class to store and handle the spacecraft attributes.
 
@@ -532,10 +620,12 @@ c
                 instrument = [Instrument.from_dict(x) for x in instru_dict]
             else:
                 instrument = [Instrument.from_dict(instru_dict)]
+        orbitstate_dict = d.get("orbitState", None)
+        spacecraft_bus_dict = d.get("spacecraftBus", None)
         return Spacecraft(
                 name = d.get("name", None),
-                orbitState = OrbitState.from_dict(d.get("orbitState", None)),
-                spacecraftBus = SpacecraftBus.from_dict(d.get("spacecraftBus", None)),
+                orbitState = OrbitState.from_dict(orbitstate_dict) if orbitstate_dict else None,
+                spacecraftBus = SpacecraftBus.from_dict(spacecraft_bus_dict) if spacecraft_bus_dict else None,
                 instrument = instrument,
                 _id = d.get("@id", str(uuid.uuid4()))
                 )
