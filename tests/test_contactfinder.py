@@ -11,7 +11,7 @@ from instrupy.util import Entity, Constants, MathUtilityFunctions, GeoUtilityFun
 import orbitpy.util
 from orbitpy.util import Spacecraft, GroundStation
 from orbitpy.propagator import J2AnalyticalPropagator, PropagatorFactory
-from orbitpy.contactfinder import ContactFinder
+from orbitpy.contactfinder import ContactFinder, ContactFinderOutputInfo
 
 class TestContactFinder(unittest.TestCase):
 
@@ -51,9 +51,18 @@ class TestContactFinder(unittest.TestCase):
     def test_execute_data_format(self):
 
         ########### entityA = Spacecraft, entityB = GroundStation, INTERVAL out_type, default output filename ###########
-        ContactFinder.execute(self.spcA, self.gs1, self.out_dir, self.state_cart_file_sentinel1A, None, None, 'INTERVAL', 0)
-
+        out_info = ContactFinder.execute(self.spcA, self.gs1, self.out_dir, self.state_cart_file_sentinel1A, None, None, ContactFinder.OutType.INTERVAL, 0)
         out_file = self.out_dir + "/sentinel1A_to_gs1.csv"
+
+        self.assertEqual(out_info, ContactFinderOutputInfo.from_dict({"entityAId": self.spcA._id,
+                                                                      "entityBId": self.gs1._id, # note that the entities are swapped
+                                                                      "entityAStateCartFile": self.state_cart_file_sentinel1A,
+                                                                      "entityBStateCartFile": None, # note here that modeId is None
+                                                                      "contactFile": out_file,
+                                                                      "outType": ContactFinder.OutType.INTERVAL,
+                                                                      "opaqueAtmosHeight": 0,
+                                                                      "startDate": 2459243.0618287036,
+                                                                      "duration": self.duration, "@id":None}))   
 
         first_line = pd.read_csv(out_file, nrows=1, header=None).astype(str) # 1st row contains the entity ids
         self.assertEqual(str(first_line[0][0]).split(' ')[5], str(self.spcA._id)) # the ids are converted to string (if not already a string) and compared
@@ -72,9 +81,17 @@ class TestContactFinder(unittest.TestCase):
         self.assertEqual(list(data.columns)[1], 'end index')
 
         ########### entityA = GroundStation, entityB = Spacecraft, DETAIL out_type, default output filename ###########
-        ContactFinder.execute(self.gs2, self.spcB, self.out_dir, None, self.state_cart_file_sentinel1B, None, 'DETAIL', 0)
-
+        out_info = ContactFinder.execute(self.gs2, self.spcB, self.out_dir, None, self.state_cart_file_sentinel1B, None, ContactFinder.OutType.DETAIL, None)
         out_file = self.out_dir + "/sentinel1B_to_gs2.csv"
+        self.assertEqual(out_info, ContactFinderOutputInfo.from_dict({"entityAId": self.spcB._id,
+                                                                      "entityBId": self.gs2._id, # note that the entities are swapped
+                                                                      "entityAStateCartFile": self.state_cart_file_sentinel1B,
+                                                                      "entityBStateCartFile": None, # note here that modeId is None
+                                                                      "contactFile": out_file,
+                                                                      "outType": ContactFinder.OutType.DETAIL,
+                                                                      "opaqueAtmosHeight": 0,
+                                                                      "startDate": 2459243.027060185,
+                                                                      "duration": self.duration, "@id":None}))        
 
         first_line = pd.read_csv(out_file, nrows=1, header=None).astype(str) # 1st row contains the entity ids
         self.assertEqual(str(first_line[0][0]).split(' ')[5], str(self.spcB._id)) # the ids are converted to string (if not already a string) and compared
@@ -155,7 +172,7 @@ class TestContactFinder(unittest.TestCase):
         Number of events : 15
 
         """
-        ContactFinder.execute(self.spcA, self.gs1, self.out_dir, self.state_cart_file_sentinel1A, None, None, 'INTERVAL', 0)
+        ContactFinder.execute(self.spcA, self.gs1, self.out_dir, self.state_cart_file_sentinel1A, None, None, ContactFinder.OutType.INTERVAL, 0)
         data = pd.read_csv(self.out_dir + "/sentinel1A_to_gs1.csv", skiprows = [0,1,2])
         # Epoch: 2021 Jan 28, 13:29:2
         epoch = datetime.datetime(2021, 1, 28, 13, 29, 2)
@@ -238,7 +255,7 @@ class TestContactFinder(unittest.TestCase):
         Number of events : 14
 
         """
-        ContactFinder.execute(self.spcB, self.gs2, self.out_dir, self.state_cart_file_sentinel1B, None, None, 'INTERVAL', 0)
+        ContactFinder.execute(self.spcB, self.gs2, self.out_dir, self.state_cart_file_sentinel1B, None, None, ContactFinder.OutType.INTERVAL, 0)
         data = pd.read_csv(self.out_dir + "/sentinel1B_to_gs2.csv", skiprows = [0,1,2])
         # Epoch: 2021 Jan 28, 13:29:2
         epoch = datetime.datetime(2021, 1, 28, 12, 38, 58)

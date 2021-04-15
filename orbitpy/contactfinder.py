@@ -12,13 +12,20 @@ import pandas as pd
 import csv
 from collections import namedtuple
 
-from instrupy.util import Entity, Constants, MathUtilityFunctions, GeoUtilityFunctions
+from instrupy.util import Entity, EnumEntity, Constants, MathUtilityFunctions, GeoUtilityFunctions
 import orbitpy.util
 from orbitpy.util import Spacecraft, GroundStation
 
 ContactPairs = namedtuple("ContactPairs", ["entityA", "entityA_state_cart_fl", "entityB", "entityB_state_cart_fl"])
 
 class ContactFinder(Entity):
+
+    class OutType(EnumEntity):
+        """ Indicates the type of output data to be saved. 'INTERVAL' indicates that the contact time-intervals are stored, 
+            while 'DETAIL' stores the access (true or false), range and elevation-angle information at each time-step of mission.  
+        """
+        INTERVAL = 'INTERVAL'
+        DETAIL = 'DETAIL'
 
     @staticmethod
     def find_all_pairs(entity, entity_state_cart_fl):
@@ -47,7 +54,7 @@ class ContactFinder(Entity):
         return res
     
     @staticmethod
-    def execute(entityA, entityB, out_dir, entityA_state_cart_fl=None, entityB_state_cart_fl=None, out_filename=None, out_type='INTERVAL', opaque_atmos_height=0):
+    def execute(entityA, entityB, out_dir, entityA_state_cart_fl=None, entityB_state_cart_fl=None, out_filename=None, out_type=OutType.INTERVAL, opaque_atmos_height=None):
         """ Find line-of-sight contact times between two entities (satellite to ground-station or satellite to satellite).
 
         The results are available in two different formats *INTERVAL* or *DETAIL* (either of which can be specified in the input argument ``out_type``).
@@ -99,14 +106,12 @@ class ContactFinder(Entity):
                              in the following format: *entityAName*_to_*entityBName*_contact.csv
         :paramtype out_filename: str or None
 
-        :param out_type: Indicates the type of output data to be saved. 'DETAIL' or 'INTERVAL' are accepted values, where 'INTERVAL' indicates that
-                         the contact time-intervals are stored, while 'DETAIL' stores the range and elevation-angle information at each time-step of mission.  
-                         Default is 'INTERVAL'
-        :paramtype out_type: str
+        :param out_type: Indicates the type of output data to be saved. Default is OutType.INTERVAL.
+        :paramtype out_type: :class:`orbitpy.contactfinder.ContactFinder.OutType`
 
         :param opaque_atmos_height: Relevant in-case both the input entities are spacecrafts. Height of atmosphere (in kilometers) below which line-of-sight 
                                     communication between two satellites cannot take place. Default value is 0 km.
-        :paramtype opaque_atmos_height_km: float
+        :paramtype opaque_atmos_height_km: float or None
 
         :return: None. The results are written out in a file.
         :rtype: None
@@ -213,7 +218,7 @@ class ContactFinder(Entity):
             else: # satellite-to-satellite communication,
                 access_log[idx] = los
 
-            if out_type == 'DETAIL':
+            if out_type == ContactFinder.OutType.DETAIL:
                 AB_km = B_pos - A_pos # TODO repeated calc sometimes, make it more efficient.
                 r_AB_km = np.sqrt(np.dot(AB_km, AB_km))
                 range_log[idx] = r_AB_km
@@ -221,7 +226,7 @@ class ContactFinder(Entity):
                 if isinstance(entityB, GroundStation):                    
                     elv_log[idx] = np.rad2deg(elv_angle) if elv_angle else None
 
-        if out_type == 'DETAIL':
+        if out_type == ContactFinder.OutType.DETAIL:
             # Write DETAIL output file
             if isinstance(entityB, GroundStation): 
                 data = pd.DataFrame(list(zip(time_indx, access_log, range_log, elv_log)), columns=['time index', 'access', 'range [km]', 'elevation [deg]'])
@@ -231,7 +236,7 @@ class ContactFinder(Entity):
                 data = pd.DataFrame(list(zip(time_indx, access_log, range_log)), columns=['time index', 'access', 'range [km]'])
                 data.to_csv(out_filepath, mode='a', index=False)
         
-        elif out_type == 'INTERVAL':    
+        elif out_type == ContactFinder.OutType.INTERVAL:    
             # Post process to create intervals
             interval_boundary = [] # TODO: Having variable-sized list could slow down computation in case of large number of intervals
             flag = access_log[0]
@@ -260,4 +265,122 @@ class ContactFinder(Entity):
 
         else:
             raise RuntimeError("Unknown specification of the contact finder output data format.")    
+        
+        return ContactFinderOutputInfo.from_dict({"@type": "ContactFinderOutputInfo",
+                                                "entityAId": entityA._id,
+                                                "entityBId": entityB._id,
+                                                "entityAStateCartFile": entityA_state_cart_fl,
+                                                "entityBStateCartFile": entityB_state_cart_fl,
+                                                "contactFile": out_filepath,
+                                                "outType": out_type.value,
+                                                "opaqueAtmosHeight": opaque_atmos_height,
+                                                "startDate": epoch_JDUT1,
+                                                "duration": duration,
+                                                "@id": None})
              
+class ContactFinderOutputInfo(Entity):
+    """ Class to hold information about the results of the data-metrics calculation. An object of this class is returned upon the execution
+        of the data metrics calculator.
+    
+    :ivar entityAId: Entity A identifier (spacecraft).
+    :vartype entityAId: str or int
+
+    :ivar entityBId: Entity B identifier (spacecraft or ground-station).
+    :vartype entityBId: str or int
+
+    :ivar entityAStateCartFile: File (filename with path) where the entity A (spacecraft) time-series state data is saved.
+    :vartype entityAStateCartFile: str
+
+    :ivar entityBStateCartFile: File (filename with path) where the entity B (spacecraft) time-series state data is saved. If entity B is ground-station,
+                                the entry is ``None``.
+    :vartype entityBStateCartFile: str
+
+    :ivar contactFile: File (filename with path) where the contacts are saved.
+    :vartype contactFile: str
+
+    :param out_type: Indicates the type of output data to be saved.
+    :paramtype out_type: :class:`orbitpy.contactfinder.ContactFinder.OutType`
+
+    :param opaque_atmos_height: Relevant in-case both the input entities are spacecrafts. Height of atmosphere (in kilometers) below which line-of-sight 
+                                communication between two satellites cannot take place. Will be 0 in case of satellite-to-ground-station contacts.
+    :paramtype opaque_atmos_height_km: float
+
+    :ivar startDate: Time start for contact-finder calculations in Julian Date UT1.
+    :vartype startDate: float
+
+    :ivar duration: Time duration in days for which the contact-finder calculations were carried out.
+    :vartype duration: float
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str or int
+
+    """
+    def __init__(self, entityAId=None, entityBId=None, entityAStateCartFile=None, entityBStateCartFile=None, 
+                 contactFile=None, outType=None, opaqueAtmosHeight=None,  startDate=None, duration=None, _id=None):
+        self.entityAId = entityAId if entityAId is not None else None
+        self.entityBId = entityBId if entityBId is not None else None
+        self.entityAStateCartFile = str(entityAStateCartFile) if entityAStateCartFile is not None else None
+        self.entityBStateCartFile = str(entityBStateCartFile) if entityBStateCartFile is not None else None 
+        self.contactFile = str(contactFile) if contactFile is not None else None
+        self.outType = ContactFinder.OutType.get(outType) if outType is not None else None
+        self.opaqueAtmosHeight = float(opaqueAtmosHeight) if opaqueAtmosHeight is not None else None
+        self.startDate = float(startDate) if startDate is not None else None
+        self.duration = float(duration) if duration is not None else None
+
+        super(ContactFinderOutputInfo, self).__init__(_id, "ContactFinderOutputInfo")
+    
+    @staticmethod
+    def from_dict(d):
+        """ Parses an ``ContactFinderOutputInfo`` object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the ContactFinderOutputInfo attributes.
+        :paramtype d: dict
+
+        :return: ContactFinderOutputInfo object.
+        :rtype: :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
+
+        """
+        out_type_str = d.get('outType', None)
+        
+        return ContactFinderOutputInfo( entityAId = d.get('entityAId', None),
+                                        entityBId = d.get('entityBId', None),
+                                        entityAStateCartFile = d.get('entityAStateCartFile', None),
+                                        entityBStateCartFile = d.get('entityBStateCartFile', None),
+                                        contactFile = d.get('contactFile', None),
+                                        outType =  ContactFinder.OutType.get(out_type_str) if out_type_str is not None else None,
+                                        opaqueAtmosHeight = d.get('opaqueAtmosHeight', None),
+                                        startDate = d.get('startDate', None),
+                                        duration = d.get('duration', None),
+                                        _id  = d.get('@id', None))
+
+    def to_dict(self):
+        """ Translate the ContactFinderOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: ContactFinderOutputInfo object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "ContactFinderOutputInfo",
+                     "entityAId": self.entityAId,
+                     "entityBId": self.entityBId,
+                     "entityAStateCartFile": self.entityAStateCartFile,
+                     "entityBStateCartFile": self.entityBStateCartFile,
+                     "contactFile": self.contactFile,
+                     "outType": self.outType.value,
+                     "opaqueAtmosHeight": self.opaqueAtmosHeight,
+                     "startDate": self.startDate,
+                     "duration": self.duration,
+                     "@id": self._id})
+
+    def __repr__(self):
+        return "ContactFinderOutputInfo.from_dict({})".format(self.to_dict())
+    
+    def __eq__(self, other):
+        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        if(isinstance(self, other.__class__)):
+            return (self.entityAId==other.entityAId) and (self.entityBId==other.entityBId) and (self.entityAStateCartFile==other.entityAStateCartFile) and \
+                   (self.entityBStateCartFile==other.entityBStateCartFile) and  (self.contactFile==other.contactFile) and  (self.outType==other.outType) and \
+                   (self.opaqueAtmosHeight==other.opaqueAtmosHeight) and (self.startDate==other.startDate) and (self.duration==other.duration) 
+                
+        else:
+            return NotImplemented
