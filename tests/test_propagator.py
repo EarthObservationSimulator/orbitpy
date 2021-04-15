@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from orbitpy.util import OrbitState, Spacecraft
-from orbitpy.propagator import PropagatorFactory, J2AnalyticalPropagator
+from orbitpy.propagator import PropagatorFactory, PropagatorOutputInfo, J2AnalyticalPropagator
 import orbitpy.propagator
 import propcov
 from instrupy import Instrument
@@ -73,8 +73,8 @@ class TestPropagatorFactory(unittest.TestCase):
         factory = PropagatorFactory()
 
         # test the built-in propagators are registered
-        self.assertIn('J2 Analytical Propagator', factory._creators)
-        self.assertEqual(factory._creators['J2 Analytical Propagator'], J2AnalyticalPropagator)
+        self.assertIn('J2 ANALYTICAL PROPAGATOR', factory._creators)
+        self.assertEqual(factory._creators['J2 ANALYTICAL PROPAGATOR'], J2AnalyticalPropagator)
 
     def test_register_propagator(self):
         factory = PropagatorFactory()
@@ -82,8 +82,8 @@ class TestPropagatorFactory(unittest.TestCase):
         self.assertIn('New Propagator', factory._creators)
         self.assertEqual(factory._creators['New Propagator'], TestPropagatorFactory.DummyNewPropagator)
         # test the built-in propagators remain registered after registration of new propagator
-        self.assertIn('J2 Analytical Propagator', factory._creators)
-        self.assertEqual(factory._creators['J2 Analytical Propagator'], J2AnalyticalPropagator)
+        self.assertIn('J2 ANALYTICAL PROPAGATOR', factory._creators)
+        self.assertEqual(factory._creators['J2 ANALYTICAL PROPAGATOR'], J2AnalyticalPropagator)
 
     def test_get_propagator(self):
         
@@ -92,8 +92,8 @@ class TestPropagatorFactory(unittest.TestCase):
         factory.register_propagator('New Propagator', TestPropagatorFactory.DummyNewPropagator)
         
         # test the propgator model classes can be obtained depending on the input specifications
-        # J2 Analytical Propagator
-        specs = {"@type": 'J2 Analytical Propagator'} # in practice additional propagator specs shall be present in the dictionary
+        # J2 ANALYTICAL PROPAGATOR
+        specs = {"@type": 'J2 ANALYTICAL PROPAGATOR'} # in practice additional propagator specs shall be present in the dictionary
         j2_prop = factory.get_propagator(specs)
         self.assertIsInstance(j2_prop, J2AnalyticalPropagator)
 
@@ -117,7 +117,7 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         # setup a simple random propagation test case
         factory = PropagatorFactory()
         self.step_size = 0.5 + random.random()
-        specs = {"@type": 'J2 Analytical Propagator', 'stepSize':self.step_size } 
+        specs = {"@type": 'J2 analytical prOPAGator', 'stepSize':self.step_size } 
         self.j2_prop = factory.get_propagator(specs)
 
         self.duration=random.random()
@@ -135,28 +135,35 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         self.out_file_kep = self.out_dir+'/test_prop_kep.csv'
 
         # run the propagator
-        self.j2_prop.execute(self.spacecraft, None, self.out_file_cart, self.out_file_kep, self.duration)
+        out_info = self.j2_prop.execute(self.spacecraft, None, self.out_file_cart, self.out_file_kep, self.duration)
 
+        # test the output info object
+        self.assertEqual(out_info, PropagatorOutputInfo.from_dict({'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
+                                                              'spacecraftId': self.spacecraft._id, 
+                                                              'stateCartFile': self.out_file_cart,
+                                                              'stateKeplerianFile': self.out_file_kep ,
+                                                              'startDate': self.spacecraft.orbitState.get_julian_date() ,
+                                                              'duration': self.duration }))
 
     def test_from_json(self):       
 
-        o = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 0.5})
+        o = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 0.5})
         self.assertIsInstance(o, J2AnalyticalPropagator)
         self.assertEqual(o.stepSize, 0.5)
         self.assertIsNone(o._id)
 
-        o = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 1, "@id":"abc"})
+        o = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 1, "@id":"abc"})
         self.assertIsInstance(o, J2AnalyticalPropagator)
         self.assertEqual(o.stepSize, 1)
         self.assertEqual(o._id, "abc")
 
-        o = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 1.5, "@id":123})
+        o = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 1.5, "@id":123})
         self.assertIsInstance(o, J2AnalyticalPropagator)
         self.assertEqual(o.stepSize, 1.5)
         self.assertEqual(o._id, 123)
 
         # test default step size
-        o = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator"})
+        o = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR"})
         self.assertIsInstance(o, J2AnalyticalPropagator)
         self.assertEqual(o.stepSize, 60)
         self.assertIsNone(o._id)
@@ -251,3 +258,6 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
     def test_execute_3(self):
         """ Check prograde and retrograd -icity of the orbits."""
         pass
+
+class TestPropagatorOutputInfo(unittest.TestCase): #TODO
+    pass

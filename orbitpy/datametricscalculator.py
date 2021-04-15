@@ -14,7 +14,7 @@ from instrupy.util import Entity, Constants
 import orbitpy.util
 from orbitpy.util import Spacecraft
 
-AccessFileInfo = namedtuple("AccessFileInfo", ["sensor_id", "mode_id", "access_filepath"])
+AccessFileInfo = namedtuple("AccessFileInfo", ["instru_id", "mode_id", "access_filepath"])
 
 class DataMetricsCalculator(Entity): 
     """ Class to handle computation of observational data metrics by invoking the :code:`instrupy` package.
@@ -27,7 +27,7 @@ class DataMetricsCalculator(Entity):
     :vartype state_cart_file: str
 
     :ivar access_file_info: List of tuples (sensor-id, mode-id, access-file path (with name)). 
-                            The namedtuple object has name as AccessFileInfo and fields as sensor_id, mode_id and access_filepath.
+                            The namedtuple object has name as AccessFileInfo and fields as instru_id, mode_id and access_filepath.
                             The access-file indicated in each tuple corresponds
                             to the sensor-id and mode-id of the tuple. The list maybe incomplete, that is not the access-data of all the possible instruments, modes of the spacecraft
                             may not be available. Use the ``add_access_data_pointer(.)`` function to add a new tuple to the list.
@@ -55,7 +55,7 @@ class DataMetricsCalculator(Entity):
         # TODO: Checks to see if the sensor-id, mode-id is exists for the spacecraft. Check for uniqueness before adding.
 
         :param acc_info: Namedtuple indicating path of access data file for a particular instrument, mode.
-                         The namedtuple object has name as AccessFileInfo and fields as sensor_id, mode_id and access_filepath.
+                         The namedtuple object has name as AccessFileInfo and fields as instru_id, mode_id and access_filepath.
                          Refer to the ``coveragecalculator`` module for the format of the access-files.
         :paramtype: :class:`orbitpy.datametricscalculator.AccessFileInfo`
 
@@ -72,7 +72,7 @@ class DataMetricsCalculator(Entity):
     def from_dict(d):
         """ Parses an ``DataMetricsCalculator`` object from a normalized JSON dictionary.
         
-        .. todo:: Add feature to test that the specified accessFileInfo parameters (sensorId and modeId) correspond to the instruments in the spacecraft.
+        .. todo:: Add feature to test that the specified accessFileInfo parameters (instruId and modeId) correspond to the instruments in the spacecraft.
 
         
         :param d: Dictionary with the DataMetricsCalculator specifications.
@@ -82,7 +82,7 @@ class DataMetricsCalculator(Entity):
                 * "spacecraft":             (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
                 * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in 
                                              CARTESIAN_EARTH_CENTERED_INERTIAL. Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
-                * "accessFileInfo":         (list, dict). List of dictionaries, where each dictionary contains the following keys: (1) sensorId (str or int), (2) modeId (str or int)
+                * "accessFileInfo":         (list, dict). List of dictionaries, where each dictionary contains the following keys: (1) instruId (str or int), (2) modeId (str or int)
                                             and (3) accessFilePath (str). 
                                             Refer to the ``coveragecalculator`` module for the format of the access-files. Different coverage-calculators have different access-file formats.
                 * "@id":                    (str or int) Unique identifier of the datametrics calculator object.
@@ -98,9 +98,9 @@ class DataMetricsCalculator(Entity):
         afi = []
         if isinstance(afi_dict, list): # list of dictionaries
             for x in afi_dict:
-                afi.append(AccessFileInfo(sensor_id=x.get('sensorId', None), mode_id=x.get('modeId', None), access_filepath=x.get('accessFilePath', None)))
+                afi.append(AccessFileInfo(instru_id=x.get('instruId', None), mode_id=x.get('modeId', None), access_filepath=x.get('accessFilePath', None)))
         elif isinstance(afi_dict, dict): # single dictionary
-            afi = [AccessFileInfo(sensor_id=afi_dict.get('sensorId', None), mode_id=afi_dict.get('modeId', None), access_filepath=afi_dict.get('accessFilePath', None))]
+            afi = [AccessFileInfo(instru_id=afi_dict.get('instruId', None), mode_id=afi_dict.get('modeId', None), access_filepath=afi_dict.get('accessFilePath', None))]
         else:
             afi = None
         return DataMetricsCalculator(spacecraft = Spacecraft.from_dict(spc_dict) if spc_dict else None, 
@@ -117,42 +117,42 @@ class DataMetricsCalculator(Entity):
         """
         access_file_info_dict = None
         for afi in self.access_file_info:
-            access_file_info_dict.append({"sensorId": afi.sensor_id, "modeId": afi.mode_id, "accessFilePath": afi.access_filepath})
-        return dict({"@type": "Grid Coverage",
+            access_file_info_dict.append({"instruId": afi.instru_id, "modeId": afi.mode_id, "accessFilePath": afi.access_filepath})
+        return dict({"@type": "GRID COVERAGE",
                      "spacecraft": self.to_dict,
                      "accessFileInfo" : access_file_info_dict,
                      "cartesianStateFilePath": self.state_cart_file,
                      "@id": self._id})
 
-    def search_access_file_info(self, sensor_id=None, mode_id=None):
+    def search_access_file_info(self, instru_id=None, mode_id=None):
         """ Search the list of namedtuples (of the instance ``access_file_info`` attribute) and find tuple with matching sensor id and mode id.
 
-        :param sensor_id: Instrument identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute is returned.
-        :paramtype sensor_id: str (or) int
+        :param instru_id: Instrument identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute is returned.
+        :paramtype instru_id: str (or) int
 
-        :param mode_id: Mode identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute with the matching sensor_id is returned.
+        :param mode_id: Mode identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute with the matching instru_id is returned.
         :paramtype mode_id: str (or) int
 
         :return: (Single) Tuple of (instrument id, mode id, access filepath), such that the instrument-id and 
-                 the mode-id match the input identifiers (sensor_id, mode_id).
+                 the mode-id match the input identifiers (instru_id, mode_id).
         :rtype: namedtuple, (str or int, str or int, str ) 
 
         """
         if self.access_file_info is not None and self.access_file_info != []:
-            if sensor_id is None:
+            if instru_id is None:
                 return (self.access_file_info[0])
             idx = 0
             for a,b,c in self.access_file_info:
-                if a == sensor_id and mode_id is None:
+                if a == instru_id and mode_id is None:
                     return self.access_file_info[idx]
-                elif a == sensor_id and b == mode_id:
+                elif a == instru_id and b == mode_id:
                     return self.access_file_info[idx]
                 idx = idx + 1
             raise Exception('Entry corresponding to the input instrument-id and mode-id was not found.')
         else:
             raise Exception('Access file info (i.e. the instance access_file_info attribute) is empty.')
 
-    def execute(self, out_datametrics_fl, sensor_id=None, mode_id=None):
+    def execute(self, out_datametrics_fl, instru_id=None, mode_id=None):
         """ Execute data-metrics calculation for the specified instrument, mode in the spacecraft.
             This function iterates over the access file corresponding to the specified instrument, mode and calculates the data-metrics 
             for each access. The satellite state data is extracted from the satellite state file (CARTESIAN_EARTH_CENTERED_INERTIAL) corresponding 
@@ -183,8 +183,8 @@ class DataMetricsCalculator(Entity):
 
         :paramtype out_datametrics_fl: str
 
-        :param sensor_id: Instrument identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute is considered.
-        :paramtype sensor_id: str (or) int
+        :param instru_id: Instrument identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute is considered.
+        :paramtype instru_id: str (or) int
 
         :param mode_id: Mode identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute is considered.
         :paramtype mode_id: str (or) int
@@ -194,7 +194,7 @@ class DataMetricsCalculator(Entity):
         
         """
         # get instrument corresponding to the input id
-        instru = self.spacecraft.get_instrument(sensor_id)
+        instru = self.spacecraft.get_instrument(instru_id)
 
         # read in the satellite states (CARTESIAN_EARTH_CENTERED_INERTIAL) and auxillary info
         (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.state_cart_file)
@@ -202,9 +202,12 @@ class DataMetricsCalculator(Entity):
         sat_state_df = sat_state_df.set_index('time index')
 
         # get the access file corresponding to the specified instrument, mode
-        (x, y, acc_filepath) = self.search_access_file_info(sensor_id, mode_id)
-        access_info_df = pd.read_csv(acc_filepath, skiprows = [0,1,2,3]) # read the access times              
-
+        (x, y, acc_filepath) = self.search_access_file_info(instru_id, mode_id)
+        access_info_df = pd.read_csv(acc_filepath, skiprows = [0,1,2,3]) # read the access times 
+        # the input instru_id, mode_id may be None, so get the sensor, mode ids.
+        instru_id = x
+        mode_id = y
+        
         # copy info rows from the original access file
         with open(acc_filepath, 'r') as f:
             head = [next(f) for x in [0,1,2,3]] 
@@ -256,6 +259,104 @@ class DataMetricsCalculator(Entity):
                     w.writerow(_v.keys())    
                 w.writerow(_v.values())
                 idx = idx + 1
+        
+        return DataMetricsOutputInfo.from_dict({"@type": "DataMetricsOutputInfo",
+                                                "spacecraftId": self.spacecraft._id,
+                                                "instruId": instru_id,
+                                                "modeId": mode_id,
+                                                "accessFile": acc_filepath,
+                                                "dataMetricsFile": out_datametrics_fl,
+                                                "startDate": epoch_JDUT1,
+                                                "duration": duration,
+                                                "@id": None})
 
+class DataMetricsOutputInfo(Entity):
+    """ Class to hold information about the results of the data-metrics calculation. An object of this class is returned upon the execution
+        of the data metrics calculator.
+    
+    :ivar spacecraftId: Spacecraft identifier.
+    :vartype spacecraftId: str or int
 
+    :param instruId: Sensor identifier.
+    :paramtype instruId: str (or) int
 
+    :param modeId: Mode identifier.
+    :paramtype modeId: str (or) int 
+
+    :ivar accessFile: File (filename with path) where the access data is saved.
+    :vartype accessFile: str
+
+    :ivar dataMetricsFile: File (filename with path) where the data-metrics data is saved.
+    :vartype dataMetricsFile: str
+
+    :ivar startDate: Time start for coverage calculation in Julian Date UT1.
+    :vartype startDate: float
+
+    :ivar duration: Time duration over which coverage was calculated in days.
+    :vartype duration: float
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str or int
+
+    """
+    def __init__(self, spacecraftId=None, instruId=None, modeId=None, gridId=None, 
+                 accessFile=None, dataMetricsFile=None,  startDate=None, duration=None, _id=None):
+        self.spacecraftId = spacecraftId if spacecraftId is not None else None
+        self.instruId = instruId if instruId is not None else None
+        self.modeId = modeId if modeId is not None else None
+        self.accessFile = str(accessFile) if accessFile is not None else None
+        self.dataMetricsFile = str(dataMetricsFile) if dataMetricsFile is not None else None
+        self.startDate = float(startDate) if startDate is not None else None
+        self.duration = float(duration) if duration is not None else None
+
+        super(DataMetricsOutputInfo, self).__init__(_id, "DataMetricsOutputInfo")
+    
+    @staticmethod
+    def from_dict(d):
+        """ Parses an ``DataMetricsOutputInfo`` object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the DataMetricsOutputInfo attributes.
+        :paramtype d: dict
+
+        :return: DataMetricsOutputInfo object.
+        :rtype: :class:`orbitpy.datametricscalculator.DataMetricsOutputInfo`
+
+        """
+        return DataMetricsOutputInfo( spacecraftId = d.get('spacecraftId', None),
+                                      instruId = d.get('instruId', None),
+                                      modeId = d.get('modeId', None),
+                                      accessFile = d.get('accessFile', None),
+                                      dataMetricsFile = d.get('dataMetricsFile', None),
+                                      startDate = d.get('startDate', None),
+                                      duration = d.get('duration', None),
+                                      _id  = d.get('@id', None))
+
+    def to_dict(self):
+        """ Translate the DataMetricsOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: DataMetricsOutputInfo object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "DataMetricsOutputInfo",
+                     "spacecraftId": self.spacecraftId,
+                     "instruId": self.instruId,
+                     "modeId": self.modeId,
+                     "accessFile": self.accessFile,
+                     "dataMetricsFile": self.dataMetricsFile,
+                     "startDate": self.startDate,
+                     "duration": self.duration,
+                     "@id": self._id})
+
+    def __repr__(self):
+        return "DataMetricsOutputInfo.from_dict({})".format(self.to_dict())
+    
+    def __eq__(self, other):
+        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        if(isinstance(self, other.__class__)):
+            return (self.spacecraftId==other.spacecraftId) and (self.instruId==other.instruId) and (self.modeId==other.modeId) and \
+                   (self.accessFile==other.accessFile) and  (self.dataMetricsFile==other.dataMetricsFile) and \
+                   (self.startDate==other.startDate) and (self.duration==other.duration) 
+                
+        else:
+            return NotImplemented

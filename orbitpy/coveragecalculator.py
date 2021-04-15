@@ -10,7 +10,7 @@ import csv
 import pandas as pd
 
 import propcov
-from instrupy.util import Entity, Constants
+from instrupy.util import Entity, EnumEntity, Constants
 from orbitpy.grid import Grid
 import orbitpy.util
 from orbitpy.util import Spacecraft
@@ -43,9 +43,9 @@ class CoverageCalculatorFactory:
     """
     def __init__(self):
         self._creators = {}
-        self.register_coverage_calculator('Grid Coverage', GridCoverage)
-        self.register_coverage_calculator('Pointing Options Coverage', PointingOptionsCoverage)
-        self.register_coverage_calculator('Pointing Options With Grid Coverage', PointingOptionsWithGridCoverage)
+        self.register_coverage_calculator('GRID COVERAGE', GridCoverage)
+        self.register_coverage_calculator('POINTING OPTIONS COVERAGE', PointingOptionsCoverage)
+        self.register_coverage_calculator('POINTING OPTIONS WITH GRID COVERAGE', PointingOptionsWithGridCoverage)
 
     def register_coverage_calculator(self, _type, creator):
         """ Function to register coverage calculators.
@@ -71,11 +71,23 @@ class CoverageCalculatorFactory:
         _type = specs.get("@type", None)
         if _type is None:
             raise KeyError('Coverage Calculator type key/value pair not found in specifications dictionary.')
+        else:
+            try:
+                _type = CoverageType.get(_type).value
+            except:
+                pass # a new user defined type not present in the CoverageType class.
 
         creator = self._creators.get(_type)
         if not creator:
             raise ValueError(_type)
         return creator.from_dict(specs)
+
+class CoverageType(EnumEntity):
+    """ Enumeration of the orbitpy recognized coverage calculators.
+    """
+    GRID_COVERAGE = 'GRID COVERAGE'
+    POINTING_OPTIONS_COVERAGE = 'POINTING OPTIONS COVERAGE'
+    POINTING_OPTIONS_WITH_GRID_COVERAGE = 'POINTING OPTIONS WITH GRID COVERAGE'
 
 def helper_extract_coverage_parameters_of_spacecraft(spc):
     """ Helper function to extract tuples of (instrument_id, mode_id, scene-field-of-view, field-of-regard, pointing_option(s)).
@@ -110,32 +122,32 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
                     
     return params
 
-def find_in_cov_params_list(cov_param_list, sensor_id=None, mode_id=None):
+def find_in_cov_params_list(cov_param_list, instru_id=None, mode_id=None):
     """ For an input instrument-id, mode-id, find the corresponding FOV, FOR and pointing_option(s) in an input list of coverage-parameters 
-        (list of tuples of (sensor_id, mode_id, field-of-view, field-of-regard, pointing_option)). 
+        (list of tuples of (instru_id, mode_id, field-of-view, field-of-regard, pointing_option)). 
 
     :param cov_param_list: List of tuples of (instrument id, mode id, field-of-view, field-of-regard, pointing_option).
     :paramtype cov_param_list: list, namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list, :class:`instrupy.util.ViewGeometry`>, <list,:class:`instrupy.util.Orientation`>)
 
-    :param sensor_id: Instrument identifier. If ``None``, the first tuple in the list of coverage parameters is returned.
-    :paramtype sensor_id: str (or) int
+    :param instru_id: Instrument identifier. If ``None``, the first tuple in the list of coverage parameters is returned.
+    :paramtype instru_id: str (or) int
 
-    :param mode_id: Mode identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute with the matching sensor_id is returned.
+    :param mode_id: Mode identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute with the matching instru_id is returned.
     :paramtype mode_id: str (or) int
 
     :return: (Single) Tuple of (instrument id, mode id, field-of-view, field-of-regard, pointing-option(s)), such that the instrument-id and 
-             the mode-id match the input identifiers (sensor_id, mode_id).
+             the mode-id match the input identifiers (instru_id, mode_id).
     :rtype: namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list, :class:`instrupy.util.ViewGeometry`> , <list,:class:`instrupy.util.Orientation`> )
 
     """ 
     if cov_param_list is not None and cov_param_list != []:
-        if sensor_id is None:
+        if instru_id is None:
             return (cov_param_list[0])
         idx = 0
         for a,b,c,d,e in cov_param_list:
-            if a == sensor_id and mode_id is None:
+            if a == instru_id and mode_id is None:
                 return cov_param_list[idx]
-            elif a == sensor_id and b == mode_id:
+            elif a == instru_id and b == mode_id:
                 return cov_param_list[idx]
             idx = idx + 1
             
@@ -258,7 +270,7 @@ class GridCoverage(Entity):
         # Extract the coverage related parameters
         self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.spacecraft) if self.spacecraft is not None else None
 
-        super(GridCoverage, self).__init__(_id, "Grid Coverage")
+        super(GridCoverage, self).__init__(_id, "GRID COVERAGE")
 
     @staticmethod
     def from_dict(d):
@@ -294,20 +306,23 @@ class GridCoverage(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "Grid Coverage",
+        return dict({"@type": "GRID COVERAGE",
                      "grid": self.grid.to_dict,
                      "spacecraft": self.to_dict,
                      "cartesianStateFilePath": self.state_cart_file,
                      "@id": self._id})
 
-    def execute(self, sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None):
+    def __repr__(self):
+        return "GridCoverage.from_dict({})".format(self.to_dict())
+
+    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None):
         """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
             same as the time resolution at which the spacecraft states are available. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV)
             is used for coverage calculations.
 
-        :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
-        :paramtype sensor_id: str (or) int
+        :param instru_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
+        :paramtype instru_id: str (or) int
 
         :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
         :paramtype mode_id: str (or) int
@@ -335,8 +350,8 @@ class GridCoverage(Entity):
         
         :paramtype out_file_access: str
 
-        :return: None
-        :rtype: None
+        :return: Coverage output info.
+        :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
 
         """
         ###### read in the propagated states and auxillary information ######               
@@ -347,14 +362,18 @@ class GridCoverage(Entity):
         if out_file_access:
             access_file = open(out_file_access, 'w', newline='')
             access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["Grid Coverage"])
+            access_writer.writerow(["GRID COVERAGE"])
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             access_writer.writerow(['time index','GP index', 'lat [deg]', 'lon [deg]'])
         
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
-        cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
+        cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
+        # the input instru_id, mode_id may be None, so get the sensor, mode ids.
+        instru_id = cov_param.instru_id
+        mode_id = cov_param.mode_id
+
         if use_field_of_regard is True:
             view_geom = cov_param.field_of_regard # a list
         else:
@@ -418,6 +437,19 @@ class GridCoverage(Entity):
         ##### Close file #####                
         if access_file:
             access_file.close()
+        
+        return CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
+                                                "coverageType": "GRID COVERAGE",
+                                                "spacecraftId": self.spacecraft._id,
+                                                "instruId": instru_id,
+                                                "modeId": mode_id,
+                                                "usedFieldOfRegard": use_field_of_regard,
+                                                "gridId": self.grid._id,
+                                                "stateCartFile": self.state_cart_file,
+                                                "accessFile": out_file_access,
+                                                "startDate": epoch_JDUT1,
+                                                "duration": duration,
+                                                "@id": None})
             
 class PointingOptionsCoverage(Entity):
     """A coverage calculator which handles coverage calculation for a spacecraft with specified set of pointing-options.
@@ -442,7 +474,7 @@ class PointingOptionsCoverage(Entity):
         # Extract the coverage related parameters
         self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.spacecraft) if self.spacecraft is not None else None
 
-        super(PointingOptionsCoverage, self).__init__(_id, "Pointing Options Coverage")
+        super(PointingOptionsCoverage, self).__init__(_id, "POINTING OPTIONS COVERAGE")
 
     @staticmethod
     def from_dict(d):
@@ -476,10 +508,13 @@ class PointingOptionsCoverage(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "Pointing Options Coverage",
+        return dict({"@type": "POINTING OPTIONS COVERAGE",
                      "spacecraft": self.to_dict,
                      "cartesianStateFilePath": self.state_cart_file,
                      "@id": self._id})
+
+    def __repr__(self):
+        return "PointingOptionsCoverage.from_dict({})".format(self.to_dict())
 
     @staticmethod
     def intersect_vector_sphere(r, o, vec_direc):
@@ -525,13 +560,13 @@ class PointingOptionsCoverage(Entity):
         
         return intersect_point.tolist()
 
-    def execute(self, sensor_id=None, mode_id=None, out_file_access=None):
+    def execute(self, instru_id=None, mode_id=None, out_file_access=None):
         """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
             same as the time resolution at which the spacecraft states are available.
 
-        :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
-        :paramtype sensor_id: str (or) int
+        :param instru_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
+        :paramtype instru_id: str (or) int
 
         :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
         :paramtype mode_id: str (or) int        
@@ -555,8 +590,8 @@ class PointingOptionsCoverage(Entity):
         
         :paramtype out_file_access: str
 
-        :return: None
-        :rtype: None
+        :return: Coverage output info.
+        :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
 
         """
         ###### read in the propagated states and auxillary information ######               
@@ -569,19 +604,21 @@ class PointingOptionsCoverage(Entity):
         if out_file_access:
             access_file = open(out_file_access, 'w', newline='')
             access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["Pointing Options Coverage"])
+            access_writer.writerow(["POINTING OPTIONS COVERAGE"])
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             access_writer.writerow(['time index', 'pnt-opt index', 'lat [deg]', 'lon [deg]'])
         
         ###### find the pointing-options corresponding to the input sensor-id, mode-id  ######
-        cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
+        cov_param = find_in_cov_params_list(self.cov_params, instru_id, mode_id)
         pointing_option = cov_param.pointing_option
         if pointing_option is None:
             print("No pointing options specified for the particular sensor, mode. Exiting PointingOptionsCoverage.")
             return
-
+        # the input instru_id, mode_id may be None, so get the sensor, mode ids.
+        instru_id = cov_param.instru_id
+        mode_id = cov_param.mode_id
         ###### iterate over the propagated states ######
         date = propcov.AbsoluteDate()
         for idx, state in states_df.iterrows():
@@ -626,6 +663,19 @@ class PointingOptionsCoverage(Entity):
         ##### Close file #####                
         if access_file:
             access_file.close()
+        
+        return CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
+                                                "coverageType": "POINTING OPTIONS COVERAGE",
+                                                "spacecraftId": self.spacecraft._id,
+                                                "instruId": instru_id,
+                                                "modeId": mode_id,
+                                                "usedFieldOfRegard": None,
+                                                "gridId": None,
+                                                "stateCartFile": self.state_cart_file,
+                                                "accessFile": out_file_access,
+                                                "startDate": epoch_JDUT1,
+                                                "duration": duration,
+                                                "@id": None})
 
 class PointingOptionsWithGridCoverage(Entity):
     """A coverage calculator which handles coverage calculation for a spacecraft over a grid for a set of pointing-options.         
@@ -655,7 +705,7 @@ class PointingOptionsWithGridCoverage(Entity):
         # Extract the coverage related parameters
         self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.spacecraft) if self.spacecraft is not None else None
 
-        super(PointingOptionsWithGridCoverage, self).__init__(_id, "Pointing Options With Grid Coverage")
+        super(PointingOptionsWithGridCoverage, self).__init__(_id, "POINTING OPTIONS WITH GRID COVERAGE")
 
     @staticmethod
     def from_dict(d):
@@ -691,13 +741,16 @@ class PointingOptionsWithGridCoverage(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "Pointing Options With Grid Coverage",
+        return dict({"@type": "POINTING OPTIONS WITH GRID COVERAGE",
                      "grid": self.grid.to_dict,
                      "spacecraft": self.to_dict,
                      "cartesianStateFilePath": self.state_cart_file,
                      "@id": self._id})
 
-    def execute(self, sensor_id=None, mode_id=None, out_file_access=None):
+    def __repr__(self):
+        return "PointingOptionsWithGridCoverage.from_dict({})".format(self.to_dict())
+
+    def execute(self, instru_id=None, mode_id=None, out_file_access=None):
         """ Perform orbit coverage calculation for a specific instrument and mode. 
             The field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
             Coverage is calculated for the period over which the input spacecraft propagated states are available. 
@@ -705,8 +758,8 @@ class PointingOptionsWithGridCoverage(Entity):
             The access-times, grid-points are calculated seperately for each pointing-option.
             Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations.
 
-        :param sensor_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
-        :paramtype sensor_id: str (or) int
+        :param instru_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
+        :paramtype instru_id: str (or) int
 
         :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
         :paramtype mode_id: str (or) int
@@ -731,8 +784,8 @@ class PointingOptionsWithGridCoverage(Entity):
         
         :paramtype out_file_access: str
 
-        :return: None
-        :rtype: None
+        :return: Coverage output info.
+        :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
 
         """
         ###### read in the propagated states and auxillary information ######               
@@ -743,14 +796,19 @@ class PointingOptionsWithGridCoverage(Entity):
         if out_file_access:
             access_file = open(out_file_access, 'w', newline='')
             access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["Pointing Options With Grid Coverage"])
+            access_writer.writerow(["POINTING OPTIONS WITH GRID COVERAGE"])
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             access_writer.writerow(['time index','pnt-opt index', 'GP index', 'lat [deg]', 'lon [deg]'])
         
         ###### find the coverage-parameters of the input sensor-id, mode-id  ######
-        cov_param= find_in_cov_params_list(self.cov_params, sensor_id, mode_id)
+        cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
+        
+        # the input instru_id, mode_id may be None, so get the sensor, mode ids.
+        instru_id = cov_param.instru_id
+        mode_id = cov_param.mode_id
+
         sen_sph_geom = cov_param.scene_field_of_view.sph_geom # only the spherical geometry of the sensor is required. the orientation is ignored, since the pointing-option gives the orientation of the pointing-axis in the NADIR_POINTING frame.
         pointing_option = cov_param.pointing_option
         if pointing_option is None:
@@ -805,3 +863,130 @@ class PointingOptionsWithGridCoverage(Entity):
         ##### Close file #####                
         if access_file:
             access_file.close()
+
+        return CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
+                                                "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
+                                                "spacecraftId": self.spacecraft._id,
+                                                "instruId": instru_id,
+                                                "modeId": mode_id,
+                                                "usedFieldOfRegard": None,
+                                                "gridId": self.grid._id,
+                                                "stateCartFile": self.state_cart_file,
+                                                "accessFile": out_file_access,
+                                                "startDate": epoch_JDUT1,
+                                                "duration": duration,
+                                                "@id": None})
+
+class CoverageOutputInfo(Entity):
+    """ Class to hold information about the results of the coverage calculation. An object of this class is returned upon the execution
+        of the coverage calculator.
+    
+    :ivar coverageType: Type of coverage calculator which produced the results.
+    :vartype coverageType: :class:`orbitpy.coveragecalculator.CoverageType`
+
+    :ivar spacecraftId: Spacecraft identifier.
+    :vartype spacecraftId: str or int
+
+    :param instruId: Sensor identifier.
+    :paramtype instruId: str (or) int
+
+    :param modeId: Mode identifier.
+    :paramtype modeId: str (or) int 
+
+    :param usedFieldOfRegard: Boolean flag which indicates if the field-of-regard was used in the coverage calculations. 
+                              If not relevant the value is ``None``. 
+    :paramtype usedFieldOfRegard: bool (or) None
+
+    :param gridId: Grid identifier. 
+    :paramtype gridId: str (or) int 
+
+    :ivar stateCartFile: State file (filename with path) where the time-series of the cartesian states of the spacecraft are saved.
+    :vartype stateCartFile: str
+
+    :ivar accessFile: File (filename with path) where the access data is saved.
+    :vartype accessFile: str
+
+    :ivar startDate: Time start for coverage calculation in Julian Date UT1.
+    :vartype startDate: float
+
+    :ivar duration: Time duration over which coverage was calculated in days.
+    :vartype duration: float
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str or int
+
+    """
+    def __init__(self, coverageType=None, spacecraftId=None, instruId=None, modeId=None, usedFieldOfRegard=None, gridId=None, 
+                 stateCartFile=None, accessFile=None, 
+                 startDate=None, duration=None, _id=None):
+        self.coverageType = coverageType if coverageType is not None and isinstance(coverageType, CoverageType) else None
+        self.spacecraftId = spacecraftId if spacecraftId is not None else None
+        self.instruId = instruId if instruId is not None else None
+        self.modeId = modeId if modeId is not None else None
+        self.gridId = gridId if gridId is not None else None 
+        self.usedFieldOfRegard = usedFieldOfRegard if usedFieldOfRegard is not None else None
+        self.stateCartFile = str(stateCartFile) if stateCartFile is not None else None
+        self.accessFile = str(accessFile) if accessFile is not None else None
+        self.startDate = float(startDate) if startDate is not None else None
+        self.duration = float(duration) if duration is not None else None
+
+        super(CoverageOutputInfo, self).__init__(_id, "CoverageOutputInfo")
+    
+    @staticmethod
+    def from_dict(d):
+        """ Parses an ``CoverageOutputInfo`` object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the CoverageOutputInfo attributes.
+        :paramtype d: dict
+
+        :return: CoverageOutputInfo object.
+        :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
+
+        """
+        cov_type = d.get('coverageType', None)
+        coverageType = CoverageType.get(cov_type) if cov_type is not None else None
+
+        return CoverageOutputInfo( coverageType = coverageType,
+                                   spacecraftId = d.get('spacecraftId', None),
+                                   instruId = d.get('instruId', None),
+                                   modeId = d.get('modeId', None),
+                                   usedFieldOfRegard = d.get('usedFieldOfRegard', None),
+                                   gridId = d.get('gridId', None),
+                                   stateCartFile = d.get('stateCartFile', None),
+                                   accessFile = d.get('accessFile', None),
+                                   startDate = d.get('startDate', None),
+                                   duration = d.get('duration', None),
+                                   _id  = d.get('@id', None))
+
+    def to_dict(self):
+        """ Translate the CoverageOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: CoverageOutputInfo object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "CoverageOutputInfo",
+                     "coverageType": self.coverageType.value,
+                     "spacecraftId": self.spacecraftId,
+                     "instruId": self.instruId,
+                     "modeId": self.modeId,
+                     "usedFieldOfRegard": self.usedFieldOfRegard,
+                     "gridId": self.gridId,
+                     "stateCartFile": self.stateCartFile,
+                     "accessFile": self.accessFile,
+                     "startDate": self.startDate,
+                     "duration": self.duration,
+                     "@id": self._id})
+
+    def __repr__(self):
+        return "CoverageOutputInfo.from_dict({})".format(self.to_dict())
+    
+    def __eq__(self, other):
+        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        if(isinstance(self, other.__class__)):
+            return (self.coverageType==other.coverageType) and (self.spacecraftId==other.spacecraftId) and (self.instruId==other.instruId) and (self.modeId==other.modeId) and \
+                   (self.usedFieldOfRegard==other.usedFieldOfRegard) and (self.gridId==other.gridId) and  (self.stateCartFile==other.stateCartFile) and (self.accessFile==other.accessFile) and \
+                    (self.startDate==other.startDate) and (self.duration==other.duration) 
+                
+        else:
+            return NotImplemented

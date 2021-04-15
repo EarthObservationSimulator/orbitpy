@@ -21,7 +21,7 @@ import warnings
 import json 
 
 import propcov
-from orbitpy.coveragecalculator import CoverageCalculatorFactory, PointingOptionsCoverage
+from orbitpy.coveragecalculator import CoverageCalculatorFactory, CoverageOutputInfo, PointingOptionsCoverage
 import orbitpy.coveragecalculator
 from orbitpy.grid import Grid
 from orbitpy.util import Spacecraft, OrbitState, SpacecraftBus
@@ -49,14 +49,14 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         # make propagator
         factory = PropagatorFactory()
         cls.step_size = 1
-        cls.j2_prop = factory.get_propagator({"@type": 'J2 Analytical Propagator', "stepSize": cls.step_size})
+        cls.j2_prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": cls.step_size})
 
     def test_from_dict(self):
         o = PointingOptionsCoverage.from_dict({ "spacecraft": json.loads(spc1_json),
                                                 "cartesianStateFilePath":"../../state.csv",
                                                 "@id": 15})
         self.assertEqual(o._id, 15)
-        self.assertEqual(o._type, 'Pointing Options Coverage')
+        self.assertEqual(o._type, 'POINTING OPTIONS COVERAGE')
         self.assertEqual(o.spacecraft, Spacecraft.from_json(spc1_json))
         self.assertEqual(o.state_cart_file, "../../state.csv")
 
@@ -91,12 +91,12 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
 
         # check the outputs
         cov_calc_type = pd.read_csv(out_file_access, nrows=1, header=None).astype(str) # 1st row contains the coverage calculation type
         cov_calc_type = str(cov_calc_type[0][0])
-        self.assertEqual(cov_calc_type, 'Pointing Options Coverage')
+        self.assertEqual(cov_calc_type, 'POINTING OPTIONS COVERAGE')
 
         epoch_JDUT1 = pd.read_csv(out_file_access, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
@@ -117,7 +117,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         self.assertEqual(column_headers.iloc[0][3],"lon [deg]")
     
     def test_execute_1(self):
-        """ Test that the pointing euler-angles, euler-sequence (0,0,x, 1,2,3) (where x is variable) corresponds to pointing at the 
+        """ Test that the pointing euler-angles, euler-sequence (0,0,x, 1,2,3) (where x is variable). This corresponds to pointing at the 
             nadir position which shall be the same as the satellite position.
         """ 
         # setup spacecraft with some parameters setup randomly     
@@ -148,7 +148,19 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        out_info = PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
+                        "coverageType": "POINTING OPTIONS COVERAGE",
+                        "spacecraftId": sat._id,
+                        "instruId": sat.get_instrument(None)._id,
+                        "modeId": sat.get_instrument(None).get_mode_id()[0],
+                        "usedFieldOfRegard": None,
+                        "gridId": None,
+                        "stateCartFile": state_cart_file,
+                        "accessFile": out_file_access,
+                        "startDate": 2458265.00000,
+                        "duration": duration, "@id":None}))
 
         # extract satellite position data from state file
         epoch_JDUT1 = pd.read_csv(out_file_access, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
@@ -198,7 +210,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         roll_po2 = random.uniform(0,30)
         roll_po3 = random.uniform(0,-30)
         instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, 
-                                           "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter": 10}, 
+                                           "mode":[{"@id":111, "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter": 10}}], 
                                            "pointingOption":[{"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":0, "zRotation":yaw_po1},
                                                              {"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":roll_po2, "zRotation":0},
                                                              {"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":roll_po3, "zRotation":0}
@@ -215,7 +227,19 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        out_info = PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
+                        "coverageType": "POINTING OPTIONS COVERAGE",
+                        "spacecraftId": sat._id,
+                        "instruId": 'bs1',
+                        "modeId": 111,
+                        "usedFieldOfRegard": None,
+                        "gridId": None,
+                        "stateCartFile": state_cart_file,
+                        "accessFile": out_file_access,
+                        "startDate": 2458265.00000,
+                        "duration": duration, "@id":None}))
 
         # perform checks on the output access data
         access_data_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data

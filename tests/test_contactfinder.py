@@ -28,7 +28,7 @@ class TestContactFinder(unittest.TestCase):
         factory = PropagatorFactory()
         cls.step_size = 1
         cls.duration = 1
-        j2_prop = factory.get_propagator({"@type": 'J2 Analytical Propagator', "stepSize": cls.step_size})
+        j2_prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": cls.step_size})
         
         # sentinel1A
         cls.spcA = Spacecraft.from_dict({"name":"sentinel1A", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \

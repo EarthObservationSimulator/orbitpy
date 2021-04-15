@@ -10,7 +10,7 @@ import csv
 import copy 
 
 import propcov
-from instrupy.util import Entity, Constants
+from instrupy.util import Entity, EnumEntity, Constants
 import orbitpy.util
 
 def compute_time_step(spacecraft, time_res_fac):
@@ -100,7 +100,7 @@ class PropagatorFactory:
     """
     def __init__(self):
         self._creators = {}
-        self.register_propagator('J2 Analytical Propagator', J2AnalyticalPropagator)
+        self.register_propagator('J2 ANALYTICAL PROPAGATOR', J2AnalyticalPropagator)
 
     def register_propagator(self, _type, creator):
         """ Function to register propagators.
@@ -126,14 +126,24 @@ class PropagatorFactory:
         _type = specs.get("@type", None)
         if _type is None:
             raise KeyError('Propagator type key/value pair not found in specifications dictionary.')
+        else:
+            try:
+                _type = PropagatorType.get(_type).value
+            except:
+                pass
 
         creator = self._creators.get(_type)
         if not creator:
             raise ValueError(_type)
         return creator.from_dict(specs)
 
+class PropagatorType(EnumEntity):
+    """ Enumeration of the orbitpy recognized orbit-propagators.
+    """
+    J2ANALYTICALPROPAGATOR = 'J2 ANALYTICAL PROPAGATOR'
+
 class J2AnalyticalPropagator(Entity):
-    """A J2 Analytical Propagator class.
+    """A J2 ANALYTICAL PROPAGATOR class.
 
     The instance variable(s) correspond to the propagator setting(s). 
 
@@ -146,13 +156,13 @@ class J2AnalyticalPropagator(Entity):
     """
     def __init__(self, stepSize=None, _id=None):
         self.stepSize = float(stepSize) if stepSize is not None and stepSize is not False else False
-        super(J2AnalyticalPropagator, self).__init__(_id, "J2 Analytical Propagator")
+        super(J2AnalyticalPropagator, self).__init__(_id, "J2 ANALYTICAL PROPAGATOR")
 
     @staticmethod
     def from_dict(d):
         """ Parses an J2AnalyticalPropagator object from a normalized JSON dictionary.
         
-        :param d: Dictionary with the J2 analytical propagator specifications.
+        :param d: Dictionary with the J2 ANALYTICAL PROPAGATOR specifications.
 
                 Following keys are to be specified.
                 
@@ -175,7 +185,7 @@ class J2AnalyticalPropagator(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "J2 Analytical Propagator",
+        return dict({"@type": "J2 ANALYTICAL PROPAGATOR",
                      "stepSize": self.stepSize,
                      "@id": self._id})
 
@@ -245,8 +255,8 @@ class J2AnalyticalPropagator(Entity):
         :param duration: Time duration propagation in days.  Default is 1 day.
         :paramtype duration: float
 
-        :return: 0 if success. The results are stored in a csv data-file at the indicated file-path.
-        :rtype: int
+        :return: Propagator output info.
+        :rtype: :class:`orbitpy.propagator.PropagatorOutputInfo`
         
 
         """
@@ -306,6 +316,96 @@ class J2AnalyticalPropagator(Entity):
         if out_file_kep:
             kep_file.close()
 
-        return 0
+        return PropagatorOutputInfo.from_dict({'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
+                                               'spacecraftId': spacecraft._id,
+                                               'stateCartFile': out_file_cart,
+                                               'stateKeplerianFile': out_file_kep,
+                                               'startDate': start_date.GetJulianDate(),
+                                               'duration': duration})
 
+class PropagatorOutputInfo(Entity):
+    """ Class to hold information about the results of the propagation. An object of this class is returned upon the execution
+        of the propagator.
+    
+    :ivar propagatorType: Type of orbit propagator which produced the results.
+    :vartype propagatorType: :class:`orbitpy.propagator.PropagatorType`
 
+    :ivar spacecraftId: Spacecraft identifier for which propagation was carried out.
+    :vartype spacecraftId: str or int
+
+    :ivar stateCartFile: State file (filename with path) where the time-series of the cartesian states of the spacecraft are saved.
+    :vartype stateCartFile: str
+
+    :ivar stateKeplerianFile: State file (filename with path) where the time-series of the Keplerian states of the spacecraft are saved.
+    :vartype stateKeplerianFile: str
+
+    :ivar startDate: Time start for propagation in Julian Date UT1.
+    :vartype startDate: float
+
+    :ivar duration: Time duration propagation in days.
+    :vartype duration: float
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+
+    """
+    def __init__(self, propagatorType=None, spacecraftId=None, stateCartFile=None, stateKeplerianFile=None, 
+                 startDate=None, duration=None, _id=None):
+        self.propagatorType = propagatorType if propagatorType is not None and isinstance(propagatorType, PropagatorType) else None
+        self.spacecraftId = spacecraftId if spacecraftId is not None else None
+        self.stateCartFile = str(stateCartFile) if stateCartFile is not None else None
+        self.stateKeplerianFile = str(stateKeplerianFile) if stateKeplerianFile is not None else None
+        self.startDate = float(startDate) if startDate is not None else None
+        self.duration = float(duration) if duration is not None else None
+
+        super(PropagatorOutputInfo, self).__init__(_id, "PropagatorOutputInfo")
+    
+    @staticmethod
+    def from_dict(d):
+        """ Parses an ``PropagatorOutputInfo`` object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the PropagatorOutputInfo attributes.
+        :paramtype d: dict
+
+        :return: PropagatorOutputInfo object.
+        :rtype: :class:`orbitpy.propagator.PropagatorOutputInfo`
+
+        """
+        prop_type = d.get('propagatorType', None)
+        propagatorType = PropagatorType.get(prop_type) if prop_type is not None else None
+
+        return PropagatorOutputInfo( propagatorType = propagatorType,
+                                     spacecraftId = d.get('spacecraftId', None),
+                                     stateCartFile = d.get('stateCartFile', None),
+                                     stateKeplerianFile = d.get('stateKeplerianFile', None),
+                                     startDate = d.get('startDate', None),
+                                     duration = d.get('duration', None),
+                                     _id  = d.get('@id', None))
+
+    def to_dict(self):
+        """ Translate the GridCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: GridCoverage object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "PropagatorOutputInfo",
+                     "propagatorType": self.propagatorType.value,
+                     "spacecraftId": self.spacecraftId,
+                     "stateCartFile": self.stateCartFile,
+                     "stateKeplerianFile": self.stateKeplerianFile,
+                     "startDate": self.startDate,
+                     "duration": self.duration,
+                     "@id": self._id})
+
+    def __repr__(self):
+        return "PropagatorOutputInfo.from_dict({})".format(self.to_dict())
+    
+    def __eq__(self, other):
+        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        if(isinstance(self, other.__class__)):
+            return (self.propagatorType==other.propagatorType) and (self.spacecraftId==other.spacecraftId) and (self.stateCartFile==other.stateCartFile) and \
+                    (self.stateKeplerianFile==other.stateKeplerianFile) and (self.startDate==other.startDate) and (self.duration==other.duration) 
+                
+        else:
+            return NotImplemented

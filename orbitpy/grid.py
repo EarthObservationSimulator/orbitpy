@@ -7,6 +7,7 @@
 import numpy as np
 import pandas as pd
 from collections import namedtuple
+import uuid
 
 import propcov
 from instrupy.util import Entity, EnumEntity, Constants
@@ -84,11 +85,12 @@ class Grid(Entity):
 
         Following keys are to be specified:
 
-                *  "latUpper": (float) Upper latitude in degrees. Default value is 90 deg.
-                *  "latLower": (float) Lower latitude in degrees. Default value is -90 deg.
-                *  "lonUpper": (float) Upper longitude in degrees. Default value is 180 deg.
-                *  "lonLower": (float) Lower longitude in degrees. Default value is -180 deg.
-                *  "gridRes": (float)  Grid resolution in degrees. Default value is 1 deg.
+                * latUpper: (float) Upper latitude in degrees. Default value is 90 deg.
+                * latLower: (float) Lower latitude in degrees. Default value is -90 deg.
+                * lonUpper: (float) Upper longitude in degrees. Default value is 180 deg.
+                * lonLower: (float) Lower longitude in degrees. Default value is -180 deg.
+                * gridRes: (float)  Grid resolution in degrees. Default value is 1 deg.
+                * _id : (str or int) Unique grid-identifier. If absent a random id is assigned.
 
         Specify latitude bounds in the range of -90 deg to +90 deg. Specify longitude bounds in the range of -180 deg to +180 deg. 
         
@@ -120,7 +122,7 @@ class Grid(Entity):
         point_group.SetLatLonBounds(latUp=latUp, latLow=latLow, lonUp=lonUp, lonLow=lonLow)
         point_group.AddHelicalPointsByAngle(angleBetweenPoints=angleBetweenPoints)
         return Grid( point_group=point_group,
-                     _id = d.get('@id', None)
+                     _id = d.get('@id', uuid.uuid4())
                     )
         
     @staticmethod
@@ -129,7 +131,8 @@ class Grid(Entity):
 
         Following keys are to be specified:
 
-                *  "covGridFilePath": (str) Filepath to the file containing the grid points.
+                * covGridFilePath: (str) Filepath to the file containing the grid points.
+                * _id : (str or int) Unique grid-identifier. If absent a random id is assigned.
 
         Example:
 
@@ -171,7 +174,7 @@ class Grid(Entity):
         point_group = propcov.PointGroup()
         point_group.AddUserDefinedPoints(data['lat [deg]'].tolist(),data['lon [deg]'].tolist())
         return Grid( point_group = point_group,
-                     _id = d.get('@id', None)
+                     _id = d.get('@id', uuid.uuid4())
                     )
 
     def write_to_file(self, filepath):

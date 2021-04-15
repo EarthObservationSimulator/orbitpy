@@ -26,7 +26,7 @@ import warnings
 import json 
 
 import propcov
-from orbitpy.coveragecalculator import CoverageCalculatorFactory, GridCoverage
+from orbitpy.coveragecalculator import CoverageCalculatorFactory, CoverageOutputInfo, GridCoverage
 from orbitpy.grid import Grid
 from orbitpy.util import Spacecraft, OrbitState, SpacecraftBus
 from orbitpy.propagator import PropagatorFactory
@@ -53,7 +53,7 @@ class TestGridCoverage(unittest.TestCase):
         # make propagator
         factory = PropagatorFactory()
         cls.step_size = 1
-        cls.j2_prop = factory.get_propagator({"@type": 'J2 Analytical Propagator', "stepSize": cls.step_size})
+        cls.j2_prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": cls.step_size})
 
     def test_from_dict(self):
         o = GridCoverage.from_dict({ "grid":{"@type": "autogrid", "@id": 1, "latUpper":25, "latLower":-25, "lonUpper":180, "lonLower":-180, "gridRes": 2},
@@ -61,7 +61,7 @@ class TestGridCoverage(unittest.TestCase):
                                      "cartesianStateFilePath":"../../state.csv",
                                      "@id": 12})
         self.assertEqual(o._id, 12)
-        self.assertEqual(o._type, 'Grid Coverage')
+        self.assertEqual(o._type, 'GRID COVERAGE')
         self.assertEqual(o.grid, Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":25, "latLower":-25, "lonUpper":180, "lonLower":-180, "gridRes": 2}))
         self.assertEqual(o.spacecraft, Spacecraft.from_json(spc1_json))
         self.assertEqual(o.state_cart_file, "../../state.csv")
@@ -96,12 +96,12 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
 
         # check the outputs
         cov_calc_type = pd.read_csv(out_file_access, nrows=1, header=None).astype(str) # 1st row contains the coverage calculation type
         cov_calc_type = str(cov_calc_type[0][0])
-        self.assertEqual(cov_calc_type, 'Grid Coverage')
+        self.assertEqual(cov_calc_type, 'GRID COVERAGE')
 
         epoch_JDUT1 = pd.read_csv(out_file_access, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
@@ -158,7 +158,19 @@ class TestGridCoverage(unittest.TestCase):
         out_file_access = self.out_dir+'/test_cov_accessX.csv'
         # run the coverage calculator
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
-        cov.execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access)     
+        out_info = cov.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access)
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
+                        "coverageType": "GRID COVERAGE",
+                        "spacecraftId": sat._id,
+                        "instruId": sat.get_instrument(None)._id,
+                        "modeId": sat.get_instrument(None).get_mode_id()[0],
+                        "usedFieldOfRegard": False,
+                        "gridId": grid._id,
+                        "stateCartFile": state_cart_file,
+                        "accessFile": out_file_access,
+                        "startDate": 2458265.00000,
+                        "duration": duration, "@id":None}))        
+        
         # check the outputs
         access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
         
@@ -177,7 +189,7 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_accessY.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access)   
+        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access)   
         # check the outputs
         access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
         if not access_data.empty:
@@ -186,7 +198,6 @@ class TestGridCoverage(unittest.TestCase):
         else:
             warnings.warn('No data was generated in test_execute_1(.) negative roll test. Run the test again.')
         
-    
     def test_execute_2(self):
         """ Orient the sensor with varying yaw but same pitch and roll, and test that the captured ground-points remain the same
             (Conical Sensor). 
@@ -220,15 +231,27 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
+        out_info = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
         
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
+                        "coverageType": "GRID COVERAGE",
+                        "spacecraftId": sat._id,
+                        "instruId": sat.get_instrument(None)._id,
+                        "modeId": sat.get_instrument(None).get_mode_id()[0],
+                        "usedFieldOfRegard": False,
+                        "gridId": grid._id,
+                        "stateCartFile": state_cart_file,
+                        "accessFile": out_file_access,
+                        "startDate": 2458265.00000,
+                        "duration": duration, "@id":None}))
+
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
         ######## Simulation 2 ########
         yaw = random.uniform(0,360)
-        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": roll, "zRotation": yaw}, 
+        instrument_dict = {"mode":[{"@id":"m1", "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ",  "xRotation": pitch, "yRotation": roll, "zRotation": yaw}}], 
                                            "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter": 25 }, 
-                                           "@id":"bs1", "@type":"Basic Sensor"}
+                                           "@id":"sen1", "@type":"Basic Sensor"}
 
         sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
 
@@ -236,8 +259,20 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
-        
+        out_info = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
+
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
+                        "coverageType": "GRID COVERAGE",
+                        "spacecraftId": sat._id,
+                        "instruId": "sen1",
+                        "modeId": "m1",
+                        "usedFieldOfRegard": False,
+                        "gridId": grid._id,
+                        "stateCartFile": state_cart_file,
+                        "accessFile": out_file_access,
+                        "startDate": 2458265.00000,
+                        "duration": duration, "@id":None}))
+
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
         ######## compare the results of both the simulations ########    
@@ -279,7 +314,7 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access1.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
+        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
         
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
@@ -297,7 +332,7 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access2.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
+        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
         
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
@@ -314,7 +349,7 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access3.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
+        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
         
         access_data3 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
@@ -376,7 +411,7 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_accessY.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access)   
+        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access)   
         # check the outputs
         access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
         if not access_data.empty:
@@ -412,7 +447,7 @@ class TestGridCoverage(unittest.TestCase):
         state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
         # execute propagator
         #factory = PropagatorFactory()
-        #prop = factory.get_propagator({"@type": 'J2 Analytical Propagator', "stepSize": 1})
+        #prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": 1})
         #prop.execute(spacecraft=sat, start_date=None, out_file_cart=state_cart_file, duration=duration)
         self.j2_prop.execute(spacecraft=sat, start_date=None, out_file_cart=state_cart_file, duration=duration)
 
@@ -437,7 +472,7 @@ class TestGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access2.csv'
         # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(sensor_id=None, out_file_access=out_file_access) 
+        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, out_file_access=out_file_access) 
         
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
@@ -499,7 +534,7 @@ class TestGridCoverage(unittest.TestCase):
         out_file_access = self.out_dir+'/test_cov_access1.csv'
         # run the coverage calculator
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
-        cov.execute(sensor_id='bs1', out_file_access=out_file_access)     
+        cov.execute(instru_id='bs1', out_file_access=out_file_access)     
         # check the outputs
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
         
@@ -515,7 +550,7 @@ class TestGridCoverage(unittest.TestCase):
         out_file_access = self.out_dir+'/test_cov_access2.csv'
         # run the coverage calculator
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
-        cov.execute(sensor_id='bs1', out_file_access=out_file_access)     
+        cov.execute(instru_id='bs1', out_file_access=out_file_access)     
         # check the outputs
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data    
 
@@ -547,19 +582,19 @@ class TestGridCoverage(unittest.TestCase):
         cov = GridCoverage(grid=grid, spacecraft=spc4, state_cart_file=state_cart_file)
 
         # run the different simulations
-        cov.execute(sensor_id='bs1', out_file_access=out_file_access) 
+        cov.execute(instru_id='bs1', out_file_access=out_file_access) 
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data   
         
-        cov.execute(sensor_id='bs2', mode_id=101, out_file_access=out_file_access) 
+        cov.execute(instru_id='bs2', mode_id=101, out_file_access=out_file_access) 
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data    
 
-        cov.execute(sensor_id='bs3', mode_id=0, out_file_access=out_file_access) 
+        cov.execute(instru_id='bs3', mode_id=0, out_file_access=out_file_access) 
         access_data3_1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data  
 
-        cov.execute(sensor_id='bs3', mode_id="roll_pos", out_file_access=out_file_access) 
+        cov.execute(instru_id='bs3', mode_id="roll_pos", out_file_access=out_file_access) 
         access_data3_2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data  
 
-        cov.execute(sensor_id='bs3', mode_id="roll_neg", out_file_access=out_file_access) 
+        cov.execute(instru_id='bs3', mode_id="roll_neg", out_file_access=out_file_access) 
         access_data3_3 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data  
 
         # compare attributes of the output data from the different simulations
@@ -603,12 +638,12 @@ class TestGridCoverage(unittest.TestCase):
         
         # run the coverage calculator: FOV considered
         out_file_access = self.out_dir+'/test_cov_access1.csv'
-        cov.execute(sensor_id='bs1', use_field_of_regard=False, out_file_access=out_file_access)
+        cov.execute(instru_id='bs1', use_field_of_regard=False, out_file_access=out_file_access)
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
         # run the coverage calculator: FOR considered
         out_file_access = self.out_dir+'/test_cov_access2.csv'               
-        cov.execute(sensor_id='bs1', use_field_of_regard=True, out_file_access=out_file_access) 
+        cov.execute(instru_id='bs1', use_field_of_regard=True, out_file_access=out_file_access) 
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
          # compare attributes of the output data from the different simulations
@@ -642,17 +677,17 @@ class TestGridCoverage(unittest.TestCase):
 
         # run mode with SINGLE_ROLL_ONLY manuever (positive)
         out_file_access = self.out_dir+'/test_cov_access1.csv'
-        cov.execute(sensor_id="sen1", mode_id=0, use_field_of_regard=True, out_file_access=out_file_access)
+        cov.execute(instru_id="sen1", mode_id=0, use_field_of_regard=True, out_file_access=out_file_access)
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
         # run mode with SINGLE_ROLL_ONLY manuever (negative)
         out_file_access = self.out_dir+'/test_cov_access2.csv'
-        cov.execute(sensor_id="sen1", mode_id=1, use_field_of_regard=True, out_file_access=out_file_access)
+        cov.execute(instru_id="sen1", mode_id=1, use_field_of_regard=True, out_file_access=out_file_access)
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
         # run mode with DOUBLE_ROLL_ONLY manuever
         out_file_access = self.out_dir+'/test_cov_access3.csv'
-        cov.execute(sensor_id="sen1", mode_id=2, use_field_of_regard=True, out_file_access=out_file_access)
+        cov.execute(instru_id="sen1", mode_id=2, use_field_of_regard=True, out_file_access=out_file_access)
         access_data3 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
         # compare the results from the different simulations
@@ -660,8 +695,6 @@ class TestGridCoverage(unittest.TestCase):
         dfs = [access_data1, access_data2]
         df = pd.concat( dfs,axis=0,ignore_index=True)
         self.assertTrue(access_data3.equals(df))
-    
-        
 
 
 

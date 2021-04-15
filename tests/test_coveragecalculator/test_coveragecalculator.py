@@ -141,17 +141,17 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         # spc1 spacecraft, 1 instrument, 1 mode
         spc1 = Spacecraft.from_json(spc1_json) 
         cov_param_list = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc1)
-        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs1', mode_id='0'), 
+        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id='bs1', mode_id='0'), 
                          cov_param_list[0])
-        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id=None, mode_id=None), 
+        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id=None, mode_id=None), 
                          cov_param_list[0])
-        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs1', mode_id=None), 
+        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id='bs1', mode_id=None), 
                          cov_param_list[0])
-        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id=None, mode_id='0'), 
+        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id=None, mode_id='0'), 
                          cov_param_list[0])
         with self.assertRaises(Exception):
-            orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='axe', mode_id='1') # invalid sensor-id
-            orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs1', mode_id='1') # invalid mode-id
+            orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id='axe', mode_id='1') # invalid sensor-id
+            orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id='bs1', mode_id='1') # invalid mode-id
 
         # spc2 spacecraft, no instruments 
         spc2 = Spacecraft.from_json(spc2_json)
@@ -162,15 +162,15 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         # spc3 spacecraft, 3 instruments, 1st and 2nd instrument have 1 mode and 3rd instrument has 3 modes 
         spc3 = Spacecraft.from_json(spc3_json)
         cov_param_list = orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft(spc3)
-        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs3', mode_id=1), 
+        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id='bs3', mode_id=1), 
                          cov_param_list[3])
-        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs3', mode_id=None), 
+        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id='bs3', mode_id=None), 
                          cov_param_list[2])
-        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id=None, mode_id=None), 
+        self.assertEqual(orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id=None, mode_id=None), 
                          cov_param_list[0])
         with self.assertRaises(Exception):
-            orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='axe', mode_id='1') # invalid sensor-id
-            orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, sensor_id='bs1', mode_id='1') # invalid mode-id
+            orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id='axe', mode_id='1') # invalid sensor-id
+            orbitpy.coveragecalculator.find_in_cov_params_list(cov_param_list=cov_param_list, instru_id='bs1', mode_id='1') # invalid mode-id
 
     def test_filter_mid_interval_access(self):
         """ Check the behavior of this function is as expected using pre-run results.
@@ -209,15 +209,15 @@ class TestCoverageCalculatorFactory(unittest.TestCase):
         factory = CoverageCalculatorFactory()
 
         # test the built-in coverage calculators are registered
-        # Grid Coverage
-        self.assertIn('Grid Coverage', factory._creators)
-        self.assertEqual(factory._creators['Grid Coverage'], GridCoverage)
-        # Pointing Options Coverage
-        self.assertIn('Pointing Options Coverage', factory._creators)
-        self.assertEqual(factory._creators['Pointing Options Coverage'], PointingOptionsCoverage)
-        # Pointing Options With Grid Coverage
-        self.assertIn('Pointing Options With Grid Coverage', factory._creators)
-        self.assertEqual(factory._creators['Pointing Options With Grid Coverage'], PointingOptionsWithGridCoverage)
+        # GRID COVERAGE
+        self.assertIn('GRID COVERAGE', factory._creators)
+        self.assertEqual(factory._creators['GRID COVERAGE'], GridCoverage)
+        # POINTING OPTIONS COVERAGE
+        self.assertIn('POINTING OPTIONS COVERAGE', factory._creators)
+        self.assertEqual(factory._creators['POINTING OPTIONS COVERAGE'], PointingOptionsCoverage)
+        # POINTING OPTIONS WITH GRID COVERAGE
+        self.assertIn('POINTING OPTIONS WITH GRID COVERAGE', factory._creators)
+        self.assertEqual(factory._creators['POINTING OPTIONS WITH GRID COVERAGE'], PointingOptionsWithGridCoverage)
 
     def test_register_coverage_calculator(self):
         factory = CoverageCalculatorFactory()
@@ -225,15 +225,15 @@ class TestCoverageCalculatorFactory(unittest.TestCase):
         self.assertIn('New Cov Calc', factory._creators)
         self.assertEqual(factory._creators['New Cov Calc'], TestCoverageCalculatorFactory.DummyNewCoverageCalculator)
         # test the built-in coverage calculator remain registered after registration of new coverage calculator
-        # Grid Coverage
-        self.assertIn('Grid Coverage', factory._creators)
-        self.assertEqual(factory._creators['Grid Coverage'], GridCoverage)
-        # Pointing Options Coverage
-        self.assertIn('Pointing Options Coverage', factory._creators)
-        self.assertEqual(factory._creators['Pointing Options Coverage'], PointingOptionsCoverage)
-        # Pointing Options With Grid Coverage
-        self.assertIn('Pointing Options With Grid Coverage', factory._creators)
-        self.assertEqual(factory._creators['Pointing Options With Grid Coverage'], PointingOptionsWithGridCoverage)
+        # GRID COVERAGE
+        self.assertIn('GRID COVERAGE', factory._creators)
+        self.assertEqual(factory._creators['GRID COVERAGE'], GridCoverage)
+        # POINTING OPTIONS COVERAGE
+        self.assertIn('POINTING OPTIONS COVERAGE', factory._creators)
+        self.assertEqual(factory._creators['POINTING OPTIONS COVERAGE'], PointingOptionsCoverage)
+        # POINTING OPTIONS WITH GRID COVERAGE
+        self.assertIn('POINTING OPTIONS WITH GRID COVERAGE', factory._creators)
+        self.assertEqual(factory._creators['POINTING OPTIONS WITH GRID COVERAGE'], PointingOptionsWithGridCoverage)
 
     def test_get_coverage_calculator(self):
         
@@ -242,16 +242,16 @@ class TestCoverageCalculatorFactory(unittest.TestCase):
         factory.register_coverage_calculator('New Coverage Calc', TestCoverageCalculatorFactory.DummyNewCoverageCalculator)
         
         # test the coverage calculator model classes can be obtained depending on the input specifications
-        # Grid Coverage
-        specs = {"@type": 'Grid Coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
+        # GRID COVERAGE
+        specs = {"@type": 'Grid coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
         grid_cov = factory.get_coverage_calculator(specs)
         self.assertIsInstance(grid_cov, GridCoverage)
-        # Pointing Options Coverage
-        specs = {"@type": 'Pointing Options Coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
+        # POINTING OPTIONS COVERAGE
+        specs = {"@type": 'pointing OPTIONS COVERAGE'} # in practice additional coverage calculator specs shall be present in the dictionary
         popt_cov = factory.get_coverage_calculator(specs)
         self.assertIsInstance(popt_cov, PointingOptionsCoverage)
-        # Pointing Options With Grid Coverage
-        specs = {"@type": 'Pointing Options With Grid Coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
+        # POINTING OPTIONS WITH GRID COVERAGE
+        specs = {"@type": 'POINTING OpTiOns with GRID coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
         popt_with_grid_cov = factory.get_coverage_calculator(specs)
         self.assertIsInstance(popt_with_grid_cov, PointingOptionsWithGridCoverage)
 
@@ -259,3 +259,6 @@ class TestCoverageCalculatorFactory(unittest.TestCase):
         specs = {"@type": 'New Coverage Calc'} # in practice additional coverage calculator specs shall be present in the dictionary
         new_cov = factory.get_coverage_calculator(specs)
         self.assertIsInstance(new_cov, TestCoverageCalculatorFactory.DummyNewCoverageCalculator)
+
+class TestCoverageOutputInfo(unittest.TestCase): #TODO
+    pass

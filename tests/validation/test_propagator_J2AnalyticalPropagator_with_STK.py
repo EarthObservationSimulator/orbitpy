@@ -35,7 +35,7 @@ class TestPropagation(unittest.TestCase):
         cls.dir_path = dir_path        
         factory = PropagatorFactory()
         step_size = 1
-        specs = {"@type": 'J2 Analytical Propagator', 'stepSize': step_size } 
+        specs = {"@type": 'J2 ANALYTICAL PROPAGATOR', 'stepSize': step_size } 
         cls.j2_prop = factory.get_propagator(specs)
         cls.duration=1        
         # circular orbit

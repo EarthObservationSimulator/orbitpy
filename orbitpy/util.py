@@ -606,8 +606,9 @@ class Spacecraft(Entity):
     @staticmethod
     def from_dict(d):
         """ Parses ``Spacecraft`` object from a dictionary.
-c
+
         :param d: Dictionary with the spacecraft properties.
+        :paramtype d: dict
         
         :return: Parsed python object. 
         :rtype: :class:`orbitpy.util.Spacecraft`
@@ -766,3 +767,65 @@ def extract_auxillary_info_from_state_file(state_file):
     state_aux_info = namedtuple("state_aux_info", ["epoch_JDUT1", "step_size", "duration"])
     
     return state_aux_info(epoch_JDUT1, step_size, duration)
+
+def dictionary_list_to_object_list(d, cls):
+    """ Utility function to convert list of dictionaries to list of corresponding objects. 
+        The objects must have the function ``from_dict(.)`` associated with it.
+    
+    :param d: List of dictionaries.
+    :paramtype d: list, dict
+
+    :param cls: Class to which each dictionary is to be converted into.
+    :paramtype cls: cls
+
+    :return: List of objects.
+    :rtype: list, cls
+
+    """
+    obj_list = None
+    if d is not None:
+        if isinstance(d, list):
+            obj_list = [cls.from_dict(x) for x in d]
+        else:
+            obj_list = [cls.from_dict(d)] 
+    return obj_list
+
+def object_list_to_dictionary_list(obj_list):
+    """ Utility function to convert list of objects to list of dictionaries. 
+        The objects must have the function ``to_dict(.)`` associated with it.
+    
+    :param obj_list: List of objects.
+    :paramtype obj_list: list, cls or cls
+
+    :return: List of dictionaries.
+    :rtype: list, dict
+
+    """
+    dict_list = None
+    if obj_list is not None:
+        if isinstance(obj_list, list):
+            dict_list = [x.to_dict() for x in obj_list]
+        else:
+            dict_list = [obj_list.to_dict()] 
+    return dict_list
+
+def initialize_object_list(inp, cls):
+    """ Utility function to return list of objects from a valid input or else to return ``None``. 
+    
+    :param inp: Input.
+    :paramtype inp: list, cls or cls
+
+    :param cls: Class of each element of the list.
+    :paramtype cls: cls
+
+    :return: List of objects if valid input else None.
+    :rtype: list, cls or None
+
+    """
+    obj_list = None
+    if inp is not None and isinstance(inp, list):
+        if all(isinstance(x, cls) for x in inp):
+            obj_list = inp
+        elif(isinstance(inp, cls)): # make into list if not list
+            obj_list = [inp]
+    return obj_list

@@ -509,3 +509,14 @@ class TestUtilModuleFunction(unittest.TestCase):
 
 class TestGroundStation(unittest.TestCase): #TODO
     pass
+
+class TestUtilFunctions(unittest.TestCase):
+
+    def test_dictionary_list_to_object_list(self): #TODO
+        pass
+
+    def test_object_list_to_dictionary_list(self): #TODO
+        pass
+
+    def test_initialize_object_list(self): #TODO
+        pass
