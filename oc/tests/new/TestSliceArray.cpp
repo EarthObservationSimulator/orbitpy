@@ -1,5 +1,7 @@
 #include "SlicedPolygon.hpp"
+#include "SliceArray.hpp"
 #include <gtest/gtest.h>
+#include <iostream>
 
 class Poly_01 : public ::testing::Test {
 
@@ -29,65 +31,44 @@ class Poly_01 : public ::testing::Test {
 		polygon[12][1] = 0.0;
 		
 		grapefruit = new SlicedPolygon(polygon,contained);
+		sliceTree = new SliceArray(grapefruit->getLonArray(),grapefruit->getEdgeArray());
+		sliceTree->preprocess();
+        grapefruit->addPreprocessor(sliceTree);
 	}
 
   	void TearDown() override 
   	{
   		delete(grapefruit);
+		delete(sliceTree);
   	}
 
 	Real tol = .00000001;
 	SlicedPolygon* grapefruit;
+	Preprocessor* sliceTree;
 };
 
-TEST_F(Poly_01,getTI)
+TEST_F(Poly_01,getEdges)
 {
-	/*
-	Rmatrix33 TI = grapefruit->getTI();
+	SliceArray test = SliceArray(grapefruit->getLonArray(),grapefruit->getEdgeArray());
+    std::vector<Real> lonArray = test.getLonArray();
 
-	// Should be identity
-
-	EXPECT_NEAR(1.0,TI.GetElement(0,0),tol);
-	EXPECT_NEAR(1.0,TI.GetElement(1,1),tol);
-	EXPECT_NEAR(1.0,TI.GetElement(2,2),tol);
-
-	EXPECT_NEAR(0.0,TI.GetElement(0,1),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(0,2),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(1,0),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(1,2),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(2,0),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(2,1),tol);
-	*/
+    std::cerr << "Elements: \n";
+    for (int i = 0; i < lonArray.size(); i++)
+    {
+        std::cerr << lonArray[i];
+        std::cerr << "\n";
+    }
+    std::cerr << "Finished. \n";
 
 	ASSERT_TRUE(true);
-}
-
-// Test that the spherical coordinate 0,0 corresponds to Z axis
-TEST_F(Poly_01,sphericalToCartesian)
-{
-	AnglePair querySpherical = {0,0};
-	Rvector3 queryCartesian = util::sphericalToCartesian(querySpherical);
-
-	EXPECT_NEAR(0.0,queryCartesian[0],tol);
-	EXPECT_NEAR(0.0,queryCartesian[1],tol);
-	EXPECT_NEAR(1.0,queryCartesian[2],tol);
-}
-
-// Test that the spherical coordinate 0,0 corresponds to zero inclination
-TEST_F(Poly_01,cartesianToSpherical)
-{
-	Rvector3 queryCartesian = {0,0,1};
-	AnglePair querySpherical = util::cartesianToSpherical(queryCartesian);
-
-	// Inc should be zero
-	EXPECT_NEAR(0.0,querySpherical[0],tol);
 }
 
 TEST_F(Poly_01,Query_03_numCrossings)
 {
 	// Test 1: Lies inside polygon
 	int expectedCrossings = 0;
-	AnglePair query = {0,0};
+	AnglePair query = {.01,.01};
+	
 	int crossings = grapefruit->numCrossings(query);
 	ASSERT_EQ(expectedCrossings,crossings);
 }
@@ -148,6 +129,12 @@ TEST_F(Poly_01,Query_05_numCrossings)
 	AnglePair query = {0.5235987756,0.4487989505};
 	int crossings = grapefruit->numCrossings(query);
 	ASSERT_EQ(expectedCrossings,crossings);
+
+	// new
+	AnglePair query_Q = grapefruit->toQueryFrame(query);
+	std::vector<int> subset = grapefruit->getSubset(query_Q);
+
+	ASSERT_TRUE(subset.size() <= 3);
 }
 
 TEST_F(Poly_01,Query_06_numCrossings)
@@ -157,6 +144,12 @@ TEST_F(Poly_01,Query_06_numCrossings)
 	AnglePair query = {0.5235987756,0.897597901};
 	int crossings = grapefruit->numCrossings(query);
 	ASSERT_EQ(expectedCrossings,crossings);
+
+	// new
+	AnglePair query_Q = grapefruit->toQueryFrame(query);
+	std::vector<int> subset = grapefruit->getSubset(query_Q);
+
+	ASSERT_TRUE(subset.size() <= 3);
 }
 
 TEST_F(Poly_01,Query_07_numCrossings)
@@ -166,6 +159,12 @@ TEST_F(Poly_01,Query_07_numCrossings)
 	AnglePair query = {1.047197551,0.4487989505};
 	int crossings = grapefruit->numCrossings(query);
 	ASSERT_EQ(expectedCrossings,crossings);
+
+	// new
+	AnglePair query_Q = grapefruit->toQueryFrame(query);
+	std::vector<int> subset = grapefruit->getSubset(query_Q);
+
+	ASSERT_TRUE(subset.size() <= 3);
 }
 
 TEST_F(Poly_01,Query_08_numCrossings)
@@ -173,8 +172,14 @@ TEST_F(Poly_01,Query_08_numCrossings)
 	// Test 7: lies outside the polygon, at clock angle in the middle of a segment
 	int expectedCrossings = 1;
 	AnglePair query = {1.047197551,0.897597901};
-	int crossings = grapefruit->numCrossings(query);
-	ASSERT_EQ(expectedCrossings,crossings);
+	//int crossings = grapefruit->numCrossings(query);
+	//ASSERT_EQ(expectedCrossings,crossings);
+
+	// new
+	AnglePair query_Q = grapefruit->toQueryFrame(query);
+	std::vector<int> subset = grapefruit->getSubset(query_Q);
+
+	ASSERT_TRUE(subset.size() <= 3);
 }
 
 TEST_F(Poly_01,Query_08_boundsPoint)

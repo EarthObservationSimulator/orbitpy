@@ -6,6 +6,8 @@
 #include "gmatdefs.hpp"
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
+#include <iostream>
+#include <fstream>
 
 typedef std::array<Real,2> AnglePair;
 
@@ -15,6 +17,11 @@ namespace util
 	Rvector3 sphericalToCartesian(const AnglePair &spherical);
 
 	AnglePair transformSpherical(const AnglePair &sherical, const Rmatrix33 &transform);
+	bool lonBounded(Real,Real,Real);
+
+	std::vector<AnglePair> csvRead(std::string filename);
+	void csvWrite(std::string filename, std::vector<bool>);
+	void csvWrite(std::string filename, std::vector<int>);
 }
 
 class Polygon
@@ -24,22 +31,11 @@ class Polygon
 		static AnglePair cartesianToSpherical(const Rvector3&);
 		static Rvector3 sphericalToCartesian(const AnglePair&);
 
-		Polygon(std::vector<Rvector3>);
-		Polygon(std::vector<AnglePair>);
-		
+		Polygon();		
 		~Polygon();
 		
-		//virtual void preprocess();
-		//virtual int contains(std::vector<Rvector3>);
+		virtual std::vector<bool> contains(std::vector<AnglePair>) = 0;
 		//virtual int contains(Rvector3);
-		
-		// Getter
-		std::vector<Rvector3> getNodeArray();
-		Rvector3 getNode(int index);
-		
-	protected:
-		
-		std::vector<Rvector3> nodes;
 };
 
 #endif /* Polygon_hpp */

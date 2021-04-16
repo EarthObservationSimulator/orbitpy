@@ -2,6 +2,9 @@
 #define SlicedPolygon_hpp
 
 #include "Polygon.hpp"
+#include "Preprocessor.hpp"
+
+class SliceTree;
 
 class Edge
 {
@@ -18,7 +21,11 @@ class Edge
 
 		// Getters
 		Rvector3 getPole();
-		
+		Real getBound1();
+		Real getBound2();
+
+		friend std::ostream& operator<<(std::ostream& os, const Edge& edge);
+
 	protected:
 	
 		Rvector3 pole;
@@ -29,43 +36,50 @@ class Edge
 		Real shooterDotPole;
 };
 
-class Slice
-{
-	//Slice(Rvector3
-};
-
-
-class SlicedPolygon : Polygon
+class SlicedPolygon : public Polygon
 {
 
 	public:
 
-		SlicedPolygon(std::vector<Rvector3> poly, Rvector3 contained);
-		SlicedPolygon(std::vector<AnglePair> poly, AnglePair contained);
+		// Constructors
+		SlicedPolygon(std::vector<Rvector3> &poly, Rvector3 contained);
+		SlicedPolygon(std::vector<AnglePair> &poly, AnglePair contained);
+
+		// Destructor
 		~SlicedPolygon();
 		
-		//virtual void preprocess();
-		//virtual int contains(std::vector<Rvector3> queries);
-		//virtual int contains(Rvector3 query);
-		
-		virtual int numCrossings(AnglePair query);
-		//virtual Slice findSlice(Real clock);
+		void addPreprocessor(Preprocessor*);
+
+		bool contains(AnglePair query);
+		std::vector<bool> contains(std::vector<AnglePair> queries);
+		int numCrossings(AnglePair query);
+		std::vector<int> numCrossings(std::vector<AnglePair> queries);
+
+		std::vector<int> getSubset(AnglePair query);
 		
 		std::vector<Edge> generateEdgeArray();
 		
 		// Coordinate Transformation
 		Rmatrix33 generateTI();
+		AnglePair toQueryFrame(AnglePair query);
 
 		// Getters
-
 		std::vector<Edge> getEdgeArray();
+		std::vector<Real> getLonArray();
+		std::vector<Real> getLatArray();
 		Rmatrix33 getTI();
+
+		// Overide print function 
+		friend std::ostream& operator<<(std::ostream& os, const SlicedPolygon& poly);
 		
 	protected:
+		bool processed;
 		Rvector3 contained;
+		Preprocessor* sliceTree;
 		std::vector<Edge> edgeArray;
+		std::vector<int> indexArray;
+		std::vector<Rvector3> nodes;
 		Rmatrix33 TI;
 };
 
 #endif /* SlicedPolygon_hpp */
-

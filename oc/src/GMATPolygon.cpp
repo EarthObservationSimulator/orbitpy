@@ -1,0 +1,32 @@
+#include "GMATPolygon.hpp"
+
+GMATPolygon::GMATPolygon(std::vector<AnglePair> &vertices,AnglePair contained) :
+SlicedPolygon(vertices,contained)
+{
+    genCustomSensor();
+}
+
+void GMATPolygon::genCustomSensor()
+{
+    Rvector coneArray = getLatArray();
+    Rvector clockArray = getLonArray();
+
+    sensor = new CustomSensor(coneArray,clockArray);
+}
+
+std::vector<bool> GMATPolygon::contains(std::vector<AnglePair> queries)
+{
+    std::vector<bool> results;
+    int i;
+
+    for (i = 0; i < queries.size(); i++)
+    {
+        AnglePair query = toQueryFrame(queries[i]);
+        Real clock = query[1];
+        Real cone = query[0];
+
+        results.push_back(sensor->CheckTargetVisibility(cone,clock));
+    }
+
+    return results;
+}

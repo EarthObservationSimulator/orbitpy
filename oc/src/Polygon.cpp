@@ -2,6 +2,49 @@
 
 // Utilities
 
+std::vector<AnglePair> util::csvRead(std::string filename)
+{
+	std::vector<AnglePair> vertices;
+
+	std::ifstream ip(filename);
+
+	std::string lat,lon;
+	while (ip.good())
+	{
+		getline(ip,lat,',');
+		getline(ip,lon,'\n');
+		AnglePair latLon = {std::stod(lat),std::stod(lon)};
+		vertices.push_back(latLon);
+	}
+	ip.close();
+
+	return vertices;
+}
+
+void util::csvWrite(std::string filename, std::vector<bool> contained)
+{
+	std::ofstream myFile;
+	myFile.open(filename);
+
+	for (int i = 0; i < contained.size(); i++)
+	{
+		myFile << contained[i] << "\n";
+	}
+	myFile.close();
+}
+
+void util::csvWrite(std::string filename, std::vector<int> contained)
+{
+	std::ofstream myFile;
+	myFile.open(filename);
+
+	for (int i = 0; i < contained.size(); i++)
+	{
+		myFile << contained[i] << "\n";
+	}
+	myFile.close();
+}
+
 AnglePair util::transformSpherical(const AnglePair &spherical,const Rmatrix33 &transform)
 {
 	Rvector3 cart = util::sphericalToCartesian(spherical);
@@ -9,6 +52,19 @@ AnglePair util::transformSpherical(const AnglePair &spherical,const Rmatrix33 &t
 	AnglePair transformedSpherical = util::cartesianToSpherical(transformedCart);
 
 	return transformedSpherical;
+}
+
+bool util::lonBounded(Real bound1, Real bound2, Real lon)
+{
+	if ((bound2 - bound1) < M_PI)
+	{
+		return ((lon >= bound1) && (lon <= bound2));
+	}
+	else
+	{
+
+		return !((lon >= bound1) && (lon <= bound2));
+	}
 }
 
 AnglePair util::cartesianToSpherical(const Rvector3 &cart)
@@ -76,29 +132,6 @@ Rvector3 Polygon::sphericalToCartesian(const AnglePair &spherical)
 	return cartesian;
 }
 
-Polygon::Polygon(std::vector<Rvector3> nodesIn) :
-nodes (nodesIn)
-{
-}
-
-Polygon::Polygon(std::vector<AnglePair> nodesIn)
-{
-	
-	nodes.resize(nodesIn.size());
-	for (int i = 0;i < nodesIn.size();i++)
-	{
-		nodes[i] = sphericalToCartesian(nodesIn[i]);
-	}	
-}
+Polygon::Polygon(){}
 
 Polygon::~Polygon(){}
-
-Rvector3 Polygon::getNode(int index)
-{
-	return nodes[index];
-}
-
-std::vector<Rvector3> Polygon::getNodeArray()
-{
-	return nodes;
-}

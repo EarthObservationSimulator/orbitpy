@@ -1,4 +1,5 @@
 #include "SlicedPolygon.hpp"
+#include "SliceTree.hpp"
 #include <gtest/gtest.h>
 
 class Poly_01 : public ::testing::Test {
@@ -29,58 +30,31 @@ class Poly_01 : public ::testing::Test {
 		polygon[12][1] = 0.0;
 		
 		grapefruit = new SlicedPolygon(polygon,contained);
+		sliceTree = new SliceTree(grapefruit->getEdgeArray(),1,16);
+		sliceTree->preprocess();
+        grapefruit->addPreprocessor(sliceTree);
 	}
 
   	void TearDown() override 
   	{
   		delete(grapefruit);
+		delete(sliceTree);
   	}
 
 	Real tol = .00000001;
 	SlicedPolygon* grapefruit;
+	Preprocessor* sliceTree;
 };
 
-TEST_F(Poly_01,getTI)
+TEST_F(Poly_01,getEdges)
 {
-	/*
-	Rmatrix33 TI = grapefruit->getTI();
+	Real crit1 = 1;
+	Real crit2 = 16;
 
-	// Should be identity
-
-	EXPECT_NEAR(1.0,TI.GetElement(0,0),tol);
-	EXPECT_NEAR(1.0,TI.GetElement(1,1),tol);
-	EXPECT_NEAR(1.0,TI.GetElement(2,2),tol);
-
-	EXPECT_NEAR(0.0,TI.GetElement(0,1),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(0,2),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(1,0),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(1,2),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(2,0),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(2,1),tol);
-	*/
+	SliceTree* test = new SliceTree(grapefruit->getEdgeArray(),crit1,crit2);
 
 	ASSERT_TRUE(true);
-}
-
-// Test that the spherical coordinate 0,0 corresponds to Z axis
-TEST_F(Poly_01,sphericalToCartesian)
-{
-	AnglePair querySpherical = {0,0};
-	Rvector3 queryCartesian = util::sphericalToCartesian(querySpherical);
-
-	EXPECT_NEAR(0.0,queryCartesian[0],tol);
-	EXPECT_NEAR(0.0,queryCartesian[1],tol);
-	EXPECT_NEAR(1.0,queryCartesian[2],tol);
-}
-
-// Test that the spherical coordinate 0,0 corresponds to zero inclination
-TEST_F(Poly_01,cartesianToSpherical)
-{
-	Rvector3 queryCartesian = {0,0,1};
-	AnglePair querySpherical = util::cartesianToSpherical(queryCartesian);
-
-	// Inc should be zero
-	EXPECT_NEAR(0.0,querySpherical[0],tol);
+	
 }
 
 TEST_F(Poly_01,Query_03_numCrossings)
@@ -148,6 +122,12 @@ TEST_F(Poly_01,Query_05_numCrossings)
 	AnglePair query = {0.5235987756,0.4487989505};
 	int crossings = grapefruit->numCrossings(query);
 	ASSERT_EQ(expectedCrossings,crossings);
+
+	// new
+	AnglePair query_Q = grapefruit->toQueryFrame(query);
+	std::vector<int> subset = grapefruit->getSubset(query_Q);
+
+	ASSERT_EQ(1,subset.size());
 }
 
 TEST_F(Poly_01,Query_06_numCrossings)
@@ -157,6 +137,12 @@ TEST_F(Poly_01,Query_06_numCrossings)
 	AnglePair query = {0.5235987756,0.897597901};
 	int crossings = grapefruit->numCrossings(query);
 	ASSERT_EQ(expectedCrossings,crossings);
+
+	// new
+	AnglePair query_Q = grapefruit->toQueryFrame(query);
+	std::vector<int> subset = grapefruit->getSubset(query_Q);
+
+	ASSERT_EQ(1,subset.size());
 }
 
 TEST_F(Poly_01,Query_07_numCrossings)
@@ -166,6 +152,12 @@ TEST_F(Poly_01,Query_07_numCrossings)
 	AnglePair query = {1.047197551,0.4487989505};
 	int crossings = grapefruit->numCrossings(query);
 	ASSERT_EQ(expectedCrossings,crossings);
+
+	// new
+	AnglePair query_Q = grapefruit->toQueryFrame(query);
+	std::vector<int> subset = grapefruit->getSubset(query_Q);
+
+	ASSERT_EQ(1,subset.size());
 }
 
 TEST_F(Poly_01,Query_08_numCrossings)
@@ -175,6 +167,12 @@ TEST_F(Poly_01,Query_08_numCrossings)
 	AnglePair query = {1.047197551,0.897597901};
 	int crossings = grapefruit->numCrossings(query);
 	ASSERT_EQ(expectedCrossings,crossings);
+
+	// new
+	AnglePair query_Q = grapefruit->toQueryFrame(query);
+	std::vector<int> subset = grapefruit->getSubset(query_Q);
+
+	ASSERT_EQ(1,subset.size());
 }
 
 TEST_F(Poly_01,Query_08_boundsPoint)
