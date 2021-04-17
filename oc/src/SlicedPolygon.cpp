@@ -7,7 +7,6 @@ Edge::Edge()
 	Rvector3 pole = {1200000,120000,1222};
 	Real bound1 = 0;
 	Real bound2 = 0;
-	Real B = 0;
 }
 
 Rvector3 Edge::getPole()
@@ -38,9 +37,6 @@ Edge::Edge(Rvector3 cartNode1, Rvector3 cartNode2)
 	AnglePair node1 = util::cartesianToSpherical(cartNode1);
 	AnglePair node2 = util::cartesianToSpherical(cartNode2);
 	
-	// For strike condition edge case
-	B = node2[1];
-	
 	// Sets bounds1 to the lesser of the two longitudes/thetas
 	if (node1[1] < node2[1])
 	{
@@ -67,10 +63,7 @@ Edge::Edge(Rvector3 cartNode1, Rvector3 cartNode2)
 }
 
 Edge::Edge(AnglePair node1, AnglePair node2)
-{
-	// For strike condition edge case
-	B = node2[1];
-	
+{	
 	// Sets bounds1 to the lesser of the two longitudes/thetas
 	if (node1[1] < node2[1])
 	{
@@ -97,10 +90,10 @@ Edge::Edge(AnglePair node1, AnglePair node2)
 bool Edge::boundsPoint(double lon)
 {
 	
-	if (B == lon)
+	if (lon == bound1 || lon == bound2)
 	{	
-		std::cout << "AAAAAAH\n";
-		return 0;
+		Real delta = std::numeric_limits<double>::min();		
+		return boundsPoint(lon + delta);
 	}
 
 	//return ((lon >= bound1) && (lon <= bound2));

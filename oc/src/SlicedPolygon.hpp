@@ -3,6 +3,7 @@
 
 #include "Polygon.hpp"
 #include "Preprocessor.hpp"
+#include <limits>
 
 class SliceTree;
 
@@ -31,7 +32,6 @@ class Edge
 		Rvector3 pole;
 		Real bound1;
 		Real bound2;
-		double B;
 
 		Real shooterDotPole;
 };
