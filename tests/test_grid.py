@@ -81,7 +81,7 @@ class TestGrid(unittest.TestCase):
         #  case using default values
         o = Grid.from_autogrid_dict({"@type": "autogrid"})
         self.assertEqual(o._type, "Grid")
-        self.assertIsNone(o._id)
+        self.assertIsNotNone(o._id)
         self.assertIsInstance(o.point_group, propcov.PointGroup)
         self.assertEqual(o.num_points, 41252)
 

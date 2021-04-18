@@ -395,6 +395,7 @@ class TestUtilModuleFunction(unittest.TestCase):
                                                     "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
+        
         # single sc tests
         x = orbitpy.util.helper_extract_spacecraft_params([o1])
         self.assertEqual(len(x), 1)
@@ -407,8 +408,17 @@ class TestUtilModuleFunction(unittest.TestCase):
         self.assertAlmostEqual(x[0].for_height, 15.0) 
         self.assertAlmostEqual(x[0].for_width, 15.0)
 
+        # spacecraft with no instruments
         x = orbitpy.util.helper_extract_spacecraft_params([o2])
-        self.assertEqual(x, [])
+        self.assertEqual(len(x), 1)
+        self.assertEqual(x[0].sc_id, 12)
+        self.assertIsNone(x[0].instru_id)
+        self.assertIsNone(x[0].mode_id)
+        self.assertAlmostEqual(x[0].sma, 6878.136999999998)
+        self.assertIsNone(x[0].fov_height)
+        self.assertIsNone(x[0]. fov_width)
+        self.assertIsNone(x[0].for_height) 
+        self.assertIsNone(x[0].for_width)
 
         x = orbitpy.util.helper_extract_spacecraft_params([o3])
         self.assertEqual(len(x), 8)
@@ -485,8 +495,8 @@ class TestUtilModuleFunction(unittest.TestCase):
 
         # test multiple spacecraft list, test first and last element of the resultant list
         x = orbitpy.util.helper_extract_spacecraft_params([o1, o2, o3])
-        self.assertEqual(len(x), 9)
-        self.assertEqual(x[0].sc_id, 'sp1')
+        self.assertEqual(len(x), 10)
+        self.assertEqual(x[0].sc_id, 'sp1')     
         self.assertEqual(x[0].instru_id,'bs1')
         self.assertEqual(x[0].mode_id, '0')
         self.assertAlmostEqual(x[0].sma, 6878.136999999998)
@@ -495,14 +505,24 @@ class TestUtilModuleFunction(unittest.TestCase):
         self.assertAlmostEqual(x[0].for_height, 15.0) 
         self.assertAlmostEqual(x[0].for_width, 15.0)
 
-        self.assertIsNotNone(x[8].sc_id)
-        self.assertEqual(x[8].instru_id,'bs3')
-        self.assertIsNotNone(x[8].mode_id)
-        self.assertAlmostEqual(x[8].sma, 6878.136999999998)
-        self.assertAlmostEqual(x[8].fov_height, 5.0)
-        self.assertAlmostEqual(x[8]. fov_width, 10.0)
-        self.assertAlmostEqual(x[8].for_height, 5.0) 
-        self.assertAlmostEqual(x[8].for_width, 15.0)
+        self.assertEqual(x[1].sc_id, 12)
+
+        self.assertIsNotNone(x[2].sc_id)       
+        self.assertEqual(x[3].sc_id, x[2].sc_id)
+        self.assertEqual(x[4].sc_id, x[2].sc_id)
+        self.assertEqual(x[5].sc_id, x[2].sc_id)
+        self.assertEqual(x[6].sc_id, x[2].sc_id)
+        self.assertEqual(x[7].sc_id, x[2].sc_id) 
+        self.assertEqual(x[8].sc_id, x[2].sc_id)
+        self.assertEqual(x[9].sc_id, x[2].sc_id)
+        self.assertEqual(x[9].instru_id,'bs3')
+        self.assertIsNotNone(x[9].mode_id)
+        self.assertAlmostEqual(x[9].sma, 6878.136999999998)
+        self.assertAlmostEqual(x[9].fov_height, 5.0)
+        self.assertAlmostEqual(x[9]. fov_width, 10.0)
+        self.assertAlmostEqual(x[9].for_height, 5.0) 
+        self.assertAlmostEqual(x[9].for_width, 15.0)       
+
     
     def test_extract_auxillary_info_from_state_file(self): # TODO
         pass

@@ -26,7 +26,33 @@ import pandas as pd
 
 from orbitpy.mission import Mission
 
+class TestSettings(unittest.TestCase): #TODO
+    pass
+
 class TestMission(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        # Create new working directory to store output of all the class functions. 
+        cls.dir_path = os.path.dirname(os.path.realpath(__file__))
+        cls.out_dir = os.path.join(cls.dir_path, 'temp')
+        if os.path.exists(cls.out_dir):
+            shutil.rmtree(cls.out_dir)
+        os.makedirs(cls.out_dir)
+        
     def test_scenario_1(self):
-        pass
+        mission_json_str = '{  "epoch": "2018, 1, 15, 12, 0, 0", \
+                                "duration": 0.1, \
+                                "spacecraft": { \
+                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                                } \
+                                    } \
+                            }'
+        mission = Mission.from_json(mission_json_str)
+        mission.outDir = self.out_dir
+
+        out_info = mission.execute()
+        print(out_info)

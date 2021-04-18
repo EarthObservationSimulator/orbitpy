@@ -232,7 +232,7 @@ class Grid(Entity):
         return GridPoint(latitude=lat, longitude=lon)
 
 
-def compute_grid_res(spacecraft, grid_res_fac=0.9):
+def compute_grid_res(spacecraft, grid_res_fac):
     """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.
 
     The grid resolution is set such that at any given arbitrary time, the sensor footprint from its field-of-**view** captures atleast one grid-point
@@ -253,7 +253,7 @@ def compute_grid_res(spacecraft, grid_res_fac=0.9):
     :param spacecraft: List of spacecrafts in the mission.
     :paramtype spacecraft: list, :class:`orbitpy:util.Spacecraft`
 
-    :param grid_res_fac: Factor which decides the resolution of the generated grid. Default value is 0.9.
+    :param grid_res_fac: Factor which decides the resolution of the generated grid.
     :paramtype grid_res_fac: float  
 
     :return: Grid resolution in degrees.

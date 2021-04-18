@@ -25,12 +25,15 @@ class TestPropagatorModuleFunction(unittest.TestCase):
         instru2 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 25, "angleWidth": 0.01}}')
         instru3 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 35, "angleWidth": 0.01}}')
         instru4 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 150, "angleWidth": 0.01}}')
+        instru5 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter": 136.03734762889385}}')
 
         orbit1 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+500, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
         orbit2 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+710, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
         orbit3 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+510, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
         orbit4 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1000, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
 
+        
+        
         # single satellite, multiple instruments
         sats = [Spacecraft(orbitState=orbit1, instrument=[instru1, instru2])]
         self.assertAlmostEqual(orbitpy.propagator.compute_time_step(sats, 1), 18.6628, places=4)
@@ -60,6 +63,12 @@ class TestPropagatorModuleFunction(unittest.TestCase):
         f = random.random()
         self.assertAlmostEqual(orbitpy.propagator.compute_time_step(sats, f), 1057.437400519928*f)
 
+        # result with satellite, no instruments is same as satellite with instrument of fov=horizon angle
+        sats1 = [Spacecraft(orbitState=orbit1)] 
+        sats2 = [Spacecraft(orbitState=orbit1, instrument=[instru5])]
+        self.assertAlmostEqual(orbitpy.propagator.compute_time_step(sats1, 0.25), orbitpy.propagator.compute_time_step(sats2, 0.25))  # horizon angle = 136.03734762889385
+
+'''
 class TestPropagatorFactory(unittest.TestCase):
   
     class DummyNewPropagator:
@@ -261,3 +270,5 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
 
 class TestPropagatorOutputInfo(unittest.TestCase): #TODO
     pass
+
+'''

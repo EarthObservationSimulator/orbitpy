@@ -608,6 +608,16 @@ class Spacecraft(Entity):
         """ Parses ``Spacecraft`` object from a dictionary.
 
         :param d: Dictionary with the spacecraft properties.
+
+        The following default values are assigned to the object instance parameters in case of 
+        :class:`None` values or missing key/value pairs in the input dictionary.
+
+        .. csv-table:: Default values
+            :header: Parameter, Default Value
+            :widths: 10,40
+
+            spacecraftBus, A `SpacecraftBus` object with the orientation in the ``NADIR_POINTING`` frame and convention ``REF_FRAME_ALIGNED``. 
+
         :paramtype d: dict
         
         :return: Parsed python object. 
@@ -626,7 +636,7 @@ class Spacecraft(Entity):
         return Spacecraft(
                 name = d.get("name", None),
                 orbitState = OrbitState.from_dict(orbitstate_dict) if orbitstate_dict else None,
-                spacecraftBus = SpacecraftBus.from_dict(spacecraft_bus_dict) if spacecraft_bus_dict else None,
+                spacecraftBus = SpacecraftBus.from_dict(spacecraft_bus_dict) if spacecraft_bus_dict else Spacecraft.from_dict({'orientation':{'referenceFrame': 'NADIR_POINTING', 'convention':'REF_FRAME_ALIGNED'}}),
                 instrument = instrument,
                 _id = d.get("@id", str(uuid.uuid4()))
                 )
@@ -743,6 +753,8 @@ def helper_extract_spacecraft_params(spacecraft):
                         [for_height, for_width] = x.sph_geom.get_fov_height_and_width()
 
                         params.append(_p(sc_id, instru_id, mode_id, sma, fov_height, fov_width, for_height, for_width))
+        else:
+            params.append(_p(sc_id, None, None, sma, None, None, None, None))
     return params
 
 def extract_auxillary_info_from_state_file(state_file):
