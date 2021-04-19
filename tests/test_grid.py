@@ -107,7 +107,11 @@ class TestGrid(unittest.TestCase):
         # typical case involving autoGrid
         out_file = self.out_dir+'/grid_test_write_to_file.csv'
         o = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
-        o.write_to_file(out_file)
+        out_info = o.write_to_file(out_file)
+        self.assertEqual(out_info.gridId, 1)
+        self.assertEqual(out_info.gridFile, out_file)
+        self.assertEqual(out_info._type, 'GridOutputInfo')
+        self.assertIsNone(out_info._id)
         # check written data
         data = pd.read_csv(out_file)
         self.assertEqual(data.columns[0], 'lat [deg]')
@@ -168,4 +172,5 @@ class TestGrid(unittest.TestCase):
     def test_get_lat_lon(self): #TODO
         pass
 
-
+class TestGridOutputInfo(unittest.TestCase): #TODO
+    pass

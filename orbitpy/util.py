@@ -704,14 +704,13 @@ class Spacecraft(Entity):
                 return x
         return None
 
-    '''
     def __eq__(self, other):
-        """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
-            Note that _id data attribute may be different.
-        """
-        return (self.name == other.name and self.orbitState == other.orbitState and self.spacecraftBus == other.spacecraftBus \
-                and self.instrument==other.instrument)
-    '''
+        # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different
+        if(isinstance(self, other.__class__)):
+            return (self.name == other.name and self.orbitState == other.orbitState and self.spacecraftBus == other.spacecraftBus \
+                    and self.instrument==other.instrument)                
+        else:
+            return NotImplemented    
     
 def helper_extract_spacecraft_params(spacecraft):
     """ Helper function for the time step and grid resolution computation which returns tuples 

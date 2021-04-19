@@ -6,8 +6,8 @@ The truth data is present in the folder ``test_data``.
 
 **Tests:**
 
-* ``test_scenario_1``: 1 satellite, no instrument ; propagation only.
-* ``test_scenario_2``: 1 satellite, 1 instrument ; propagation, grid-coverage, data-metrics calculation.
+* ``test_scenario_1``: 1 satellite, no instrument ; propagation only, auto-time-step.
+* ``test_scenario_2``: 1 satellite, 1 instrument ; propagation (custom time-step), grid-coverage (custom-grid res), data-metrics calculation.
 * ``test_scenario_3``: 1 satellite, 1 instrument, 1 ground-station ; propagation, pointing-options coverage, data-metrics calculation, contact-finder (ground-station only).
 * ``test_scenario_4``: 1 satellite, 1 instrument, 1 ground-station ; propagation, pointing-options with grid-coverage, data-metrics calculation, contact-finder (ground-station only).
 * ``test_scenario_5``: 1 satellite, multiple instruments, multiple ground-stations ; propagation, grid-coverage, data-metrics calculation, contact-finder (ground-station only).
@@ -25,6 +25,8 @@ import numpy as np
 import pandas as pd
 
 from orbitpy.mission import Mission
+from orbitpy.propagator import J2AnalyticalPropagator
+from orbitpy.util import Spacecraft
 
 class TestSettings(unittest.TestCase): #TODO
     pass
@@ -41,7 +43,10 @@ class TestMission(unittest.TestCase):
         os.makedirs(cls.out_dir)
         
     def test_scenario_1(self):
-        mission_json_str = '{  "epoch": "2018, 1, 15, 12, 0, 0", \
+        """  1 satellite, no instrument ; propagation only, auto, custom-time-step. The mission epoch is same, different from the satellite orbit-state date.
+        """
+        # auto propagation step-size, mission-date different from spacecraft orbitstate date
+        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
                                 "duration": 0.1, \
                                 "spacecraft": { \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
@@ -49,10 +54,109 @@ class TestMission(unittest.TestCase):
                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                   "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                 } \
-                                    } \
+                                    }, \
+                                "settings": {"outDir": "tests/temp/"} \
                             }'
         mission = Mission.from_json(mission_json_str)
-        mission.outDir = self.out_dir
+        self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459299.1292592594)
+        self.assertAlmostEqual(mission.duration, 0.1)
+        self.assertEqual(len(mission.spacecraft), 1)
+        self.assertAlmostEqual(mission.spacecraft[0], Spacecraft.from_dict({ "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}}, 
+                                                                          "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
+                                                                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}} 
+                                                                        }))
+        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 173.31598026839598})) # corresponds to time-step calculated considering horizon angle = 136.0373... deg and time-resolution factor = 0.25
+        self.assertIsNone(mission.grid)
+        self.assertIsNone(mission.groundStation)
+        self.assertAlmostEqual(mission.propagator.stepSize, 173.31598026839598) 
+        self.assertEqual(mission.settings.outDir,  "tests/temp/")
+        self.assertIsNone(mission.settings.coverageType)
+        self.assertEqual(mission.settings.propTimeResFactor, 0.25)
+        self.assertEqual(mission.settings.gridResFactor, 0.9)
+
+        out_info = mission.execute()
+
+        # custom propagation step-size, mission-date same as spacecraft orbitstate date, custom propTimeResFactor = 1/8
+        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                "duration": 0.1, \
+                                "spacecraft": { \
+                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                                } \
+                                    }, \
+                                "settings": {"outDir": "tests/temp/", "propTimeResFactor": 0.125} \
+                            }'
+        mission = Mission.from_json(mission_json_str)
+        self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459270.75)
+        self.assertAlmostEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 86.657990134197990})) # corresponds to time-step calculated considering horizon angle = 136.0373... deg and time-resolution factor = 1/8
+        self.assertAlmostEqual(mission.propagator.stepSize, 0.5*173.31598026839598) 
+        self.assertEqual(mission.settings.propTimeResFactor, 1/8)
+
+        out_info = mission.execute()
+
+    
+    def test_scenario_2(self):
+        """  1 satellite, 1 instrument ; propagation (custom time-step), grid-coverage (2 grids, auto and custom-grid res), data-metrics calculation.
+        """
+        # check warnings are issued.
+        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                "duration": 0.1, \
+                                "spacecraft": { \
+                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                                }, \
+                                   "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
+                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":15 }, \
+                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
+                                                   "@id":"bs1", "@type":"Basic Sensor" \
+                                            } \
+                                    }, \
+                                "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 200}, \
+                                "settings": {"outDir": "tests/temp/", "coverageType": "Grid COverage"} \
+                            }'
+        with self.assertWarns(Warning): # check for warning that user specified step-size is greater than auto-calculated step-size.
+            mission = Mission.from_json(mission_json_str)
+
+        mission = Mission.from_json(mission_json_str)
+        with self.assertWarns(Warning): # check for warning that grid has not been specified.
+            out_info = mission.execute()
+
+        # check execution with single grid.
+        mission_json_str = '{   "epoch":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
+                                "duration": 0.5, \
+                                "spacecraft": { \
+                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 30, "raan": 35, "aop": 145, "ta": -25} \
+                                                }, \
+                                   "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
+                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":15 }, \
+                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
+                                                   "@id":"bs1", "@type":"Basic Sensor" \
+                                            } \
+                                    }, \
+                                "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 60}, \
+                                "grid": [{"@type": "autogrid", "@id": "cus", "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180}, {"@type": "autogrid", "@id": "auto", "latUpper":20, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}], \
+                                "settings": {"outDir": "tests/temp/", "coverageType": "Grid COverage", "gridResFactor": 0.5} \
+                            }'
+
+        mission = Mission.from_json(mission_json_str)
+ 
+        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 60}))
+
+
+        self.assertEqual(len(mission.grid), 2)
+        # 0.5917400590151374 is the grid-resolution calculated for the 15 deg FOV sensor at altitude of 500km and gridResFactor = 0.5
+        self.assertEqual(mission.grid[0].num_points, 1820) # ~ 4*pi/ (0.5917400590151374*pi/180 * 0.5917400590151374*pi/180) *  ((2*pi)*(2*pi/180))/(4*pi)
+        # 1 deg grid resolution is input in the specifications
+        self.assertEqual(mission.grid[1].num_points, 7402) # ~ 4*pi/ (pi/180 * pi/180) * ((2*pi)*(20*pi/180)/(4*pi)) 
+
 
         out_info = mission.execute()
         print(out_info)
+    

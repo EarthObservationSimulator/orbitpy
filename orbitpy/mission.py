@@ -11,19 +11,21 @@ import math
 import uuid
 from collections import namedtuple
 import pandas as pd
+import warnings
 
 from instrupy.util import Entity
 from instrupy import Instrument
 import propcov
 
 import orbitpy.util
+from orbitpy.util import OrbitState
 from .util import Spacecraft, GroundStation, SpacecraftBus
 from .constellation import ConstellationFactory
 import orbitpy.propagator
 import orbitpy.grid
 from .propagator import PropagatorFactory
 from .coveragecalculator import CoverageCalculatorFactory, CoverageType, GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
-from datametricscalculator import DataMetricsCalculator
+from datametricscalculator import DataMetricsCalculator, AccessFileInfo
 from .contactfinder import ContactFinder
 from .grid import Grid
 
@@ -128,8 +130,8 @@ class Mission(Entity):
     :ivar propagator: Orbit propagator.
     :vartype propagator: :class:`orbitpy.propagator.J2AnalyticalPropagator`
 
-    :ivar grid: Grid object to be used in case of coverage calculations.
-    :vartype grid: :class:`orbitpy.grid.Grid` or None
+    :ivar grid: List of grid objects to be used in case of coverage calculations.
+    :vartype grid: list, :class:`orbitpy.grid.Grid` or None
 
     :ivar groundStation: List of ground-stations in the mission.
     :vartype groundStation: list, :class:`orbitpy.util.GroundStation` or None
@@ -141,18 +143,17 @@ class Mission(Entity):
     :vartype _id: str
 
     """
-    def __init__(self, startDate=None, duration=None, spacecraft=None, propagator=None,
+    def __init__(self, epoch=None, duration=None, spacecraft=None, propagator=None,
                  grid=None, groundStation=None, settings=None, _id=None):
-        self.startDate = startDate if startDate is not None and isinstance(startDate, propcov.AbsoluteDate) else None
+        self.epoch = epoch if epoch is not None and isinstance(epoch, propcov.AbsoluteDate) else None
         self.duration = float(duration) if duration is not None else None
         self.spacecraft = orbitpy.util.initialize_object_list(spacecraft, Spacecraft)
         self.propagator = propagator if propagator is not None else None
-        self.grid = grid if grid is not None and isinstance(grid, Grid) else None
+        self.grid = orbitpy.util.initialize_object_list(grid, Grid)
         self.groundStation = orbitpy.util.initialize_object_list(groundStation, GroundStation)
         self.settings = settings if isinstance(settings, Settings) else None
 
-        super(Mission, self).__init__(_id, "Mission")
-        
+        super(Mission, self).__init__(_id, "Mission")        
  
     @staticmethod
     def from_dict(d):
@@ -165,11 +166,10 @@ class Mission(Entity):
         :rtype: :class:`orbitpy.mission.Mission`
 
         """
-        startDate = propcov.AbsoluteDate()
-        startDate.SetJulianDate(d.get('startDate', 2459270.5)) # 25 Feb 2021 0:0:0 default startDate
+        epoch = OrbitState.date_from_dict(d.get('epoch', {"dateType":"JULIAN_DATE_UT1", "jd":2459270.5}) ) # 25 Feb 2021 0:0:0 default startDate
 
         # parse settings
-        settings_dict: = d.get('settings', {})
+        settings_dict = d.get('settings', dict())
         settings = Settings.from_dict(settings_dict)
 
         # parse spacecraft(s) 
@@ -197,23 +197,31 @@ class Mission(Entity):
         # Compute step-size
         time_step = orbitpy.propagator.compute_time_step(spacecraft, settings.propTimeResFactor)
         prop_dict = d.get('propagator', {'@type': 'J2 ANALYTICAL PROPAGATOR', 'stepSize': time_step}) # default to J2 Analytical propagator and time-step as calculated before 
-        propagator = factory.get_propagator(prop_dict)
+        if prop_dict.get("stepSize") > time_step:
+            warnings.warn('User given step-size is greater than auto calculated step-size.')
+        propagator = factory.get_propagator(prop_dict) 
 
         # parse grid        
-        grid_dict = d.get('grid', None)
+        grid_dict = d.get('grid', None) 
         if grid_dict:
-            if ((grid_dict.get('@type', None)=='autogrid') and (grid_dict.get('gridRes', None) is None)):
-                # calculate grid resolution factor
-                gridRes = orbitpy.grid.compute_grid_res(spacecraft, settings.gridResFactor)
-                grid_dict['gridRes'] = gridRes
+            # make into list of dictionaries if not already list
+            if not isinstance(grid_dict, list):
+                grid_dict = [grid_dict]
+            # iterate through the list of grids
+            grid = []
+            for gd in grid_dict:
+                if ((gd.get('@type', None)=='autogrid') and (gd.get('gridRes', None) is None)):
+                    # calculate grid resolution factor
+                    gridRes = orbitpy.grid.compute_grid_res(spacecraft, settings.gridResFactor)
+                    gd['gridRes'] = gridRes
 
-            grid = Grid.from_dict(grid_dict)
+                grid.append(Grid.from_dict(gd))
         else:
             grid = None        
 
         # parse ground-station(s) 
         groundStation = orbitpy.util.dictionary_list_to_object_list(d.get("groundStation", None), GroundStation)
-        return Mission(startDate = startDate, # 25 Feb 2021 0:0:0 default startDate
+        return Mission(epoch = epoch, # 25 Feb 2021 0:0:0 default startDate
                        duration = d.get('duration', 1), # 1 day default
                        spacecraft = spacecraft,
                        propagator = propagator,                       
@@ -231,7 +239,7 @@ class Mission(Entity):
         
         """
         return dict({"@type": "Mission",
-                     "startDate": self.startDate,
+                     "epoch": self.epoch,
                      "duration": self.duration,                     
                      "spacecraft": orbitpy.util.object_list_to_dictionary_list(self.spacecraft),
                      "propagator": self.propagator.to_dict(),
@@ -260,45 +268,70 @@ class Mission(Entity):
         for spc_idx, spc in enumerate(self.spacecraft):
             
             # make satellite directory
-            sat_dir = self.outDir + '/sat' + str(spc_idx) + '/'
+            sat_dir = self.settings.outDir + '/sat' + str(spc_idx) + '/'
             if os.path.exists(sat_dir):
                 shutil.rmtree(sat_dir)
             os.makedirs(sat_dir)
 
             state_cart_file = sat_dir + 'state_cartesian.csv'
             state_kep_file = sat_dir + 'state_keplerian.csv'
-            x = self.propagator.execute(spc, self.startDate, state_cart_file, state_kep_file, self.duration)
+            x = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
             out_info.append(x)
 
             # loop over all the instruments and modes (per instrument) and calculate the corresponding coverage, data-metrics
             if spc.instrument:
                 for instru_idx, instru in enumerate(spc.instrument):
 
-                    for mode_idx, mode in enumerate(instru.mode):
-
-                        acc_fl = sat_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '.csv'
+                    for mode_idx, mode in enumerate(instru.mode):                        
                         
-                        if self.coverageType == CoverageType.GRID_COVERAGE:
-                            cov_calc = GridCoverage(grid=self.grid, spacecraft=spc, state_cart_file=state_cart_file)
-                            x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl)
-                            out_info.append(x)                       
+                        if self.settings.coverageType == CoverageType.GRID_COVERAGE:
+                            if self.grid is None:
+                                warnings.warn('Grid not specified, skipping Grid Coverage, Data metrics calculations.')
+                                continue
+                            # iterate over multiple grids
+                            for grid_idx, grid in enumerate(self.grid):
+                                grid_fl = self.settings.outDir + 'grid_' + str(grid_idx) + '.csv'
+                                x = grid.write_to_file(grid_fl) # TODO inefficient since the same file would be written multiple times, revise
+                                out_info.append(x)
+                                acc_fl = sat_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                cov_calc = GridCoverage(grid=grid, spacecraft=spc, state_cart_file=state_cart_file)
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl)
+                                out_info.append(x)     
 
-                        elif self.coverageType == CoverageType.POINTING_OPTIONS_COVERAGE:
+                                dm_file = sat_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, acc_fl))                    
+                                x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id)
+                                out_info.append(x)                  
+
+                        elif self.settings.coverageType == CoverageType.POINTING_OPTIONS_COVERAGE:
+                            acc_fl = sat_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '.csv'
                             cov_calc = PointingOptionsCoverage(spacecraft=spc, state_cart_file=state_cart_file)
                             x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl)
+                            out_info.append(x)
+
+                            dm_file = sat_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '.csv'
+                            dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, acc_fl))                    
+                            x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id)
                             out_info.append(x) 
 
-                        elif self.coverageType == CoverageType.POINTING_OPTIONS_WITH_GRID_COVERAGE:
-                            cov_calc = PointingOptionsWithGridCoverage(grid=self.grid, spacecraft=spc, state_cart_file=state_cart_file)
-                            x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl)
-                            out_info.append(x)
+                        elif self.settings.coverageType == CoverageType.POINTING_OPTIONS_WITH_GRID_COVERAGE:
+                            if self.grid is None:
+                                warnings.warn('Grid not specified, skipping Grid Coverage, Data metrics calculations.')
+                                continue
+                            # iterate over multiple grids
+                            for grid_idx, grid in enumerate(self.grid):
+                                grid_fl = self.settings.outDir + 'grid_' + str(grid_idx) + '.csv'
+                                x = grid.write_to_file(grid_fl)
+                                out_info.append(x)
+                                acc_fl = sat_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                cov_calc = PointingOptionsWithGridCoverage(grid=self.grid, spacecraft=spc, state_cart_file=state_cart_file)
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl)
+                                out_info.append(x)
                         
-                        dm_file = sat_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '.csv'
-
-                        dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=state_cart_file, access_file_info=acc_fl)
-            
-                        x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._idx, mode_id=mode._id)
-                        out_info.append(x)
+                                dm_file = sat_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, acc_fl))                    
+                                x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id)
+                                out_info.append(x)
         
             # loop over all the ground-stations and calculate contacts
             if self.groundStation:
@@ -309,19 +342,19 @@ class Mission(Entity):
                     out_info.append(x)
 
         # Calculate inter-satellite contacts
-        intersat_comm_dir = self.outDir + '/comm/'
+        intersat_comm_dir = self.settings.outDir + '/comm/'
         if os.path.exists(intersat_comm_dir):
             shutil.rmtree(intersat_comm_dir)
         os.makedirs(intersat_comm_dir)
 
         for spc1_idx in range(0, len(self.spacecraft)):
             spc1 = self.spacecraft[spc1_idx]
-            spc1_state_cart_file = self.outDir + 'sat' + str(spc1_idx) + '/state_cartesian.csv'
+            spc1_state_cart_file = self.settings.outDir + 'sat' + str(spc1_idx) + '/state_cartesian.csv'
             
             # loop over the rest of the spacecrafts in the list (i.e. from the current spacecraft to the last spacecraft in the list)
             for spc2_idx in range(spc1_idx+1, len(self.spacecraft)):
                 
-                spc2_state_cart_file = self.outDir + 'sat' + str(spc1_idx) + '/state_cartesian.csv'
+                spc2_state_cart_file = self.settings.outDir + 'sat' + str(spc1_idx) + '/state_cartesian.csv'
                 
                 spc2 = self.spacecraft[spc2_idx]
                 out_intersat_filename = 'sat'+str(spc_idx)+'_to_sat'+str(spc2_idx)+'.csv'

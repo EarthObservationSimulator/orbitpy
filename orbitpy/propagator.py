@@ -59,6 +59,7 @@ def compute_time_step(spacecraft, time_res_fac):
             # no instruments specified, hence no field-of-regard to consider, hence consider the entire horizon angle as FOR
             f = RE/sma
             for_at = np.rad2deg(2*np.arcsin(f))
+            print(for_at)
         
         # calculate maximum horizon angle
         f = RE/sma
@@ -292,7 +293,7 @@ class J2AnalyticalPropagator(Entity):
             kep_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             kep_writer.writerow(['time index','sma [km]','ecc','inc [deg]','raan [deg]','aop [deg]','ta [deg]'])
 
-        # propagate from to the start date since the date at which the orbit-state is defined
+        # propagate to the specified start date since the date at which the orbit-state is defined
         # could be different from the specified start_date (propagation could be either forwards or backwards)
         prop.Propagate(start_date)
         date = start_date

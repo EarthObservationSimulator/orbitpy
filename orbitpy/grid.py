@@ -14,6 +14,7 @@ from instrupy.util import Entity, EnumEntity, Constants
 import orbitpy.util
 
 GridPoint = namedtuple("GridPoint", ["latitude", "longitude"])
+
 class Grid(Entity):
     """ Class to handle grid related operations. 
 
@@ -184,10 +185,17 @@ class Grid(Entity):
                          input custom grid data file as described in the function ``from_custom_grid``.
         :paramtype filepath: str
 
+        :returns: Output grid info.
+        :rtype: :class:`orbitpy.grid.GridOutputInfo`
+
         """
         grid_points = self.get_lat_lon()
         df = pd.DataFrame(list(zip(grid_points.latitude, grid_points.longitude)), columns =['lat [deg]','lon [deg]'])
         df.to_csv(filepath, index=False)
+        return GridOutputInfo.from_dict({'gridId': self._id,
+                                         'gridFile': filepath,
+                                         '_id': None}    
+                                        )
 
     def get_lat_lon(self):
         """ Get the grid points (coordinates).
@@ -230,7 +238,6 @@ class Grid(Entity):
         lon = [_lon[x] for x in indexes]        
 
         return GridPoint(latitude=lat, longitude=lon)
-
 
 def compute_grid_res(spacecraft, grid_res_fac):
     """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.
@@ -292,3 +299,60 @@ def compute_grid_res(spacecraft, grid_res_fac):
             min_grid_res_deg = grid_res_deg
 
     return min_grid_res_deg
+
+class GridOutputInfo(Entity):
+    """ Class to hold information about the grid-data (geo-coordinates).
+    
+    :ivar gridId: Spacecraft identifier.
+    :vartype gridId: str or int
+
+    :ivar gridFile: File (filename with path) where the grid data is saved.
+    :vartype gridFile: str
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str or int
+
+    """
+    def __init__(self, gridId=None, gridFile=None, _id=None):
+        self.gridId = gridId if gridId is not None else None
+        self.gridFile = str(gridFile) if gridFile is not None else None
+
+        super(GridOutputInfo, self).__init__(_id, "GridOutputInfo")
+    
+    @staticmethod
+    def from_dict(d):
+        """ Parses an ``GridOutputInfo`` object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the GridOutputInfo attributes.
+        :paramtype d: dict
+
+        :return: GridOutputInfo object.
+        :rtype: :class:`orbitpy.datametricscalculator.GridOutputInfo`
+
+        """
+        return GridOutputInfo( gridId = d.get('gridId', None),
+                               gridFile = d.get('gridFile', None),
+                               _id  = d.get('@id', None))
+
+    def to_dict(self):
+        """ Translate the GridOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: GridOutputInfo object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "GridOutputInfo",
+                     "gridId": self.gridId,
+                     "gridFile": self.gridFile,
+                     "@id": self._id})
+
+    def __repr__(self):
+        return "GridOutputInfo.from_dict({})".format(self.to_dict())
+    
+    def __eq__(self, other):
+        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        if(isinstance(self, other.__class__)):
+            return (self.gridId==other.gridId) and (self.gridFile==other.gridFile)
+                
+        else:
+            return NotImplemented
