@@ -3,7 +3,7 @@
 ``TestPointingOptionsCoverage`` class:
 
 * ``test_execute_0``: Test format of output access files.
-* ``test_execute_1``: For a random circular orbit, test that pointing of the Euler angles, sequence (0,0,x,1,2,3) shall yield access points equal to the satellite position.
+* ``test_execute_1``: For a circular orbit, test that pointing of the Euler angles, sequence (0,0,x,1,2,3) shall yield access points equal to the satellite position.
 * ``test_execute_2``: For a equatorial orbit, test the accessed ground-points against an analytical result.
 
 TODO: tests to check behavior with multiple sensors, modes
@@ -125,8 +125,8 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         sma = RE+random.uniform(350,850)
         orbit_dict = {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": sma, 
-                            "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
-                            "aop": random.uniform(0,360), "ta": random.uniform(0,360)}
+                            "ecc": 0, "inc": 56, "raan": 135, 
+                            "aop": 26.23, "ta": 67}
                      }
 
         instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, 
@@ -156,6 +156,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
                         "instruId": sat.get_instrument(None)._id,
                         "modeId": sat.get_instrument(None).get_mode_id()[0],
                         "usedFieldOfRegard": None,
+                        "filterMidIntervalAccess": None,
                         "gridId": None,
                         "stateCartFile": state_cart_file,
                         "accessFile": out_file_access,
@@ -235,6 +236,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
                         "instruId": 'bs1',
                         "modeId": 111,
                         "usedFieldOfRegard": None,
+                        "filterMidIntervalAccess": None,
                         "gridId": None,
                         "stateCartFile": state_cart_file,
                         "accessFile": out_file_access,

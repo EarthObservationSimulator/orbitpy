@@ -190,16 +190,16 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
         .. warning:: The correction method is to be used only when the instrument access-duration is smaller than the propagation time step (which is determined from sceneFOV). 
 
         :ivar inp_acc_df: Dataframe with the access data which needs to be filtered. The rows correspond to pair of 
-                          access time and corresponding ground-point index. The columns are to be named as: ``time index`` and ``GP index``.
+                          access time and corresponding ground-point index. The columns are to be named as: ``time index``, ``GP index``, ``lat [deg]``, ``lon [deg]``.
                           If ``None``, the ``inp_acc_fl`` input argument must be specified.
-        :vartype inp_acc_df: pd.DataFrame
+        :vartype inp_acc_df: pd.DataFrame or None
 
-        :ivar inp_acc_fl: Input access file (filepath with filename). Refer to the ``execute`` method in the respective coverage calculator classes
+        :ivar inp_acc_fl: Input access file (filepath with filename). Refer to the ``execute`` method in the ``GridCoverage`` class
                           for description of the file format. If ``None``, the ``inp_acc_df`` input argument must be specified.
-        :vartype inp_acc_fl: str
+        :vartype inp_acc_fl: str or None
 
         :ivar out_acc_fl: Output access file (filepath with filename). The format is the same as that of the input access file. If ``None`` the file is not written.
-        :vartype out_acc_fl: str
+        :vartype out_acc_fl: str or None
 
         :returns: Dataframe with the resultant access data.
         :rtype: pd.DataFrame
@@ -209,41 +209,77 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
             df = pd.read_csv(inp_acc_fl, skiprows = 4)            
         else:
             df = inp_acc_df
-        df_grp = df.groupby('GP index') # group according to ground-point indices
-        # iterate over all the groups (ground-point indices)
+
         max_num_acc = len(df.index)
-        data = np.zeros((max_num_acc,2), dtype=int)
-        k = 0
         data_indx = 0
-        for name, group in df_grp:
-            x = (group['time index'].shift(periods=1) - group['time index']) < -1
-            _intv = np.where(x == True)[0]            
-            interval_indices = [0] # add the very first interval start index
-            interval_indices.extend(_intv)
-            interval_indices.extend((_intv - 1).tolist())
-            interval_indices.append(len(group)-1) # add the very last interval end index
-            interval_indices.sort()
-            mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
-            mid_points = [int(np.round(x)) for x in mid_points]
-            _data = group.iloc[mid_points].to_numpy()
-            m = _data.shape[0]
-            data[data_indx:data_indx+m,:] = _data
-            data_indx = data_indx + m
 
-        data = data[0:data_indx]
-        out_df = pd.DataFrame(data = data, columns = ['time index', 'GP index'])
-        if inp_acc_fl:
-            with open(inp_acc_fl, 'r') as f1:
-                head = [next(f1) for x in range(4)] # copy first four header lines from the original access file
-                with open(out_acc_fl, 'w') as f2:
-                    for k in range(0,len(head)):
-                        f2.write(str(head[k]))
+        if 'pnt-opt index' in df: # pointing-options with grid coverage access file
+            
+            data = np.zeros((max_num_acc,5)) # make a data structure with maximum possible size            
 
+            for popt, df_per_popt in df.groupby('pnt-opt index'): # iterate over each pointing-option
+
+                # iterate over all the groups (ground-point indices)                
+                for name, group in df_per_popt.groupby('GP index'):
+                    x = (group['time index'].shift(periods=1) - group['time index']) < -1
+                    _intv = np.where(x == True)[0]            
+                    interval_indices = [0] # add the very first interval start index
+                    interval_indices.extend(_intv)
+                    interval_indices.extend((_intv - 1).tolist())
+                    interval_indices.append(len(group)-1) # add the very last interval end index
+                    interval_indices.sort()
+                    mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
+                    mid_points = [int(np.round(x)) for x in mid_points]
+                    _data = group.iloc[mid_points].to_numpy()
+                    m = _data.shape[0]
+                    data[data_indx:data_indx+m,:] = _data
+                    data_indx = data_indx + m
+            
+            data = data[0:data_indx] # remove unnecessary rows
+        
+            out_df = pd.DataFrame(data = data, columns = ['time index', 'pnt-opt index', 'GP index',  'lat [deg]', 'lon [deg]'])
+            out_df = out_df.astype({"time index": int, 'pnt-opt index': int, "GP index": int})
+
+        else: # grid coverage access file
+
+            data = np.zeros((max_num_acc,4)) # make a data structure with maximum possible size   
+
+            # iterate over all the groups (ground-point indices)            
+            for name, group in df.groupby('GP index'):
+                x = (group['time index'].shift(periods=1) - group['time index']) < -1
+                _intv = np.where(x == True)[0]            
+                interval_indices = [0] # add the very first interval start index
+                interval_indices.extend(_intv)
+                interval_indices.extend((_intv - 1).tolist())
+                interval_indices.append(len(group)-1) # add the very last interval end index
+                interval_indices.sort()
+                mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
+                mid_points = [int(np.round(x)) for x in mid_points]
+                _data = group.iloc[mid_points].to_numpy()
+                m = _data.shape[0]
+                data[data_indx:data_indx+m,:] = _data
+                data_indx = data_indx + m
+
+            data = data[0:data_indx] # remove unnecessary rows
+        
+            out_df = pd.DataFrame(data = data, columns = ['time index', 'GP index', 'lat [deg]', 'lon [deg]'])
+            out_df = out_df.astype({"time index": int, "GP index": int})
+        
         out_df.sort_values(by=['time index'], inplace=True)
         out_df = out_df.reset_index(drop=True)
+        
         if out_acc_fl:
-            with open(out_acc_fl, 'a') as f2:
+            head = []
+            if inp_acc_fl:
+                with open(inp_acc_fl, 'r') as f1:
+                    head = [next(f1) for x in range(4)] # copy first four header lines from the original access file                  
+
+            with open(out_acc_fl, 'w') as f2:
+                if head:
+                    for k in range(0,len(head)):
+                        f2.write(str(head[k]))
                 out_df.to_csv(f2, index=False, header=True, line_terminator='\n')
+
         return out_df
 
 class GridCoverage(Entity):
@@ -315,7 +351,7 @@ class GridCoverage(Entity):
     def __repr__(self):
         return "GridCoverage.from_dict({})".format(self.to_dict())
 
-    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None):
+    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, filter_mid_acc=False):
         """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
             same as the time resolution at which the spacecraft states are available. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV)
@@ -349,6 +385,10 @@ class GridCoverage(Entity):
                 lon [deg], float, degrees, Longitude corresponding to the GP index.
         
         :paramtype out_file_access: str
+
+        :param filter_mid_acc: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
+                                           Default value is ``False``.
+        :paramtype filter_mid_acc: bool
 
         :return: Coverage output info.
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
@@ -437,6 +477,10 @@ class GridCoverage(Entity):
         ##### Close file #####                
         if access_file:
             access_file.close()
+
+        ##### filter mid-interval access data if necessary #####
+        if filter_mid_acc is True:
+            filter_mid_interval_access(inp_acc_fl=out_file_access, out_acc_fl=out_file_access)        
         
         return CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
                                                 "coverageType": "GRID COVERAGE",
@@ -444,6 +488,7 @@ class GridCoverage(Entity):
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
                                                 "usedFieldOfRegard": use_field_of_regard,
+                                                "filterMidIntervalAccess": filter_mid_acc,
                                                 "gridId": self.grid._id,
                                                 "stateCartFile": self.state_cart_file,
                                                 "accessFile": out_file_access,
@@ -670,6 +715,7 @@ class PointingOptionsCoverage(Entity):
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
                                                 "usedFieldOfRegard": None,
+                                                "filterMidIntervalAccess": None,
                                                 "gridId": None,
                                                 "stateCartFile": self.state_cart_file,
                                                 "accessFile": out_file_access,
@@ -750,7 +796,7 @@ class PointingOptionsWithGridCoverage(Entity):
     def __repr__(self):
         return "PointingOptionsWithGridCoverage.from_dict({})".format(self.to_dict())
 
-    def execute(self, instru_id=None, mode_id=None, out_file_access=None):
+    def execute(self, instru_id=None, mode_id=None, out_file_access=None, filter_mid_acc=False):
         """ Perform orbit coverage calculation for a specific instrument and mode. 
             The field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
             Coverage is calculated for the period over which the input spacecraft propagated states are available. 
@@ -783,6 +829,10 @@ class PointingOptionsWithGridCoverage(Entity):
                 lon [deg], float, degrees, Longitude corresponding to the GP index.
         
         :paramtype out_file_access: str
+
+        :param filter_mid_acc: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
+                                           Default value is ``False``.
+        :paramtype filter_mid_acc: bool
 
         :return: Coverage output info.
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
@@ -864,12 +914,18 @@ class PointingOptionsWithGridCoverage(Entity):
         if access_file:
             access_file.close()
 
+        ##### filter mid-interval access data if necessary #####
+        if filter_mid_acc is True:
+            #inp_acc_df = pd.read_csv(out_file_access, skiprows = 4)
+            filter_mid_interval_access(inp_acc_fl=out_file_access, out_acc_fl=out_file_access)
+
         return CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
                                                 "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
                                                 "spacecraftId": self.spacecraft._id,
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
                                                 "usedFieldOfRegard": None,
+                                                "filterMidIntervalAccess": filter_mid_acc,
                                                 "gridId": self.grid._id,
                                                 "stateCartFile": self.state_cart_file,
                                                 "accessFile": out_file_access,
@@ -897,6 +953,10 @@ class CoverageOutputInfo(Entity):
                               If not relevant the value is ``None``. 
     :paramtype usedFieldOfRegard: bool (or) None
 
+    :param filterMidIntervalAccess: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
+                                       If not relevant (such as in the case of pointing-options coverage) the value is ``None``. 
+    :paramtype filterMidIntervalAccess: bool (or) None
+
     :param gridId: Grid identifier. 
     :paramtype gridId: str (or) int 
 
@@ -916,15 +976,15 @@ class CoverageOutputInfo(Entity):
     :vartype _id: str or int
 
     """
-    def __init__(self, coverageType=None, spacecraftId=None, instruId=None, modeId=None, usedFieldOfRegard=None, gridId=None, 
-                 stateCartFile=None, accessFile=None, 
-                 startDate=None, duration=None, _id=None):
+    def __init__(self, coverageType=None, spacecraftId=None, instruId=None, modeId=None, usedFieldOfRegard=None, filterMidIntervalAccess=None, 
+                 gridId=None,  stateCartFile=None, accessFile=None, startDate=None, duration=None, _id=None):
         self.coverageType = coverageType if coverageType is not None and isinstance(coverageType, CoverageType) else None
         self.spacecraftId = spacecraftId if spacecraftId is not None else None
         self.instruId = instruId if instruId is not None else None
         self.modeId = modeId if modeId is not None else None
         self.gridId = gridId if gridId is not None else None 
         self.usedFieldOfRegard = usedFieldOfRegard if usedFieldOfRegard is not None else None
+        self.filterMidIntervalAccess = bool(filterMidIntervalAccess) if filterMidIntervalAccess is not None else None
         self.stateCartFile = str(stateCartFile) if stateCartFile is not None else None
         self.accessFile = str(accessFile) if accessFile is not None else None
         self.startDate = float(startDate) if startDate is not None else None
@@ -951,6 +1011,7 @@ class CoverageOutputInfo(Entity):
                                    instruId = d.get('instruId', None),
                                    modeId = d.get('modeId', None),
                                    usedFieldOfRegard = d.get('usedFieldOfRegard', None),
+                                   filterMidIntervalAccess = d.get('filterMidIntervalAccess', None),
                                    gridId = d.get('gridId', None),
                                    stateCartFile = d.get('stateCartFile', None),
                                    accessFile = d.get('accessFile', None),
@@ -971,6 +1032,7 @@ class CoverageOutputInfo(Entity):
                      "instruId": self.instruId,
                      "modeId": self.modeId,
                      "usedFieldOfRegard": self.usedFieldOfRegard,
+                     "filterMidIntervalAccess": self.filterMidIntervalAccess,
                      "gridId": self.gridId,
                      "stateCartFile": self.stateCartFile,
                      "accessFile": self.accessFile,
@@ -985,7 +1047,7 @@ class CoverageOutputInfo(Entity):
         # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
         if(isinstance(self, other.__class__)):
             return (self.coverageType==other.coverageType) and (self.spacecraftId==other.spacecraftId) and (self.instruId==other.instruId) and (self.modeId==other.modeId) and \
-                   (self.usedFieldOfRegard==other.usedFieldOfRegard) and (self.gridId==other.gridId) and  (self.stateCartFile==other.stateCartFile) and (self.accessFile==other.accessFile) and \
+                   (self.usedFieldOfRegard==other.usedFieldOfRegard) and (self.filterMidIntervalAccess == other.filterMidIntervalAccess) and (self.gridId==other.gridId) and  (self.stateCartFile==other.stateCartFile) and (self.accessFile==other.accessFile) and \
                     (self.startDate==other.startDate) and (self.duration==other.duration) 
                 
         else:

@@ -175,6 +175,7 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
     def test_filter_mid_interval_access(self):
         """ Check the behavior of this function is as expected using pre-run results.
         """
+        
         # file input, file output
         inp_acc_fl = self.dir_path + '/../test_data/accessData.csv'
         out_acc_fl = self.out_dir + '/test_filter_mid_interval_access.csv' 
@@ -183,13 +184,17 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         result_df = pd.read_csv(out_acc_fl, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
         truth_df = pd.read_csv(true_mid_interval_acc_fl, skiprows = [0,1,2,3])
         self.assertTrue(result_df.equals(truth_df))
-
+        
         # dataframe input, dataframe output
         inp_data = { 'time index': [ 0,  1,  2,  3,  4,  4,  4,  5,  5,  6,  6,  7,  8], 
-                     'GP index'  : [10, 11, 11, 11, 12, 13, 14, 12, 13, 12, 10, 10, 11] }    
+                     'GP index'  : [10, 11, 11, 11, 12, 13, 14, 12, 13, 12, 10, 10, 11],
+                     'lat [deg]' : [10.0, 11.0, 11.0, 11.0, 12.0, 13.0, 14.0, 12.0, 13.0, 12.0, 10.0, 10.0, 11.0],
+                     'lon [deg]':  [10.0, 11.0, 11.0, 11.0, 12.0, 13.0, 14.0, 12.0, 13.0, 12.0, 10.0, 10.0, 11.0]}    
         inp_acc_df = pd.DataFrame(data = inp_data) 
         truth_df = pd.DataFrame({ 'time index': [  0,  2,  4,  4,  5,   7,  8 ], 
-                                  'GP index'  : [ 10, 11, 13,  14, 12, 10, 11 ] })
+                                  'GP index'  : [ 10, 11, 13,  14, 12, 10, 11 ],
+                                   'lat [deg]' : [10.0, 11.0, 13.0,  14.0, 12.0, 10.0, 11.0],
+                                   'lon [deg]' : [10.0, 11.0, 13.0,  14.0, 12.0, 10.0, 11.0]})
         result_df = orbitpy.coveragecalculator.filter_mid_interval_access(inp_acc_df=inp_acc_df)
         self.assertTrue(result_df.equals(truth_df))
 
