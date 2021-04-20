@@ -100,8 +100,8 @@ class TestGrid(unittest.TestCase):
         self.assertEqual(len(true_data['lat [deg]']), len(test_data.latitude))
 
         for idx, val in enumerate(test_data.latitude):
-            self.assertAlmostEqual(true_data['lat [deg]'][idx], test_data.latitude[idx], places=1) # places = 2 because data is rounded of to 2 decimal places
-            self.assertAlmostEqual(true_data['lon [deg]'][idx], test_data.longitude[idx], places=1)
+            self.assertAlmostEqual(true_data['lat [deg]'][idx], test_data.latitude[idx], places=2) # places = 2 because data is rounded of to 3 decimal places
+            self.assertAlmostEqual(true_data['lon [deg]'][idx], test_data.longitude[idx], places=2)
     
     def test_write_to_file(self):
         # typical case involving autoGrid

@@ -205,18 +205,18 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
         :rtype: pd.DataFrame
 
         """
+        print("start correction")
         if inp_acc_fl: # If input file is specified, the data is taken from it. 
-            df = pd.read_csv(inp_acc_fl, skiprows = 4)            
+            df = pd.read_csv(inp_acc_fl, skiprows=4)            
         else:
             df = inp_acc_df
 
         max_num_acc = len(df.index)
         data_indx = 0
+        data = np.zeros((max_num_acc,len(df.columns))) # make a data structure with maximum possible size  
 
         if 'pnt-opt index' in df: # pointing-options with grid coverage access file
             
-            data = np.zeros((max_num_acc,5)) # make a data structure with maximum possible size            
-
             for popt, df_per_popt in df.groupby('pnt-opt index'): # iterate over each pointing-option
 
                 # iterate over all the groups (ground-point indices)                
@@ -238,11 +238,9 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
             data = data[0:data_indx] # remove unnecessary rows
         
             out_df = pd.DataFrame(data = data, columns = ['time index', 'pnt-opt index', 'GP index',  'lat [deg]', 'lon [deg]'])
-            out_df = out_df.astype({"time index": int, 'pnt-opt index': int, "GP index": int})
+            out_df = out_df.astype({"time index": int, 'pnt-opt index': int, "GP index": int, "lat [deg]": float, "lon [deg]": float})
 
         else: # grid coverage access file
-
-            data = np.zeros((max_num_acc,4)) # make a data structure with maximum possible size   
 
             # iterate over all the groups (ground-point indices)            
             for name, group in df.groupby('GP index'):
@@ -263,7 +261,7 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
             data = data[0:data_indx] # remove unnecessary rows
         
             out_df = pd.DataFrame(data = data, columns = ['time index', 'GP index', 'lat [deg]', 'lon [deg]'])
-            out_df = out_df.astype({"time index": int, "GP index": int})
+            out_df = out_df.astype({"time index": int, "GP index": int, "lat [deg]": float, "lon [deg]": float})
         
         out_df.sort_values(by=['time index'], inplace=True)
         out_df = out_df.reset_index(drop=True)

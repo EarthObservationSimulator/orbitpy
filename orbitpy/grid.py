@@ -206,8 +206,8 @@ class Grid(Entity):
         """
         [lat, lon] = self.point_group.GetLatLonVectors()
         # convert to degrees and round to two decimal places
-        lat= np.rad2deg(np.array(lat)).round(decimals=2)
-        lon= np.rad2deg(np.array(lon)).round(decimals=2)   
+        lat= np.rad2deg(np.array(lat)).round(decimals=3)
+        lon= np.rad2deg(np.array(lon)).round(decimals=3)   
 
         return GridPoint(latitude=list(lat), longitude=list(lon))
     
@@ -224,11 +224,11 @@ class Grid(Entity):
         # if only one index specified
         if isinstance(indexes, int):
             (lat, lon) = self.point_group.GetLatAndLon(indexes)
-            return GridPoint(latitude=np.rad2deg(lat).round(decimals=2), longitude=np.rad2deg(lon).round(decimals=2))
+            return GridPoint(latitude=np.rad2deg(lat).round(decimals=3), longitude=np.rad2deg(lon).round(decimals=3))
         elif isinstance(indexes, list):
             if len(indexes)==1:
                 (lat, lon) = self.point_group.GetLatAndLon(indexes[0])
-                return GridPoint(latitude=np.rad2deg(lat).round(decimals=2), longitude=np.rad2deg(lon).round(decimals=2))
+                return GridPoint(latitude=np.rad2deg(lat).round(decimals=3), longitude=np.rad2deg(lon).round(decimals=3))
 
         (_lat, _lon) = self.get_lat_lon()
         # make indexes into a list if not list
