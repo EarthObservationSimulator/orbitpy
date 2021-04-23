@@ -166,7 +166,6 @@ def calculate_inclination_circular_SSO(altitude_km):
     tol = 1e-10         # Error tolerance
     # Initial guess for the orbital inclination
     i0 = 180/np.pi*np.arccos(-2/3*(h/Re )**2*we/(n*J2))
-    print(i0)
     err = 1e1
     while(err >= tol):
         # J2 perturbed mean motion
@@ -714,19 +713,19 @@ class Spacecraft(Entity):
     
 def helper_extract_spacecraft_params(spacecraft):
     """ Helper function for the time step and grid resolution computation which returns tuples 
-        of spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, FOR height and FOR width. 
-        The height and width of the sensor FOV/FOR correspond to the along-track and cross-track directions when the sensor
+        of spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, sceneFOV height, sceneFOV width, FOR height and FOR width. 
+        The height and width of the sensor FOV/sceneFOV/FOR correspond to the along-track and cross-track directions when the sensor
         is aligned to the NADIR_POINTING_FRAME.
 
     :param spacecraft: List of spacecrafts in the mission.
     :paramtype spacecraft: list, :class:`orbitpy:util.Spacecraft`
 
-    :return: Tuples with spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, FOR height and FOR width
+    :return: Tuples with spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, sceneFOV height, sceneFOV width, FOR height and FOR width.
              of all input spacecrafts.
-    :rtype: list, namedtuple, <str, str, str, float, float, float, float, float>
+    :rtype: list, namedtuple, <str, str, str, float, float, float, float, float, float, float>
 
     """
-    _p = namedtuple("sc_params", ["sc_id", "instru_id", "mode_id", "sma", "fov_height", "fov_width", "for_height", "for_width"])
+    _p = namedtuple("sc_params", ["sc_id", "instru_id", "mode_id", "sma", "fov_height", "fov_width", "scfov_height", "scfov_width", "for_height", "for_width"])
     params = []
 
     for sc in spacecraft: # iterate over all satellites
@@ -743,17 +742,20 @@ def helper_extract_spacecraft_params(spacecraft):
                     field_of_view  = instru.get_field_of_view(mode_id)
                     [fov_height, fov_width] = field_of_view.sph_geom.get_fov_height_and_width()
 
+                    scene_field_of_view  = instru.get_scene_field_of_view(mode_id)
+                    [scfov_height, scfov_width] = field_of_view.sph_geom.get_fov_height_and_width()
+
                     field_of_regard  = instru.get_field_of_regard(mode_id) 
 
-                    if field_of_regard is None or []: # if FOR is None, use FOV for FOR
-                        field_of_regard = [instru.get_field_of_view(mode_id)]
+                    if field_of_regard is None or []: # if FOR is None, use sceneFOV for FOR
+                        field_of_regard = [instru.get_scene_field_of_view(mode_id)]
                     
                     for x in field_of_regard: # iterate over the field_of_regard list
                         [for_height, for_width] = x.sph_geom.get_fov_height_and_width()
 
-                        params.append(_p(sc_id, instru_id, mode_id, sma, fov_height, fov_width, for_height, for_width))
+                        params.append(_p(sc_id, instru_id, mode_id, sma, fov_height, fov_width, scfov_height, scfov_width, for_height, for_width))
         else:
-            params.append(_p(sc_id, None, None, sma, None, None, None, None))
+            params.append(_p(sc_id, None, None, sma, None, None, None, None, None, None))
     return params
 
 def extract_auxillary_info_from_state_file(state_file):

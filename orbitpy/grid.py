@@ -242,7 +242,7 @@ class Grid(Entity):
 def compute_grid_res(spacecraft, grid_res_fac):
     """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.
 
-    The grid resolution is set such that at any given arbitrary time, the sensor footprint from its field-of-**view** captures atleast one grid-point
+    The grid resolution is set such that at any given arbitrary time, the sensor footprint from its (scene) field-of-**view** captures atleast one grid-point
     when the satellite is somewhere well within the interior of a region. This can be achieved by setting the grid resolution (spacing between
     the grid points) to be less than the minimum footprint dimension. A grid resolution factor :code:`grid_res_fac` is defined 
     (with default value 0.9) and the grid resolution is computed as (:code:`grid_res_fac` . minimum footprint angular dimension).
@@ -266,7 +266,8 @@ def compute_grid_res(spacecraft, grid_res_fac):
     :return: Grid resolution in degrees.
     :rtype: float  
 
-    .. note:: The field-of-**view** is used here, and not the field-of-**regard**.
+    .. note:: The field-of-**view** is used here, and not the field-of-**regard**. The scene-field-of-view is used if different from the field-of-view. 
+              The scene-field-of-view is typically larger than the instrument field-of-view to allow for coarser grid-resolution.
 
     """
     RE = Constants.radiusOfEarthInKM        
@@ -278,9 +279,9 @@ def compute_grid_res(spacecraft, grid_res_fac):
     for p in params:
 
         sma = p.sma # orbit semi-major axis
-        fov = min(p.fov_height, p.fov_width) # note that field of view is considered not field of regard
+        fov = min(p.scfov_height, p.scfov_width) # note that scene field of view is considered not field of regard
         if fov is None:
-            # no instruments specified, hence no field-of-view to consider, hence consider the entire horizon angle as field-of-view
+            # no instruments specified, hence no scene field-of-view to consider, hence consider the entire horizon angle as field-of-view
             f = RE/sma
             fov = np.rad2deg(2*np.arcsin(f))
 

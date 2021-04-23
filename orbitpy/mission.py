@@ -324,7 +324,13 @@ class Mission(Entity):
                                 x = grid.write_to_file(grid_fl)
                                 out_info.append(x)
                                 acc_fl = sat_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
-                                cov_calc = PointingOptionsWithGridCoverage(grid=self.grid, spacecraft=spc, state_cart_file=state_cart_file)
+                                cov_calc = PointingOptionsWithGridCoverage(grid=grid, spacecraft=spc, state_cart_file=state_cart_file)
+                                
+                                # For SAR instruments pick only the time-instants at the middle of access-intervals
+                                if instru._type == 'S'
+                                    filter_mid_acc = True
+                                else:
+                                    filter_mid_acc = False
                                 x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl)
                                 out_info.append(x)
                         

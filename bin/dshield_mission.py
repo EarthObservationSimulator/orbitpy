@@ -230,7 +230,7 @@ epoch_JDUt1 = epoch.GetJulianDate()
 sat1 = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
                                             },
                              "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0},
-                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 120, "ta": 0}
+                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 240}
                                         },
                              "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle":45},
                                             "fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight":5, "angleWidth": 10 },
@@ -246,13 +246,13 @@ propagator = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagato
 instru_id = sat1.instrument[0]._id
 mode_id = sat1.instrument[0].mode[0]._id
 
-sat_dir = wdir + '/sat2/'
+sat_dir = wdir + '/sat3/'
 if os.path.exists(sat_dir):
     shutil.rmtree(sat_dir)
 os.makedirs(sat_dir)
 
 
-for k in range(1,12):
+for k in range(0,12):
 
     print('processing at {} hrs'.format(k*6))
 

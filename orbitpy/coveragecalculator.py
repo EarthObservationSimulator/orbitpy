@@ -627,7 +627,7 @@ class PointingOptionsCoverage(Entity):
                     :widths: 10,10,10,30
 
                 time index, int, , Access time-index.
-                pnt-opt index, int, , Pointing options index.
+                pnt-opt index, int, , "Pointing options index. The indexing is implicit and starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
                 lat [deg], float, degrees, Latitude of accessed ground-location.
                 lon [deg], float, degrees, Longitude of accessed ground-location.
         
@@ -673,35 +673,35 @@ class PointingOptionsCoverage(Entity):
             orbit_state = propcov.OrbitState.fromCartesianState(propcov.Rvector6(cart_state))
             
             # iterate over all pointing options
+            if pointing_option:
+                for pnt_opt_idx, pnt_opt in enumerate(pointing_option): # note that the pointing-option is indexed from 0 onwards
+                    ###### form the propcov.Spacecraft object ######
+                    attitude = propcov.NadirPointingAttitude()
+                    interp = propcov.LagrangeInterpolator()
 
-            for pnt_opt_idx, pnt_opt in enumerate(pointing_option):
-                ###### form the propcov.Spacecraft object ######
-                attitude = propcov.NadirPointingAttitude()
-                interp = propcov.LagrangeInterpolator()
+                    spc = propcov.Spacecraft(date, orbit_state, attitude, interp, 0, 0, 0, 1, 2, 3)
 
-                spc = propcov.Spacecraft(date, orbit_state, attitude, interp, 0, 0, 0, 1, 2, 3)
+                    # orient the spacecraft-bus according to the pointing-option. Assumed that the instrument-pointing axis is aligned to the spacecraft-bus z-axis.
+                    if pnt_opt.ref_frame == ReferenceFrame.NADIR_POINTING:            
+                        spc.SetBodyNadirOffsetAngles(angle1=pnt_opt.euler_angle1, angle2=pnt_opt.euler_angle2, angle3=pnt_opt.euler_angle3, # input angles are in degrees
+                                                    seq1=pnt_opt.euler_seq1, seq2=pnt_opt.euler_seq2, seq3=pnt_opt.euler_seq3)            
+                    else:
+                        raise NotImplementedError # only NADIR_POINTING reference frame is supported.
+                    
+                    rot_N2B = spc.GetNadirToBodyMatrix()
+                    earth_fixed_state = earth.GetBodyFixedState(propcov.Rvector6(cart_state), jd_date)
+                    rot_EF2N = spc.GetBodyFixedToReference(earth_fixed_state) # Earth fixed to Nadir
+                    rot_EF2B = rot_N2B * rot_EF2N
+                    # find the direction of the pointing axis (z-axis of the satellite body) in the Earth-Fixed frame                
+                    pnt_axis = [rot_EF2B.GetElement(2,0), rot_EF2B.GetElement(2,1), rot_EF2B.GetElement(2,2)] # Equivalelent to pnt_axis = R_EF2B.Transpose() * Rvector3(0,0,1)
+                    earth_fixed_state = earth_fixed_state.GetRealArray()
+                    earth_fixed_pos = [earth_fixed_state[0], earth_fixed_state[1], earth_fixed_state[2]]
 
-                # orient the spacecraft-bus according to the pointing-option. Assumed that the instrument-pointing axis is aligned to the spacecraft-bus z-axis.
-                if pnt_opt.ref_frame == ReferenceFrame.NADIR_POINTING:            
-                    spc.SetBodyNadirOffsetAngles(angle1=pnt_opt.euler_angle1, angle2=pnt_opt.euler_angle2, angle3=pnt_opt.euler_angle3, # input angles are in degrees
-                                                seq1=pnt_opt.euler_seq1, seq2=pnt_opt.euler_seq2, seq3=pnt_opt.euler_seq3)            
-                else:
-                    raise NotImplementedError # only NADIR_POINTING reference frame is supported.
-                
-                rot_N2B = spc.GetNadirToBodyMatrix()
-                earth_fixed_state = earth.GetBodyFixedState(propcov.Rvector6(cart_state), jd_date)
-                rot_EF2N = spc.GetBodyFixedToReference(earth_fixed_state) # Earth fixed to Nadir
-                rot_EF2B = rot_N2B * rot_EF2N
-                # find the direction of the pointing axis (z-axis of the satellite body) in the Earth-Fixed frame                
-                pnt_axis = [rot_EF2B.GetElement(2,0), rot_EF2B.GetElement(2,1), rot_EF2B.GetElement(2,2)] # Equivalelent to pnt_axis = R_EF2B.Transpose() * Rvector3(0,0,1)
-                earth_fixed_state = earth_fixed_state.GetRealArray()
-                earth_fixed_pos = [earth_fixed_state[0], earth_fixed_state[1], earth_fixed_state[2]]
+                    intersect_point = PointingOptionsCoverage.intersect_vector_sphere(earth.GetRadius(), earth_fixed_pos, pnt_axis)
 
-                intersect_point = PointingOptionsCoverage.intersect_vector_sphere(earth.GetRadius(), earth_fixed_pos, pnt_axis)
-
-                if intersect_point is not False:
-                    geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
-                    access_writer.writerow([time_index, pnt_opt_idx, np.rad2deg(geo_coords[0]).round(decimals=2), np.rad2deg(geo_coords[1]).round(decimals=2)])
+                    if intersect_point is not False:
+                        geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
+                        access_writer.writerow([time_index, pnt_opt_idx, np.rad2deg(geo_coords[0]).round(decimals=2), np.rad2deg(geo_coords[1]).round(decimals=2)])
 
         ##### Close file #####                
         if access_file:
@@ -821,7 +821,7 @@ class PointingOptionsWithGridCoverage(Entity):
                     :widths: 10,10,10,30
 
                 time index, int, , Access time-index.
-                pnt-opt index, int, , Pointing options index.
+                pnt-opt index, int, , "Pointing options index.  The indexing is implicit and starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
                 GP index, integer, , Grid-point index.
                 lat [deg], float, degrees, Latitude corresponding to the GP index.
                 lon [deg], float, degrees, Longitude corresponding to the GP index.

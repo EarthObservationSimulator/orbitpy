@@ -6,13 +6,13 @@ The truth data is present in the folder ``test_data``.
 
 **Tests:**
 
-* ``test_scenario_1``: 1 satellite, no instrument ; propagation only, auto-time-step.
-* ``test_scenario_2``: 1 satellite, 1 instrument ; propagation (custom time-step), grid-coverage (custom-grid res), data-metrics calculation.
-* ``test_scenario_3``: 1 satellite, 1 instrument, 1 ground-station ; propagation, pointing-options coverage, data-metrics calculation, contact-finder (ground-station only).
-* ``test_scenario_4``: 1 satellite, 1 instrument, 1 ground-station ; propagation, pointing-options with grid-coverage, data-metrics calculation, contact-finder (ground-station only).
-* ``test_scenario_5``: 1 satellite, multiple instruments, multiple ground-stations ; propagation, grid-coverage, data-metrics calculation, contact-finder (ground-station only).
-* ``test_scenario_6``: Multiple satellites from constellation, 1 instrument each ; propagation, pointing-options coverage, data-metrics calculation, contact-finder (inter-satellite only).
-* ``test_scenario_7``: Multiple satellites from constellation, multiple-instruments per satellite ; propagation, pointing-options with grid-coverage, data-metrics calculation, contact-finder (inter-satellite only).
+* ``test_scenario_1``: 1 satellite, no instrument ; propagation only, auto/ custom-time-step. The mission epoch is same, different from the satellite orbit-state date.
+* ``test_scenario_2``: 1 satellite, 1 instrument ; propagation (custom time-step), grid-coverage (2 (auto) grids, default and custom-grid res), data-metrics calculation.
+* ``test_scenario_3``: 1 satellite, 1 instrument ; propagation, pointing-options coverage, data-metrics calculation, contact-finder (ground-station only).
+* ``test_scenario_4``: 1 satellite, 1 instrument ; propagation, pointing-options with grid-coverage, data-metrics calculation, contact-finder (ground-station only).
+* ``test_scenario_5``: 1 satellite, multiple ground-stations ; propagation, contact-finder (ground-station only).
+* ``test_scenario_6``: Multiple satellites from constellation; propagation, contact-finder (inter-satellite only).
+* ``test_scenario_7``: Multiple satellites from constellation, single-instrument per satellite ; propagation, pointing-options-coverage, data-metrics calculation, contact-finder (inter-satellite only).
 * ``test_scenario_8``: Multiple satellites from list, multiple instruments per satellite, multiple ground-stations ; propagation, grid-coverage, data-metrics calculation, contact-finder (ground-station and inter-satellite).
 
 """
@@ -42,6 +42,7 @@ class TestMission(unittest.TestCase):
             shutil.rmtree(cls.out_dir)
         os.makedirs(cls.out_dir)
         
+    '''
     def test_scenario_1(self):
         """  1 satellite, no instrument ; propagation only, auto, custom-time-step. The mission epoch is same, different from the satellite orbit-state date.
         """
@@ -91,14 +92,13 @@ class TestMission(unittest.TestCase):
         mission = Mission.from_json(mission_json_str)
         self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459270.75)
         self.assertAlmostEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 86.657990134197990})) # corresponds to time-step calculated considering horizon angle = 136.0373... deg and time-resolution factor = 1/8
-        self.assertAlmostEqual(mission.propagator.stepSize, 0.5*173.31598026839598) 
         self.assertEqual(mission.settings.propTimeResFactor, 1/8)
 
         out_info = mission.execute()
 
     
     def test_scenario_2(self):
-        """  1 satellite, 1 instrument ; propagation (custom time-step), grid-coverage (2 grids, auto and custom-grid res), data-metrics calculation.
+        """  1 satellite, 1 instrument ; propagation (custom time-step), (field-of-regard) grid-coverage (2 (auto) grids, default and custom-grid res), basic-sensor data-metrics calculation.
         """
         # check warnings are issued.
         mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
@@ -128,7 +128,7 @@ class TestMission(unittest.TestCase):
         # check execution with single grid.
         mission_json_str = '{   "epoch":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
                                 "duration": 0.5, \
-                                "spacecraft": { \
+                                "spacecraft": [{ \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
@@ -139,7 +139,7 @@ class TestMission(unittest.TestCase):
                                                    "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                    "@id":"bs1", "@type":"Basic Sensor" \
                                             } \
-                                    }, \
+                                    }], \
                                 "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 60}, \
                                 "grid": [{"@type": "autogrid", "@id": "cus", "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180}, {"@type": "autogrid", "@id": "auto", "latUpper":20, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}], \
                                 "settings": {"outDir": "tests/temp/", "coverageType": "Grid COverage", "gridResFactor": 0.5} \
@@ -158,5 +158,86 @@ class TestMission(unittest.TestCase):
 
 
         out_info = mission.execute()
-        print(out_info)
+    
+    def test_scenario_3(self):
+        """  1 satellite, 1 instrument ; propagation, pointing-options coverage, basic-sensor data-metrics calculation.
+        """
+        mission_json_str = '{   "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":12, "hour":23, "minute":12, "second":12}, \
+                                "duration": 0.05, \
+                                "spacecraft": { \
+                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":15, "hour":12, "minute":12, "second":12}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                                }, \
+                                   "instrument": [{ "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
+                                                   "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight":15, "angleWidth":10 }, \
+                                                   "pointingOption":[{"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":0}, \
+                                                                      {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":-15}, \
+                                                                      {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":15}], \
+                                                   "@id":"bs1", "@type":"Basic Sensor" \
+                                                  }] \
+                                    }, \
+                                "settings": {"outDir": "tests/temp/", "coverageType": "Pointing Options COverage"} \
+                            }'
+
+        mission = Mission.from_json(mission_json_str)
+
+ 
+        self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459286.4668055554)
+        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 6.820899943040534}))
+
+        out_info = mission.execute()
+    '''
+    def test_scenario_4(self):
+        """ 1 satellite, 1 SAR instrument ; propagation, pointing-options with grid-coverage and access-file correction (since sidelooking instrument with narrow At-fov), SAR data-metrics calculation.
+            Using default propagation step-size and grid-resolution. The scene FOV has angleWidth = instrument FOV angleWidth. The scene FOV angleHeight is larger to allow for coarser propagation step-size and gird-resolution.
+
+        """
+        mission_json_str = '{   "epoch":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
+                                "duration": 0.1, \
+                                "spacecraft": { \
+                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                                }, \
+                                   "instrument": { "@type": "Synthetic Aperture Radar", \
+                                                    "@id": "sar1", \
+                                                    "orientation": { \
+                                                        "convention": "SIDE_LOOK", \
+                                                        "sideLookAngle": 20.5 \
+                                                    }, \
+                                                    "sceneFieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":6.233630110575892}, \
+                                                    "pulseWidth": 33.4e-6, \
+                                                    "antennaHeight": 10.7, \
+                                                    "antennaWidth": 2.16, \
+                                                    "antennaApertureEfficiency": 0.6, \
+                                                    "operatingFrequency": 1.2757e9, \
+                                                    "peakTransmitPower": 1000, \
+                                                    "chirpBandwidth": 19e6, \
+                                                    "minimumPRF": 1463, \
+                                                    "maximumPRF": 1686, \
+                                                    "radarLoss": 3.5, \
+                                                    "systemNoiseFigure": 5.11, \
+                                                    "pointingOption":[{"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":-20.5}, \
+                                                                    {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":20.5}] \
+                                                    } \
+                                    }, \
+                                "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180}, {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180}], \
+                                "settings": {"outDir": "tests/temp/", "coverageType": "Pointing Options with Grid COverage"} \
+                            }'
+
+        mission = Mission.from_json(mission_json_str)
+        self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2458254.0084722224)
+        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 2.2600808214710266}))
+        self.assertEqual(mission.grid[0].num_points, 46299)
+        self.assertEqual(mission.grid[1].num_points, 43234)
+
+        out_info = mission.execute()
+
+    def test_scenario_4(self):
+        """    1 satellite, multiple ground-stations ; propagation, contact-finder (ground-station only).
+        """
+    
     

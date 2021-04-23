@@ -59,7 +59,6 @@ def compute_time_step(spacecraft, time_res_fac):
             # no instruments specified, hence no field-of-regard to consider, hence consider the entire horizon angle as FOR
             f = RE/sma
             for_at = np.rad2deg(2*np.arcsin(f))
-            print(for_at)
         
         # calculate maximum horizon angle
         f = RE/sma
