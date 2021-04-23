@@ -14,9 +14,9 @@ void GMATPolygon::genCustomSensor()
     sensor = new CustomSensor(coneArray,clockArray);
 }
 
-std::vector<bool> GMATPolygon::contains(std::vector<AnglePair> queries)
+std::vector<int> GMATPolygon::contains(std::vector<AnglePair> queries)
 {
-    std::vector<bool> results;
+    std::vector<int> results;
     int i;
 
     for (i = 0; i < queries.size(); i++)
@@ -25,7 +25,7 @@ std::vector<bool> GMATPolygon::contains(std::vector<AnglePair> queries)
         Real clock = query[1];
         Real cone = query[0];
 
-        results.push_back(sensor->CheckTargetVisibility(cone,clock));
+        results.push_back((int)(sensor->CheckTargetVisibility(cone,clock)));
     }
 
     return results;

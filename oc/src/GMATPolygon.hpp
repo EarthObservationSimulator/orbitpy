@@ -8,16 +8,16 @@ class GMATPolygon : public SlicedPolygon
 {
     public: 
 
-    GMATPolygon(std::vector<AnglePair> &vertices,AnglePair contained);
-    ~GMATPolygon();
+        GMATPolygon(std::vector<AnglePair> &vertices,AnglePair contained);
+        ~GMATPolygon();
 
-    void genCustomSensor();
+        void genCustomSensor();
 
-    virtual std::vector<bool> contains(std::vector<AnglePair>);
+        virtual std::vector<int> contains(std::vector<AnglePair>);
 
     protected:
 
-    CustomSensor* sensor;
+        CustomSensor* sensor;
 };
 
 #endif /* GMATPolygon_hpp */

@@ -9,18 +9,18 @@ class Poly_TN : public ::testing::Test {
 
 	void SetUp() override 
 	{
-		std::vector<AnglePair> TN = util::csvRead("../../util/Tennessee.csv");
+		std::vector<AnglePair> TN = util::csvRead("util/Tennessee.csv");
         AnglePair contained = TN.back();
         TN.pop_back();
 		
 		grapefruit = new SlicedPolygon(TN,contained);
 		sliceTree = new SliceArray(grapefruit->getLonArray(),grapefruit->getEdgeArray());
+		sliceTree->preprocess();
 	}
 
   	void TearDown() override 
   	{
   		delete(grapefruit);
-		delete(sliceTree);
   	}
 
 	Real tol = .00000001;

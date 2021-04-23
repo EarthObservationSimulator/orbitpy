@@ -50,8 +50,8 @@ class SlicedPolygon : public Polygon
 		
 		void addPreprocessor(Preprocessor*);
 
-		bool contains(AnglePair query);
-		std::vector<bool> contains(std::vector<AnglePair> queries);
+		int contains(AnglePair query);
+		std::vector<int> contains(std::vector<AnglePair> queries);
 		int numCrossings(AnglePair query);
 		std::vector<int> numCrossings(std::vector<AnglePair> queries);
 
@@ -75,7 +75,7 @@ class SlicedPolygon : public Polygon
 	protected:
 		bool processed;
 		Rvector3 contained;
-		Preprocessor* sliceTree;
+		Preprocessor* preprocessor;
 		std::vector<Edge> edgeArray;
 		std::vector<int> indexArray;
 		std::vector<Rvector3> nodes;

@@ -34,7 +34,7 @@ class Polygon
 		Polygon();		
 		~Polygon();
 		
-		virtual std::vector<bool> contains(std::vector<AnglePair>) = 0;
+		virtual std::vector<int> contains(std::vector<AnglePair>) = 0;
 		//virtual int contains(Rvector3);
 };
 

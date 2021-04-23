@@ -69,7 +69,7 @@ void analysis::generateFullReport(std::string inputPoly,std::string inputQueries
 Real analysis::containedOut(Polygon* poly, std::vector<AnglePair> &queries, std::string output)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    std::vector<bool> results = poly->contains(queries);
+    std::vector<int> results = poly->contains(queries);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
@@ -91,36 +91,3 @@ Real analysis::preprocess(Preprocessor* prep)
 
     return micros;
 }
-
-/*
-int main(int argc, char **argv)
-{
-    std::string inputPoly = argv[1];
-    std::string inputQueries = argv[2];
-    std::string prepOutput = argv[3];
-
-    std::vector<AnglePair> vertices = util::csvRead(inputPoly);
-    AnglePair contained = vertices.back();
-    vertices.pop_back();
-    
-    SlicedPolygon* poly = new SlicedPolygon(vertices,contained);
-    Preprocessor* prep = new SliceArray(poly->getLonArray(),poly->getEdgeArray());
-
-    std::vector<AnglePair> queries = util::csvRead(inputQueries);
-
-    if (argc == 5)
-    {
-        std::string output = argv[4];
-        analysis::generateQueryReport(poly,queries,output);
-    }
-
-    analysis::generatePrepReport(prep);
-    poly->addPreprocessor(prep);
-    analysis::generateQueryReport(poly,queries,prepOutput);
-
-    free(poly);
-    free(prep);
-
-    return 0;
-}
-*/

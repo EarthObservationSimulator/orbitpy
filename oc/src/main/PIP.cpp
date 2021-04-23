@@ -1,4 +1,4 @@
-#include "../PointInPolygon.hpp"
+#include "PointInPolygon.hpp"
 
 int main(int argc, char **argv)
 {
@@ -25,8 +25,7 @@ int main(int argc, char **argv)
     poly->addPreprocessor(prep);
     analysis::generateQueryReport(poly,queries,prepOutput);
 
-    free(poly);
-    free(prep);
+    delete(poly);
 
     return 0;
 }

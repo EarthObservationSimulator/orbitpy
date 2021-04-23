@@ -1,5 +1,5 @@
-#include "../PointInPolygon.hpp"
-#include "../GMATPolygon.hpp"
+#include "PointInPolygon.hpp"
+#include "GMATPolygon.hpp"
 
 int main(int argc, char **argv)
 {

@@ -33,7 +33,6 @@ class Poly_05 : public ::testing::Test {
   	void TearDown() override 
   	{
   		delete(grapefruit);
-		delete(sliceTree);
   	}
 
 	Real tol = .00000001;

@@ -177,6 +177,24 @@ TEST_F(Poly_01,Query_08_numCrossings)
 	ASSERT_EQ(expectedCrossings,crossings);
 }
 
+TEST_F(Poly_01,Query_09_numCrossings)
+{
+	// Test 9: Point lies at antipode of contained point.
+	int expectedCrossings = 1;
+	AnglePair query = {M_PI,0};
+	int crossings = grapefruit->numCrossings(query);
+	ASSERT_EQ(expectedCrossings,crossings);
+}
+
+TEST_F(Poly_01,Query_10_numCrossings)
+{
+	// Test 9: Point lies on contained point.
+	int expectedCrossings = 0;
+	AnglePair query = {0,0};
+	int crossings = grapefruit->numCrossings(query);
+	ASSERT_EQ(expectedCrossings,crossings);
+}
+
 TEST_F(Poly_01,Query_08_boundsPoint)
 {
 	// Test 2: Lies outside polygon, at same clock angle as starting point

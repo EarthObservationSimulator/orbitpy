@@ -37,7 +37,7 @@ Edge::Edge(Rvector3 cartNode1, Rvector3 cartNode2)
 	AnglePair node1 = util::cartesianToSpherical(cartNode1);
 	AnglePair node2 = util::cartesianToSpherical(cartNode2);
 	
-	// Sets bounds1 to the lesser of the two longitudes/thetas
+	// Sets bounds1 to the lesser of the two longitudes
 	if (node1[1] < node2[1])
 	{
 		bound1 = node1[1];
@@ -48,15 +48,6 @@ Edge::Edge(Rvector3 cartNode1, Rvector3 cartNode2)
 		bound1 = node2[1];
 		bound2 = node1[1];
 	}
-
-	/*
-	if ((bound2 - bound1) >= M_PI)
-	{
-		bound1 = bound2;
-		bound2 = 2*M_PI;
-	} 
-	*/
-	
 
 	Rvector3 shooter = {0,0,1.0};
 	shooterDotPole = shooter*pole;
@@ -96,7 +87,6 @@ bool Edge::boundsPoint(double lon)
 		return boundsPoint(lon + delta);
 	}
 
-	//return ((lon >= bound1) && (lon <= bound2));
 	return util::lonBounded(bound1,bound2,lon);
 }
 
@@ -106,7 +96,7 @@ int Edge::crossesBoundary(Rvector3 query)
 	
 	// Directly on an edge
 	if ( queryDotPole == 0.0)
- 		return -100000;
+ 		return -1;
 	// On opposite side of edge as shooter
  	else if (queryDotPole*shooterDotPole < 0)
  		return 1;
@@ -147,7 +137,11 @@ Polygon ()
 	edgeArray = generateEdgeArray();
 }
 
-SlicedPolygon::~SlicedPolygon(){}
+SlicedPolygon::~SlicedPolygon()
+{
+	if (processed)
+		delete(preprocessor);
+}
 
 AnglePair SlicedPolygon::toQueryFrame(AnglePair query)
 {
@@ -158,12 +152,10 @@ AnglePair SlicedPolygon::toQueryFrame(AnglePair query)
 	return sphericalQueryT;
 }
 
-
 int SlicedPolygon::numCrossings(AnglePair query)
 {
 	int numCrossings = 0;
 
-	
 	// Query point in initial frame I
 	Rvector3 cartQueryI = util::sphericalToCartesian(query);
 
@@ -175,6 +167,11 @@ int SlicedPolygon::numCrossings(AnglePair query)
 	for (int index : indices)
 	{
 		Edge edge = this->edgeArray[index];
+		int contained = edge.contains(cartQueryT,sphericalQueryT[1]);
+
+		if (contained == -1)
+			return -1;
+
 		numCrossings += edge.contains(cartQueryT,sphericalQueryT[1]);
 	}
 	
@@ -184,33 +181,23 @@ int SlicedPolygon::numCrossings(AnglePair query)
 void SlicedPolygon::addPreprocessor(Preprocessor* speedy)
 {
 	this->processed = true;
-	this->sliceTree = speedy;
+	this->preprocessor = speedy;
 }
-
-/*
-void SlicedPolygon::preprocess()
-{
-	this->processed = true;
-
-	Real crit1 = 1;
-	Real crit2 = 16;
-
-	this->sliceTree = new SliceTree(this->edgeArray,crit1,crit2);
-}*/
 
 std::vector<int> SlicedPolygon::getSubset(AnglePair query)
 {
 	if (this->processed)
-		return this->sliceTree->getEdges(query);
+		return this->preprocessor->getEdges(query);
 	else
 		return this->indexArray;
 }
 
-bool SlicedPolygon::contains(AnglePair query)
+int SlicedPolygon::contains(AnglePair query)
 {
-	int num;
+	int num = numCrossings(query);
 
-	num = numCrossings(query);
+	if (num == -1)
+		return -1;
 
 	return ((num % 2) == false);
 }
@@ -227,15 +214,19 @@ std::vector<int> SlicedPolygon::numCrossings(std::vector<AnglePair> queries)
 	return results;
 }
 
-std::vector<bool> SlicedPolygon::contains(std::vector<AnglePair> queries)
+std::vector<int> SlicedPolygon::contains(std::vector<AnglePair> queries)
 {
 	int num;
-	std::vector<bool> results(queries.size());
+	std::vector<int> results(queries.size());
 
 	for (int i = 0; i < queries.size(); i++)
 	{
 		num = numCrossings(queries[i]);
-		results[i] = ((num % 2) == false);
+
+		if (num == -1)
+			results[i] = -1;
+
+		results[i] = (int)((num % 2) == false);
 	}
 
 	return results;
