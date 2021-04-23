@@ -8,6 +8,7 @@
 class SphericalSensor : public Sensor
 {
     public:
+    
         // Class construction/destruction 
         SphericalSensor(const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn, AnglePair contained);
         ~SphericalSensor();
@@ -16,6 +17,7 @@ class SphericalSensor : public Sensor
         virtual bool CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle);
 
     protected:
+
         SlicedPolygon* poly;
 };
 

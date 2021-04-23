@@ -2,6 +2,7 @@
 
 // Utilities
 
+// Read a vector of AnglePairs from a CSV file
 std::vector<AnglePair> util::csvRead(std::string filename)
 {
 	std::vector<AnglePair> vertices;
@@ -21,6 +22,7 @@ std::vector<AnglePair> util::csvRead(std::string filename)
 	return vertices;
 }
 
+// Write a vector of booleans to CSV
 void util::csvWrite(std::string filename, std::vector<bool> contained)
 {
 	std::ofstream myFile;
@@ -33,6 +35,7 @@ void util::csvWrite(std::string filename, std::vector<bool> contained)
 	myFile.close();
 }
 
+// Write a vector of integers to CSV
 void util::csvWrite(std::string filename, std::vector<int> contained)
 {
 	std::ofstream myFile;
@@ -45,6 +48,7 @@ void util::csvWrite(std::string filename, std::vector<int> contained)
 	myFile.close();
 }
 
+// Transform a set of spherical coordinates to a different frame using the matrix transform 
 AnglePair util::transformSpherical(const AnglePair &spherical,const Rmatrix33 &transform)
 {
 	Rvector3 cart = util::sphericalToCartesian(spherical);
@@ -54,19 +58,16 @@ AnglePair util::transformSpherical(const AnglePair &spherical,const Rmatrix33 &t
 	return transformedSpherical;
 }
 
+// Checks wheter a longitude is bounded by the minor arc defined by two other longitudes. 
 bool util::lonBounded(Real bound1, Real bound2, Real lon)
 {
 	if ((bound2 - bound1) < M_PI)
-	{
 		return ((lon >= bound1) && (lon <= bound2));
-	}
 	else
-	{
-
 		return !((lon >= bound1) && (lon <= bound2));
-	}
 }
 
+// Transform from cartesian to spherical coordinates
 AnglePair util::cartesianToSpherical(const Rvector3 &cart)
 {
 	Real x = cart[0];
@@ -87,6 +88,7 @@ AnglePair util::cartesianToSpherical(const Rvector3 &cart)
 	return spherical;
 }
 
+// Transform from spherical to cartesian coordinates
 Rvector3 util::sphericalToCartesian(const AnglePair &spherical)
 {
 	Real x,y,z;
@@ -101,37 +103,3 @@ Rvector3 util::sphericalToCartesian(const AnglePair &spherical)
 	
 	return cartesian;
 }
-
-
-AnglePair Polygon::cartesianToSpherical(const Rvector3 &cart)
-{
-	Real x = cart[0];
-	Real y = cart[1];
-	Real z = cart[2];
-	
-	Real phi = atan2(y,x);
-	Real theta = acos(z);
-	
-	AnglePair spherical = {theta,phi};
-	
-	return spherical;
-}
-
-Rvector3 Polygon::sphericalToCartesian(const AnglePair &spherical)
-{
-	Real x,y,z;
-	Real theta = spherical[0];
-	Real phi = spherical[1];
-	
-	x = sin(theta)*cos(phi);
-	y = sin(theta)*sin(phi);
-	z = cos(theta);
-	
-	Rvector3 cartesian = {x,y,z};
-	
-	return cartesian;
-}
-
-Polygon::Polygon(){}
-
-Polygon::~Polygon(){}

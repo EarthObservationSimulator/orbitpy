@@ -78,9 +78,9 @@ TEST_F(Poly_01,Query_02_boundsPoint)
 
 	int expectedCrossings = 1;
 	AnglePair query = {1.047197551,0};
-	Rmatrix33 TI = grapefruit->getTI();
+	Rmatrix33 QI = grapefruit->getQI();
 
-	query = util::transformSpherical(query,TI);
+	query = util::transformSpherical(query,QI);
 	Real lon = query[1];
 
 	std::vector<Edge> edgeArray = grapefruit->getEdgeArray();
@@ -187,9 +187,9 @@ TEST_F(Poly_01,Query_08_boundsPoint)
 
 	int expectedCrossings = 1;
 	AnglePair query = {1.047197551,0.897597901};
-	Rmatrix33 TI = grapefruit->getTI();
+	Rmatrix33 QI = grapefruit->getQI();
 
-	query = util::transformSpherical(query,TI);
+	query = util::transformSpherical(query,QI);
 	Real lon = query[1];
 
 	std::vector<Edge> edgeArray = grapefruit->getEdgeArray();

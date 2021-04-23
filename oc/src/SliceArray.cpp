@@ -2,7 +2,7 @@
 
 SliceArray::SliceArray(std::vector<Real> lonArray, const std::vector<Edge> &edgeArray)
 {
-    // Temp fix
+    // Set the last longitude in lonArray (always = 0) to 2*PI
     lonArray[lonArray.size() - 1] = 2*M_PI;
 
     this->lonArray = lonArray;
@@ -71,7 +71,6 @@ bool SliceArray::contains(Edge edge, Real bound1, Real bound2)
 	bool condition2_1 = (bound1 >= vertex1) && (bound1 <= vertex2);
 	bool condition2_2 = (bound2 >= vertex1) && (bound2 <= vertex2);
     */
-
     
     bool condition2_1 = util::lonBounded(vertex1,vertex2,bound1);
 	bool condition2_2 = util::lonBounded(vertex1,vertex2,bound2);

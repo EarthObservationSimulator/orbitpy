@@ -27,15 +27,8 @@ namespace util
 class Polygon
 {
 	public:
-		
-		static AnglePair cartesianToSpherical(const Rvector3&);
-		static Rvector3 sphericalToCartesian(const AnglePair&);
-
-		Polygon();		
-		~Polygon();
-		
+		// Virtual function to define interface
 		virtual std::vector<int> contains(std::vector<AnglePair>) = 0;
-		//virtual int contains(Rvector3);
 };
 
 #endif /* Polygon_hpp */

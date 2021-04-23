@@ -40,23 +40,23 @@ class Poly_01 : public ::testing::Test {
 	SlicedPolygon* grapefruit;
 };
 
-TEST_F(Poly_01,getTI)
+TEST_F(Poly_01,getQI)
 {
 	/*
-	Rmatrix33 TI = grapefruit->getTI();
+	Rmatrix33 QI = grapefruit->getQI();
 
 	// Should be identity
 
-	EXPECT_NEAR(1.0,TI.GetElement(0,0),tol);
-	EXPECT_NEAR(1.0,TI.GetElement(1,1),tol);
-	EXPECT_NEAR(1.0,TI.GetElement(2,2),tol);
+	EXPECT_NEAR(1.0,QI.GetElement(0,0),tol);
+	EXPECT_NEAR(1.0,QI.GetElement(1,1),tol);
+	EXPECT_NEAR(1.0,QI.GetElement(2,2),tol);
 
-	EXPECT_NEAR(0.0,TI.GetElement(0,1),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(0,2),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(1,0),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(1,2),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(2,0),tol);
-	EXPECT_NEAR(0.0,TI.GetElement(2,1),tol);
+	EXPECT_NEAR(0.0,QI.GetElement(0,1),tol);
+	EXPECT_NEAR(0.0,QI.GetElement(0,2),tol);
+	EXPECT_NEAR(0.0,QI.GetElement(1,0),tol);
+	EXPECT_NEAR(0.0,QI.GetElement(1,2),tol);
+	EXPECT_NEAR(0.0,QI.GetElement(2,0),tol);
+	EXPECT_NEAR(0.0,QI.GetElement(2,1),tol);
 	*/
 
 	ASSERT_TRUE(true);
@@ -98,9 +98,9 @@ TEST_F(Poly_01,Query_02_boundsPoint)
 
 	int expectedCrossings = 1;
 	AnglePair query = {1.047197551,0};
-	Rmatrix33 TI = grapefruit->getTI();
+	Rmatrix33 QI = grapefruit->getQI();
 
-	query = util::transformSpherical(query,TI);
+	query = util::transformSpherical(query,QI);
 	Real lon = query[1];
 
 	std::vector<Edge> edgeArray = grapefruit->getEdgeArray();
@@ -201,9 +201,9 @@ TEST_F(Poly_01,Query_08_boundsPoint)
 
 	int expectedCrossings = 1;
 	AnglePair query = {1.047197551,0.897597901};
-	Rmatrix33 TI = grapefruit->getTI();
+	Rmatrix33 QI = grapefruit->getQI();
 
-	query = util::transformSpherical(query,TI);
+	query = util::transformSpherical(query,QI);
 	Real lon = query[1];
 
 	std::vector<Edge> edgeArray = grapefruit->getEdgeArray();
