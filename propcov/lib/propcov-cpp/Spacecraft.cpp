@@ -560,7 +560,7 @@ Rmatrix33 Spacecraft::GetBodyFixedToReference(const Rvector6 &bfState)
  * @return  true if set; false otherwise
  *
  */
-//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------ @TODO: Vinay: Set date also?
 bool Spacecraft::SetOrbitState(const AbsoluteDate &t,
                                const Rvector6     &kepl)
 {
@@ -586,6 +586,34 @@ bool Spacecraft::SetOrbitState(const AbsoluteDate &t,
    
    return true;
 }
+
+// Author: Vinay: Similar to the SetOrbitState(.) function, except that date is also set.
+bool  Spacecraft::SetOrbitStateCartesian(const AbsoluteDate &t,
+                                         const Rvector6 &cart)
+{
+   if (!interpolator)
+      throw TATCException(
+            "Cannot interpolate - no interpolator set on spacecraft\n");
+   // Set the state on the Spacecraft's orbitState parameter
+   orbitEpoch->SetJulianDate(t.GetJulianDate()); // Vinay: Added by me
+   orbitState->SetCartesianState(cart);
+   
+   #ifdef DEBUG_STATES
+      MessageInterface::ShowMessage(
+                        "About to set date and state on the interpolator:\n");
+      MessageInterface::ShowMessage("date: %12.10f\n", t.GetJulianDate());
+      for (Integer ii = 0; ii < 6; ii++)
+         MessageInterface::ShowMessage("  %12.10f\n", cart[ii]);
+   #endif
+   Real     cartReal[6];
+   for (Integer ii = 0; ii < 6; ii++)
+      cartReal[ii] = cart[ii];
+   interpolator->AddPoint(t.GetJulianDate(), cartReal);
+   
+   return true;
+
+} 
+
 
 //------------------------------------------------------------------------------
 //  void SetBodyNadirOffsetAngles(Real angle1, Real angle2, Real angle3,

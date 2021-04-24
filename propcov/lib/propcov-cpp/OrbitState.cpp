@@ -98,6 +98,23 @@ OrbitState& OrbitState::operator=(const OrbitState &copy)
 }
 
 //------------------------------------------------------------------------------
+//  bool operator==(const OrbitState &s) const
+//------------------------------------------------------------------------------
+/**
+ * @return true if cartesian state is equal
+ */
+//------------------------------------------------------------------------------
+bool OrbitState::operator==(const OrbitState &s) const
+{
+   if (currentState == s.GetCartesianState())
+   {
+      return true;
+   }
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // ~OrbitState()
 //------------------------------------------------------------------------------
 /**
@@ -212,7 +229,7 @@ Rvector6 OrbitState::GetKeplerianState()
  *
  */
 //------------------------------------------------------------------------------
-Rvector6 OrbitState::GetCartesianState()
+Rvector6 OrbitState::GetCartesianState() const
 {
    // Returns the Cartesian state
    // Units are consistent with g

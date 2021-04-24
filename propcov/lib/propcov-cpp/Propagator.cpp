@@ -182,8 +182,10 @@ Propagator& Propagator::operator=(const Propagator &copy)
 //------------------------------------------------------------------------------
 Propagator::~Propagator()
 {
+   /* VInay: commented to make pybind11 work. 
    if (densityModel)
       delete densityModel;
+   */
 }
 
 //------------------------------------------------------------------------------

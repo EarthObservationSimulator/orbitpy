@@ -3,11 +3,11 @@ Miscellaneous
 
 .. _grid_pnts_cov_calc_app:
 
-Grid-points coverage calcuations approach
+Grid-points coverage calculations approach
 ==========================================
-This section describes the "Grid-point" approach towards coverage calculations. In this approach, the coverage caclulator is given a 
+This section describes the "Grid-point" approach towards coverage calculations. In this approach, the coverage calculator is given a 
 set of predefined grid-points (lat, lon values). The satellite is propagated and at each time, and it is determined if a grid-point falls
-within the sensor projected footprint on the Earth's surface at that time. A conitnuous collection of such times corresponds to 
+within the sensor projected footprint on the Earth's surface at that time. A continuous collection of such times corresponds to 
 an access interval: i.e. the time-interval over which the ground-point is visible to the satellite sensor.
 The key aspects relating to this approach are described below:
 
@@ -53,48 +53,45 @@ object in the user-defined JSON configuration file.
 
 .. _corr_acc_files:
 
-"Correction" of access files for purely side-looking instruments
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"Correction" of access files for purely side-looking instruments with narrow (along-track) FOV
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In case of purely side-looking instruments (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place when the grid-point
-is seen with no squint angle. The orbit propagation and coverage calculations takes place for a corresponding *FOV/sceneFOV* for the instrument 
-(see :code:`instrupy` package documentation). 
-The generated access files are then *corrected* to a new format, to show access only at approximately the middle of the access interval. This should be 
-coupled with the scene-scan time to get complete information about the access. 
+In case of purely side-looking instruments with narrow-FOV (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place
+when the grid-point is seen with no squint angle and the access is relatively instantaneous (i.e. access duration is very small). 
+The field-of-regard coverage calculations are carried out with the corresponding *sceneFOV* (see :code:`instrupy` package documentation). 
+
+The access files list rows of access-time, ground-points, and thus independent access opportunities for the instrument
+when the field-of-regard is used for coverage calculations. 
+If the generated access files from the field-of-regard coverage calculations (using sceneFOV) of purely side-looking, narrow-FOV instruments are
+interpreted in the same manner, it would be erroneous.
+
+Thus the generated access files are then *corrected* to show access only at approximately (to the nearest propagation time-step) 
+the middle of the access interval. 
+This should be coupled with the required scene-scan-duration (from sceneFOV) to get complete information about the access. 
 
 For example, consider a SAR instrument pointing sideways as shown in the figure below. The along-track FOV is narrow
 corresponding to narrow strips, and a scene is built from concatenated strips. A SceneFOV is associated with the SAR and is used for access 
-calculation over the grid point shown in the figure. Say the propagation time-step is 1s as shown in the figure. An acccess interval between
+calculation over the grid point shown in the figure. Say the propagation time-step is 1s as shown in the figure. An access interval between
 t=100s to t=105s is registered. However as shown the actual access takes place over a small interval of time at t=103.177s. 
 
-An approximation can be applied (i.e. correction is made) that the observaton time of the ground point is at the middle of the access
-interval rounded of to the nearest propgation time as calculated using the SceneFOV, i.e. :math:`t= 100 + ((105-100)/2) % 1 = 103s`. The state 
-of the spacecraft at :math:`t=103s` is utilized for the data-metrics calculation.
-
+An approximation can be applied (i.e. correction is made) that the observation time of the ground point is at the middle of the access
+interval rounded of to the nearest propagation time as calculated using the SceneFOV, i.e. :math:`t= 100 + ((105-100)/2) % 1 = 103s`. The state 
+of the spacecraft at :math:`t=103s` and access duration corresponding to the instrument FOV (note: *not* the sceneFOV) (can be determined analytically) 
+is to be used for the data-metrics calculation.
 
 .. figure:: sar_access.png
     :scale: 75 %
     :align: center
 
-The correction of the access files is handled by the :class:`orbitpy.orbitpropcov` module which requires as inputs: list of access files (to be revised). The original access files are renamed to :code:`...._old` and the corrected access files are
-produced with the same name as the original access files at the same location. An additional message is displayed within the file as follows:
-   
-   *Access listed below corresponds to approximate access instants at the grid-points at a side-look target geometery. The scene scan time should be used along with the below data to get complete access information.*
+.. warning:: The correction method is to be used only when the instrument access-duration is smaller than the propagation time step (which is determined from sceneFOV). 
 
-
-.. warning:: There is a small hiccup when the propagation time step is smaller than the sensor (eg: SAR) dwell time and access is corrected as described above. 
-            Since the propagation time step is small, the access over the grid point takes place over number of time-steps, while the corrected access
-            files show access as taking place at only one time-step. The correction method is to be used when the dwell time is much smaller than the 
-            propagation time step. The dwell time needed for the calculation of the data-metrics is calculated analytically by the :code:`instrupy` module.
-            It should be OK as long as we are aware.
-
-Issue #1
-.........
+Issues with the above coverage calculation approach 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Current implementation works well only for:
-   1. Instruments whose required observation time < propagation step-size (i.e. < 1s).  For scanning type instruments 
-      (like pushbroom sensors, stripmap SARs) this condition can be waived. But cannot be waived for instruments like Matrix imagers, radiometers 
-      which require the entire sensor FOV to be focused on the scene. 
+   1. Instruments whose required observation time < propagation step-size.  For scanning type instruments 
+      (like pushbroom sensors, stripmap SARs) this condition would be met. But this condition cannot be met for instruments 
+      like Matrix imagers, radiometers which require the entire sensor FOV to be focused on the scene. 
    2. Whose FOV << FOR.
 
 *First one is not realistic if the minimum exposure/ dwell time of instruments 
@@ -102,7 +99,7 @@ Current implementation works well only for:
 instruments having a wide-swath.*
 
 The access file generated by the orbit and coverage is quite naive. It indicates if the ground-point can be accessed at some instant of time.
-However, what we require are the imaging oppourtunities, where a imaging opportunity is defined as:
+However, what we require are the imaging opportunities, where a imaging opportunity is defined as:
 
 *Outlier grid-points:* The area around the grid-point should be able to be observed, not just the point. Not realistic for instruments with large FOV.
 
@@ -114,25 +111,25 @@ However, what we require are the imaging oppourtunities, where a imaging opportu
 
 .. _pnt_opts_cov_calc_app:
 
-Pointing Options coverage calcuations approach
+Pointing Options coverage calculations approach
 ===============================================
 In this coverage calculation approach, a set of pointing options is supplied in a data-file by the user. The pointing-options
-are defined with respect to the Nadir-frame (see :code:`instrupy`, :code:`orienation` JSON object description). The complete set of pointing-options
-represent a discritized field-of-maneuverability. Hence the :code:`manuverability` JSON object need not be specified within the  
+are defined with respect to the Nadir-frame (see :code:`instrupy`, :code:`orientation` JSON object description). The complete set of pointing-options
+represent a discretized field-of-maneuverability. Hence the :code:`maneuver` JSON object need not be specified within the  
 :code:`instrument` JSON object.
 
 The generated access file contains the locations corresponding to each pointing-option and each time accessed by the sensor. This location
 is the intersection of the pointing-axis with a spherical Earth model to give geocentric latitudes and longitudes. 
 
-The porpagation time-step determination is identical to the description above in :ref:`prop_time_step_determination`. However, instead of 
-field-of-regard, the field-of-**view** would be used, since the manueverability field is not included. Also, the user may set a higher
+The propagation time-step determination is identical to the description above in :ref:`prop_time_step_determination`. However, instead of 
+field-of-regard, the field-of-**view** would be used, since the maneuver field is not included. Also, the user may set a higher
 :code:`customTimeResFactor`(from the default 0.25) in the :code:`settings` JSON object.  
 
-Pointing Options with Grid coverage calcuations approach
+Pointing Options with Grid coverage calculations approach
 ==========================================================
 The sensor is oriented to each of the pointing-options specified by the user and the coverage is calculated for taking into account the 
 FOV of the sensor. 
-Sensor orientation and Manueverability options if specified, are ignored since the pointing options are defined with respect to the Nadir frame.
+Sensor orientation and Maneuver options if specified, are ignored since the pointing options are defined with respect to the Nadir frame.
 
 Common issues:
 ==============

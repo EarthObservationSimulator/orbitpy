@@ -250,9 +250,6 @@ Rmatrix33 AttitudeConversionUtility::ToCosineMatrix(const Rvector3 &eulerAngles,
 //------------------------------------------------------------------------------
  /**
  * Converts the input euler angles and sequence to a direction cosine matrix.
- * Vinay: Intrinsic Euler rotations. Eg: 1-2-3 => R = R3.R2.R1, where each rotation matrix rotates the coordinate system (not the vector).
- * https://mathworld.wolfram.com/RotationMatrix.html
- * https://mathworld.wolfram.com/EulerAngles.html
  *
  * @param eulerAngles  the input euler angles (radians)
  * @param seq1         first entry of the euler sequence

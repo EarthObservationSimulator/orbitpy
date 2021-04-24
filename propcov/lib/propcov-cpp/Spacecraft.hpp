@@ -109,7 +109,10 @@ public:
    /// time t
    virtual bool           SetOrbitState(const AbsoluteDate &t,
                                         const Rvector6 &kepl);
-   
+
+   virtual bool           SetOrbitStateCartesian(const AbsoluteDate &t,
+                                        const Rvector6 &cart); 
+
    /// Set the body nadir offset angles for the spacecraft
    virtual void           SetBodyNadirOffsetAngles(
                               Real angle1 = 0.0, Real angle2 = 0.0,

@@ -32,6 +32,7 @@
 #include "TATCException.hpp"
 #include "MessageInterface.hpp"
 
+#include <utility>
 //#define DEBUG_HELICAL_POINTS
 //#define DEBUG_POINTS
 //#define DEBUG_LAT_LON
@@ -170,7 +171,7 @@ void PointGroup::AddUserDefinedPoints(const RealArray& lats,
                                       const RealArray& lons)
 {
    // Add user defined latitude and longitude points
-   // Inputs are real arrays of longitude and latitude in radians
+   // Inputs are real arrays of latitude and longitude in radians
    if (lats.size() != lons.size())
       throw TATCException(
                   "latitude and longitude arrays must have the same length\n");
@@ -266,6 +267,18 @@ void PointGroup::GetLatAndLon(Integer idx, Real &theLat, Real &theLon)
    theLon = lon.at(idx);
 }
 
+std::pair<Real, Real> PointGroup::GetLatAndLon(Integer idx)
+{
+   // Returns body fixed location of point given point index
+   // Make sure there are points
+   CheckHasPoints();
+   
+   Real theLat = lat.at(idx);
+   Real theLon = lon.at(idx);
+
+   return std::make_pair(theLat, theLon);
+}
+
 //------------------------------------------------------------------------------
 // Integer GetNumPoints()
 //------------------------------------------------------------------------------
@@ -301,6 +314,16 @@ void PointGroup::GetLatLonVectors(RealArray &lats, RealArray &lons)
    
    lats = lat;
    lons = lon;
+}
+
+std::pair<RealArray, RealArray> PointGroup::GetLatLonVectors()
+{
+   // Returns the latitude and longitude vectors as a pair
+   
+   //Make sure there are points
+   CheckHasPoints();
+
+   return std::make_pair(lat, lon);
 }
 
 //------------------------------------------------------------------------------
