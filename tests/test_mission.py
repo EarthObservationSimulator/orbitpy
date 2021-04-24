@@ -11,7 +11,7 @@ The truth data is present in the folder ``test_data``.
 * ``test_scenario_3``: 1 satellite, 1 instrument ; propagation, pointing-options coverage, data-metrics calculation, contact-finder (ground-station only).
 * ``test_scenario_4``: 1 satellite, 1 instrument ; propagation, pointing-options with grid-coverage, data-metrics calculation, contact-finder (ground-station only).
 * ``test_scenario_5``: 1 satellite, multiple ground-stations ; propagation, contact-finder (ground-station only).
-* ``test_scenario_6``: Multiple satellites from constellation; propagation, contact-finder (inter-satellite only).
+* ``test_scenario_6``: Multiple satellites from constellation; propagation, contact-finder (ground-station, inter-satellite).
 * ``test_scenario_7``: Multiple satellites from constellation, single-instrument per satellite ; propagation, pointing-options-coverage, data-metrics calculation, contact-finder (inter-satellite only).
 * ``test_scenario_8``: Multiple satellites from list, multiple instruments per satellite, multiple ground-stations ; propagation, grid-coverage, data-metrics calculation, contact-finder (ground-station and inter-satellite).
 
@@ -26,7 +26,7 @@ import pandas as pd
 
 from orbitpy.mission import Mission
 from orbitpy.propagator import J2AnalyticalPropagator
-from orbitpy.util import Spacecraft
+from orbitpy.util import Spacecraft, GroundStation
 
 class TestSettings(unittest.TestCase): #TODO
     pass
@@ -188,7 +188,7 @@ class TestMission(unittest.TestCase):
         self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 6.820899943040534}))
 
         out_info = mission.execute()
-    '''
+    
     def test_scenario_4(self):
         """ 1 satellite, 1 SAR instrument ; propagation, pointing-options with grid-coverage and access-file correction (since sidelooking instrument with narrow At-fov), SAR data-metrics calculation.
             Using default propagation step-size and grid-resolution. The scene FOV has angleWidth = instrument FOV angleWidth. The scene FOV angleHeight is larger to allow for coarser propagation step-size and gird-resolution.
@@ -235,9 +235,52 @@ class TestMission(unittest.TestCase):
         self.assertEqual(mission.grid[1].num_points, 43234)
 
         out_info = mission.execute()
+    '''
 
-    def test_scenario_4(self):
+    def test_scenario_5(self):
         """    1 satellite, multiple ground-stations ; propagation, contact-finder (ground-station only).
         """
-    
-    
+        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
+                                "duration": 0.5, \
+                                "spacecraft": { \
+                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                                } \
+                                    }, \
+                                "groundStation":[{"name": "TrollSAR", "latitude": -72.0029, "longitude": 2.5257, "altitude":0}, \
+                                                 {"name": "CONAE", "latitude": -31.52, "longitude": -64.46, "altitude":0}], \
+                                "settings": {"outDir": "tests/temp/"} \
+                            }'
+        
+        mission = Mission.from_json(mission_json_str)
+        self.assertEqual(len(mission.groundStation), 2)
+        self.assertIsInstance(mission.groundStation[0], GroundStation)
+        self.assertEqual(mission.groundStation[0], GroundStation.from_dict({"name": "TrollSAR", "latitude": -72.0029, "longitude": 2.5257, "altitude":0}))
+        self.assertIsInstance(mission.groundStation[1], GroundStation)
+        self.assertEqual(mission.groundStation[1], GroundStation.from_dict({"name": "CONAE", "latitude": -31.52, "longitude": -64.46, "altitude":0}))
+
+        out_info = mission.execute()
+
+    def test_scenario_6(self):
+        """    Multiple satellites from constellation; propagation, contact-finder (inter-satellite only).
+        """
+        mission_json_str = '{  "epoch":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, \
+                                "duration": 0.25, \
+                                "constellation": { "@type": "Walker Delta Constellation", \
+                                        "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, \
+                                        "numberSatellites": 8, \
+                                        "numberPlanes": 1, \
+                                        "relativeSpacing": 1, \
+                                        "alt": 700, \
+                                        "ecc": 0.001, \
+                                        "inc": 45, \
+                                        "aop": 135, \
+                                        "@id": "abc" \
+                                    }, \
+                                "groundStation":{"name": "CONAE", "latitude": -31.52, "longitude": -64.46, "altitude":0}, \
+                                "settings": {"outDir": "tests/temp/"} \
+                            }'
+        mission = Mission.from_json(mission_json_str)
+        out_info = mission.execute()

@@ -178,9 +178,10 @@ class Mission(Entity):
         if custom_spc_dict is not None:
             spacecraft = orbitpy.util.dictionary_list_to_object_list(custom_spc_dict, Spacecraft)
         elif constel_dict is not None:
-            factory = PropagatorFactory()        
-            constel = factory.get_propagator(constel_dict)
+            factory = ConstellationFactory()        
+            constel = factory.get_constellation_model(constel_dict)
             orbits = constel.from_dict(constel_dict).generate_orbits()
+            
             # one common spacecraft-bus specifications can be expected to be defined for all the satellites in the constellation
             spc_bus_dict = d.get("spacecraftBus", None)
             spc_bus = SpacecraftBus.from_dict(spc_bus_dict) if spc_bus_dict is not None else None
@@ -190,7 +191,7 @@ class Mission(Entity):
             instru_list = orbitpy.util.dictionary_list_to_object_list(instru_dict, Instrument) # list of instruments
             spacecraft = []
             for orb in orbits:
-                spacecraft.append(Spacecraft(orbitState=orb, spacecraftBus=spc_bus, instrument=instru_list))
+                spacecraft.append(Spacecraft(orbitState=orb, spacecraftBus=spc_bus, instrument=instru_list, _id=uuid.uuid4()))
 
         # parse propagator
         factory = PropagatorFactory()
@@ -275,6 +276,7 @@ class Mission(Entity):
 
             state_cart_file = sat_dir + 'state_cartesian.csv'
             state_kep_file = sat_dir + 'state_keplerian.csv'
+            print(self.epoch)
             x = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
             out_info.append(x)
 
@@ -295,6 +297,11 @@ class Mission(Entity):
                                 out_info.append(x)
                                 acc_fl = sat_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
                                 cov_calc = GridCoverage(grid=grid, spacecraft=spc, state_cart_file=state_cart_file)
+                                # For SAR instruments pick only the time-instants at the middle of access-intervals
+                                if instru._type == 'Synthetic Aperture Radar':
+                                    filter_mid_acc = True
+                                else:
+                                    filter_mid_acc = False
                                 x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl)
                                 out_info.append(x)     
 
@@ -327,11 +334,11 @@ class Mission(Entity):
                                 cov_calc = PointingOptionsWithGridCoverage(grid=grid, spacecraft=spc, state_cart_file=state_cart_file)
                                 
                                 # For SAR instruments pick only the time-instants at the middle of access-intervals
-                                if instru._type == 'S'
+                                if instru._type == 'Synthetic Aperture Radar':
                                     filter_mid_acc = True
                                 else:
                                     filter_mid_acc = False
-                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl)
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, filter_mid_acc=filter_mid_acc)
                                 out_info.append(x)
                         
                                 dm_file = sat_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
@@ -343,7 +350,7 @@ class Mission(Entity):
             if self.groundStation:
                 for gnd_stn_idx, gnd_stn in enumerate(self.groundStation):
                     
-                    out_gnd_stn_file = sat_dir+'gndStn'+str(gnd_stn_idx)+'.csv'
+                    out_gnd_stn_file = 'gndStn'+str(gnd_stn_idx)+'_contacts.csv'
                     x = ContactFinder.execute(spc, gnd_stn, sat_dir, state_cart_file, None, out_gnd_stn_file, ContactFinder.OutType.INTERVAL, 0)
                     out_info.append(x)
 
@@ -360,11 +367,11 @@ class Mission(Entity):
             # loop over the rest of the spacecrafts in the list (i.e. from the current spacecraft to the last spacecraft in the list)
             for spc2_idx in range(spc1_idx+1, len(self.spacecraft)):
                 
-                spc2_state_cart_file = self.settings.outDir + 'sat' + str(spc1_idx) + '/state_cartesian.csv'
-                
                 spc2 = self.spacecraft[spc2_idx]
-                out_intersat_filename = 'sat'+str(spc_idx)+'_to_sat'+str(spc2_idx)+'.csv'
-                x = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, 0)
+                spc2_state_cart_file = self.settings.outDir + 'sat' + str(spc2_idx) + '/state_cartesian.csv'
+                                
+                out_intersat_filename = 'sat'+str(spc1_idx)+'_to_sat'+str(spc2_idx)+'.csv'
+                x = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, 30) # 30km opaque atmosphere height (TODO: move to user-parameter)
                 out_info.append(x)
     
         return out_info

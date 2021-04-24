@@ -556,7 +556,7 @@ class GroundStation(Entity):
             Note that _id data attribute may be different.
         """
         if(isinstance(self, other.__class__)):
-            return (self.name == other.name and self.lat == other.lat and self.lon == other.lon \
+            return (self.name == other.name and self.latitude == other.latitude and self.longitude == other.longitude \
                     and self.altitude==other.altitude and self.minimumElevation == other.minimumElevation)
         else:
             return NotImplemented

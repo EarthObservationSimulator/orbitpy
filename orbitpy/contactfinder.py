@@ -140,8 +140,8 @@ class ContactFinder(Entity):
         A_z_km = list(entityA_df['z [km]'])
 
         if isinstance(entityB, Spacecraft):
-           entityB_df = pd.read_csv(entityA_state_cart_fl, skiprows=4)
-           (_epoch_JDUT1, _step_size, _duration) = orbitpy.util.extract_auxillary_info_from_state_file(entityA_state_cart_fl)
+           entityB_df = pd.read_csv(entityB_state_cart_fl, skiprows=4)
+           (_epoch_JDUT1, _step_size, _duration) = orbitpy.util.extract_auxillary_info_from_state_file(entityB_state_cart_fl)
            if(_epoch_JDUT1 != epoch_JDUT1 or _step_size != step_size or _duration != duration):
                raise RuntimeError("The time-series data of entityA and entityB are not synced.")
 
