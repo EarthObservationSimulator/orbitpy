@@ -276,7 +276,6 @@ class Mission(Entity):
 
             state_cart_file = sat_dir + 'state_cartesian.csv'
             state_kep_file = sat_dir + 'state_keplerian.csv'
-            print(self.epoch)
             x = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
             out_info.append(x)
 

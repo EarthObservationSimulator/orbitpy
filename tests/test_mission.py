@@ -24,6 +24,7 @@ import random
 import numpy as np
 import pandas as pd
 
+import orbitpy
 from orbitpy.mission import Mission
 from orbitpy.propagator import J2AnalyticalPropagator
 from orbitpy.util import Spacecraft, GroundStation
@@ -264,7 +265,7 @@ class TestMission(unittest.TestCase):
         out_info = mission.execute()
 
     def test_scenario_6(self):
-        """    Multiple satellites from constellation; propagation, contact-finder (inter-satellite only).
+        """    Multiple satellites from constellation, common instrument; propagation, contact-finder (ground-station, inter-satellite only).
         """
         mission_json_str = '{  "epoch":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, \
                                 "duration": 0.25, \
@@ -283,4 +284,132 @@ class TestMission(unittest.TestCase):
                                 "settings": {"outDir": "tests/temp/"} \
                             }'
         mission = Mission.from_json(mission_json_str)
+        self.assertEqual(len(mission.spacecraft), 8)
+        
+
         out_info = mission.execute()
+
+        # test the satellites initial Keplerian states to confirm that the constellation is generated correctly.
+        state_sat0_fl = self.out_dir + '/sat0/state_keplerian.csv'        
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(state_sat0_fl)
+        state_sat0_row0 = pd.read_csv(state_sat0_fl, skiprows=4, nrows=2)
+        self.assertEqual(epoch_JDUT1, 2459270.75)
+        self.assertAlmostEqual(step_size, 211.50955372780942)
+        self.assertEqual(duration, 0.25)
+        self.assertAlmostEqual(state_sat0_row0['sma [km]'][0], 7078.137)
+        self.assertAlmostEqual(state_sat0_row0['ecc'][0], 0.001)
+        self.assertAlmostEqual(state_sat0_row0['inc [deg]'][0], 45)
+        self.assertAlmostEqual(state_sat0_row0['raan [deg]'][0]%360, 0)
+        self.assertAlmostEqual(state_sat0_row0['aop [deg]'][0], 135.0)
+        self.assertAlmostEqual(state_sat0_row0['ta [deg]'][0]%360, 0.0)
+
+        state_sat1_fl = self.out_dir + '/sat1/state_keplerian.csv'        
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(state_sat1_fl)
+        state_sat1_row0 = pd.read_csv(state_sat1_fl, skiprows=4, nrows=2)
+        self.assertEqual(epoch_JDUT1, 2459270.75)
+        self.assertAlmostEqual(step_size, 211.50955372780942)
+        self.assertEqual(duration, 0.25)
+        self.assertAlmostEqual(state_sat1_row0['sma [km]'][0], 7078.137)
+        self.assertAlmostEqual(state_sat1_row0['ecc'][0], 0.001)
+        self.assertAlmostEqual(state_sat1_row0['inc [deg]'][0], 45)
+        self.assertAlmostEqual(state_sat1_row0['raan [deg]'][0]%360, 0)
+        self.assertAlmostEqual(state_sat1_row0['aop [deg]'][0], 135.0)
+        self.assertAlmostEqual(state_sat1_row0['ta [deg]'][0]%360, 45)
+
+        state_sat2_fl = self.out_dir + '/sat2/state_keplerian.csv'        
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(state_sat2_fl)
+        state_sat2_row0 = pd.read_csv(state_sat2_fl, skiprows=4, nrows=2)
+        self.assertEqual(epoch_JDUT1, 2459270.75)
+        self.assertAlmostEqual(step_size, 211.50955372780942)
+        self.assertEqual(duration, 0.25)
+        self.assertAlmostEqual(state_sat2_row0['sma [km]'][0], 7078.137)
+        self.assertAlmostEqual(state_sat2_row0['ecc'][0], 0.001)
+        self.assertAlmostEqual(state_sat2_row0['inc [deg]'][0], 45)
+        self.assertAlmostEqual(state_sat2_row0['raan [deg]'][0]%360, 0)
+        self.assertAlmostEqual(state_sat2_row0['aop [deg]'][0], 135.0)
+        self.assertAlmostEqual(state_sat2_row0['ta [deg]'][0]%360, 90)
+
+        state_sat3_fl = self.out_dir + '/sat3/state_keplerian.csv'        
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(state_sat3_fl)
+        state_sat3_row0 = pd.read_csv(state_sat3_fl, skiprows=4, nrows=2)
+        self.assertEqual(epoch_JDUT1, 2459270.75)
+        self.assertAlmostEqual(step_size, 211.50955372780942)
+        self.assertEqual(duration, 0.25)
+        self.assertAlmostEqual(state_sat3_row0['sma [km]'][0], 7078.137)
+        self.assertAlmostEqual(state_sat3_row0['ecc'][0], 0.001)
+        self.assertAlmostEqual(state_sat3_row0['inc [deg]'][0], 45)
+        self.assertAlmostEqual(state_sat3_row0['raan [deg]'][0]%360, 0)
+        self.assertAlmostEqual(state_sat3_row0['aop [deg]'][0], 135.0)
+        self.assertAlmostEqual(state_sat3_row0['ta [deg]'][0]%360, 135)
+
+        state_sat4_fl = self.out_dir + '/sat4/state_keplerian.csv'        
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(state_sat4_fl)
+        state_sat4_row0 = pd.read_csv(state_sat4_fl, skiprows=4, nrows=2)
+        self.assertEqual(epoch_JDUT1, 2459270.75)
+        self.assertAlmostEqual(step_size, 211.50955372780942)
+        self.assertEqual(duration, 0.25)
+        self.assertAlmostEqual(state_sat4_row0['sma [km]'][0], 7078.137)
+        self.assertAlmostEqual(state_sat4_row0['ecc'][0], 0.001)
+        self.assertAlmostEqual(state_sat4_row0['inc [deg]'][0], 45)
+        self.assertAlmostEqual(state_sat4_row0['raan [deg]'][0]%360, 0)
+        self.assertAlmostEqual(state_sat4_row0['aop [deg]'][0], 135.0)
+        self.assertAlmostEqual(state_sat4_row0['ta [deg]'][0]%360, 180, delta=0.001)
+
+        state_sat5_fl = self.out_dir + '/sat5/state_keplerian.csv'        
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(state_sat5_fl)
+        state_sat5_row0 = pd.read_csv(state_sat5_fl, skiprows=4, nrows=2)
+        self.assertEqual(epoch_JDUT1, 2459270.75)
+        self.assertAlmostEqual(step_size, 211.50955372780942)
+        self.assertEqual(duration, 0.25)
+        self.assertAlmostEqual(state_sat5_row0['sma [km]'][0], 7078.137)
+        self.assertAlmostEqual(state_sat5_row0['ecc'][0], 0.001)
+        self.assertAlmostEqual(state_sat5_row0['inc [deg]'][0], 45)
+        self.assertAlmostEqual(state_sat5_row0['raan [deg]'][0]%360, 0)
+        self.assertAlmostEqual(state_sat5_row0['aop [deg]'][0], 135.0)
+        self.assertAlmostEqual(state_sat5_row0['ta [deg]'][0]%360, 225)
+
+        state_sat6_fl = self.out_dir + '/sat6/state_keplerian.csv'        
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(state_sat6_fl)
+        state_sat6_row0 = pd.read_csv(state_sat6_fl, skiprows=4, nrows=2)
+        self.assertEqual(epoch_JDUT1, 2459270.75)
+        self.assertAlmostEqual(step_size, 211.50955372780942)
+        self.assertEqual(duration, 0.25)
+        self.assertAlmostEqual(state_sat6_row0['sma [km]'][0], 7078.137)
+        self.assertAlmostEqual(state_sat6_row0['ecc'][0], 0.001)
+        self.assertAlmostEqual(state_sat6_row0['inc [deg]'][0], 45)
+        self.assertAlmostEqual(state_sat6_row0['raan [deg]'][0]%360, 0)
+        self.assertAlmostEqual(state_sat6_row0['aop [deg]'][0], 135.0)
+        self.assertAlmostEqual(state_sat6_row0['ta [deg]'][0]%360, 270)
+
+        state_sat7_fl = self.out_dir + '/sat7/state_keplerian.csv'        
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(state_sat7_fl)
+        state_sat7_row0 = pd.read_csv(state_sat7_fl, skiprows=4, nrows=2)
+        self.assertEqual(epoch_JDUT1, 2459270.75)
+        self.assertAlmostEqual(step_size, 211.50955372780942)
+        self.assertEqual(duration, 0.25)
+        self.assertAlmostEqual(state_sat7_row0['sma [km]'][0], 7078.137)
+        self.assertAlmostEqual(state_sat7_row0['ecc'][0], 0.001)
+        self.assertAlmostEqual(state_sat7_row0['inc [deg]'][0], 45)
+        self.assertAlmostEqual(state_sat7_row0['raan [deg]'][0]%360, 0)
+        self.assertAlmostEqual(state_sat7_row0['aop [deg]'][0], 135.0)
+        self.assertAlmostEqual(state_sat7_row0['ta [deg]'][0]%360, 315)
+
+    def test_scenario_7(self):
+        """ Multiple satellites from list, multiple instruments per satellite, multiple ground-stations ; propagation, grid-coverage, data-metrics calculation, contact-finder (ground-station and inter-satellite).
+
+        """
+        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
+                                "duration": 0.5, \
+                                "spacecraft": [{ \
+                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                                } \
+                                    }], \
+                                "groundStation":[{"name": "TrollSAR", "latitude": -72.0029, "longitude": 2.5257, "altitude":0}, \
+                                                 {"name": "CONAE", "latitude": -31.52, "longitude": -64.46, "altitude":0}], \
+                                "settings": {"outDir": "tests/temp/"} \
+                            }'
+
+        
