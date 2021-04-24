@@ -8,6 +8,8 @@
 #include <math.h>
 #include "BodyFixedStateConverter.hpp"
 
+typedef std::pair<std::vector<AnglePair>,std::vector<Rvector3>> CoordsPair;
+
 class Projector
 {
 public:
@@ -16,19 +18,19 @@ public:
 	Projector(Spacecraft *sat,DiscretizedSensor *sensor);
 	
 	// Pixel center projection onto earth
-	std::vector<AnglePair> checkIntersection(const Rvector6 &stateECF);
+	CoordsPair checkIntersection(const Rvector6 &stateECF);
 	// Uses state vector stored in the Spacecraft class member
-	std::vector<AnglePair> checkIntersection();
+	CoordsPair checkIntersection();
 	
 	// Pole projection onto earth for each FPA row/col
-	virtual std::vector<Rvector3> checkPoleIntersection(const Rvector6 &stateECF);
+	virtual CoordsPair checkPoleIntersection(const Rvector6 &stateECF);
 	// Uses state vector stored in the Spacecraft class member
-	virtual std::vector<Rvector3> checkPoleIntersection();
+	virtual CoordsPair checkPoleIntersection();
 	
 	// Pixel corner projection onto earth
-	std::vector<AnglePair> checkCornerIntersection(const Rvector6 &stateECF);
+	CoordsPair checkCornerIntersection(const Rvector6 &stateECF);
 	// Uses state vector stored in the Spacecraft class member
-	std::vector<AnglePair> checkCornerIntersection();
+	CoordsPair checkCornerIntersection();
 	
 	// Core projection algorithm for a single heading
 	AnglePair projectionAlg(Real clock,Real cone,const Rvector3 &sphericalPos);
@@ -36,6 +38,9 @@ public:
 	// Coordinate conversion
 	std::vector<AnglePair> unitVectorToClockCone(const std::vector<Rvector3> &cartesianHeadings);
 	Rvector6 getEarthFixedState(Real jd,const Rvector6 &state_I);
+	Rvector3 latLonToCartesian(AnglePair latLon);
+	AnglePair cartesianToLatLon(Rvector3 &cart);
+	Real constrainLongitude(Real lon);
 	
 	// Matrix coordinate conversion
 	Rmatrix33 getNadirToSpacecraftAccessMatrix(const Rvector6 &state_ECF);

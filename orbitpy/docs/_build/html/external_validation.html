@@ -1,0 +1,833 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>External Validation &mdash; OrbitPy 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tests" href="tests.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> OrbitPy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user_json_desc.html">User JSON Input Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output_desc.html">Output Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="miscellaneous.html">Miscellaneous</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">External Validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#about">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gmat-tests">GMAT Tests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gmat-propagation-tests-model">GMAT Propagation Tests: Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gmat-propagation-tests-input">GMAT Propagation Tests: Input</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gmat-propagation-tests-analysis">GMAT Propagation Tests: Analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#stk-tests">STK Tests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#stk-propagation-tests-model">STK Propagation Tests: Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stk-propagation-tests-inputs">STK Propagation Tests: Inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stk-propagation-tests-analysis">STK Propagation Tests: Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stk-coverage-tests-model">STK Coverage Tests: Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stk-coverage-tests-inputs">STK Coverage Tests: Inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stk-coverage-tests-analysis">STK Coverage Tests: Analysis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OrbitPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>External Validation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/external_validation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="external-validation">
+<h1>External Validation<a class="headerlink" href="#external-validation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
+<p>Core features of OrbitPy were validated against GMAT and STK, two industry standard mission design softwares. Although these tests are generated and run using Python’s unittest module, it is important that they are not thought of as traditional unit tests. Since they test whole features of OrbitPy at once, any errors found in these tests would be difficult to tie to a particular algorithm or software feature. Furthermore, since STK in particular is a closed-source proprietary software, implementation details that differ from OrbitPy are difficult to quantify and predict.</p>
+<p>The purpose of these tests is to provide a high-level ‘sanity check’ for OrbitPy, as well as a constant base of reference for future software revisions.</p>
+<p>All of the files associated with these test can be found at <code class="code docutils literal notranslate"><span class="pre">tests/validation</span></code>. <code class="code docutils literal notranslate"><span class="pre">tests/validation/STK</span></code> contains the files used to generate STK truth data, while <code class="code docutils literal notranslate"><span class="pre">tests/validation/GMAT</span></code> contains the files used to generate GMAT truth data. After the test cases are run, the OrbitPy results can be found at <code class="code docutils literal notranslate"><span class="pre">tests/validation/temp</span></code>.</p>
+<p>Test cases were set to pass or fail based on hard-coded difference values in the results from OrbitPy vs. the truth value from the reference software. The test cases all pass as of September 2020 on the master branch.</p>
+</div>
+<div class="section" id="gmat-tests">
+<h2>GMAT Tests<a class="headerlink" href="#gmat-tests" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gmat-propagation-tests-model">
+<h3>GMAT Propagation Tests: Model<a class="headerlink" href="#gmat-propagation-tests-model" title="Permalink to this headline">¶</a></h3>
+<p>The propagation model was tested against GMAT’s orbit propagation capabilities. GMAT’s propagation settings were fine-tuned to match
+OrbitPy’s capabilities as closely as possible. This included using the eq2000 frame for propagation and output, limiting the gravity model
+to only consideration of degree 2, order 0 perturbations (J2 only), changing the earth radius value to exactly match OrbitPy’s, and
+setting the min/max step size on the numerical propagator to 1 second, among other settings.</p>
+<p>Due to certain unresolvable differences between GMAT and OrbitPy, it is impossible to match the outputs exactly. In particular, GMAT uses a numerical propagator, while OrbitPy uses an analytical model. OrbitPy’s analytical model considers only secular
+J2 perturbations, while GMAT considers all J2 (periodic and secular) perturbations. This is likely the biggest cause of difference between
+the two outputs.</p>
+</div>
+<div class="section" id="gmat-propagation-tests-input">
+<h3>GMAT Propagation Tests: Input<a class="headerlink" href="#gmat-propagation-tests-input" title="Permalink to this headline">¶</a></h3>
+<p>The GMAT test cases were generated by propagating the following orbits for one day:</p>
+<ol class="arabic simple">
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 0</p></li>
+<li><p>RAAN: 0</p></li>
+<li><p>AOP: 0</p></li>
+<li><p>TA: 0</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 1</p></li>
+<li><p>RAAN: 1</p></li>
+<li><p>AOP: 1</p></li>
+<li><p>TA: 1</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 90</p></li>
+<li><p>RAAN: 180</p></li>
+<li><p>AOP: 180</p></li>
+<li><p>TA: 180</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7578.378</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 45.7865</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7578.378</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 180</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 90</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 170</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 10</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+</ol>
+<p>Each of the test functions can be found in <code class="code docutils literal notranslate"><span class="pre">tests/validation/test_GMAT_propagation_OrbitPropCovGrid</span></code>. The numbers listed here correspond to the test function names (i.e orbit 1 is propagated in <code class="code docutils literal notranslate"><span class="pre">test_run_1</span></code>).</p>
+</div>
+<div class="section" id="gmat-propagation-tests-analysis">
+<h3>GMAT Propagation Tests: Analysis<a class="headerlink" href="#gmat-propagation-tests-analysis" title="Permalink to this headline">¶</a></h3>
+<p>The initial position for each test came out to match exactly. However, the example plots below clearly illustrate the modelling differences between GMAT and OrbitPy. The results for the first test case (a 7000 km equatorial circular orbit, with all other orbital elements set to 0)
+expressed in cartesian coordinates show divergence.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/GMAT_01_X_Diff.png"><img alt="_images/GMAT_01_X_Diff.png" src="_images/GMAT_01_X_Diff.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<p>Notably, the Z position also diverges. An inclination is introduced in the GMAT propagation that remains at zero in the OrbitPy propagation. This is due to a periodic perturbation in inclination modeled in GMAT, but taken as zero in OrbitPy.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/GMAT_01_Z_Diff.png"><img alt="_images/GMAT_01_Z_Diff.png" src="_images/GMAT_01_Z_Diff.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<p>These additional periodic perturbations in the GMAT model can be more clearly seen when examining the keplerian elements. In particular, the semi-major axis, eccentricity, and inclination are subject to periodic purturbations not present in OrbitPy (for this OrbitPy test case, these values remained at zero throughout the simulation).</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/GMAT_01_SMA.png"><img alt="_images/GMAT_01_SMA.png" src="_images/GMAT_01_SMA.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/GMAT_01_ECC.png"><img alt="_images/GMAT_01_ECC.png" src="_images/GMAT_01_ECC.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/GMAT_01_INC.png"><img alt="_images/GMAT_01_INC.png" src="_images/GMAT_01_INC.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<p>For the sake of brevity, the GMAT results for the remaining tests are not shown here. Since STK was found to be a much better match for OrbitPy’s model, the rest of the analysis on this page will focus on STK results.</p>
+</div>
+</div>
+<div class="section" id="stk-tests">
+<h2>STK Tests<a class="headerlink" href="#stk-tests" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="stk-propagation-tests-model">
+<h3>STK Propagation Tests: Model<a class="headerlink" href="#stk-propagation-tests-model" title="Permalink to this headline">¶</a></h3>
+<p>Due to the significant modelling differences between OrbitPy and GMAT, STK was used for the remaining test cases. STK was expected to match much more closely with GMAT, because STK has the option of using an analytical propagator which considers only secular perturbations in J2, just like OrbitPy. As with GMAT, the STK settings were matched as closely as possible with OrbitPy. The STK scenario file used to produce the data can be found at <code class="code docutils literal notranslate"><span class="pre">tests/validation/STK/test_STK_propagation/Test_01.sc</span></code>.</p>
+<p>The STK test cases resulted in a much smaller difference than GMAT. Remaining differences are likely explained by a variety of small factors, such as floating point error and slight modelling differences.</p>
+<p>Test case were set to pass if the difference in each cartesian state was less than 6 km at every point along the orbit. The last three tests compared RAAN drift: these were set to pass if the difference in RAAN was less than .015 degrees at every point along the orbit.</p>
+</div>
+<div class="section" id="stk-propagation-tests-inputs">
+<h3>STK Propagation Tests: Inputs<a class="headerlink" href="#stk-propagation-tests-inputs" title="Permalink to this headline">¶</a></h3>
+<p>The STK test cases were generated by propagating the following orbits for one day:</p>
+<ol class="arabic simple">
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 0</p></li>
+<li><p>RAAN: 0</p></li>
+<li><p>AOP: 0</p></li>
+<li><p>TA: 0</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 1</p></li>
+<li><p>RAAN: 1</p></li>
+<li><p>AOP: 1</p></li>
+<li><p>TA: 1</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 90</p></li>
+<li><p>RAAN: 180</p></li>
+<li><p>AOP: 180</p></li>
+<li><p>TA: 180</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7578.378</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 45.7865</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7578.378</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 180</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 90</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 10</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 170</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+</ol>
+<p>Each of the test functions can be found in <code class="code docutils literal notranslate"><span class="pre">tests/validation/test_STK_propagation_OrbitPropCovGrid</span></code>. The numbers listed here correspond to the test function names (i.e orbit 1 is propagated in <code class="code docutils literal notranslate"><span class="pre">test_run_1</span></code>).</p>
+</div>
+<div class="section" id="stk-propagation-tests-analysis">
+<h3>STK Propagation Tests: Analysis<a class="headerlink" href="#stk-propagation-tests-analysis" title="Permalink to this headline">¶</a></h3>
+<p>The results from all eight test cases are summarized in the table below:</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text"><strong>Test Results</strong></span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head stub"></th>
+<th class="head"><p>1</p></th>
+<th class="head"><p>2</p></th>
+<th class="head"><p>3</p></th>
+<th class="head"><p>4</p></th>
+<th class="head"><p>5</p></th>
+<th class="head"><p>6</p></th>
+<th class="head"><p>7</p></th>
+<th class="head"><p>8</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>Max Difference (km)</p></th>
+<td><p>4.69</p></td>
+<td><p>4.68</p></td>
+<td><p>3.82</p></td>
+<td><p>3.33</p></td>
+<td><p>4.19</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>Max Difference (deg)</p></th>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+<td><p>.00000149</p></td>
+<td><p>.00914</p></td>
+<td><p>.00916</p></td>
+</tr>
+</tbody>
+</table>
+<p>The results from the first test case, this time with STK data, are shown again below.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_01_X_Diff.png"><img alt="_images/STK_01_X_Diff.png" src="_images/STK_01_X_Diff.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<p>A difference in the Z positions is still introduced, although it is substantially smaller. For an unknown reason, the STK propagation also introduces a small inclination, although much less than GMAT.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_01_Z_Diff.png"><img alt="_images/STK_01_Z_Diff.png" src="_images/STK_01_Z_Diff.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<p>The difference in the semi-major axis, eccentricity, and inclination are plotted below. The semi-major axis and inclination difference plots both exibit very small, random error, while the inclination plot shows a slightly larger, linearly increasing difference.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_01_SMA_Diff.png"><img alt="_images/STK_01_SMA_Diff.png" src="_images/STK_01_SMA_Diff.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_01_ECC_Diff.png"><img alt="_images/STK_01_ECC_Diff.png" src="_images/STK_01_ECC_Diff.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_01_INC_Diff.png"><img alt="_images/STK_01_INC_Diff.png" src="_images/STK_01_INC_Diff.png" style="width: 480.0px; height: 360.0px;" /></a>
+</div>
+</div>
+<div class="section" id="stk-coverage-tests-model">
+<h3>STK Coverage Tests: Model<a class="headerlink" href="#stk-coverage-tests-model" title="Permalink to this headline">¶</a></h3>
+<p>The ground point access capabilities of OrbitPy’s <code class="xref py py-class docutils literal notranslate"><span class="pre">orbitpy.orbitpropcov.OrbitPropCovGrid</span></code> class were also verified against STK results. The orbit propagation settings for these tests remain identical to the settings used for the propagation tests. In order to make these tests as modular as possible, most of the orbits used were previously tested in the propagation tests.</p>
+<p>STK settings were matched to OrbitPy wherever possible. STK uses a variable time step for access calculations, so OrbitPy’s one second time step wasn’t matched exactly. Rather than reporting a binary access value for each grid point at each timestep, like OrbitPy does, STK simply outputs the access intervals for each grid point; the STK output was converted to OrbitPy’s format for comparison.</p>
+<p>STK uses a different default coordinate frame definition for its sensors. Like in OrbitPy, the Z axis can be set to nadir alligned with the ECF velocity constraint.
+However, the X axis is alligned with the satellite’s velocity vector, wherease in OrbitPy, the Y axis takes this position.
+This was taken into consideration and an intrinsic 213 Euler sequence was applied in OrbitPy’s sensor coordinate frame to match with the (default) STK coordinate frame.</p>
+<p>The results of each of the 12 scenarios (described below) tested were evaluated against STK according to the following four metrics:</p>
+<ol class="arabic simple">
+<li><p>Total number of grid points accessed.</p></li>
+<li><p>Cumulative access time, summed across all grid points.</p></li>
+<li><p>Average number of grid points accessed per propagation time step (1 second).</p></li>
+<li><p>Cumulative access time per grid point, averaged across grid points accessed by both softwares.</p></li>
+</ol>
+<p>The absolute value of the percent difference in these metrics was compared for each test case. The algorithm used for access calculations
+is not made available in the STK documentation; these test cases are comparing possibly two different coverage algorithms, without much prior
+understanding of any algorithm differences present. For this reason, it was difficult to pin down an ‘expected’ or ‘acceptable’
+bound for deviation in the results before running the test cases.
+The following bounds for passing each metric were decided after examination of the results.</p>
+<ol class="arabic simple">
+<li><p>10%</p></li>
+<li><p>5%</p></li>
+<li><p>5%</p></li>
+<li><p>30%</p></li>
+</ol>
+<p>The STK scenario file used to produce these tests can be found at <code class="code docutils literal notranslate"><span class="pre">tests/validation/STK/test_STK_coverage/Access_Tests.sc</span></code>.</p>
+</div>
+<div class="section" id="stk-coverage-tests-inputs">
+<h3>STK Coverage Tests: Inputs<a class="headerlink" href="#stk-coverage-tests-inputs" title="Permalink to this headline">¶</a></h3>
+<p>The 12 test cases were generated using combinations of the following inputs.</p>
+<p><strong>Coverage Grids:</strong></p>
+<ol class="arabic simple">
+<li><p>A 3 degree resolution grid, spanning lat=-3 to +3 degrees, lon = -180 to 180 degrees.</p></li>
+<li><p>A 10 degree resolution grid, covering the entire globe.</p></li>
+<li><p>A 1 degree resolution grid, covering the continental United States.</p></li>
+</ol>
+<p><strong>Orbits:</strong></p>
+<ol class="arabic simple">
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 0</p></li>
+<li><p>RAAN: 0</p></li>
+<li><p>AOP: 0</p></li>
+<li><p>TA: 0</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 1</p></li>
+<li><p>RAAN: 1</p></li>
+<li><p>AOP: 1</p></li>
+<li><p>TA: 1</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7000</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 90</p></li>
+<li><p>RAAN: 180</p></li>
+<li><p>AOP: 180</p></li>
+<li><p>TA: 180</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7578.378</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 45.7865</p></li>
+<li><p>RAAN: 98.8797</p></li>
+<li><p>AOP: 75.78089</p></li>
+<li><p>TA: 277.789</p></li>
+</ul>
+</li>
+<li><ul class="simple">
+<li><p>SMA: 7080.48</p></li>
+<li><p>ECC: 0</p></li>
+<li><p>INC: 98.22</p></li>
+<li><p>RAAN: 180</p></li>
+<li><p>AOP: 180</p></li>
+<li><p>TA: 180</p></li>
+</ul>
+</li>
+</ol>
+<p><strong>Sensors:</strong></p>
+<ol class="arabic simple">
+<li><p>A 10 degree (fullcone angle) conical sensor.</p></li>
+<li><p>A 10 degree along track, 15 degree across track rectangular sensor.</p></li>
+<li><p>A 15 degree along track, 10 degree across track rectangular sensor.</p></li>
+</ol>
+<p><strong>Orientations:</strong>
+213 (order = first Y, then X, then Z) Euler (instrinsic) rotations in degrees.</p>
+<ol class="arabic simple">
+<li><p>(Y = 0, X = 0, Z = 0)</p></li>
+<li><p>(Y = 30, X = 24, Z = -6), instrinsic,</p></li>
+<li><p>(Y = -30, X = -25, Z = 5)</p></li>
+</ol>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text"><strong>Test Combinations</strong></span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head stub"></th>
+<th class="head"><p>1</p></th>
+<th class="head"><p>2</p></th>
+<th class="head"><p>3</p></th>
+<th class="head"><p>4</p></th>
+<th class="head"><p>5</p></th>
+<th class="head"><p>6</p></th>
+<th class="head"><p>7</p></th>
+<th class="head"><p>8</p></th>
+<th class="head"><p>9</p></th>
+<th class="head"><p>10</p></th>
+<th class="head"><p>11</p></th>
+<th class="head"><p>12</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>Orbit</p></th>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>2</p></td>
+<td><p>3</p></td>
+<td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+<td><p>5</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>Grid</p></th>
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>Sensor</p></th>
+<td><p>1</p></td>
+<td><p>3</p></td>
+<td><p>1</p></td>
+<td><p>3</p></td>
+<td><p>1</p></td>
+<td><p>3</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>2</p></td>
+<td><p>3</p></td>
+<td><p>2</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>Orientation</p></th>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>3</p></td>
+<td><p>2</p></td>
+<td><p>1</p></td>
+<td><p>3</p></td>
+<td><p>2</p></td>
+</tr>
+</tbody>
+</table>
+<p>Each of the test functions can be found in <code class="code docutils literal notranslate"><span class="pre">tests/validation/test_STK_coverage_OrbitPropCovGrid</span></code>. The columns correspond to the test function names (i.e the inputs in column 1 are tested in <code class="code docutils literal notranslate"><span class="pre">test_run_1</span></code>).</p>
+</div>
+<div class="section" id="stk-coverage-tests-analysis">
+<h3>STK Coverage Tests: Analysis<a class="headerlink" href="#stk-coverage-tests-analysis" title="Permalink to this headline">¶</a></h3>
+<p>The results of all of the test cases across each metric is shown in the table below.</p>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text"><strong>Test Results</strong></span><a class="headerlink" href="#id3" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head stub"></th>
+<th class="head"><p>1</p></th>
+<th class="head"><p>2</p></th>
+<th class="head"><p>3</p></th>
+<th class="head"><p>4</p></th>
+<th class="head"><p>5</p></th>
+<th class="head"><p>6</p></th>
+<th class="head"><p>7</p></th>
+<th class="head"><p>8</p></th>
+<th class="head"><p>9</p></th>
+<th class="head"><p>10</p></th>
+<th class="head"><p>11</p></th>
+<th class="head"><p>12</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><th class="stub"><p>Metric 1 [%]</p></th>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1.13</p></td>
+<td><p>6.57</p></td>
+<td><p>1.43</p></td>
+<td><p>2.79</p></td>
+<td><p>2.90</p></td>
+<td><p>1.82</p></td>
+<td><p>2.57</p></td>
+<td><p>8.28</p></td>
+<td><p>.351</p></td>
+<td><p>.304</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>Metric 2 [%]</p></th>
+<td><p>3.26</p></td>
+<td><p>2.73</p></td>
+<td><p>4.82</p></td>
+<td><p>2.41</p></td>
+<td><p>.327</p></td>
+<td><p>1.11</p></td>
+<td><p>1.71</p></td>
+<td><p>1.96</p></td>
+<td><p>3.38</p></td>
+<td><p>1.47</p></td>
+<td><p>.448</p></td>
+<td><p>2.38</p></td>
+</tr>
+<tr class="row-even"><th class="stub"><p>Metric 3 [%]</p></th>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>3.79</p></td>
+<td><p>.0135</p></td>
+<td><p>.651</p></td>
+<td><p>.733</p></td>
+<td><p>.873</p></td>
+<td><p>.863</p></td>
+<td><p>2.20</p></td>
+<td><p>1.15</p></td>
+<td><p>1.23</p></td>
+</tr>
+<tr class="row-odd"><th class="stub"><p>Metric 4 [%]</p></th>
+<td><p>3.26</p></td>
+<td><p>2.73</p></td>
+<td><p>4.83</p></td>
+<td><p>9.66</p></td>
+<td><p>7.58</p></td>
+<td><p>6.38</p></td>
+<td><p>16.9</p></td>
+<td><p>3.51</p></td>
+<td><p>18.7</p></td>
+<td><p>15.8</p></td>
+<td><p>6.24</p></td>
+<td><p>25.6</p></td>
+</tr>
+</tbody>
+</table>
+<p>Visual inspection of the test case results shows excellent agreement between OrbitPy and STK coverage. In this section, the most divergent results (highest percent difference) across each metric will be analyzed.</p>
+<p>For metric 1 (total number of grid points accessed), test case 10 showed the highest percent difference at 8.28 percent. Test case 10 propagated a sun-synchronous orbit over a continental US grid, with a nadir-pointing rectangular sensor. The STK and OrbitPy results are shown below.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/OP_Acc_10.png"><img alt="_images/OP_Acc_10.png" src="_images/OP_Acc_10.png" style="width: 518.25px; height: 324.0px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_Acc_10.png"><img alt="_images/STK_Acc_10.png" src="_images/STK_Acc_10.png" style="width: 518.25px; height: 324.0px;" /></a>
+</div>
+<p>For metric 2 (cumulative access time, summed across all grid points.), test case 3 showed the highest percent difference at 4.82 percent. Test case 3 propagated a near-equatorial orbit over a global grid with a nadir-pointing conical sensor. STK and OrbitPy results are shown below.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/OP_Acc_3.png"><img alt="_images/OP_Acc_3.png" src="_images/OP_Acc_3.png" style="width: 518.25px; height: 324.0px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_Acc_3.png"><img alt="_images/STK_Acc_3.png" src="_images/STK_Acc_3.png" style="width: 518.25px; height: 324.0px;" /></a>
+</div>
+<p>For metric 3 (average number of grid points accessed per propagation time step (1 second)), test case 4 showed the highest percent difference at 3.79 percent. Test case 4 propagated a polar orbit over continental US grid with a nadir-pointing rectangular sensor. STK and OrbitPy results are shown below.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/OP_Acc_4.png"><img alt="_images/OP_Acc_4.png" src="_images/OP_Acc_4.png" style="width: 518.25px; height: 324.0px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_Acc_4.png"><img alt="_images/STK_Acc_4.png" src="_images/STK_Acc_4.png" style="width: 518.25px; height: 324.0px;" /></a>
+</div>
+<p>For metric 4 (cumulative access time per grid point, averaged across grid points accessed by both softwares), test case 12 showed the highest percent difference at 25.6 percent. Test case 12 propagated a sun-synchronous orbit over continental US grid with a pointed rectangular sensor. STK and OrbitPy results are shown below.
+Please note that the color coding is confusing.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/OP_Acc_12.png"><img alt="_images/OP_Acc_12.png" src="_images/OP_Acc_12.png" style="width: 518.25px; height: 324.0px;" /></a>
+</div>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/STK_Acc_12.png"><img alt="_images/STK_Acc_12.png" src="_images/STK_Acc_12.png" style="width: 518.25px; height: 324.0px;" /></a>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="tests.html" class="btn btn-neutral float-left" title="Tests" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, BAERI
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

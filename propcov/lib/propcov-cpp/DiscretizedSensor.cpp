@@ -1,7 +1,7 @@
 #include "DiscretizedSensor.hpp"
 #include "RealUtilities.hpp"
 
-// Utilities
+
 Rvector3 RADECToCartesian(AnglePair RADEC)
 {
 	Real x,y,z;
@@ -16,7 +16,19 @@ Rvector3 RADECToCartesian(AnglePair RADEC)
 	return heading;
 }
 
-// Constructor
+/**
+ * Constructor
+ *
+ * Fully builds the DiscretizedSensor object by constructing lists of heading locations of pixel 
+ * centers,corners,and poles, specified as unit vectors in the sensor frame.
+ *
+ * @param angleWidthIn The FOV angle in the row direction (along the y axis in the sensor frame)
+ * @param angleHeightIn The FOV angle in the column direction (along the x axis in the sensor frame)
+ * @param widthDetectorsIn Number of detectors in the row direction
+ * @param heightDetectorsIn Number of detectors in the column direction
+ * @return the constructed DiscretizedSensor object, ready to use.
+ *
+ */
 DiscretizedSensor::DiscretizedSensor(Real angleWidthIn, Real angleHeightIn, Integer widthDetectorsIn, Integer heightDetectorsIn)
  : angleWidth(angleWidthIn),
    angleHeight(angleHeightIn),
@@ -34,11 +46,24 @@ DiscretizedSensor::DiscretizedSensor(Real angleWidthIn, Real angleHeightIn, Inte
 	poleHeadings = generatePoles();
 }
 
-// Destructor
+/**
+ * Destructor.
+ *
+ */
 DiscretizedSensor::~DiscretizedSensor()
 {
 }
 
+/**
+ * Generates vector of right ascension and declination values of pixel centers.
+ *
+ * For ease of construction, angles are specified in an intermediate coordinate frame, with the y
+ * axis pointing down sensor boresight and the x axis pointing along the sensor rows. The
+ * genCartesianHeadings function must be used to transform to the sensor frame after.
+ *
+ * @return A vector of right ascension and declination values.
+ *
+ */
 std::vector<AnglePair> DiscretizedSensor::generateRADEC()
 {
 	std::vector<AnglePair> pointList(widthDetectors*heightDetectors);
@@ -63,6 +88,17 @@ std::vector<AnglePair> DiscretizedSensor::generateRADEC()
 	return pointList;
 }
 
+/**
+ * Generates vector of right ascension and declination values of pixel corners.
+ *
+ * For ease of construction, angles are specified in an intermediate coordinate frame,
+ * the sensor construction frame, with the y axis pointing down sensor boresight and the
+ * x axis pointing along the sensor rows. The genCartesianHeadings function must be used to
+ * transform to the sensor frame after.
+ *
+ * @return A vector of right ascension and declination values.
+ *
+ */
 std::vector<AnglePair> DiscretizedSensor::generateCorners()
 {
 	// Initialize point list with number of corners
@@ -88,6 +124,18 @@ std::vector<AnglePair> DiscretizedSensor::generateCorners()
 	return pointList;
 }
 
+/**
+ * 
+ * Generates a vector of cartesian unit vectors from a vector of RA/DEC headings.
+ *
+ * Headings will also be transformed from the sensor construction frame to the sensor frame.
+ * The sensor frame boresight is along the Z axis, the pixel columns are along the X axis,
+ * and the pixel rows are along the Y axis.
+ *
+ * @param RADECVector A vector of AnglePairs in the sensor construction frame.
+ * @return A vector of cartesian unit vectors (Rvector3 objects) in the sensor frame.
+ *
+ */
 std::vector<Rvector3> DiscretizedSensor::genCartesianHeadings(std::vector<AnglePair> RADECVector)
 {
 	int numPts = RADECVector.size();
@@ -118,6 +166,18 @@ std::vector<Rvector3> DiscretizedSensor::genCartesianHeadings(std::vector<AngleP
 	return headings;
 }
 
+/**
+ *
+ * Generates a vector of cartesian unit vectors of poles representing the pixel edges
+ *
+ * cornerheadings class member must already be initialized. The column rows are constructed by 
+ * crossing the corner in the first column of the ith row with the corner in the second column of
+ * the ith row. The column poles are constructed by crossing the corner in the first row of the 
+ * ith column with the corner in the second row of the ith column.
+ *
+ * @return  A vector of cartesian unit vectors (Rvector3 objects) in the sensor frame
+ *
+ */
 std::vector<Rvector3> DiscretizedSensor::generatePoles()
 {
 	// Stored as rows, then columns
@@ -134,12 +194,9 @@ std::vector<Rvector3> DiscretizedSensor::generatePoles()
 		// Index of next value of row i
 		int index2 = getIndex(i,1,numRowPoles);
 		
-		// NOTE: Need to determine north/south pole convention
 		poles[i] = Cross(cornerHeadings[index2],cornerHeadings[index1]);
 		poles[i].Normalize();
 		
-		
-		// New code
 		if(i >= numRowPoles/2)
 		{
 			poles[i] = Cross(cornerHeadings[index1],cornerHeadings[index2]);
@@ -172,38 +229,90 @@ std::vector<Rvector3> DiscretizedSensor::generatePoles()
 	return poles;
 }
 
-// Indexed at zero
+/**
+ *
+ * Returns the array index of the pixel element at a particular row, column location.
+ *
+ * @param row  The pixel row number, with index starting at zero
+ * @param col  The pixel column number, with index starting at zero
+ * @param numRows  The total number of rows of pixels
+ *
+ */
 Integer DiscretizedSensor::getIndex(Integer row,Integer col,Integer numRows)
 {
 	// Index of leftmost corner of column col + index of row
 	return col*numRows + row;
 }
 
+/**
+ *
+ * Dummy function to satisfy Sensor class contract.
+ *
+ * @param fakeVal1  Dummy variable
+ * @param fakeVal2  Dummy variable
+ * @return boolean false
+ *
+ */
 bool DiscretizedSensor::CheckTargetVisibility(Real fakeVal1,Real fakeVal2)
 {
 	return false;
 }
 
+/**
+ *
+ * Returns the class member wFOV, the field of view in the row direction
+ *
+ * @return  The wFov class member
+ *
+ */
 Real DiscretizedSensor::getwFOV()
 {
 	return wFOV;
 }
 
+/**
+ *
+ * Returns the class member hFOV, the field of view in the column direction
+ *
+ * @return  The hFov class member
+ *
+ */
 Real DiscretizedSensor::gethFOV()
 {
 	return hFOV;
 }
 
+/**
+ *
+ * Returns a vector of unit vectors (Rvector3) of the pixel centers.
+ *
+ * @return  The centerHeadings class member
+ *
+ */
 std::vector<Rvector3> DiscretizedSensor::getCenterHeadings()
 {
 	return centerHeadings;
 }
 
+/**
+ *
+ * Returns a vector of unit vectors (Rvector3) of the pixel corners.
+ *
+ * @return  The cornerHeadings class member
+ *
+ */
 std::vector<Rvector3> DiscretizedSensor::getCornerHeadings()
 {
 	return cornerHeadings;
 }
 
+/**
+ *
+ * Returns a vector of unit vectors (Rvector3) of the pixel poles.
+ *
+ * @return  The poleHeadings class member
+ *
+ */
 std::vector<Rvector3> DiscretizedSensor::getPoleHeadings()
 {
 	return poleHeadings;

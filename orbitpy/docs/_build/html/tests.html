@@ -1,0 +1,304 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tests &mdash; OrbitPy 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="External Validation" href="external_validation.html" />
+    <link rel="prev" title="Miscellaneous" href="miscellaneous.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> OrbitPy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user_json_desc.html">User JSON Input Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output_desc.html">Output Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="miscellaneous.html">Miscellaneous</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-to">How to</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-strategies">Testing strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-modules">Test Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#test-orbitpropcovgrid-1"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovGrid_1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-orbitpropcovgrid-2"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovGrid_2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-orbitpropcovgrid-3"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovGrid_3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-gmat-propagation-orbitpropcovgrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_GMAT_propagation_OrbitPropCovGrid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-stk-propagation-orbitpropcovgrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_STK_propagation_OrbitPropCovGrid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-stk-coverage-orbitpropcovgrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_STK_coverage_OrbitPropCovGrid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-orbitpropcovpopts-1"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovPopts_1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-orbitpropcovpopts-2"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovPopts_2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-groundstationcomm"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_GroundStationComm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-intersatellitecomm"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_InterSatelliteComm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-preprocess"><code class="xref py py-class docutils literal notranslate"><span class="pre">test_PreProcess</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="external_validation.html">External Validation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OrbitPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Tests</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/tests.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tests">
+<h1>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="how-to">
+<h2>How to<a class="headerlink" href="#how-to" title="Permalink to this headline">¶</a></h2>
+<p>Testing is done using the <a class="reference external" href="https://docs.python.org/3.8/library/unittest.html#module-unittest" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unittest</span></code></a> module and <code class="xref py py-mod docutils literal notranslate"><span class="pre">nose</span></code> module. Use the below command to run all the tests:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>make runtest
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing-strategies">
+<h2>Testing strategies<a class="headerlink" href="#testing-strategies" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p>Test the expected format of the output files.</p></li>
+<li><p>Use of random input values and calculated output values to validate the test.</p>
+<blockquote>
+<div><ol class="lowerroman simple">
+<li><p>Sometimes special cases are run, and some input values which do not make a difference to the
+output are made random. Eg: In case of a equatorial orbit, the latitude of the location seen by
+a nadir-pointed sensor will always be 0 deg, irrespective of the chosen orbital altitude, raan, ta
+which can be used as random values.</p></li>
+<li><p>In cases where the random input values do influence the output, the expected output is calculated
+(as much as possible) from methods, code other than used by the <code class="code docutils literal notranslate"><span class="pre">OrbitPy</span></code> package. Sometimes
+the chosen validation methods are approximate in which case an <em>approximately equal to</em> assertion tests
+are used.</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>Using known inputs, and outputs from external sources (eg: literature, other orbital simulation softwares such as GMAT, STK)</p></li>
+<li><p>Run tests after making any revisions to the code. This helps to check that the revisions do not have uninteded effects on the results.</p></li>
+</ol>
+</div>
+<div class="section" id="test-modules">
+<h2>Test Modules<a class="headerlink" href="#test-modules" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="test-orbitpropcovgrid-1">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovGrid_1</span></code><a class="headerlink" href="#test-orbitpropcovgrid-1" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-orbitpropcovgrid-2">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovGrid_2</span></code><a class="headerlink" href="#test-orbitpropcovgrid-2" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-orbitpropcovgrid-3">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovGrid_3</span></code><a class="headerlink" href="#test-orbitpropcovgrid-3" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-gmat-propagation-orbitpropcovgrid">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_GMAT_propagation_OrbitPropCovGrid</span></code><a class="headerlink" href="#test-gmat-propagation-orbitpropcovgrid" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-stk-propagation-orbitpropcovgrid">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_STK_propagation_OrbitPropCovGrid</span></code><a class="headerlink" href="#test-stk-propagation-orbitpropcovgrid" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-stk-coverage-orbitpropcovgrid">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_STK_coverage_OrbitPropCovGrid</span></code><a class="headerlink" href="#test-stk-coverage-orbitpropcovgrid" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-orbitpropcovpopts-1">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovPopts_1</span></code><a class="headerlink" href="#test-orbitpropcovpopts-1" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-orbitpropcovpopts-2">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_OrbitPropCovPopts_2</span></code><a class="headerlink" href="#test-orbitpropcovpopts-2" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-groundstationcomm">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_GroundStationComm</span></code><a class="headerlink" href="#test-groundstationcomm" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-intersatellitecomm">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_InterSatelliteComm</span></code><a class="headerlink" href="#test-intersatellitecomm" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="test-preprocess">
+<h3><code class="xref py py-class docutils literal notranslate"><span class="pre">test_PreProcess</span></code><a class="headerlink" href="#test-preprocess" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="external_validation.html" class="btn btn-neutral float-right" title="External Validation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="miscellaneous.html" class="btn btn-neutral float-left" title="Miscellaneous" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, BAERI
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

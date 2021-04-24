@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Miscellaneous &mdash; OrbitPy 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tests" href="tests.html" />
+    <link rel="prev" title="Examples" href="examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> OrbitPy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="user_json_desc.html">User JSON Input Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output_desc.html">Output Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Miscellaneous</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#grid-points-coverage-calcuations-approach">Grid-points coverage calcuations approach</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#propagation-time-step-determination">Propagation time-step determination</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#grid-resolution-determination">Grid Resolution determination</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#correction-of-access-files-for-purely-side-looking-instruments">“Correction” of access files for purely side-looking instruments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#issue-1">Issue #1</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pointing-options-coverage-calcuations-approach">Pointing Options coverage calcuations approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pointing-options-with-grid-coverage-calcuations-approach">Pointing Options with Grid coverage calcuations approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-issues">Common issues:</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#issue">Issue</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_validation.html">External Validation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">OrbitPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Miscellaneous</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/miscellaneous.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="miscellaneous">
+<h1>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="grid-points-coverage-calcuations-approach">
+<span id="grid-pnts-cov-calc-app"></span><h2>Grid-points coverage calcuations approach<a class="headerlink" href="#grid-points-coverage-calcuations-approach" title="Permalink to this headline">¶</a></h2>
+<p>This section describes the “Grid-point” approach towards coverage calculations. In this approach, the coverage caclulator is given a
+set of predefined grid-points (lat, lon values). The satellite is propagated and at each time, and it is determined if a grid-point falls
+within the sensor projected footprint on the Earth’s surface at that time. A conitnuous collection of such times corresponds to
+an access interval: i.e. the time-interval over which the ground-point is visible to the satellite sensor.
+The key aspects relating to this approach are described below:</p>
+<div class="section" id="propagation-time-step-determination">
+<span id="prop-time-step-determination"></span><h3>Propagation time-step determination<a class="headerlink" href="#propagation-time-step-determination" title="Permalink to this headline">¶</a></h3>
+<p>The propagation time step is selected based on the time taken to cover the length (along-track) of the sensor footprint from it’s field-of-<strong>regard</strong> (calculated
+at the nadir) and a time-resolution factor (<code class="code docutils literal notranslate"><span class="pre">time_res_fac</span></code>) which be default is set to 0.25. Smaller <code class="code docutils literal notranslate"><span class="pre">time_res_fac</span></code> implies higher precision
+in calculation of the access interval over a grid-point. In case of conical sensors there is always a chance that a grid-point
+is missed during the access calculations.</p>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="_images/time_step_illus.png"><img alt="_images/time_step_illus.png" src="_images/time_step_illus.png" style="width: 480.75px; height: 375.75px;" /></a>
+<p class="caption"><span class="caption-text">Illustration of possible inaccuracies due to a large time resolution factor (0.75 in above figure).</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>The user may change the default <code class="code docutils literal notranslate"><span class="pre">time_res_fac</span></code> by setting the <code class="code docutils literal notranslate"><span class="pre">customTimeResFac</span></code> JSON key within the <code class="code docutils literal notranslate"><span class="pre">settings</span></code> JSON
+object in the user-defined JSON configuration file.</p>
+</div>
+<div class="section" id="grid-resolution-determination">
+<span id="grid-res-determination"></span><h3>Grid Resolution determination<a class="headerlink" href="#grid-resolution-determination" title="Permalink to this headline">¶</a></h3>
+<p>The grid resolution is set such that at any given arbitrary time, the sensor footprint from its field-of-<strong>view</strong> captures atleast one grid-point
+when the satellite is within the interior of a region. This can be acheived by setting the grid resolution (spacing between
+the grid points) to be less than the minimum footprint dimension. A grid resolution factor <code class="code docutils literal notranslate"><span class="pre">grid_res_fac</span></code> is defined
+(with default value 0.9) and the grid resolution is computed as (<code class="code docutils literal notranslate"><span class="pre">grid_res_fac</span></code> . minimum footprint angular dimension).
+For example, in case of rectangular sensor with FOV: 5 deg x 15 deg at an altitude of 500km, the minimum footprint angular dimension
+is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives the grid resolution as 0.3530 deg.</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/grid_res_illus.png"><img alt="_images/grid_res_illus.png" src="_images/grid_res_illus.png" style="width: 420.0px; height: 324.0px;" /></a>
+<p class="caption"><span class="caption-text">Illustration of relationship between grid resolution and sensor footprint.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While the time-step is calculated from the FOR, the  grid-resolution is calculated from the FOV.</p>
+</div>
+<p>The user may change the default <code class="code docutils literal notranslate"><span class="pre">grid_res_fac</span></code> by setting the <code class="code docutils literal notranslate"><span class="pre">customGridResFac</span></code> JSON key within the <code class="code docutils literal notranslate"><span class="pre">settings</span></code> JSON
+object in the user-defined JSON configuration file.</p>
+</div>
+<div class="section" id="correction-of-access-files-for-purely-side-looking-instruments">
+<span id="corr-acc-files"></span><h3>“Correction” of access files for purely side-looking instruments<a class="headerlink" href="#correction-of-access-files-for-purely-side-looking-instruments" title="Permalink to this headline">¶</a></h3>
+<p>In case of purely side-looking instruments (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place when the grid-point
+is seen with no squint angle. The orbit propagation and coverage calculations takes place for a corresponding <em>FOV/sceneFOV</em> for the instrument
+(see <code class="code docutils literal notranslate"><span class="pre">instrupy</span></code> package documentation).
+The generated access files are then <em>corrected</em> to a new format, to show access only at approximately the middle of the access interval. This should be
+coupled with the scene-scan time to get complete information about the access.</p>
+<p>For example, consider a SAR instrument pointing sideways as shown in the figure below. The along-track FOV is narrow
+corresponding to narrow strips, and a scene is built from concatenated strips. A SceneFOV is associated with the SAR and is used for access
+calculation over the grid point shown in the figure. Say the propagation time-step is 1s as shown in the figure. An acccess interval between
+t=100s to t=105s is registered. However as shown the actual access takes place over a small interval of time at t=103.177s.</p>
+<p>An approximation can be applied (i.e. correction is made) that the observaton time of the ground point is at the middle of the access
+interval rounded of to the nearest propgation time as calculated using the SceneFOV, i.e. <span class="math notranslate nohighlight">\(t= 100 + ((105-100)/2) % 1 = 103s\)</span>. The state
+of the spacecraft at <span class="math notranslate nohighlight">\(t=103s\)</span> is utilized for the data-metrics calculation.</p>
+<div class="figure align-center">
+<a class="reference internal image-reference" href="_images/sar_access.png"><img alt="_images/sar_access.png" src="_images/sar_access.png" style="width: 728.25px; height: 332.25px;" /></a>
+</div>
+<p>The correction of the access files is handled by the <code class="xref py py-class docutils literal notranslate"><span class="pre">orbitpy.orbitpropcov</span></code> module which requires as inputs: list of access files (to be revised). The original access files are renamed to <code class="code docutils literal notranslate"><span class="pre">...._old</span></code> and the corrected access files are
+produced with the same name as the original access files at the same location. An additional message is displayed within the file as follows:</p>
+<blockquote>
+<div><p><em>Access listed below corresponds to approximate access instants at the grid-points at a side-look target geometery. The scene scan time should be used along with the below data to get complete access information.</em></p>
+</div></blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>There is a small hiccup when the propagation time step is smaller than the sensor (eg: SAR) dwell time and access is corrected as described above.
+Since the propagation time step is small, the access over the grid point takes place over number of time-steps, while the corrected access
+files show access as taking place at only one time-step. The correction method is to be used when the dwell time is much smaller than the
+propagation time step. The dwell time needed for the calculation of the data-metrics is calculated analytically by the <code class="code docutils literal notranslate"><span class="pre">instrupy</span></code> module.
+It should be OK as long as we are aware.</p>
+</div>
+<div class="section" id="issue-1">
+<h4>Issue #1<a class="headerlink" href="#issue-1" title="Permalink to this headline">¶</a></h4>
+<dl class="simple">
+<dt>Current implementation works well only for:</dt><dd><ol class="arabic simple">
+<li><p>Instruments whose required observation time &lt; propagation step-size (i.e. &lt; 1s).  For scanning type instruments
+(like pushbroom sensors, stripmap SARs) this condition can be waived. But cannot be waived for instruments like Matrix imagers, radiometers
+which require the entire sensor FOV to be focused on the scene.</p></li>
+<li><p>Whose FOV &lt;&lt; FOR.</p></li>
+</ol>
+</dd>
+</dl>
+<p><em>First one is not realistic if the minimum exposure/ dwell time of instruments
+(required in radiometers) is to be considered. Second one is not realistic assumption for
+instruments having a wide-swath.</em></p>
+<p>The access file generated by the orbit and coverage is quite naive. It indicates if the ground-point can be accessed at some instant of time.
+However, what we require are the imaging oppourtunities, where a imaging opportunity is defined as:</p>
+<p><em>Outlier grid-points:</em> The area around the grid-point should be able to be observed, not just the point. Not realistic for instruments with large FOV.</p>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="_images/outlier_grid_points.png"><img alt="_images/outlier_grid_points.png" src="_images/outlier_grid_points.png" style="width: 644.25px; height: 387.0px;" /></a>
+<p class="caption"><span class="caption-text">Issue of the outlier grid-points</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="pointing-options-coverage-calcuations-approach">
+<span id="pnt-opts-cov-calc-app"></span><h2>Pointing Options coverage calcuations approach<a class="headerlink" href="#pointing-options-coverage-calcuations-approach" title="Permalink to this headline">¶</a></h2>
+<p>In this coverage calculation approach, a set of pointing options is supplied in a data-file by the user. The pointing-options
+are defined with respect to the Nadir-frame (see <code class="code docutils literal notranslate"><span class="pre">instrupy</span></code>, <code class="code docutils literal notranslate"><span class="pre">orienation</span></code> JSON object description). The complete set of pointing-options
+represent a discritized field-of-maneuverability. Hence the <code class="code docutils literal notranslate"><span class="pre">manuverability</span></code> JSON object need not be specified within the
+<code class="code docutils literal notranslate"><span class="pre">instrument</span></code> JSON object.</p>
+<p>The generated access file contains the locations corresponding to each pointing-option and each time accessed by the sensor. This location
+is the intersection of the pointing-axis with a spherical Earth model to give geocentric latitudes and longitudes.</p>
+<p>The porpagation time-step determination is identical to the description above in <a class="reference internal" href="#prop-time-step-determination"><span class="std std-ref">Propagation time-step determination</span></a>. However, instead of
+field-of-regard, the field-of-<strong>view</strong> would be used, since the manueverability field is not included. Also, the user may set a higher
+<code class="code docutils literal notranslate"><span class="pre">customTimeResFactor`(from</span> <span class="pre">the</span> <span class="pre">default</span> <span class="pre">0.25)</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">:code:`settings</span></code> JSON object.</p>
+</div>
+<div class="section" id="pointing-options-with-grid-coverage-calcuations-approach">
+<h2>Pointing Options with Grid coverage calcuations approach<a class="headerlink" href="#pointing-options-with-grid-coverage-calcuations-approach" title="Permalink to this headline">¶</a></h2>
+<p>The sensor is oriented to each of the pointing-options specified by the user and the coverage is calculated for taking into account the
+FOV of the sensor.
+Sensor orientation and Manueverability options if specified, are ignored since the pointing options are defined with respect to the Nadir frame.</p>
+</div>
+<div class="section" id="common-issues">
+<h2>Common issues:<a class="headerlink" href="#common-issues" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="issue">
+<h3>Issue<a class="headerlink" href="#issue" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>The area around the ground-point is not the same at each observation, especially for rectangular FOV sensors.</p></li>
+</ul>
+<div class="figure align-center" id="id4">
+<a class="reference internal image-reference" href="_images/different_observation_areas.png"><img alt="_images/different_observation_areas.png" src="_images/different_observation_areas.png" style="width: 444.0px; height: 372.0px;" /></a>
+<p class="caption"><span class="caption-text">Issue of the different observation areas when observation is made with footprint aligned to the ground-track.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tests.html" class="btn btn-neutral float-right" title="Tests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, BAERI
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

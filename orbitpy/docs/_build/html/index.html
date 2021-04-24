@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to OrbitPy’s documentation! &mdash; OrbitPy 0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User JSON Input Description" href="user_json_desc.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home" alt="Documentation Home"> OrbitPy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user_json_desc.html">User JSON Input Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output_desc.html">Output Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="miscellaneous.html">Miscellaneous</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_validation.html">External Validation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">OrbitPy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Welcome to OrbitPy’s documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-orbitpy-s-documentation">
+<h1>Welcome to OrbitPy’s documentation!<a class="headerlink" href="#welcome-to-orbitpy-s-documentation" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="install">
+<h1>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h1>
+<p><em>Requires:</em> Unix-like operating system (currently tested in Ubuntu 18.04.03, MacOS, CentOS-8), <code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">3.8</span></code>, <code class="code docutils literal notranslate"><span class="pre">pip</span></code>, <code class="code docutils literal notranslate"><span class="pre">gcc</span></code>, <code class="code docutils literal notranslate"><span class="pre">gfortran</span></code></p>
+<ol class="arabic simple">
+<li><p>Make sure the <code class="code docutils literal notranslate"><span class="pre">instrupy</span></code> package (dependency) has been installed. It can be installed by running <code class="code docutils literal notranslate"><span class="pre">make</span></code> in the <code class="code docutils literal notranslate"><span class="pre">instruments/instrupy/</span></code> directory.</p></li>
+<li><p>Navigate to the <code class="code docutils literal notranslate"><span class="pre">orbits/oc/</span></code> directory and run <code class="code docutils literal notranslate"><span class="pre">make</span></code>.</p></li>
+<li><p>Navigate to the <code class="code docutils literal notranslate"><span class="pre">orbits/orbitpy/</span></code> directory and run <code class="code docutils literal notranslate"><span class="pre">make</span></code>.</p></li>
+<li><p>Execute <code class="code docutils literal notranslate"><span class="pre">make</span> <span class="pre">runtest</span></code> to run tests and verify <em>OK</em> message.</p></li>
+<li><p>Run an example, by running the following command from the <code class="code docutils literal notranslate"><span class="pre">orbits</span></code> directory: <code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">orbitpy/bin/run_mission.py</span> <span class="pre">orbitpy/examples/example1/</span></code>.
+See the results in the <code class="code docutils literal notranslate"><span class="pre">orbitpy/examples/example1/</span></code> folder. Description of the examples in given in <a class="reference internal" href="examples.html#examples"><span class="std std-ref">Examples</span></a> page.</p></li>
+</ol>
+<p>Find the documentation in: <code class="code docutils literal notranslate"><span class="pre">/orbitpy/docs/_build/html/index.html</span></code></p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="user_json_desc.html">User JSON Input Description</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_json_desc.html#constellation-json-object"><code class="code docutils literal notranslate"><span class="pre">constellation</span></code> JSON object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_json_desc.html#satellite-json-object"><code class="code docutils literal notranslate"><span class="pre">satellite</span></code> JSON object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_json_desc.html#groundstations-json-object"><code class="code docutils literal notranslate"><span class="pre">groundStations</span></code> JSON object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_json_desc.html#grid-json-object"><code class="code docutils literal notranslate"><span class="pre">grid</span></code> JSON object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_json_desc.html#pointingoptions-json-object"><code class="code docutils literal notranslate"><span class="pre">pointingOptions</span></code> JSON object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_json_desc.html#propagator-json-object"><code class="code docutils literal notranslate"><span class="pre">propagator</span></code> JSON object</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output_desc.html">Output Description</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="output_desc.html#satellite-states-data">Satellite States Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output_desc.html#access-data">Access Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output_desc.html#intersatellite-contact-data">Intersatellite Contact Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output_desc.html#ground-stations-contact-data">Ground Stations Contact Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output_desc.html#observation-data-metrics">Observation Data Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output_desc.html#coverage-grid-data">Coverage Grid Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_reference.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.html"><code class="docutils literal notranslate"><span class="pre">orbitpy</span></code> — Package overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.preprocess.html"><code class="docutils literal notranslate"><span class="pre">orbit.preprocess</span></code> — Preprocess User Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.orbitpropcov.html"><code class="docutils literal notranslate"><span class="pre">orbitpy.orbitpropcov</span></code> — Orbit Propagation and Coverage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.communications.html"><code class="docutils literal notranslate"><span class="pre">orbit.communications</span></code> — Communications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.obsdatametrics.html"><code class="docutils literal notranslate"><span class="pre">orbitpy.obsdatametrics</span></code> — Observation Data Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="orbitpy.util.html"><code class="docutils literal notranslate"><span class="pre">orbitpy.util</span></code> — Utility functions, classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-1">Example 1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-2">Example 2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-3">Example 3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-4">Example 4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-5">Example 5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-6">Example 6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-7">Example 7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#example-8">Example 8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#running-your-own-case">Running your own case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="miscellaneous.html">Miscellaneous</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="miscellaneous.html#grid-points-coverage-calcuations-approach">Grid-points coverage calcuations approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="miscellaneous.html#pointing-options-coverage-calcuations-approach">Pointing Options coverage calcuations approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="miscellaneous.html#pointing-options-with-grid-coverage-calcuations-approach">Pointing Options with Grid coverage calcuations approach</a></li>
+<li class="toctree-l2"><a class="reference internal" href="miscellaneous.html#common-issues">Common issues:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#how-to">How to</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#testing-strategies">Testing strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#test-modules">Test Modules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="external_validation.html">External Validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="external_validation.html#about">About</a></li>
+<li class="toctree-l2"><a class="reference internal" href="external_validation.html#gmat-tests">GMAT Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="external_validation.html#stk-tests">STK Tests</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="description">
+<h1>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h1>
+<p>This package contain set of modules to compute orbit data of satellites. It performs the following functions:</p>
+<ol class="arabic simple">
+<li><p>Computation of satellite state (position and velocity) data.</p></li>
+<li><p>Generation of grid-of-points at a (user-defined or auto) angular resolution.</p></li>
+<li><p>Computation of Field Of Regard (FOR) based on the manueverability and sensor specifications, mounting.</p></li>
+<li><p>Computation of satellite access intervals over given set of grid points for the length of the mission.</p></li>
+<li><p>Computation of inter-satellite communication time intervals.</p></li>
+<li><p>Computation of ground-station contact time intervals.</p></li>
+</ol>
+<p>With respect to integration in DSHIELD, the outputs/ functions of the package are used by other modules
+of DSHIELD as follows:</p>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">Integration to other modules</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Data output</p></th>
+<th class="head"><p>the other module</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Satellite States, Grid Points</p></td>
+<td><p>ACS module</p></td>
+</tr>
+<tr class="row-odd"><td><p>Intersatellite comms</p></td>
+<td><p>Comm Module</p></td>
+</tr>
+<tr class="row-even"><td><p>Ground-station comms</p></td>
+<td><p>Ground module</p></td>
+</tr>
+<tr class="row-odd"><td><p>Access Opps with Observation quality</p></td>
+<td><p>Planner</p></td>
+</tr>
+</tbody>
+</table>
+<p>The input to the first three items is straightforward and can be used directly from the current implementation. The last item
+however has issues. The raw access outputs are naive, and need to be filtered, post-processed to imaging opportunities (<strong>raw access vs imaging opps</strong>).</p>
+<div class="section" id="issue-1">
+<h2>Issue #1<a class="headerlink" href="#issue-1" title="Permalink to this headline">¶</a></h2>
+<p>Consider a 5 second mission, the desired output from the Orbits to the Planner would be as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Time, <span class="o">(</span>Grid-points, Observation Quality<span class="o">)</span>
+<span class="m">1</span>,    <span class="o">(</span><span class="m">10</span>,2<span class="o">)</span> <span class="o">(</span><span class="m">45</span>,1<span class="o">)</span> <span class="o">(</span><span class="m">100</span>,1<span class="o">)</span> <span class="o">(</span><span class="m">210</span>,4<span class="o">)</span>
+<span class="m">2</span>,    <span class="o">(</span><span class="m">10</span>,3<span class="o">)</span> <span class="o">(</span><span class="m">45</span>,2<span class="o">)</span> <span class="o">(</span><span class="m">100</span>,2<span class="o">)</span> <span class="o">(</span><span class="m">210</span>,3<span class="o">)</span>
+<span class="m">3</span>,    <span class="o">(</span><span class="m">10</span>,4<span class="o">)</span> <span class="o">(</span><span class="m">45</span>,3<span class="o">)</span> <span class="o">(</span><span class="m">100</span>,3<span class="o">)</span> <span class="o">(</span><span class="m">210</span>,2<span class="o">)</span>
+<span class="m">4</span>,    <span class="o">(</span><span class="m">10</span>,3<span class="o">)</span>        <span class="o">(</span><span class="m">100</span>,4<span class="o">)</span> <span class="o">(</span><span class="m">210</span>,1<span class="o">)</span>
+<span class="m">5</span>,    <span class="o">(</span><span class="m">10</span>,1<span class="o">)</span>        <span class="o">(</span><span class="m">100</span>,5<span class="o">)</span>
+</pre></div>
+</div>
+<p>Where a observation is defined as taking an image/ reading around the respective ground-point:</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="_images/valid_vs_invalid_obs.png"><img alt="_images/valid_vs_invalid_obs.png" src="_images/valid_vs_invalid_obs.png" style="width: 533.25px; height: 153.0px;" /></a>
+<p class="caption"><span class="caption-text">Valid vs Invalid observations</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+<p>In order to deal with the above issue, the observation is deemed to be made with the pointing axis pointed to the GP
+(and hence the missle of the observation). While this flows naturally when calculating coverage from pointing-options,
+it is not natural for the case of coverage calculated from grid-points. See <a class="reference internal" href="miscellaneous.html#corr-acc-files"><span class="std std-ref">“Correction” of access files for purely side-looking instruments</span></a>.</p>
+</div>
+<div class="section" id="issue-2">
+<h2>Issue #2<a class="headerlink" href="#issue-2" title="Permalink to this headline">¶</a></h2>
+<p>A similar issue exists in the time domain:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Time,Access,Imaging Opp
+<span class="m">98</span>,No, No
+<span class="m">99</span>,No, No
+<span class="m">100</span>,Yes, No
+<span class="m">101</span>,Yes, No
+<span class="m">102</span>,Yes, No
+<span class="m">103</span>,Yes, Yes iff <span class="nv">t</span><span class="o">=</span> <span class="m">104</span>, are free
+<span class="m">104</span>,Yes, Yes iff <span class="nv">t</span><span class="o">=</span> <span class="m">103</span>, <span class="m">105</span> are free
+<span class="m">105</span>,Yes, Yes iff <span class="nv">t</span><span class="o">=</span><span class="m">103</span>, <span class="m">104</span>, <span class="m">106</span> are free
+.,.,,
+.,.,,
+.,.,,
+.,.,,
+<span class="m">115</span>, Yes,No
+<span class="m">116</span>, No,No
+</pre></div>
+</div>
+<div class="figure align-center" id="id3">
+<a class="reference internal image-reference" href="_images/outlier_times.png"><img alt="_images/outlier_times.png" src="_images/outlier_times.png" style="width: 564.0px; height: 375.75px;" /></a>
+<p class="caption"><span class="caption-text">Valid vs Invalid obs times</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>To deal with the above issue, a constraint condition such as that shown in the table is implicit in the provided imaging oppurtunities
+table.</p>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="questions">
+<h1>Questions?<a class="headerlink" href="#questions" title="Permalink to this headline">¶</a></h1>
+<p>Please contact Vinay (<a class="reference external" href="mailto:vinay&#46;ravindra&#37;&#52;&#48;nasa&#46;gov">vinay<span>&#46;</span>ravindra<span>&#64;</span>nasa<span>&#46;</span>gov</a>)</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="user_json_desc.html" class="btn btn-neutral float-right" title="User JSON Input Description" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, BAERI
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
