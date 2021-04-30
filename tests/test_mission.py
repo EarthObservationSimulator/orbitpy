@@ -203,24 +203,12 @@ class TestMission(unittest.TestCase):
                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
                                                   "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
                                                 }, \
-                                   "instrument": { "@type": "Synthetic Aperture Radar", \
-                                                    "@id": "sar1", \
-                                                    "orientation": { \
-                                                        "convention": "SIDE_LOOK", \
-                                                        "sideLookAngle": 20.5 \
-                                                    }, \
+                                   "instrument": { "@type": "Synthetic Aperture Radar", "@id": "sar1", \
+                                                    "orientation": { "convention": "SIDE_LOOK", "sideLookAngle": 20.5 }, \
                                                     "sceneFieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":6.233630110575892}, \
-                                                    "pulseWidth": 33.4e-6, \
-                                                    "antennaHeight": 10.7, \
-                                                    "antennaWidth": 2.16, \
-                                                    "antennaApertureEfficiency": 0.6, \
-                                                    "operatingFrequency": 1.2757e9, \
-                                                    "peakTransmitPower": 1000, \
-                                                    "chirpBandwidth": 19e6, \
-                                                    "minimumPRF": 1463, \
-                                                    "maximumPRF": 1686, \
-                                                    "radarLoss": 3.5, \
-                                                    "systemNoiseFigure": 5.11, \
+                                                    "pulseWidth": 33.4e-6, "antennaHeight": 10.7, "antennaWidth": 2.16, "antennaApertureEfficiency": 0.6, \
+                                                    "operatingFrequency": 1.2757e9, "peakTransmitPower": 1000, "chirpBandwidth": 19e6, \
+                                                    "minimumPRF": 1463, "maximumPRF": 1686, "radarLoss": 3.5, "systemNoiseFigure": 5.11, \
                                                     "pointingOption":[{"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":-20.5}, \
                                                                     {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":20.5}] \
                                                     } \
@@ -236,7 +224,6 @@ class TestMission(unittest.TestCase):
         self.assertEqual(mission.grid[1].num_points, 43234)
 
         out_info = mission.execute()
-    '''
 
     def test_scenario_5(self):
         """    1 satellite, multiple ground-stations ; propagation, contact-finder (ground-station only).
@@ -284,8 +271,7 @@ class TestMission(unittest.TestCase):
                                 "settings": {"outDir": "tests/temp/"} \
                             }'
         mission = Mission.from_json(mission_json_str)
-        self.assertEqual(len(mission.spacecraft), 8)
-        
+        self.assertEqual(len(mission.spacecraft), 8)        
 
         out_info = mission.execute()
 
@@ -393,23 +379,92 @@ class TestMission(unittest.TestCase):
         self.assertAlmostEqual(state_sat7_row0['raan [deg]'][0]%360, 0)
         self.assertAlmostEqual(state_sat7_row0['aop [deg]'][0], 135.0)
         self.assertAlmostEqual(state_sat7_row0['ta [deg]'][0]%360, 315)
-
+    '''
     def test_scenario_7(self):
-        """ Multiple satellites from list, multiple instruments per satellite, multiple ground-stations ; propagation, grid-coverage, data-metrics calculation, contact-finder (ground-station and inter-satellite).
+        """ Multiple satellites from list, multiple instruments per satellite ; propagation, grid-coverage, data-metrics calculation, contact-finder (inter-satellite).
+
+            Spacecraft #1 : No instruments.
+            Spacecraft #2 : 1 instrument (Basic Sensor).
+            Spacecraft #3 : 2 instruments (Passive Optical Scanner, SAR)
 
         """
         mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
-                                "duration": 0.5, \
-                                "spacecraft": [{ \
-                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                               "duration": 0.1, \
+                               "spacecraft": [{ \
+                                  "@id": "spc1", \
+                                  "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                  }, \
+                                  "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                 "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                               } \
+                                   }, \
+                                   { \
+                                    "@id": "spc2", \
+                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
-                                                } \
+                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -35} \
+                                                }, \
+                                    "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
+                                                   "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight":15, "angleWidth":10 }, \
+                                                   "@id":"bs", "@type":"Basic Sensor" } \
+                                    }, \
+                                    { \
+                                    "@id": "spc3", \
+                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                                   }, \
+                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -145} \
+                                                }, \
+                                    "instrument": [{"@type": "Passive Optical Scanner", "@id": "opt1",\
+                                                    "fieldOfViewGeometry": { "shape": "RECTanGULAR", "angleHeight": 0.628, "angleWidth": 115.8 }, \
+                                                    "sceneFieldOfViewGeometry": { "shape": "RECTanGULAR", "angleHeight": 5, "angleWidth": 115.8 }, \
+                                                    "scanTechnique": "WhiskBROOM", \
+                                                    "orientation": { "referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_loOK", "sideLookAngle": 0 }, \
+                                                    "numberDetectorRows": 256, "numberDetectorCols": 1, \
+                                                    "detectorWidth": 30e-6, "focalLength": 0.7, "operatingWavelength": 4.2e-6, "bandwidth": 1.9e-6, \
+                                                    "quantumEff": 0.5, "targetBlackBodyTemp": 290, "bitsPerPixel": 8, "opticsSysEff": 0.75, \
+                                                    "numOfReadOutE": 25, "apertureDia": 0.26, "Fnum": 2.7, "atmosLossModel": "LOWTRAN7" \
+                                                   }, \
+                                                   {"@type": "Synthetic Aperture Radar", "@id": "sar1", \
+                                                    "orientation": { "convention": "SIDE_LOOK", "sideLookAngle": 20.5 }, \
+                                                    "sceneFieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":6.233630110575892}, \
+                                                    "pulseWidth": 33.4e-6, "antennaHeight": 10.7, "antennaWidth": 2.16, "antennaApertureEfficiency": 0.6, \
+                                                    "operatingFrequency": 1.2757e9, "peakTransmitPower": 1000, "chirpBandwidth": 19e6, \
+                                                    "minimumPRF": 1463, "maximumPRF": 1686, "radarLoss": 3.5, "systemNoiseFigure": 5.11 \
+                                                    }] \
                                     }], \
-                                "groundStation":[{"name": "TrollSAR", "latitude": -72.0029, "longitude": 2.5257, "altitude":0}, \
-                                                 {"name": "CONAE", "latitude": -31.52, "longitude": -64.46, "altitude":0}], \
+                                "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180, "gridRes": 1}], \
+                                "settings": {"outDir": "tests/temp/", "coverageType": "Grid COverage"} \
+                            }'
+
+        mission = Mission.from_json(mission_json_str)
+        self.assertEqual(len(mission.spacecraft), 3)        
+
+        out_info = mission.execute()
+    
+    '''
+    def test_scenario_x(self):
+        """ Hydrology paper """
+        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":27, "hour":18, "minute":43, "second":5}, \
+                                "duration": 3, \
+                                "constellation": { "@type": "Walker Delta Constellation", \
+                                        "date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":27, "hour":18, "minute":43, "second":5}, \
+                                        "numberSatellites": 8, \
+                                        "numberPlanes": 1, \
+                                        "relativeSpacing": 1, \
+                                        "alt": 705, \
+                                        "ecc": 0.0001, \
+                                        "inc": 98.2, \
+                                        "aop": 302.6503 \
+                                    }, \
+                                "groundStation":{"name": "AtMetro", "latitude": 33, "longitude": -98, "altitude":0, "minimumElevation":35}, \
+                                "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 4}, \
                                 "settings": {"outDir": "tests/temp/"} \
                             }'
+        mission = Mission.from_json(mission_json_str)
+        out_info = mission.execute()
+    '''
+
 
         

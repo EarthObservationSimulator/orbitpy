@@ -34,20 +34,35 @@ class TestContactFinder(unittest.TestCase):
         cls.spcA = Spacecraft.from_dict({"name":"sentinel1A", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
                                                          "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
                                          }})
-        cls.state_cart_file_sentinel1A = cls.out_dir + '/test_cov_cart_states_sentinel1A.csv'
+        cls.state_cart_file_sentinel1A = cls.out_dir + '/cart_states_sentinel1A.csv'
         j2_prop.execute(spacecraft=cls.spcA, out_file_cart=cls.state_cart_file_sentinel1A, duration=cls.duration)
 
         # sentinel1B
         cls.spcB = Spacecraft.from_dict({"name":"sentinel1B", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":12, "minute":38, "second":58}, \
                                                          "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1816, "raan": 38.1151, "aop": 84.837, "ta": 275.3} \
                                          }})
-        cls.state_cart_file_sentinel1B = cls.out_dir + '/test_cov_cart_states_sentinel1B.csv'
+        cls.state_cart_file_sentinel1B = cls.out_dir + '/cart_states_sentinel1B.csv'
         j2_prop.execute(spacecraft=cls.spcB, out_file_cart=cls.state_cart_file_sentinel1B, duration=cls.duration)
+
+        # Test satellite close to sentinel1A
+        cls.spcC = Spacecraft.from_dict({"name":"testSat", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
+                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 250} \
+                                         }})
+        cls.state_cart_file_spcC = cls.out_dir + '/cart_states_spcC.csv'
+        j2_prop.execute(spacecraft=cls.spcC, out_file_cart=cls.state_cart_file_spcC, duration=cls.duration)
+        
+        # Another test satellite, 90 deg RAAN offset from spcC
+        cls.spcD = Spacecraft.from_dict({"name":"testSat", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
+                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 90+38.3243, "aop": 86.2045, "ta": 250} \
+                                         }})
+        cls.state_cart_file_spcD = cls.out_dir + '/cart_states_spcD.csv'
+        j2_prop.execute(spacecraft=cls.spcD, out_file_cart=cls.state_cart_file_spcD, duration=cls.duration)
 
         # Ground stations
         cls.gs1 = GroundStation.from_dict({"@id":1231, "name": "gs1", "latitude": 85, "longitude": -45 }) # by default "minimumElevation":7
         cls.gs2 = GroundStation.from_dict({"@id":833, "name": "gs2", "latitude": -88, "longitude": 25, "minimumElevation":12 })
 
+    '''
     def test_execute_data_format(self):
 
         ########### entityA = Spacecraft, entityB = GroundStation, INTERVAL out_type, default output filename ###########
@@ -114,13 +129,12 @@ class TestContactFinder(unittest.TestCase):
         self.assertAlmostEqual((data["time index"].iloc[-1] + 1)*_step_size, self.duration*86400, delta=self.step_size) # almost equal, probably due to errors introduced by floating-point arithmetic
 
         ########### entityA = Spacecraft, entityB = Spacecraft. output filename specified ###########
-        """
-        ContactFinder.execute(self.spcA, self.spcB, self.out_dir, self.state_cart_file_sentinel1A, self.state_cart_file_sentinel1B, 'spcA_to_spcB.csv', 'DETAIL', 10)
-        out_file = self.out_dir + "/spcA_to_spcB.csv"
+        ContactFinder.execute(self.spcA, self.spcC, self.out_dir, self.state_cart_file_sentinel1A, self.state_cart_file_spcC, 'spcA_to_spcC.csv', ContactFinder.OutType.DETAIL, 10)
+        out_file = self.out_dir + "/spcA_to_spcC.csv"
 
         first_line = pd.read_csv(out_file, nrows=1, header=None).astype(str) # 1st row contains the entity ids
         self.assertEqual(str(first_line[0][0]).split(' ')[5], str(self.spcA._id)) # the ids are converted to string (if not already a string) and compared
-        self.assertEqual(str(first_line[0][0]).split(' ')[10], str(self.spcB._id))
+        self.assertEqual(str(first_line[0][0]).split(' ')[10], str(self.spcC._id))
 
         epoch_JDUT1 = pd.read_csv(out_file, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
@@ -134,11 +148,10 @@ class TestContactFinder(unittest.TestCase):
         self.assertEqual(list(data.columns)[0], 'time index')
         self.assertEqual(list(data.columns)[1], 'access')
         self.assertEqual(list(data.columns)[2], 'range [km]')
-        """
+        
         ########### entityA = GroundStation, entityB = GroundStation, should raise Error ###########
         with self.assertRaises(Exception):
-            ContactFinder.execute(self.gs1, self.gs2, self.out_dir, None, None, None, 'INTERVAL', 0)
-
+            ContactFinder.execute(self.gs1, self.gs2, self.out_dir, None, None, None, ContactFinder.OutType.INTERVAL, 0)
 
     def test_execute_ground_stn_contact_Sentinel1A_gs1(self):
         """ Test against GMAT truth data. This validates both the propgation of the satellite and the 
@@ -301,7 +314,115 @@ class TestContactFinder(unittest.TestCase):
 
         self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 11,11,31)-epoch).total_seconds(), data['start index'][13], delta=160) 
         self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 11,18,25)-epoch).total_seconds(), data['end index'][13], delta=163)
+    '''
+    def test_execute_intersat_contact_precomputed(self):
+        """ Test against precomputed data.
+        """
+        ############### check the spcA to spcC contacts ###############        
+        ContactFinder.execute(self.spcA, self.spcC, self.out_dir, self.state_cart_file_sentinel1A, self.state_cart_file_spcC, 'spcA_to_spcC.csv', ContactFinder.OutType.INTERVAL, 10)
+        out_file = self.out_dir + "/spcA_to_spcC.csv"   
 
+        first_line = pd.read_csv(out_file, nrows=1, header=None).astype(str) # 1st row contains the entity ids
+        self.assertEqual(str(first_line[0][0]).split(' ')[5], str(self.spcA._id)) # the ids are converted to string (if not already a string) and compared
+        self.assertEqual(str(first_line[0][0]).split(' ')[10], str(self.spcC._id))
 
-    def test_find_all_pairs(self):
+        epoch_JDUT1 = pd.read_csv(out_file, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
+        epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
+        self.assertAlmostEqual(epoch_JDUT1, 2459243.0618287036)
+
+        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        _step_size = float(_step_size[0][0].split()[4])
+        self.assertAlmostEqual(_step_size, 1)
+
+        data = pd.read_csv(out_file, skiprows = [0,1,2]) # 5th row header, 6th row onwards contains the data
+        self.assertEqual(list(data.columns)[0], 'start index')
+        self.assertEqual(list(data.columns)[1], 'end index')
+
+        # contact throughout the mission
+        self.assertEqual(len(data.index), 1)
+        self.assertEqual(data['start index'][0], 0)
+        self.assertEqual(data['end index'][0], 86400)
+
+        ############### check the spcC to spcD contacts ###############
+        ContactFinder.execute(self.spcC, self.spcD, self.out_dir, self.state_cart_file_spcC, self.state_cart_file_spcD, 'spcC_to_spcD.csv', ContactFinder.OutType.INTERVAL, 10)
+        out_file = self.out_dir + "/spcC_to_spcD.csv"
+
+        first_line = pd.read_csv(out_file, nrows=1, header=None).astype(str) # 1st row contains the entity ids
+        self.assertEqual(str(first_line[0][0]).split(' ')[5], str(self.spcC._id)) # the ids are converted to string (if not already a string) and compared
+        self.assertEqual(str(first_line[0][0]).split(' ')[10], str(self.spcD._id))
+
+        epoch_JDUT1 = pd.read_csv(out_file, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
+        epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
+        self.assertAlmostEqual(epoch_JDUT1, 2459243.0618287036)
+
+        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        _step_size = float(_step_size[0][0].split()[4])
+        self.assertAlmostEqual(_step_size, 1)
+
+        data = pd.read_csv(out_file, skiprows = [0,1,2]) # 5th row header, 6th row onwards contains the data
+        self.assertEqual(list(data.columns)[0], 'start index')
+        self.assertEqual(list(data.columns)[1], 'end index')
+
+        # contact throughout the mission
+        self.assertEqual(len(data.index), 29)
+        self.assertEqual(data['start index'][0], 1272)
+        self.assertEqual(data['end index'][0], 2477)
+        self.assertEqual(data['start index'][1], 4235)
+        self.assertEqual(data['end index'][1], 5442)
+        self.assertEqual(data['start index'][2], 7200)
+        self.assertEqual(data['end index'][2], 8405)
+        self.assertEqual(data['start index'][3], 10163)
+        self.assertEqual(data['end index'][3], 11370)
+        self.assertEqual(data['start index'][4], 13128)
+        self.assertEqual(data['end index'][4], 14333)
+        self.assertEqual(data['start index'][5], 16091)
+        self.assertEqual(data['end index'][5], 17299)
+        self.assertEqual(data['start index'][6], 19056)
+        self.assertEqual(data['end index'][6], 20262)
+        self.assertEqual(data['start index'][7], 22020)
+        self.assertEqual(data['end index'][7], 23227)
+        self.assertEqual(data['start index'][8], 24985)
+        self.assertEqual(data['end index'][8], 26190)
+        self.assertEqual(data['start index'][9], 27948)
+        self.assertEqual(data['end index'][9], 29155)
+        self.assertEqual(data['start index'][10], 30913)
+        self.assertEqual(data['end index'][10], 32118)
+        self.assertEqual(data['start index'][11], 33876)
+        self.assertEqual(data['end index'][11], 35083)
+        self.assertEqual(data['start index'][12], 36841)
+        self.assertEqual(data['end index'][12], 38047)
+        self.assertEqual(data['start index'][13], 39804)
+        self.assertEqual(data['end index'][13], 41012)
+        self.assertEqual(data['start index'][14], 42770)
+        self.assertEqual(data['end index'][14], 43975)
+        self.assertEqual(data['start index'][15], 45733)
+        self.assertEqual(data['end index'][15], 46940)
+        self.assertEqual(data['start index'][16], 48698)
+        self.assertEqual(data['end index'][16], 49903)
+        self.assertEqual(data['start index'][17], 51661)
+        self.assertEqual(data['end index'][17], 52868)
+        self.assertEqual(data['start index'][18], 54626)
+        self.assertEqual(data['end index'][18], 55831)
+        self.assertEqual(data['start index'][19], 57589)
+        self.assertEqual(data['end index'][19], 58797)
+        self.assertEqual(data['start index'][20], 60554)
+        self.assertEqual(data['end index'][20], 61760)
+        self.assertEqual(data['start index'][21], 63518)
+        self.assertEqual(data['end index'][21], 64725)
+        self.assertEqual(data['start index'][22], 66483)
+        self.assertEqual(data['end index'][22], 67688)
+        self.assertEqual(data['start index'][23], 69446)
+        self.assertEqual(data['end index'][23], 70653)
+        self.assertEqual(data['start index'][24], 72411)
+        self.assertEqual(data['end index'][24], 73616)
+        self.assertEqual(data['start index'][25], 75374)
+        self.assertEqual(data['end index'][25], 76581)
+        self.assertEqual(data['start index'][26], 78339)
+        self.assertEqual(data['end index'][26], 79545)
+        self.assertEqual(data['start index'][27], 81302)
+        self.assertEqual(data['end index'][27], 82510)
+        self.assertEqual(data['start index'][28], 84268)
+        self.assertEqual(data['end index'][28], 85473)
+
+    def test_find_all_pairs(self): #TODO
         pass

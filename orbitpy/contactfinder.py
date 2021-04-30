@@ -221,10 +221,10 @@ class ContactFinder(Entity):
             if out_type == ContactFinder.OutType.DETAIL:
                 AB_km = B_pos - A_pos # TODO repeated calc sometimes, make it more efficient.
                 r_AB_km = np.sqrt(np.dot(AB_km, AB_km))
-                range_log[idx] = r_AB_km
+                range_log[idx] = round(r_AB_km, 2)
 
                 if isinstance(entityB, GroundStation):                    
-                    elv_log[idx] = np.rad2deg(elv_angle) if elv_angle else None
+                    elv_log[idx] = round(np.rad2deg(elv_angle), 2) if elv_angle else None
 
         if out_type == ContactFinder.OutType.DETAIL:
             # Write DETAIL output file

@@ -181,7 +181,7 @@ Within the :code:`stationInfo` JSOn field, a *list* of ground-stations can be sp
    lat, float, degrees, Latitude
    lon,float, degrees, Longitude
    alt,float, km, (Optional) Altitude. Default is 0km.
-   minElevation, float, degrees, Minimum elevation beyond which the ground-station cane see the satellite.
+   minimumElevation, float, degrees, Minimum elevation beyond which the ground-station cane see the satellite.
 
 .. code-block:: javascript
    
@@ -189,17 +189,17 @@ Within the :code:`stationInfo` JSOn field, a *list* of ground-stations can be sp
         "stationInfo":[
             { "@id": "gs1",
               "name": "Tacos",
-              "lat": 1,
-              "lon": 1.5,
-              "alt": 0,
-              "minElevation": 7
+              "latitude": 1,
+              "longitude": 1.5,
+              "altitude": 0,
+              "minimumElevation": 7
             },
             { "@id": "gs2",
                 "name": "Hilly",
-                "lat": 89,
-                "lon": -10,
-                "alt": 20,
-                "minElevation": 7
+                "latitude": 89,
+                "longitude": -10,
+                "altitude": 20,
+                "minimumElevation": 7
             }
         ]
     }

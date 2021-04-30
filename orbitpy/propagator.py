@@ -266,14 +266,14 @@ class J2AnalyticalPropagator(Entity):
 
         spc = propcov.Spacecraft(spacecraft.orbitState.date, spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3) # TODO: initialization to the correct orientation of spacecraft is not necessary, so ignored for time-being.
         
-        # following snippet is required, because any copy, changes to the input start_date is relfected outside the function. (Similar to pass by reference in C++.)
-        _start_date = propcov.AbsoluteDate()
-        _start_date.SetJulianDate(start_date.GetJulianDate())
-        start_date, _start_date = _start_date, start_date # swap
-
         if(start_date is None):
             # following code sequence is required to make an *independent/8 copy of the spacecraft.orbitState.date object. 
             start_date = spacecraft.orbitState.date
+
+        # following snippet is required, because any copy, changes to the input start_date is reflected outside the function. (Similar to pass by reference in C++.)
+        _start_date = propcov.AbsoluteDate()
+        _start_date.SetJulianDate(start_date.GetJulianDate())
+        start_date, _start_date = _start_date, start_date # swap        
 
         # form the propcov.Propagator object
         prop = propcov.Propagator(spc)
