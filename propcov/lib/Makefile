@@ -1,5 +1,5 @@
 # Define macros for locations
-SUBS = propcov-cpp
+SUBS = propcov-cpp propcov-cpp/polygon
 
 all install clean bare runtest:
 	-X=`pwd`; \

@@ -1,0 +1,57 @@
+----------------------------------------------------------
+Class Definitions for Point in Spherical Polygon Algorithm
+----------------------------------------------------------
+
+-------
+Polygon
+-------
+
+The Polygon class is a pure virtual class which defines the interface for spherical polygons. This 
+interface requires all child classes to implement a function which takes query point coordinates as
+input and returns an integer value representing point inclusion status in the polygon. The Polygon
+file also includes a util namespace defining some useful function used across the program (spherical
+/cartesian coordinate conversion, file i.o., etc.). 
+
+------------
+Preprocessor
+------------
+
+The preprocessor class is a pure virtual class which defines the interface for preprocessing algorithms.
+This interface requires all child classes to implement a method which returns a list of indices representing
+a subset of edges to be examined as a function of the query point coordinates.
+
+-------------
+SlicedPolygon
+-------------
+
+A child class of Polygon which implements the proposed point in spherical polygon algorithm. The 
+algorithm can be run with or without preprocessing. To run with preprocessing, a Preprocessor object
+must be added using the addPreprocessor method. 
+
+----
+Edge
+----
+
+A utility class to simplify representation of polygon edges across the program. The edge class is
+constructed with two coordinate points, and implements useful functions such as checking whether a 
+given query point meets necessary strike or the hemisphere check with respect to the edge.
+
+----------
+SliceArray
+----------
+The proposed preprocessing algorithm described in the paper. The class is constructted using an 
+array of vertex longitudes in the query frame. The preprocess() method is used to run the preprocessing
+routine after construction. The getEdges takes method takes the coordinates of a query point as input and 
+returns the subset of edges classified in the leaf slice containing the query point.
+
+---------
+SliceTree
+---------
+This class implements the old version of the preprocessing algorithm using the recursive spacial 
+subdivision technique.
+
+--------------
+PointInPolygon
+--------------
+Utility class for running the algorithm from the command line and generating point inclusion and 
+runtime report output files.

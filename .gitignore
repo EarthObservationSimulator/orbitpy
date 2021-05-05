@@ -2,6 +2,7 @@
 
 
 # objects, executables, core dumps
+*.DS_Store
 *.o
 *.exe
 core
