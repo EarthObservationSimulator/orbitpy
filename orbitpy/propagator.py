@@ -264,7 +264,13 @@ class J2AnalyticalPropagator(Entity):
         attitude = propcov.NadirPointingAttitude()
         interp = propcov.LagrangeInterpolator()
 
-        spc = propcov.Spacecraft(spacecraft.orbitState.date, spacecraft.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3) # TODO: initialization to the correct orientation of spacecraft is not necessary, so ignored for time-being.
+        # following snippet is required, because any copy, changes to the propcov objects in the input spacecraft is reflected outside the function.
+        spc_date = propcov.AbsoluteDate()
+        spc_date.SetJulianDate(spacecraft.orbitState.date.GetJulianDate())
+        spc_orbitstate = propcov.OrbitState()
+        spc_orbitstate.SetCartesianState(spacecraft.orbitState.state.GetCartesianState())
+        
+        spc = propcov.Spacecraft(spc_date, spc_orbitstate, attitude, interp, 0, 0, 0, 1, 2, 3) # TODO: initialization to the correct orientation of spacecraft is not necessary, so ignored for time-being.
         
         if(start_date is None):
             # following code sequence is required to make an *independent/8 copy of the spacecraft.orbitState.date object. 
@@ -273,7 +279,6 @@ class J2AnalyticalPropagator(Entity):
         # following snippet is required, because any copy, changes to the input start_date is reflected outside the function. (Similar to pass by reference in C++.)
         _start_date = propcov.AbsoluteDate()
         _start_date.SetJulianDate(start_date.GetJulianDate())
-        start_date, _start_date = _start_date, start_date # swap        
 
         # form the propcov.Propagator object
         prop = propcov.Propagator(spc)
@@ -283,7 +288,7 @@ class J2AnalyticalPropagator(Entity):
             cart_file = open(out_file_cart, 'w', newline='')
             cart_writer = csv.writer(cart_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             cart_writer.writerow(["Satellite states are in CARTESIAN_EARTH_CENTERED_INERTIAL (equatorial-plane) frame."])
-            cart_writer.writerow(["Epoch [JDUT1] is {}".format(start_date.GetJulianDate())])
+            cart_writer.writerow(["Epoch [JDUT1] is {}".format(_start_date.GetJulianDate())])
             cart_writer.writerow(["Step size [s] is {}".format(self.stepSize)])
             cart_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             cart_writer.writerow(['time index','x [km]','y [km]','z [km]','vx [km/s]','vy [km/s]','vz [km/s]'])
@@ -292,15 +297,15 @@ class J2AnalyticalPropagator(Entity):
             kep_file = open(out_file_kep, 'w', newline='')
             kep_writer = csv.writer(kep_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             kep_writer.writerow(["Satellite states as KEPLERIAN_EARTH_CENTERED_INERTIAL elements."])
-            kep_writer.writerow(["Epoch [JDUT1] is {}".format(start_date.GetJulianDate())])
+            kep_writer.writerow(["Epoch [JDUT1] is {}".format(_start_date.GetJulianDate())])
             kep_writer.writerow(["Step size [s] is {}".format(self.stepSize)])
             kep_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             kep_writer.writerow(['time index','sma [km]','ecc','inc [deg]','raan [deg]','aop [deg]','ta [deg]'])
 
         # propagate to the specified start date since the date at which the orbit-state is defined
         # could be different from the specified start_date (propagation could be either forwards or backwards)
-        prop.Propagate(start_date)
-        date = start_date
+        prop.Propagate(_start_date)
+        date = _start_date
         # Propagate at time-resolution = stepSize. Store the orbit-state at each time-step.
         number_of_time_steps = int(duration*86400/ self.stepSize)
         for idx in range(0,number_of_time_steps+1):            
@@ -325,7 +330,7 @@ class J2AnalyticalPropagator(Entity):
                                                'spacecraftId': spacecraft._id,
                                                'stateCartFile': out_file_cart,
                                                'stateKeplerianFile': out_file_kep,
-                                               'startDate': start_date.GetJulianDate(),
+                                               'startDate': _start_date.GetJulianDate(),
                                                'duration': duration})
 
 class PropagatorOutputInfo(Entity):
