@@ -330,7 +330,7 @@ class J2AnalyticalPropagator(Entity):
                                                'spacecraftId': spacecraft._id,
                                                'stateCartFile': out_file_cart,
                                                'stateKeplerianFile': out_file_kep,
-                                               'startDate': _start_date.GetJulianDate(),
+                                               'startDate': start_date.GetJulianDate(),
                                                'duration': duration})
 
 class PropagatorOutputInfo(Entity):

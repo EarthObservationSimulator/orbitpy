@@ -68,7 +68,6 @@ class TestPropagatorModuleFunction(unittest.TestCase):
         sats2 = [Spacecraft(orbitState=orbit1, instrument=[instru5])]
         self.assertAlmostEqual(orbitpy.propagator.compute_time_step(sats1, 0.25), orbitpy.propagator.compute_time_step(sats2, 0.25))  # horizon angle = 136.03734762889385
 
-'''
 class TestPropagatorFactory(unittest.TestCase):
   
     class DummyNewPropagator:
@@ -147,6 +146,7 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         out_info = self.j2_prop.execute(self.spacecraft, None, self.out_file_cart, self.out_file_kep, self.duration)
 
         # test the output info object
+        
         self.assertEqual(out_info, PropagatorOutputInfo.from_dict({'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
                                                               'spacecraftId': self.spacecraft._id, 
                                                               'stateCartFile': self.out_file_cart,
@@ -271,4 +271,3 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
 class TestPropagatorOutputInfo(unittest.TestCase): #TODO
     pass
 
-'''
