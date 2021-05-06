@@ -635,7 +635,7 @@ class Spacecraft(Entity):
         return Spacecraft(
                 name = d.get("name", None),
                 orbitState = OrbitState.from_dict(orbitstate_dict) if orbitstate_dict else None,
-                spacecraftBus = SpacecraftBus.from_dict(spacecraft_bus_dict) if spacecraft_bus_dict else Spacecraft.from_dict({'orientation':{'referenceFrame': 'NADIR_POINTING', 'convention':'REF_FRAME_ALIGNED'}}),
+                spacecraftBus = SpacecraftBus.from_dict(spacecraft_bus_dict) if spacecraft_bus_dict else SpacecraftBus.from_dict({'orientation':{'referenceFrame': 'NADIR_POINTING', 'convention':'REF_FRAME_ALIGNED'}}),
                 instrument = instrument,
                 _id = d.get("@id", str(uuid.uuid4()))
                 )

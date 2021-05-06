@@ -189,8 +189,8 @@ class DataMetricsCalculator(Entity):
         :param mode_id: Mode identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute is considered.
         :paramtype mode_id: str (or) int
 
-        :return: None
-        :rtype: None
+        :return: Output info.
+        :rtype: :class:`orbitpy.datametricscalculator.DataMetricsOutputInfo`
         
         """
         # get instrument corresponding to the input id

@@ -99,7 +99,7 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
                   "numberSatellites": 2,
                   "numberPlanes": 1,
                   "relativeSpacing": 1,
-                  "alt": 700,
+                  "alt": 500,
                   "ecc": 0.001,
                   "inc": 45,
                   "aop": 135,

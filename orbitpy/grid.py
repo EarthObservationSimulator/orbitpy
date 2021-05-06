@@ -273,13 +273,14 @@ def compute_grid_res(spacecraft, grid_res_fac):
     RE = Constants.radiusOfEarthInKM        
 
     params = orbitpy.util.helper_extract_spacecraft_params(spacecraft) # obtain list of tuples of relevant spacecraft parameters
-
     # find the minimum required grid resolution over all satellites
     min_grid_res_deg = 1e1000 # some large number
     for p in params:
 
         sma = p.sma # orbit semi-major axis
-        fov = min(p.scfov_height, p.scfov_width) # note that scene field of view is considered not field of regard
+        fov = None
+        if p.scfov_height is not None:
+            fov = min(p.scfov_height, p.scfov_width) # note that scene field of view is considered not field of regard
         if fov is None:
             # no instruments specified, hence no scene field-of-view to consider, hence consider the entire horizon angle as field-of-view
             f = RE/sma
