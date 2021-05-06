@@ -23,16 +23,13 @@ from orbitpy.propagator import J2AnalyticalPropagator
 from orbitpy.coveragecalculator import GridCoverage
 from datametricscalculator import DataMetricsCalculator, AccessFileInfo
 from orbitpy.contactfinder import ContactFinder
+from orbitpy.eclipsefinder import EclipseFinder
 from orbitpy.grid import Grid
 
 """
 3 satellites in 1 plane, both L+P (spaced by 120 degrees of true anomaly):
 502.5 km altitude
 89 degree inclination
-
-6 satellites in 1 plane, alternate L and P (spaced by 60 degrees of true anomaly):
-504.19 km altitude
-90 degree inclination
 
 (both circular orbits)
 
@@ -222,12 +219,12 @@ def assign_pointing_bins(obsmetrics_fp, swath_width, spc_acc_fp):
 
 start_time = time.process_time()    
 
-wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/20210419_500kmSARConstellation/"
+wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/20210419_500kmSARConstellation_2/"
 
 epoch = OrbitState.date_from_dict({"dateType":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0})
 epoch_JDUt1 = epoch.GetJulianDate()
 
-sat1 = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
+sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
                                             },
                              "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0},
                                             "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 240}
@@ -243,10 +240,11 @@ grid = Grid.from_dict({"@type": "customGrid", "covGridFilePath": wdir+"covGrid.c
 propagator = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 1})
 
 
-instru_id = sat1.instrument[0]._id
-mode_id = sat1.instrument[0].mode[0]._id
+instru_id = sat.instrument[0]._id
+mode_id = sat.instrument[0].mode[0]._id
 
 sat_dir = wdir + '/sat3/'
+
 if os.path.exists(sat_dir):
     shutil.rmtree(sat_dir)
 os.makedirs(sat_dir)
@@ -264,22 +262,29 @@ for k in range(0,12):
     state_kep_file = sat_dir + 'state_keplerian_' + str(6*k) + 'hrs.csv'
 
     out_info = []
-
+    
     print("start propagation")
-    x = propagator.execute(sat1, sim_start_date, state_cart_file, state_kep_file, duration)
+    x = propagator.execute(sat, sim_start_date, state_cart_file, state_kep_file, duration)
     out_info.append(x)     
     print('finished propagation, time until now: {}s'.format(time.process_time() - start_time))
+    
+    
+    print("start eclipse finder")
+    eclipse_filename = 'eclipse_' + str(6*k) + 'hrs.csv'
+    out_info = EclipseFinder.execute(sat, sat_dir, state_cart_file, eclipse_filename, EclipseFinder.OutType.INTERVAL)
+    print('finished eclipse finder, time until now: {}s'.format(time.process_time() - start_time))
 
+    
     print("start coverage")
     acc_fl = sat_dir + 'access_instru_sar_' + str(6*k) + 'hrs.csv'
-    cov_calc = GridCoverage(grid=grid, spacecraft=sat1, state_cart_file=state_cart_file)
+    cov_calc = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
     x = cov_calc.execute(instru_id=instru_id, mode_id=mode_id, use_field_of_regard=True, out_file_access=acc_fl, filter_mid_acc=True)
     out_info.append(x)     
     print('finished coverage, time until now: {}s'.format(time.process_time() - start_time))
 
     print("start datametrics")
     dm_file = sat_dir + 'datametrics_instru_sar_' + str(6*k) + 'hrs.csv'
-    dm_calc = DataMetricsCalculator(spacecraft=sat1, state_cart_file=state_cart_file, access_file_info=AccessFileInfo(instru_id, mode_id, acc_fl))                    
+    dm_calc = DataMetricsCalculator(spacecraft=sat, state_cart_file=state_cart_file, access_file_info=AccessFileInfo(instru_id, mode_id, acc_fl))                    
     x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru_id, mode_id=mode_id)
     out_info.append(x)
     print('finished datametrics, time until now: {}s'.format(time.process_time() - start_time))
@@ -292,5 +297,6 @@ for k in range(0,12):
     assign_pointing_bins(dm_file, 25, lsar_acc_fp) 
     assign_pointing_bins(dm_file, 50, psar_acc_fp) 
     print('stop binning, time until now: {}s'.format(time.process_time() - start_time))
+    
 
 

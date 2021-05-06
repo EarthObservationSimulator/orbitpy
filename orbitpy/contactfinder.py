@@ -82,10 +82,10 @@ class ContactFinder(Entity):
                 range [km], float, kilometer, Distance between the two entities at the corresponding time.
                 elevation [deg], float, degrees, Angle between the ground-plane and the ground-station to satellite line.
 
-        :param entityA: Satellite or Ground-station ``orbitpy.util`` objects.
+        :param entityA: Spacecraft or Ground-station ``orbitpy.util`` object.
         :paramtype entityA: :class:`orbitpy.util.Spacecraft` or :class:`orbitpy.util.GroundStation`
 
-        :param entityB: Satellite or Ground-station ``orbitpy.util`` objects.
+        :param entityB: Spacecraft or Ground-station ``orbitpy.util`` object.
         :paramtype entityB: :class:`orbitpy.util.Spacecraft` or :class:`orbitpy.util.GroundStation`
 
         :param out_dir: Path to directory where the file with results is to be stored.
@@ -113,8 +113,8 @@ class ContactFinder(Entity):
                                     communication between two satellites cannot take place. Default value is 0 km.
         :paramtype opaque_atmos_height_km: float or None
 
-        :return: None. The results are written out in a file.
-        :rtype: None
+        :return: Output info.
+        :rtype: :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
 
         .. warning:: The time-series of the states in the entityA state file and entityB state file (in case of satellite-to-satellite contact finder)
                      must be in sync, i.e. the epoch, time-step and duration must be the same.
@@ -279,8 +279,8 @@ class ContactFinder(Entity):
                                                 "@id": None})
              
 class ContactFinderOutputInfo(Entity):
-    """ Class to hold information about the results of the data-metrics calculation. An object of this class is returned upon the execution
-        of the data metrics calculator.
+    """ Class to hold information about the results of the contact finder. An object of this class is returned upon the execution
+        of the data contact finder.
     
     :ivar entityAId: Entity A identifier (spacecraft).
     :vartype entityAId: str or int

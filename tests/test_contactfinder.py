@@ -62,7 +62,6 @@ class TestContactFinder(unittest.TestCase):
         cls.gs1 = GroundStation.from_dict({"@id":1231, "name": "gs1", "latitude": 85, "longitude": -45 }) # by default "minimumElevation":7
         cls.gs2 = GroundStation.from_dict({"@id":833, "name": "gs2", "latitude": -88, "longitude": 25, "minimumElevation":12 })
 
-    '''
     def test_execute_data_format(self):
 
         ########### entityA = Spacecraft, entityB = GroundStation, INTERVAL out_type, default output filename ###########
@@ -87,11 +86,11 @@ class TestContactFinder(unittest.TestCase):
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
         self.assertAlmostEqual(epoch_JDUT1, 2459243.0618287036)
 
-        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) 
         _step_size = float(_step_size[0][0].split()[4])
         self.assertAlmostEqual(_step_size, 1)
 
-        data = pd.read_csv(out_file, skiprows = [0,1,2]) # 5th row header, 6th row onwards contains the data
+        data = pd.read_csv(out_file, skiprows = [0,1,2]) 
         self.assertEqual(list(data.columns)[0], 'start index')
         self.assertEqual(list(data.columns)[1], 'end index')
 
@@ -116,11 +115,11 @@ class TestContactFinder(unittest.TestCase):
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
         self.assertAlmostEqual(epoch_JDUT1, 2459243.027060185)
 
-        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) 
         _step_size = float(_step_size[0][0].split()[4])
         self.assertAlmostEqual(_step_size, 1)
 
-        data = pd.read_csv(out_file, skiprows = [0,1,2]) # 5th row header, 6th row onwards contains the data
+        data = pd.read_csv(out_file, skiprows = [0,1,2]) 
         self.assertEqual(list(data.columns)[0], 'time index')
         self.assertEqual(list(data.columns)[1], 'access')
         self.assertEqual(list(data.columns)[2], 'range [km]')
@@ -140,11 +139,11 @@ class TestContactFinder(unittest.TestCase):
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
         self.assertAlmostEqual(epoch_JDUT1, 2459243.0618287036)
 
-        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) 
         _step_size = float(_step_size[0][0].split()[4])
         self.assertAlmostEqual(_step_size, 1)
 
-        data = pd.read_csv(out_file, skiprows = [0,1,2]) # 5th row header, 6th row onwards contains the data
+        data = pd.read_csv(out_file, skiprows = [0,1,2]) 
         self.assertEqual(list(data.columns)[0], 'time index')
         self.assertEqual(list(data.columns)[1], 'access')
         self.assertEqual(list(data.columns)[2], 'range [km]')
@@ -234,9 +233,7 @@ class TestContactFinder(unittest.TestCase):
 
         self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 12,49,46)-epoch).total_seconds(), data['start index'][14], delta=162)  
         self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 13,0,8)-epoch).total_seconds(), data['end index'][14], delta=167)
-        
-
-     
+            
     def test_execute_ground_stn_contact_Sentinel1B_gs2(self):
         """ Test against GMAT truth data. This validates both the propgation of the satellite and the 
             ground-station contacts. The results are approximately equal.
@@ -314,7 +311,7 @@ class TestContactFinder(unittest.TestCase):
 
         self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 11,11,31)-epoch).total_seconds(), data['start index'][13], delta=160) 
         self.assertAlmostEqual((datetime.datetime(2021, 1, 29, 11,18,25)-epoch).total_seconds(), data['end index'][13], delta=163)
-    '''
+    
     def test_execute_intersat_contact_precomputed(self):
         """ Test against precomputed data.
         """
@@ -330,11 +327,11 @@ class TestContactFinder(unittest.TestCase):
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
         self.assertAlmostEqual(epoch_JDUT1, 2459243.0618287036)
 
-        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) 
         _step_size = float(_step_size[0][0].split()[4])
         self.assertAlmostEqual(_step_size, 1)
 
-        data = pd.read_csv(out_file, skiprows = [0,1,2]) # 5th row header, 6th row onwards contains the data
+        data = pd.read_csv(out_file, skiprows = [0,1,2]) 
         self.assertEqual(list(data.columns)[0], 'start index')
         self.assertEqual(list(data.columns)[1], 'end index')
 
@@ -355,11 +352,11 @@ class TestContactFinder(unittest.TestCase):
         epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
         self.assertAlmostEqual(epoch_JDUT1, 2459243.0618287036)
 
-        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        _step_size = pd.read_csv(out_file, skiprows = [0,1], nrows=1, header=None).astype(str) 
         _step_size = float(_step_size[0][0].split()[4])
         self.assertAlmostEqual(_step_size, 1)
 
-        data = pd.read_csv(out_file, skiprows = [0,1,2]) # 5th row header, 6th row onwards contains the data
+        data = pd.read_csv(out_file, skiprows = [0,1,2]) 
         self.assertEqual(list(data.columns)[0], 'start index')
         self.assertEqual(list(data.columns)[1], 'end index')
 

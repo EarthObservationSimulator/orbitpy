@@ -43,7 +43,6 @@ class TestMission(unittest.TestCase):
             shutil.rmtree(cls.out_dir)
         os.makedirs(cls.out_dir)
         
-    '''
     def test_scenario_1(self):
         """  1 satellite, no instrument ; propagation only, auto, custom-time-step. The mission epoch is same, different from the satellite orbit-state date.
         """
@@ -379,7 +378,7 @@ class TestMission(unittest.TestCase):
         self.assertAlmostEqual(state_sat7_row0['raan [deg]'][0]%360, 0)
         self.assertAlmostEqual(state_sat7_row0['aop [deg]'][0], 135.0)
         self.assertAlmostEqual(state_sat7_row0['ta [deg]'][0]%360, 315)
-    '''
+    
     def test_scenario_7(self):
         """ Multiple satellites from list, multiple instruments per satellite ; propagation, grid-coverage, data-metrics calculation, contact-finder (inter-satellite).
 
