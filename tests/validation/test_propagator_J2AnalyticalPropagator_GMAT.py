@@ -32,7 +32,8 @@ class TestPropagation(unittest.TestCase):
         os.makedirs(out_dir2)
         
         # store directory path
-        cls.dir_path = dir_path        
+        cls.dir_path = dir_path
+        
         factory = PropagatorFactory()
         step_size = 1
         specs = {"@type": 'J2 ANALYTICAL PROPAGATOR', 'stepSize': step_size } 

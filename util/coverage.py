@@ -26,6 +26,43 @@ class Coverage:
         self.sphericalToCartesian()
     
     @classmethod
+    def OrbitPyCoverage_Depricated(cls,accPath,gridPath,days = 1):
+        """Factory method. Instantiates the class using OrbitPy grid access file and grid file. Deprecated access format."""
+        coverage = np.genfromtxt(accPath, delimiter=",",skip_header = 5,filling_values = 0)
+        grid = np.genfromtxt(gridPath, delimiter=",", skip_header = 1)
+        
+        # Number of grid points
+        numPts = grid.shape[0];    
+        
+        numSecs = days * 86401 
+        
+        timeArray = np.linspace(0,numSecs-1,numSecs,dtype=int)
+        
+        with open(accPath) as f:
+            lines = f.readlines()[5:]
+            coverage = np.zeros([numSecs,numPts],dtype=int)
+            
+            for line in lines:
+                row = np.fromstring(line,dtype = float,sep=',')
+                accessTimeIndex = int(row[0])
+                gpi = int(row[2])
+                coverage[accessTimeIndex,gpi] = 1
+                
+            
+        # Add time steps to first column of coverage array, to match orbitpy     
+        coverage = np.insert(coverage,0,timeArray,axis=1)
+        
+        # Remove rows with no accesses
+        coverage = coverage[~np.all(coverage[:,1:]==0,axis = 1)]
+        
+
+        region = grid[:,0]
+        lat = grid[:,2]
+        lon = grid[:,3]
+        
+        return cls(coverage,region,lat,lon,program = 'OrbitPy Coverage')
+    
+    @classmethod
     def OrbitPyCoverage(cls,accPath,gridPath,days = 1):
         """Factory method. Instantiates the class using OrbitPy grid access file and grid file."""
         coverage = np.genfromtxt(accPath, delimiter=",",skip_header = 5,filling_values = 0)
@@ -45,7 +82,7 @@ class Coverage:
             for line in lines:
                 row = np.fromstring(line,dtype = float,sep=',')
                 accessTimeIndex = int(row[0])
-                gpi = int(row[2])
+                gpi = int(row[1])
                 coverage[accessTimeIndex,gpi] = 1
                 
             

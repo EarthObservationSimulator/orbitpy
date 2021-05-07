@@ -9,9 +9,6 @@ import numpy as np
 import os, shutil
 import copy
 
-from orbitpy.orbitpropcov import OrbitPropCovGrid
-from orbitpy.util import PropagationCoverageParameters, CoverageCalculationsApproach
-
 import sys
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -19,6 +16,14 @@ helper_dir = os.path.join(dir_path, '../../util/')
 sys.path.append(helper_dir)
 
 from coverage import Coverage
+
+# Updated imports
+from orbitpy.propagator import PropagatorFactory
+from orbitpy.util import Spacecraft
+
+from orbitpy.grid import Grid
+from orbitpy.coveragecalculator import GridCoverage
+
 
 class TestOrbitPropCovGrid(unittest.TestCase):
         
@@ -38,32 +43,27 @@ class TestOrbitPropCovGrid(unittest.TestCase):
             shutil.rmtree(out_dir2)
         os.makedirs(out_dir2)
         
-        # store directory path
+        # Store directory path
         cls.dir_path = dir_path
         
-        cls.default_pcp = PropagationCoverageParameters(
-                        sat_id="1", 
-                        epoch="2018,5,26,12,0,0", # JD: 2458265.00000
-                        sma=7000, 
-                        ecc=0, 
-                        inc=0, 
-                        raan=0, 
-                        aop=0, 
-                        ta=0, 
-                        duration=1, 
-                        cov_grid_fl=dir_path+"/temp/test_STK_coverage_OrbitPropCovGrid/grid", 
-                        sen_fov_geom="CONICAL", 
-                        sen_orien="1,2,3,0,0,0",
-                        sen_clock="0", 
-                        sen_cone="10", 
-                        purely_sidelook = 0, 
-                        yaw180_flag = 0, 
-                        step_size = 1.0, 
-                        do_prop=True,
-                        do_cov=True,
-                        sat_state_fl = dir_path+"/temp/test_STK_coverage_OrbitPropCovGrid/state", 
-                        sat_acc_fl = dir_path+"/temp/test_STK_coverage_OrbitPropCovGrid/acc", 
-                        cov_calcs_app= CoverageCalculationsApproach.GRIDPNTS)
+        # Default propagation parameters
+        factory = PropagatorFactory()
+        step_size = 1
+        specs = {"@type": 'J2 ANALYTICAL PROPAGATOR', 'stepSize': step_size } 
+        cls.j2_prop = factory.get_propagator(specs)
+        cls.duration=1        
+        # circular orbit
+        cls.default_orbit_dict = {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0},
+                                       "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7000, 
+                                                "ecc": 0, "inc": 0, "raan": 0, "aop": 0, "ta": 0}
+                                     }
+        
+        # Default sensor parameters
+        cls.instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": 0, "yRotation": 0, "zRotation": 0}, 
+                                           "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter": 20 }, 
+                                           "@id":"bs1", "@type":"Basic Sensor"}
+        
+        cls.spacecraftBus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}}
         
         # Establish thresholds for each metric
         cls.m1 = .1
@@ -163,21 +163,24 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
-
-        prop_cov_param = copy.deepcopy(self.default_pcp)
         
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/01/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/01/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/01/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/01/acc"
+
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        sat = Spacecraft.from_dict({"orbitState":self.default_orbit_dict, "instrument":self.instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
         
-        # Run simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)     
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_1.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/01/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/01/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -194,26 +197,29 @@ class TestOrbitPropCovGrid(unittest.TestCase):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup sensor parameters
-        prop_cov_param.sen_fov_geom = "RECTANGULAR"
-        atFOV = 15*2
-        ctFOV = 10*2
-        prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
-        
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/02/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/02/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/02/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/02/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        instrument_dict = copy.deepcopy(self.instrument_dict)
+        instrument_dict["fieldOfViewGeometry"]["shape"] = "RECTANGULAR"
+        instrument_dict["fieldOfViewGeometry"]["angleHeight"] = 30
+        instrument_dict["fieldOfViewGeometry"]["angleWidth"] = 20
+
+        sat = Spacecraft.from_dict({"orbitState":self.default_orbit_dict, "instrument":instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_2.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/02/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/02/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -229,27 +235,32 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
-        
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.inc = 1
-        prop_cov_param.raan = 1
-        prop_cov_param.aop = 1
-        prop_cov_param.ta = 1
-        
+    
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/03/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/03/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/03/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/03/acc"
+
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        orbit_dict["state"]["inc"] = 1
+        orbit_dict["state"]["raan"] = 1
+        orbit_dict["state"]["aop"] = 1
+        orbit_dict["state"]["ta"] = 1
+        
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":self.instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid_3.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/03/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/03/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -266,32 +277,37 @@ class TestOrbitPropCovGrid(unittest.TestCase):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.inc = 90
-        prop_cov_param.raan = 180
-        prop_cov_param.aop = 180
-        prop_cov_param.ta = 180
-        
-        # Setup sensor parameters
-        prop_cov_param.sen_fov_geom = "RECTANGULAR"
-        atFOV = 15*2
-        ctFOV = 10*2
-        prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
-        
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/04/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/04/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/04/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/04/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        
+        instrument_dict = copy.deepcopy(self.instrument_dict)
+        instrument_dict["fieldOfViewGeometry"]["shape"] = "RECTANGULAR"
+        instrument_dict["fieldOfViewGeometry"]["angleHeight"] = 30
+        instrument_dict["fieldOfViewGeometry"]["angleWidth"] = 20
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["inc"] = 90
+        orbit_dict["state"]["raan"] = 180
+        orbit_dict["state"]["aop"] = 180
+        orbit_dict["state"]["ta"] = 180
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_4.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/04/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/04/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -307,28 +323,35 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
-        
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.sma = 7578.378
-        prop_cov_param.inc = 45.7865
-        prop_cov_param.raan = 98.8797
-        prop_cov_param.aop = 75.78089
-        prop_cov_param.ta = 277.789
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/05/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/05/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/05/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/05/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["sma"] = 7578.378
+        orbit_dict["state"]["inc"] = 45.7865
+        orbit_dict["state"]["raan"] = 98.8797
+        orbit_dict["state"]["aop"] = 75.78089
+        orbit_dict["state"]["ta"] = 277.789
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":self.instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_5.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/05/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/05/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -345,33 +368,39 @@ class TestOrbitPropCovGrid(unittest.TestCase):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.sma = 7578.378
-        prop_cov_param.inc = 45.7865
-        prop_cov_param.raan = 98.8797
-        prop_cov_param.aop = 75.78089
-        prop_cov_param.ta = 277.789
-        
-        # Setup sensor parameters
-        prop_cov_param.sen_fov_geom = "RECTANGULAR"
-        atFOV = 15*2
-        ctFOV = 10*2
-        prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
-                
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/06/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/06/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/06/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/06/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["sma"] = 7578.378
+        orbit_dict["state"]["inc"] = 45.7865
+        orbit_dict["state"]["raan"] = 98.8797
+        orbit_dict["state"]["aop"] = 75.78089
+        orbit_dict["state"]["ta"] = 277.789
+        
+        instrument_dict = copy.deepcopy(self.instrument_dict)
+        instrument_dict["fieldOfViewGeometry"]["shape"] = "RECTANGULAR"
+        instrument_dict["fieldOfViewGeometry"]["angleHeight"] = 30
+        instrument_dict["fieldOfViewGeometry"]["angleWidth"] = 20
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_6.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/06/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/06/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -388,27 +417,31 @@ class TestOrbitPropCovGrid(unittest.TestCase):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.sma = 7080.48 
-        prop_cov_param.inc = 98.22
-        prop_cov_param.raan = 0
-        prop_cov_param.aop = 0
-        prop_cov_param.ta = 0
-        
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/07/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/07/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/07/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/07/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["sma"] = 7080.48 
+        orbit_dict["state"]["inc"] = 98.22
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":self.instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_7.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/07/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/07/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -425,32 +458,41 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
-        
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.sma = 7080.48 
-        prop_cov_param.inc = 98.22
-        prop_cov_param.raan = 0
-        prop_cov_param.aop = 0
-        prop_cov_param.ta = 0
-        
-        # Setup sensor parameters
-        prop_cov_param.sen_orien = "1,2,3,-30,25,5"
-        prop_cov_param.sen_orien = "2,1,3,-30,-25,5"
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/08/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/08/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/08/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/08/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["sma"] = 7080.48 
+        orbit_dict["state"]["inc"] = 98.22
+        
+        instrument_dict = copy.deepcopy(self.instrument_dict)
+        instrument_dict["orientation"]["convention"] = 'EULER'
+        instrument_dict["orientation"]["eulerSeq1"] = 2
+        instrument_dict["orientation"]["eulerSeq2"] = 1
+        instrument_dict["orientation"]["eulerSeq3"] = 3
+        instrument_dict["orientation"]["eulerAngle1"] = -30
+        instrument_dict["orientation"]["eulerAngle2"] = -25
+        instrument_dict["orientation"]["eulerAngle3"] = 5
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
         
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_8.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/08/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/08/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -467,36 +509,44 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
-        
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.sma = 7080.48 
-        prop_cov_param.inc = 98.22
-        prop_cov_param.raan = 0
-        prop_cov_param.aop = 0
-        prop_cov_param.ta = 0
-        
-        # Setup sensor parameters
-        prop_cov_param.sen_fov_geom = "RECTANGULAR"
-        prop_cov_param.sen_orien = "1,2,3,30,-24,-6"
-        prop_cov_param.sen_orien = "2,1,3,30,24,-6"
-        atFOV = 10 * 2
-        ctFOV = 15 * 2
-        prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/09/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/09/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/09/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/09/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
         
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["sma"] = 7080.48 
+        orbit_dict["state"]["inc"] = 98.22
+        
+        instrument_dict = copy.deepcopy(self.instrument_dict)
+        instrument_dict["fieldOfViewGeometry"]["shape"] = "RECTANGULAR"
+        instrument_dict["fieldOfViewGeometry"]["angleHeight"] = 20
+        instrument_dict["fieldOfViewGeometry"]["angleWidth"] = 30
+        instrument_dict["orientation"]["convention"] = 'EULER'
+        instrument_dict["orientation"]["eulerSeq1"] = 2
+        instrument_dict["orientation"]["eulerSeq2"] = 1
+        instrument_dict["orientation"]["eulerSeq3"] = 3
+        instrument_dict["orientation"]["eulerAngle1"] = 30
+        instrument_dict["orientation"]["eulerAngle2"] = 24
+        instrument_dict["orientation"]["eulerAngle3"] = -6
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
+
         # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid_9.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/09/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/09/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -512,34 +562,37 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
-        
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.sma = 7080.48 
-        prop_cov_param.inc = 98.22
-        prop_cov_param.raan = 0
-        prop_cov_param.aop = 0
-        prop_cov_param.ta = 0
-        
-        # Setup sensor parameters
-        prop_cov_param.sen_fov_geom = "RECTANGULAR"
-        atFOV = 15 * 2
-        ctFOV = 10 * 2
-        prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/10/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/10/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/10/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/10/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
         
-         # Construct coverage objects to verify output
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["sma"] = 7080.48 
+        orbit_dict["state"]["inc"] = 98.22
+        
+        instrument_dict = copy.deepcopy(self.instrument_dict)
+        instrument_dict["fieldOfViewGeometry"]["shape"] = "RECTANGULAR"
+        instrument_dict["fieldOfViewGeometry"]["angleHeight"] = 30
+        instrument_dict["fieldOfViewGeometry"]["angleWidth"] = 20
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
+        
+        # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_10.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/10/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/10/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -556,36 +609,46 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         if os.path.exists(out_dir):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
-        
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.sma = 7080.48 
-        prop_cov_param.inc = 98.22
-        prop_cov_param.raan = 0
-        prop_cov_param.aop = 0
-        prop_cov_param.ta = 0
-        
-        # Setup sensor parameters
-        prop_cov_param.sen_fov_geom = "RECTANGULAR"
-        prop_cov_param.sen_orien = "1,2,3,-30,25,5"
-        prop_cov_param.sen_orien = "2,1,3,-30,-25,5"
-        atFOV = 10*2
-        ctFOV = 15*2
-        prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
                 
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/11/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/11/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/11/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/11/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {
+                        "covGridFilePath":grid_fl
+                    }
+        grid = Grid.from_customgrid_dict(grid_dict)
         
-         # Construct coverage objects to verify output
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["sma"] = 7080.48 
+        orbit_dict["state"]["inc"] = 98.22
+        
+        instrument_dict = copy.deepcopy(self.instrument_dict)
+        instrument_dict["fieldOfViewGeometry"]["shape"] = "RECTANGULAR"
+        instrument_dict["fieldOfViewGeometry"]["angleHeight"] = 20
+        instrument_dict["fieldOfViewGeometry"]["angleWidth"] = 30
+        instrument_dict["orientation"]["convention"] = 'EULER'
+        instrument_dict["orientation"]["eulerSeq1"] = 2
+        instrument_dict["orientation"]["eulerSeq2"] = 1
+        instrument_dict["orientation"]["eulerSeq3"] = 3
+        instrument_dict["orientation"]["eulerAngle1"] = -30
+        instrument_dict["orientation"]["eulerAngle2"] = -25
+        instrument_dict["orientation"]["eulerAngle3"] = 5
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
+        
+        # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_11.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/11/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/11/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
@@ -603,35 +666,43 @@ class TestOrbitPropCovGrid(unittest.TestCase):
             shutil.rmtree(out_dir)
         os.makedirs(out_dir)
         
-        prop_cov_param = copy.deepcopy(self.default_pcp)
-        
-        # Setup orbit parameters
-        prop_cov_param.sma = 7080.48 
-        prop_cov_param.inc = 98.22
-        prop_cov_param.raan = 0
-        prop_cov_param.aop = 0
-        prop_cov_param.ta = 0
-        
-        # Setup sensor parameters
-        prop_cov_param.sen_fov_geom = "RECTANGULAR"
-        prop_cov_param.sen_orien = "1,2,3,30,-24,-6"
-        prop_cov_param.sen_orien = "2,1,3,30,24,-6"
-        atFOV = 15*2
-        ctFOV = 10*2
-        prop_cov_param.sen_clock,prop_cov_param.sen_cone = TestOrbitPropCovGrid.getClockAngles(atFOV,ctFOV)
-                
         # Setup IO file paths
-        prop_cov_param.cov_grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
-        prop_cov_param.sat_state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/12/state"
-        prop_cov_param.sat_acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/12/acc"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/12/state"
+        acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/12/acc"
         
-        # Run Simulation
-        opc_grid = OrbitPropCovGrid(prop_cov_param)
-        opc_grid.run()
+        # Define propagation and coverage parameters
+        grid_dict = {"covGridFilePath":grid_fl}
+        grid = Grid.from_customgrid_dict(grid_dict)
+        
+        
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+        
+        orbit_dict["state"]["sma"] = 7080.48 
+        orbit_dict["state"]["inc"] = 98.22
+        
+        instrument_dict = copy.deepcopy(self.instrument_dict)
+        instrument_dict["fieldOfViewGeometry"]["shape"] = "RECTANGULAR"
+        instrument_dict["fieldOfViewGeometry"]["angleHeight"] = 30
+        instrument_dict["fieldOfViewGeometry"]["angleWidth"] = 20
+        instrument_dict["orientation"]["convention"] = 'EULER'
+        instrument_dict["orientation"]["eulerSeq1"] = 2
+        instrument_dict["orientation"]["eulerSeq2"] = 1
+        instrument_dict["orientation"]["eulerSeq3"] = 3
+        instrument_dict["orientation"]["eulerAngle1"] = 30
+        instrument_dict["orientation"]["eulerAngle2"] = 24
+        instrument_dict["orientation"]["eulerAngle3"] = -6
+
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":self.spacecraftBus_dict})
+        
+        # Execute propagation and coverage
+        self.j2_prop.execute(sat, None,state_fl, None)
+        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        cov.execute(out_file_access=acc_fl)
         
          # Construct coverage objects to verify output
         STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid_12.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/12/acc',prop_cov_param.cov_grid_fl)
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_STK_coverage_OrbitPropCovGrid/12/acc',grid_fl)
         
         # Check truth
         m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
