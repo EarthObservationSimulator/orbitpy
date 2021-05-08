@@ -165,7 +165,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
         
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/01/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/01/acc"
 
@@ -198,7 +198,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
         
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/02/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/02/acc"
         
@@ -237,7 +237,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
     
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Global_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/03/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/03/acc"
 
@@ -278,7 +278,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
         
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/04/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/04/acc"
         
@@ -325,7 +325,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
                 
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/05/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/05/acc"
         
@@ -369,7 +369,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
         
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/06/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/06/acc"
         
@@ -418,7 +418,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
         
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/07/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/07/acc"
         
@@ -460,7 +460,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
                 
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/08/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/08/acc"
         
@@ -511,7 +511,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
                 
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/Equatorial_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/09/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/09/acc"
         
@@ -564,7 +564,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
                 
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/10/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/10/acc"
         
@@ -611,7 +611,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
                 
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/11/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/11/acc"
         
@@ -667,7 +667,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         os.makedirs(out_dir)
         
         # Setup IO file paths
-        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid.csv"
+        grid_fl = self.dir_path + "/STK/test_STK_coverage_OrbitPropCovGrid/Accesses/US_Grid"
         state_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/12/state"
         acc_fl = self.dir_path + "/temp/test_STK_coverage_OrbitPropCovGrid/12/acc"
         
