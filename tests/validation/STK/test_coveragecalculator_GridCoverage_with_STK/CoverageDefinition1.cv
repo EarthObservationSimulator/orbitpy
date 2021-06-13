@@ -1,0 +1,129 @@
+stk.v.12.0
+WrittenBy    STK_v12.0.0
+
+BEGIN CoverageDefinition
+
+    Name		 CoverageDefinition1
+
+    BEGIN GridDefinition
+
+        VersionIndicator		 20080103
+        BEGIN LatitudeBounds
+            MinLatitude		 -3
+            MaxLatitude		 3
+        END LatitudeBounds
+        LatResolution		  3.0000000000000004e+00
+        LonResolution		  3.0000000000000004e+00
+        UsePolarRegions		 Yes
+        GridClass		 Target
+        PointLocationMethod		 EqualArea
+        CustomPtAltMethod		 ValueFromFile
+        CentralBody		 Earth
+        GroundAltMethod		 UseAltType
+        GroundAlt		 0
+        AltitudeMethod		 Radius
+        BEGIN AltitudeList
+            6378137.000000
+        END AltitudeList
+
+    END GridDefinition
+
+    BEGIN AccessDefinition
+
+        DataRetention		 AllData
+        Convergence		 0.005
+        AbsValueConvergence		 1e-14
+        RelValueConvergence		 1e-08
+        MaxTimeStep		 360
+        MinTimeStep		 0.01
+        UseLightTimeDelay		 No
+        TimeSense		 PerAsset
+        DetectEventsUsingSamplesOnly		 No
+        AutoRecompute		 No
+        UseAllAssetAccess		 No
+        AssetSatisType		 AtLeast
+        AssetSatisThreshold		 1
+        AccessSaveMode		 SaveWith
+        RegionAccessAccel		 Auto
+        AsciiAccessFilename		 C:\Users\rketzner\Downloads\D_SHIELD\shared\STK\Access\CoverageDefinition01.cvaa
+
+    END AccessDefinition
+
+    BEGIN AssetList
+
+        Satellite/Satellite1/Sensor/Sensor1		 Active
+        Required		 No
+
+    END AssetList
+
+    BEGIN Interval
+
+        AccStart		 26 May 2018 12:00:00.000000000
+        AccStop		 27 May 2018 12:00:00.000000000
+        UseScenarioInterval		 No
+        AccIntervalPtr		
+        BEGIN EVENTINTERVAL
+            EventInterval		
+            BEGIN EVENTINTERVAL
+                Type		 EVENTINTERVAL_LINKTO
+                Name		 AnalysisInterval
+                AbsolutePath		 Scenario
+            END EVENTINTERVAL
+            IntervalState		 Implicit
+        END EVENTINTERVAL
+
+
+    END Interval
+
+    BEGIN Extensions
+
+        BEGIN ExternData
+        END ExternData
+
+        BEGIN ADFFileData
+        END ADFFileData
+
+        BEGIN Desc
+        END Desc
+
+        BEGIN Crdn
+        END Crdn
+
+        BEGIN Graphics
+
+            BEGIN Attributes
+
+                GridMarkerStyle		 1
+                GridColor		 #ff00ff
+                ProgressColor		 #0000ff
+                SatisfactionColor		 #ffff00
+                GridTranslucency		 0.5
+                SatisfactionTranslucency		 0.7000000000000001
+
+            END Attributes
+
+            BEGIN Graphics
+
+                Show		 Yes
+                ShowGrid		 Yes
+                ShowRegions		 No
+                ShowRegionsText		 No
+                ShowPoints		 Yes
+                FillPoints		 No
+                ShowProgress		 Yes
+                ShowSatisfaction		 No
+
+            END Graphics
+        END Graphics
+
+        BEGIN VO
+        END VO
+
+    END Extensions
+
+    BEGIN SubObjects
+
+    END SubObjects
+
+END CoverageDefinition
+

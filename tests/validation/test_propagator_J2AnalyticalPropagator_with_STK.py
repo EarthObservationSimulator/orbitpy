@@ -1,8 +1,37 @@
 """ *Unit tests for :class:`orbitpy.propagate.J2AnalyticalPropagator` covering checks on orbit state data when compared to STK output.*
+
+:code:`/temp/` folder contains temporary files produced during the run of the tests below.
+
+Expected output:
+
+running test_run_1
+Max Difference: 
+4.69315597729782
+.running test_run_2
+Max Difference: 
+4.689415839943152
+.running test_run_3
+Max Difference: 
+3.815186670455347
+.running test_run_4
+Max Difference: 
+3.3283995083671414
+.running test_run_5
+Max Difference: 
+4.187096058800876
+.running test_run_6
+Max Difference: 
+1.4851594443143767e-06
+.running test_run_7
+Max Difference: 
+0.009143580793676165
+.running test_run_8
+Max Difference: 
+0.009159691231587885
+.
+
+
 """
-'''
-   :code:`/temp/` folder contains temporary files produced during the run of the tests below.
-'''
 
 import unittest
 import numpy as np
@@ -71,7 +100,7 @@ class TestPropagation(unittest.TestCase):
         
     def test_run_1(self):
         """Test propagation of 7000 SMA orbit with all other kepler states = 0.""" 
-        
+        print('running test_run_1')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/01/')
         if os.path.exists(out_dir):
@@ -98,7 +127,7 @@ class TestPropagation(unittest.TestCase):
        
     def test_run_2(self):
         """Test all states = 1, except for size and eccentricity."""
-        
+        print('running test_run_2')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/02/')
         if os.path.exists(out_dir):
@@ -131,7 +160,7 @@ class TestPropagation(unittest.TestCase):
     
     def test_run_3(self):
         """Test middle values for all states, except for size and eccentricity."""
-        
+        print('running test_run_3')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/03/')
         if os.path.exists(out_dir):
@@ -164,7 +193,7 @@ class TestPropagation(unittest.TestCase):
         
     def test_run_4(self):
         """Test decimal values for all states, except for eccentricity"""
-        
+        print('running test_run_4')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/04/')
         if os.path.exists(out_dir):
@@ -198,7 +227,7 @@ class TestPropagation(unittest.TestCase):
        
     def test_run_5(self):
         """Test a retrograde orbit."""
-        
+        print('running test_run_5')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/05/')
         if os.path.exists(out_dir):
@@ -233,7 +262,7 @@ class TestPropagation(unittest.TestCase):
         
     def test_run_6(self):
         """Test a polar orbit to verify RAAN doesn't move."""
-        
+        print('running test_run_6')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/06/')
         if os.path.exists(out_dir):
@@ -269,49 +298,10 @@ class TestPropagation(unittest.TestCase):
         TestPropagation.printMaxDiff(pyRAAN,stkRAAN)
         
         self.assertEqual(True,result)
-    
-    def test_run_8(self):
-        """Test RAAN precession of low inclination retrograde orbit."""
-        
-        # Prepare the output directory
-        out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/08/')
-        if os.path.exists(out_dir):
-            shutil.rmtree(out_dir)
-        os.makedirs(out_dir)
-        
-        # set orbit
-        orbit_dict = copy.deepcopy(self.default_orbit_dict)
 
-        orbit_dict['state']['sma'] = 7000
-        orbit_dict['state']['raan'] = 98.8797
-        orbit_dict['state']['inc'] = 170
-        orbit_dict['state']['aop'] = 75.78089
-        orbit_dict['state']['ta'] = 277.789
-        orbit = OrbitState.from_dict(orbit_dict)
-        # execute
-        spacecraft = Spacecraft(orbitState=orbit)
-        out_file_kep = self.dir_path+"/temp/test_propagation_with_STK/07/state"
-        self.j2_prop.execute(spacecraft, None, None, out_file_kep, self.duration)
-        
-        stk_sat_state_fl = self.dir_path + "/STK/test_propagation_with_STK/08/kepler_states.txt"
-        
-        # read in state data to numpy array
-        orbitpyData = TestPropagation.orbitpyStateArray(out_file_kep)
-        stkData = TestPropagation.stkStateArray(stk_sat_state_fl)
-        
-        pyRAAN = orbitpyData[:,4]
-        stkRAAN = stkData[:,4]
-        
-        result = np.allclose(pyRAAN,stkRAAN,atol=.015)
-        
-        #Print Result
-        TestPropagation.printMaxDiff(pyRAAN,stkRAAN)
-        
-        self.assertEqual(True,result)
-        
     def test_run_7(self):
         """Test RAAN regression of low inclination prograde orbit."""
-        
+        print('running test_run_7')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/07/')
         if os.path.exists(out_dir):
@@ -348,6 +338,46 @@ class TestPropagation(unittest.TestCase):
         
         self.assertEqual(True,result)
     
+    def test_run_8(self):
+        """Test RAAN precession of low inclination retrograde orbit."""
+        print('running test_run_8')
+        # Prepare the output directory
+        out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_STK/08/')
+        if os.path.exists(out_dir):
+            shutil.rmtree(out_dir)
+        os.makedirs(out_dir)
+        
+        # set orbit
+        orbit_dict = copy.deepcopy(self.default_orbit_dict)
+
+        orbit_dict['state']['sma'] = 7000
+        orbit_dict['state']['raan'] = 98.8797
+        orbit_dict['state']['inc'] = 170
+        orbit_dict['state']['aop'] = 75.78089
+        orbit_dict['state']['ta'] = 277.789
+        orbit = OrbitState.from_dict(orbit_dict)
+        # execute
+        spacecraft = Spacecraft(orbitState=orbit)
+        out_file_kep = self.dir_path+"/temp/test_propagation_with_STK/07/state"
+        self.j2_prop.execute(spacecraft, None, None, out_file_kep, self.duration)
+        
+        stk_sat_state_fl = self.dir_path + "/STK/test_propagation_with_STK/08/kepler_states.txt"
+        
+        # read in state data to numpy array
+        orbitpyData = TestPropagation.orbitpyStateArray(out_file_kep)
+        stkData = TestPropagation.stkStateArray(stk_sat_state_fl)
+        
+        pyRAAN = orbitpyData[:,4]
+        stkRAAN = stkData[:,4]
+        
+        result = np.allclose(pyRAAN,stkRAAN,atol=.015)
+        
+        #Print Result
+        TestPropagation.printMaxDiff(pyRAAN,stkRAAN)
+        
+        self.assertEqual(True,result)
+        
+
         
 if __name__ == '__main__':
     unittest.main()

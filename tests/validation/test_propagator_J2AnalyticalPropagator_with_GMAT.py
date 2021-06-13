@@ -1,8 +1,36 @@
 """ *Unit tests for :class:`orbitpy.propagate.J2AnalyticalPropagator` covering checks on orbit state data when compared to GMAT output.*
+
+:code:`/temp/` folder contains temporary files produced during the run of the tests below.
+
+Expected output:
+
+running test_run_1
+Max Difference: 
+27.67002030282174
+.running test_run_2
+Max Difference: 
+27.751102792266693
+.running test_run_3
+Max Difference: 
+1317.9240873277327
+.running test_run_4
+Max Difference: 
+541.2608688800362
+.running test_run_5
+Max Difference: 
+25.44388171147648
+.running test_run_6
+Max Difference: 
+1271.9679618980774
+.running test_run_7
+Max Difference: 
+64.29284710321213
+.running test_run_8
+Max Difference: 
+65.50185802636156
+.
+
 """
-'''
-   :code:`/temp/` folder contains temporary files produced during the run of the tests below.
-'''
 
 import unittest
 import numpy as np
@@ -69,7 +97,7 @@ class TestPropagation(unittest.TestCase):
     
     def test_run_1(self):
         """ Test propagation of 7000 sma orbit w/ all other kepler states = 0.""" 
-        
+        print('running test_run_1')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_GMAT/01/')
         if os.path.exists(out_dir):
@@ -97,7 +125,7 @@ class TestPropagation(unittest.TestCase):
         
     def test_run_2(self):
         """ Test all states = one, except for size and eccentricity."""
-        
+        print('running test_run_2')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_GMAT/02/')
         if os.path.exists(out_dir):
@@ -129,7 +157,7 @@ class TestPropagation(unittest.TestCase):
     
     def test_run_3(self):
         """ Test middle values for all states, except for size and eccentricity."""
-        
+        print('running test_run_3')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_GMAT/03/')
         if os.path.exists(out_dir):
@@ -161,7 +189,7 @@ class TestPropagation(unittest.TestCase):
        
     def test_run_4(self):
         """ Test decimal values for all states, except for eccentricity"""
-        
+        print('running test_run_4')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_GMAT/04/')
         if os.path.exists(out_dir):
@@ -194,7 +222,7 @@ class TestPropagation(unittest.TestCase):
         
     def test_run_5(self):
         """Test a retrograde orbit."""
-        
+        print('running test_run_5')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_GMAT/05/')
         if os.path.exists(out_dir):
@@ -227,7 +255,7 @@ class TestPropagation(unittest.TestCase):
         
     def test_run_6(self):
         """Test a polar orbit to verify RAAN doesn't move."""
-        
+        print('running test_run_6')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_GMAT/06/')
         if os.path.exists(out_dir):
@@ -260,7 +288,7 @@ class TestPropagation(unittest.TestCase):
         
     def test_run_7(self):
         """Propagate retrograde near equatorial orbit to verify RAAN precession"""
-        
+        print('running test_run_7')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_GMAT/07/')
         if os.path.exists(out_dir):
@@ -294,7 +322,7 @@ class TestPropagation(unittest.TestCase):
         
     def test_run_8(self):
         """Propagate near equatorial orbit to verify RAAN regression."""
-        
+        print('running test_run_8')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_propagation_with_GMAT/08/')
         if os.path.exists(out_dir):

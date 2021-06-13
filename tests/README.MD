@@ -26,7 +26,7 @@
 │       midIntervalAccessData.csv
 │
 ├───validation -> Validation with other software
-│   │   test_coverage_GridCoverage_with_STK.py
+│   │   test_coveragecalculator_GridCoverage_with_STK.py
 │   │   test_propagator_J2AnalyticalPropagator_with_GMAT.py
 │   │   test_propagator_J2AnalyticalPropagator_with_STK.py
 │   │   __init__.py
@@ -36,7 +36,7 @@
 │   ├───STK
 │   │   ├───test_propagation_with_STK -> STK propagated state data
 │   │   │
-│   │   └───test_coverage_GridCoverage_with_STK -> STK coverage data
+│   │   └───test_coveragecalculator_GridCoverage_with_STK -> STK coverage data
 │   │
 ├───util -> Util folder for tests.
 │   │   coverage.py
