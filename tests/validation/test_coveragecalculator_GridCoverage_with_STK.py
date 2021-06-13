@@ -88,7 +88,7 @@ from orbitpy.grid import Grid
 from orbitpy.coveragecalculator import GridCoverage
 
 sys.path.append('../')
-from tests.util.coverage import Coverage
+from util.coverage import Coverage
 
 class TestOrbitPropCovGrid(unittest.TestCase):
         

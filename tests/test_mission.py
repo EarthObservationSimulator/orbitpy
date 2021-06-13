@@ -1,8 +1,8 @@
 """Unit tests for orbitpy.mission module.
 
 The following tests are framed to test the different possible ways in which the mission can be framed in the JSON string and called to execute.
-In each test, the output is tested with the results as computed on 14 April 2021 (thus representing the "truth" data). 
-The truth data is present in the folder ``test_data``.
+
+TODO: In each test, the output is tested with the results as computed on July 2021 (thus representing the "truth" data). The truth data is to be present in the folder ``test_data``.
 
 **Tests:**
 
@@ -13,15 +13,11 @@ The truth data is present in the folder ``test_data``.
 * ``test_scenario_5``: 1 satellite, multiple ground-stations ; propagation, contact-finder (ground-station only).
 * ``test_scenario_6``: Multiple satellites from constellation; propagation, contact-finder (ground-station, inter-satellite).
 * ``test_scenario_7``: Multiple satellites from constellation, single-instrument per satellite ; propagation, pointing-options-coverage, data-metrics calculation, contact-finder (inter-satellite only).
-* ``test_scenario_8``: Multiple satellites from list, multiple instruments per satellite, multiple ground-stations ; propagation, grid-coverage, data-metrics calculation, contact-finder (ground-station and inter-satellite).
+* TODO ``test_scenario_8``: Multiple satellites from list, multiple instruments per satellite, multiple ground-stations ; propagation, grid-coverage, data-metrics calculation, contact-finder (ground-station and inter-satellite).
 
 """
-import json
 import os, shutil
-import sys
 import unittest
-import random
-import numpy as np
 import pandas as pd
 
 import orbitpy
@@ -56,7 +52,7 @@ class TestMission(unittest.TestCase):
                                                   "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                 } \
                                     }, \
-                                "settings": {"outDir": "tests/temp/"} \
+                                "settings": {"outDir": "temp/"} \
                             }'
         mission = Mission.from_json(mission_json_str)
         self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459299.1292592594)
@@ -70,7 +66,7 @@ class TestMission(unittest.TestCase):
         self.assertIsNone(mission.grid)
         self.assertIsNone(mission.groundStation)
         self.assertAlmostEqual(mission.propagator.stepSize, 173.31598026839598) 
-        self.assertEqual(mission.settings.outDir,  "tests/temp/")
+        self.assertEqual(mission.settings.outDir,  "temp/")
         self.assertIsNone(mission.settings.coverageType)
         self.assertEqual(mission.settings.propTimeResFactor, 0.25)
         self.assertEqual(mission.settings.gridResFactor, 0.9)
@@ -87,7 +83,7 @@ class TestMission(unittest.TestCase):
                                                   "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                 } \
                                     }, \
-                                "settings": {"outDir": "tests/temp/", "propTimeResFactor": 0.125} \
+                                "settings": {"outDir": "temp/", "propTimeResFactor": 0.125} \
                             }'
         mission = Mission.from_json(mission_json_str)
         self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459270.75)
@@ -95,7 +91,6 @@ class TestMission(unittest.TestCase):
         self.assertEqual(mission.settings.propTimeResFactor, 1/8)
 
         out_info = mission.execute()
-
     
     def test_scenario_2(self):
         """  1 satellite, 1 instrument ; propagation (custom time-step), (field-of-regard) grid-coverage (2 (auto) grids, default and custom-grid res), basic-sensor data-metrics calculation.
@@ -116,7 +111,7 @@ class TestMission(unittest.TestCase):
                                             } \
                                     }, \
                                 "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 200}, \
-                                "settings": {"outDir": "tests/temp/", "coverageType": "Grid COverage"} \
+                                "settings": {"outDir": "temp/", "coverageType": "Grid COverage"} \
                             }'
         with self.assertWarns(Warning): # check for warning that user specified step-size is greater than auto-calculated step-size.
             mission = Mission.from_json(mission_json_str)
@@ -142,7 +137,7 @@ class TestMission(unittest.TestCase):
                                     }], \
                                 "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 60}, \
                                 "grid": [{"@type": "autogrid", "@id": "cus", "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180}, {"@type": "autogrid", "@id": "auto", "latUpper":20, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}], \
-                                "settings": {"outDir": "tests/temp/", "coverageType": "Grid COverage", "gridResFactor": 0.5} \
+                                "settings": {"outDir": "temp/", "coverageType": "Grid COverage", "gridResFactor": 0.5} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
@@ -155,7 +150,6 @@ class TestMission(unittest.TestCase):
         self.assertEqual(mission.grid[0].num_points, 1820) # ~ 4*pi/ (0.5917400590151374*pi/180 * 0.5917400590151374*pi/180) *  ((2*pi)*(2*pi/180))/(4*pi)
         # 1 deg grid resolution is input in the specifications
         self.assertEqual(mission.grid[1].num_points, 7402) # ~ 4*pi/ (pi/180 * pi/180) * ((2*pi)*(20*pi/180)/(4*pi)) 
-
 
         out_info = mission.execute()
     
@@ -178,7 +172,7 @@ class TestMission(unittest.TestCase):
                                                    "@id":"bs1", "@type":"Basic Sensor" \
                                                   }] \
                                     }, \
-                                "settings": {"outDir": "tests/temp/", "coverageType": "Pointing Options COverage"} \
+                                "settings": {"outDir": "temp/", "coverageType": "Pointing Options COverage"} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
@@ -213,7 +207,7 @@ class TestMission(unittest.TestCase):
                                                     } \
                                     }, \
                                 "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180}, {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180}], \
-                                "settings": {"outDir": "tests/temp/", "coverageType": "Pointing Options with Grid COverage"} \
+                                "settings": {"outDir": "temp/", "coverageType": "Pointing Options with Grid COverage"} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
@@ -238,7 +232,7 @@ class TestMission(unittest.TestCase):
                                     }, \
                                 "groundStation":[{"name": "TrollSAR", "latitude": -72.0029, "longitude": 2.5257, "altitude":0}, \
                                                  {"name": "CONAE", "latitude": -31.52, "longitude": -64.46, "altitude":0}], \
-                                "settings": {"outDir": "tests/temp/"} \
+                                "settings": {"outDir": "temp/"} \
                             }'
         
         mission = Mission.from_json(mission_json_str)
@@ -249,7 +243,7 @@ class TestMission(unittest.TestCase):
         self.assertEqual(mission.groundStation[1], GroundStation.from_dict({"name": "CONAE", "latitude": -31.52, "longitude": -64.46, "altitude":0}))
 
         out_info = mission.execute()
-
+    
     def test_scenario_6(self):
         """    Multiple satellites from constellation, common instrument; propagation, contact-finder (ground-station, inter-satellite only).
         """
@@ -267,7 +261,7 @@ class TestMission(unittest.TestCase):
                                         "@id": "abc" \
                                     }, \
                                 "groundStation":{"name": "CONAE", "latitude": -31.52, "longitude": -64.46, "altitude":0}, \
-                                "settings": {"outDir": "tests/temp/"} \
+                                "settings": {"outDir": "temp/"} \
                             }'
         mission = Mission.from_json(mission_json_str)
         self.assertEqual(len(mission.spacecraft), 8)        
@@ -434,7 +428,7 @@ class TestMission(unittest.TestCase):
                                                     }] \
                                     }], \
                                 "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180, "gridRes": 1}], \
-                                "settings": {"outDir": "tests/temp/", "coverageType": "Grid COverage"} \
+                                "settings": {"outDir": "temp/", "coverageType": "Grid COverage"} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
@@ -459,7 +453,7 @@ class TestMission(unittest.TestCase):
                                     }, \
                                 "groundStation":{"name": "AtMetro", "latitude": 33, "longitude": -98, "altitude":0, "minimumElevation":35}, \
                                 "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 4}, \
-                                "settings": {"outDir": "tests/temp/"} \
+                                "settings": {"outDir": "temp/"} \
                             }'
         mission = Mission.from_json(mission_json_str)
         out_info = mission.execute()

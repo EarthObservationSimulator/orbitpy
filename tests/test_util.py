@@ -13,7 +13,7 @@ from orbitpy.util import OrbitState, SpacecraftBus, Spacecraft
 import orbitpy.util
 import propcov
 
-from .util import spc1_json, spc2_json, spc3_json
+from util.spacecrafts import spc1_json, spc2_json, spc3_json
 
 class TestOrbitState(unittest.TestCase):
   

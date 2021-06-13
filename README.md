@@ -4,23 +4,22 @@ This package contain set of modules to compute orbit data of satellites. It perf
 
 1. Computation of satellite state (position and velocity) data.
 2. Generation of grid-of-points at a (user-defined or auto) angular resolution.
-3. Computation of Field Of Regard (FOR) based on the manueverability and sensor specifications, mounting.
+3. Computation of Field Of Regard (FOR) based on the maneuverability and sensor specifications, mounting.
 4. Computation of satellite access intervals over given set of grid points for the length of the mission. 
 5. Computation of inter-satellite communication time intervals.
 6. Computation of ground-station contact time intervals.
 
 ## Install
 
-Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `gfortran`
+Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`
 
-1. Make sure the `instrupy` package (dependency) has been installed. It can be installed by running `make` in the `instruments/instrupy/` directory.
-2. Navigate to the `propcov/` directory and run `make`. 
-3. Run `make` from the repo root directory (please make sure to complete step (2) before this step).
-4. Execute `make runtest` to run tests and verify *OK* message.
-5. Run an example, by running the following command from the repo root directory: `python bin/run_mission.py examples/example1/`.
-   See the results in the `orbitpy/examples/example1/` folder. More description of the examples is given in the documentation.
+1. Make sure the `instrupy` package (dependency) has been installed.
+2. Run `make` from the main git directory.
+4. Run `make runtest`. This runs all the tests and can be used to verify the package.
 
 Find the documentation in: `/docs/_build/html/index.html#`
+
+Note that the installation also installs the package `propcov` which consists of python wrapper and C++ source code which provide the functionality for orbit propagation, coverage calculations and sensor pixel-array projection.
 
 ## License and Copyright
 

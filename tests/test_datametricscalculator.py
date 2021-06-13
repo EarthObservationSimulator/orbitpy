@@ -6,24 +6,18 @@
 
 """
 import unittest
-import numpy as np
 import sys
 import os, shutil
-import copy
 import pandas as pd
-import random
-from collections import namedtuple
 
-import propcov
 from orbitpy.grid import Grid
-import orbitpy.grid 
 from orbitpy.util import Spacecraft
 from orbitpy.propagator import PropagatorFactory
 from orbitpy.coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
 from orbitpy.datametricscalculator import DataMetricsCalculator, DataMetricsOutputInfo, AccessFileInfo
 
 sys.path.append('../')
-from tests.util import spc1_json, spc3_json
+from util.spacecrafts import spc1_json, spc3_json
 
 class TestDataMetricCalculator(unittest.TestCase):
 

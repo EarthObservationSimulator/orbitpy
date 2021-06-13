@@ -20,7 +20,6 @@ import pandas as pd
 import random
 import warnings 
 
-import propcov
 from orbitpy.coveragecalculator import CoverageCalculatorFactory, GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
 import orbitpy.coveragecalculator
 from orbitpy.grid import Grid
@@ -31,7 +30,7 @@ from instrupy.util import ViewGeometry, Orientation, SphericalGeometry
 from instrupy import Instrument
 
 sys.path.append('../')
-from tests.util.spacecrafts import spc1_json, spc2_json, spc3_json
+from util.spacecrafts import spc1_json, spc2_json, spc3_json
 
 RE = 6378.137 # radius of Earth in kilometers
 

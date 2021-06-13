@@ -30,7 +30,7 @@ from instrupy.util import ViewGeometry, Orientation, SphericalGeometry
 from instrupy import Instrument
 
 sys.path.append('../')
-from tests.util.spacecrafts import spc1_json, spc2_json, spc3_json, spc4_json, spc5_json
+from util.spacecrafts import spc1_json, spc2_json, spc3_json, spc4_json, spc5_json
 
 RE = 6378.137 # radius of Earth in kilometers
     
@@ -64,7 +64,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
     def test_to_dict(self): #TODO
         pass
 
-    '''
+    
     def test_execute_0(self):
         """ Check the produced access file format.
         """        
@@ -220,7 +220,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
 
         self.assertTrue(np.allclose(group1['time index'].to_numpy(), access_data3['time index'].to_numpy()))
         self.assertTrue(np.allclose(group1['GP index'].to_numpy(), access_data3['GP index'].to_numpy()))
-    '''
+    
 
     def test_execute_3(self):
         """ Test the result of PointingOptionsWithGridCoverage with  

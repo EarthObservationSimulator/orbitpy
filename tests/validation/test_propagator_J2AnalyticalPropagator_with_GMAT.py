@@ -35,7 +35,6 @@ Max Difference:
 import unittest
 import numpy as np
 import os, shutil
-import subprocess
 import copy
 
 from orbitpy.propagator import PropagatorFactory, J2AnalyticalPropagator
