@@ -28,22 +28,17 @@ docs/_templates/*
 !docs/_templates/.gitkeep
 
 propcov/tests/tests-cpp/bin/SystemTest_Analysis
-oci/bin/genCovGrid
-oci/bin/orbitpropcov_grid
-oci/bin/orbitpropcov_popts
-oci/bin/pnt_opts_with_gp_in_fov_cov_calc
-oci/bin/j2_analytical_propagator
-oci/bin/gp_in_fov_cov_calc
-oci/bin/sensor_fov_projector
-oci/bin/pnt_axis_sphere_intsec_cov_calc
-tests/orbitpropcov/OrbitPropCovGrid/temp/*
-tests/orbitpropcov/OrbitPropCovPopts/temp/*
-tests/validation/temp/*
-tests/communications/temp/*
-tests/preprocess/temp/*
-examples/flood_case_ground_stn_contacts/*
-examples/20201024_adcs_paper/*
-examples/exampleTest/*
-examples/20201102_500kmSAR/*
+TBD/oci/bin/genCovGrid
+TBD/oci/bin/orbitpropcov_grid
+TBD/oci/bin/orbitpropcov_popts
+TBD/oci/bin/pnt_opts_with_gp_in_fov_cov_calc
+TBD/oci/bin/j2_analytical_propagator
+TBD/oci/bin/gp_in_fov_cov_calc
+TBD/oci/bin/sensor_fov_projector
+TBD/oci/bin/pnt_axis_sphere_intsec_cov_calc
+TBD/examples/flood_case_ground_stn_contacts/*
+TBD/examples/20201024_adcs_paper/*
+TBD/examples/exampleTest/*
+TBD/examples/20201102_500kmSAR/*
 
 !tests/test_data/*

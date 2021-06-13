@@ -30,7 +30,7 @@ from instrupy.util import ViewGeometry, Orientation, SphericalGeometry
 from instrupy import Instrument
 
 sys.path.append('../')
-from tests.util import spc1_json, spc2_json, spc3_json, spc4_json, spc5_json
+from tests.util.spacecrafts import spc1_json, spc2_json, spc3_json, spc4_json, spc5_json
 
 RE = 6378.137 # radius of Earth in kilometers
     
