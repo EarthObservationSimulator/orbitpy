@@ -58,6 +58,7 @@ class Settings(Entity):
         """ Parses an Settings object from a normalized JSON dictionary.
 
         :param d: Dictionary with the Settings specifications.
+        
         Following dictionary keys are expected:
         
         * outDir: Output directory path. Default is the location of the current directory.

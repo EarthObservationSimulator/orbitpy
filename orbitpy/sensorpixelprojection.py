@@ -2,19 +2,11 @@ import numpy as np
 import os
 import subprocess
 import json
-import shutil
-import glob
-import warnings
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import shapely
 import cartopy.geodesic
 import math
 
 from math import radians, cos, sin, asin, sqrt
-from instrupy.public_library import Instrument    
 
 import logging
 logger = logging.getLogger(__name__)
@@ -32,7 +24,7 @@ heightDetectors = 5
 outFilePath = "../senFovProj.json"
 '''
 
-class SensorFOVProjection():
+class SensorPixelProjection():
 
     @staticmethod
     def get_pixel_position_data(user_dir, date_JDUt1, state_eci, sat_orien, sen_orien, angleWidth, angleHeight, heightDetectors, widthDetectors):

@@ -25,74 +25,82 @@ Testing strategies
             the chosen validation methods are approximate in which case an *approximately equal to* assertion tests
             are used.
 3. Using known inputs, and outputs from external sources (eg: literature, other orbital simulation softwares such as GMAT, STK)
-4. Run tests after making any revisions to the code. This helps to check that the revisions do not have uninteded effects on the results.
+4. Run tests after making any revisions to the code. This helps to check that the revisions do not have unintended effects on the results.
+
+Refer to the page :ref:`external_validation` for description of the validation tests.
 
 
 Test Modules
 ============
 
-:class:`test_OrbitPropCovGrid_1`
+:class:`test_constellation`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_OrbitPropCovGrid_1
+.. automodule:: test_constellation
    :members:
 
-:class:`test_OrbitPropCovGrid_2`
+:class:`test_propagator`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_OrbitPropCovGrid_2
+.. automodule:: test_propagator
    :members:
 
-:class:`test_OrbitPropCovGrid_3`
+:class:`test_grid`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_OrbitPropCovGrid_3
-   :members:
-   
-:class:`test_GMAT_propagation_OrbitPropCovGrid`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: test_GMAT_propagation_OrbitPropCovGrid
+.. automodule:: test_grid
    :members:
 
-:class:`test_STK_propagation_OrbitPropCovGrid`
+:class:`test_contactfinder`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_contactfinder
+   :members:
+
+:class:`test_eclipsefinder`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_eclipsefinder
+   :members:
+
+:class:`test_coveragecalculator`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_STK_propagation_OrbitPropCovGrid
-   :members:
-   
-:class:`test_STK_coverage_OrbitPropCovGrid`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: test_STK_coverage_OrbitPropCovGrid
+.. automodule:: test_coveragecalculator
    :members:
 
-:class:`test_OrbitPropCovPopts_1`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:class:`test_coveragecalculator_gridcoverage`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_OrbitPropCovPopts_1
+.. automodule:: test_coveragecalculator_gridcoverage
    :members:
 
-:class:`test_OrbitPropCovPopts_2`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:class:`test_coveragecalculator_pointingoptionscoverage`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_OrbitPropCovPopts_2
+.. automodule:: test_coveragecalculator_pointingoptionscoverage
    :members:
 
-:class:`test_GroundStationComm`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:class:`test_coveragecalculator_pointingoptionswithgridcoverage`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_GroundStationComm
+.. automodule:: test_coveragecalculator_pointingoptionswithgridcoverage
    :members:
 
-:class:`test_InterSatelliteComm`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:class:`test_datametricscalculator`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_InterSatelliteComm
+.. automodule:: test_datametricscalculator
    :members:
 
-:class:`test_PreProcess`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:class:`test_mission`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: test_PreProcess
+.. automodule:: test_mission
+   :members:
+
+:class:`test_util`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: test_util
    :members:

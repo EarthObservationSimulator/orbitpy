@@ -39,18 +39,18 @@ class EclipseFinder(Entity):
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
-                start index, int, , Eclipse start time-index.
-                stop index, int, , Eclipse stop time-index.
+                    start index, int, , Eclipse start time-index.
+                    stop index, int, , Eclipse stop time-index.
 
         2. *DETAIL*: The first line of the file indicates the spacecraft identifier. The second line contains the epoch in Julian Date UT1. The 
             third line contains the step-size in seconds. The later lines contain the interval data in csv format with the following column headers:
-=
+
             .. csv-table:: Eclipse file INTERVAL data format
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
-                time index, int, , Time-index.
-                eclipse, bool, , 'T' indicating True or F indicating False.
+                    time index, int, , Time-index.
+                    eclipse, bool, , 'T' indicating True or F indicating False.
 
         :param spacecraft: Spacecraft object.
         :paramtype spacecraft: :class:`orbitpy.util.Spacecraft`

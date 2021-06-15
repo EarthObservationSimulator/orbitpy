@@ -14,8 +14,7 @@ Install
 2. Navigate to the :code:`oc/` directory and run :code:`make`. 
 3. Navigate to the repo root directory and run :code:`make`.
 4. Execute :code:`make runtest` to run tests and verify *OK* message.
-5. Run an example, by running the following command from the repo root directory: :code:`python bin/run_mission.py examples/example1/`.
-   See the results in the :code:`examples/example1/` folder. Description of the examples in given in :ref:`examples` page. 
+
 
 Find the documentation in: :code:`/docs/_build/html/index.html`
 
@@ -26,13 +25,12 @@ Find the documentation in: :code:`/docs/_build/html/index.html`
    user_json_desc
    output_desc
    api_reference
-   examples
    miscellaneous
    tests
    external_validation
 
 Description
-===========
+=============
 
 This package contain set of modules to compute orbit data of satellites. It performs the following functions:
 

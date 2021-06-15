@@ -3,3 +3,5 @@
 
 .. automodule:: orbitpy.util
    :members:
+   :undoc-members:
+   :show-inheritance:

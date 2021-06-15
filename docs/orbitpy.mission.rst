@@ -1,7 +1,7 @@
-``orbit.communications`` --- Communications
+``orbit.mission`` --- Mission
 ================================================
 
-.. automodule:: orbitpy.communications
+.. automodule:: orbitpy.mission
    :members:
    :undoc-members:
    :show-inheritance:

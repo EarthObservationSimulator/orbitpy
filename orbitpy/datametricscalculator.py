@@ -172,11 +172,11 @@ class DataMetricsCalculator(Entity):
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
-                time index, int, , Access time-index.
-                GP index, integer, , Grid-point index. 
-                pnt-opt index, int, , Pointing options index.
-                lat [deg], float, , Latitude in degrees corresponding to the GP index/ pnt-opt index.
-                lon [deg], float, , Longitude in degrees corresponding to the GP index/ pnt-opt index.
+                    time index, int, , Access time-index.
+                    GP index, integer, , Grid-point index. 
+                    pnt-opt index, int, , Pointing options index.
+                    lat [deg], float, , Latitude in degrees corresponding to the GP index/ pnt-opt index.
+                    lon [deg], float, , Longitude in degrees corresponding to the GP index/ pnt-opt index.
 
                 Other columns containing the data-metrics are present. Refer to the docs of the corresponding instrument type (in ``instrupy`` package)
                 for description of the evaluated data-metrics.

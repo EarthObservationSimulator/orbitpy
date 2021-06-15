@@ -149,8 +149,8 @@ class Grid(Entity):
         in degrees, and *lon[deg]* is the longitude in degrees. The grid-points are referred by indices starting from 0.
 
         .. csv-table:: Example of the coverage grid data file.
-        :header: lat[deg],lon[deg]
-        :widths: 10,10
+            :header: lat[deg],lon[deg]
+            :widths: 10,10
         
             9.9,20
             9.9,20.1015

@@ -66,8 +66,8 @@ class ContactFinder(Entity):
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
-                start index, int, , Contact start time-index.
-                stop index, int, , Contact stop time-index.
+                    start index, int, , Contact start time-index.
+                    stop index, int, , Contact stop time-index.
 
         2. *DETAIL*: The first line of the file indicates the entity identifiers. The second line contains the epoch in Julian Date UT1. The 
             third line contains the step-size in seconds. The later lines contain the interval data in csv format with the following column headers:
@@ -77,10 +77,10 @@ class ContactFinder(Entity):
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
-                time index, int, , Contact time-index.
-                access, bool, , 'T' indicating True or F indicating False.
-                range [km], float, kilometer, Distance between the two entities at the corresponding time.
-                elevation [deg], float, degrees, Angle between the ground-plane and the ground-station to satellite line.
+                    time index, int, , Contact time-index.
+                    access, bool, , 'T' indicating True or F indicating False.
+                    range [km], float, kilometer, Distance between the two entities at the corresponding time.
+                    elevation [deg], float, degrees, Angle between the ground-plane and the ground-station to satellite line.
 
         :param entityA: Spacecraft or Ground-station ``orbitpy.util`` object.
         :paramtype entityA: :class:`orbitpy.util.Spacecraft` or :class:`orbitpy.util.GroundStation`
@@ -103,7 +103,7 @@ class ContactFinder(Entity):
         :paramtype entityB_state_cart_fl: str or None
 
         :param out_filename: Name of output file in when the results are written. If not specified, the output filename is derived from the entity names
-                             in the following format: *entityAName*_to_*entityBName*_contact.csv
+                             in the following format: entityAName_to_entityBName_contact.csv
         :paramtype out_filename: str or None
 
         :param out_type: Indicates the type of output data to be saved. Default is OutType.INTERVAL.

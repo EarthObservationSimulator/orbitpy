@@ -30,6 +30,11 @@ docs/_templates/*
 propcov/tests/tests-cpp/bin/SystemTest_Analysis
 propcov/build/
 *.so
+
+tests/temp
+tests/test_coveragecalculator/temp
+tests/validation/temp
+
 TBD/oci/bin/genCovGrid
 TBD/oci/bin/orbitpropcov_grid
 TBD/oci/bin/orbitpropcov_popts

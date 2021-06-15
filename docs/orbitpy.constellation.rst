@@ -1,7 +1,7 @@
-``orbit.preprocess`` --- Preprocess User Inputs
+``orbit.constellation`` --- Constellation
 ================================================
 
-.. automodule:: orbitpy.preprocess
+.. automodule:: orbitpy.constellation
    :members:
    :undoc-members:
    :show-inheritance:

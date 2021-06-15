@@ -377,10 +377,10 @@ class GridCoverage(Entity):
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
-                time index, int, , Access time-index.
-                GP index, integer, , Grid-point index.
-                lat [deg], float, degrees, Latitude corresponding to the GP index.
-                lon [deg], float, degrees, Longitude corresponding to the GP index.
+                    time index, int, , Access time-index.
+                    GP index, integer, , Grid-point index.
+                    lat [deg], float, degrees, Latitude corresponding to the GP index.
+                    lon [deg], float, degrees, Longitude corresponding to the GP index.
         
         :paramtype out_file_access: str
 
@@ -626,10 +626,10 @@ class PointingOptionsCoverage(Entity):
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
-                time index, int, , Access time-index.
-                pnt-opt index, int, , "Pointing options index. The indexing is implicit and starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
-                lat [deg], float, degrees, Latitude of accessed ground-location.
-                lon [deg], float, degrees, Longitude of accessed ground-location.
+                    time index, int, , Access time-index.
+                    pnt-opt index, int, , "Pointing options index. The indexing is implicit and starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
+                    lat [deg], float, degrees, Latitude of accessed ground-location.
+                    lon [deg], float, degrees, Longitude of accessed ground-location.
         
         :paramtype out_file_access: str
 
@@ -820,11 +820,11 @@ class PointingOptionsWithGridCoverage(Entity):
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
-                time index, int, , Access time-index.
-                pnt-opt index, int, , "Pointing options index.  The indexing is implicit and starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
-                GP index, integer, , Grid-point index.
-                lat [deg], float, degrees, Latitude corresponding to the GP index.
-                lon [deg], float, degrees, Longitude corresponding to the GP index.
+                    time index, int, , Access time-index.
+                    pnt-opt index, int, , "Pointing options index.  The indexing is implicit and starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
+                    GP index, integer, , Grid-point index.
+                    lat [deg], float, degrees, Latitude corresponding to the GP index.
+                    lon [deg], float, degrees, Longitude corresponding to the GP index.
         
         :paramtype out_file_access: str
 

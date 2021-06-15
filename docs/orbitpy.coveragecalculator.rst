@@ -1,7 +1,7 @@
-``orbitpy.orbitpropcov`` --- Orbit Propagation and Coverage
+``orbitpy.coveragecalculator`` --- Coverage Calculator
 ===========================================================
 
-.. automodule:: orbitpy.orbitpropcov
+.. automodule:: orbitpy.coveragecalculator
    :members:
    :undoc-members:
    :show-inheritance:

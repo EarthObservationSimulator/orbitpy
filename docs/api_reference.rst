@@ -6,11 +6,17 @@ This API reference provides detailed descriptions of OrbitPy's classes and funct
    :maxdepth: 1
    
    orbitpy
-   orbitpy.preprocess
-   orbitpy.orbitpropcov 
-   orbitpy.communications
-   orbitpy.obsdatametrics
+   orbitpy.constellation
+   orbitpy.propagator 
+   orbitpy.grid
+   orbitpy.coveragecalculator
+   orbitpy.contactfinder
+   orbitpy.eclipsefinder
+   orbitpy.datametricscalculator
+   orbitpy.mission
+   orbitpy.sensorpixelprojection
    orbitpy.util
+
    
 
 
