@@ -32,7 +32,7 @@ Note that this installation also automatically installs the package `propcov` wh
 In order to uninstall run `make bare` in the terminal.
 
 ## Directory structure
-
+```
 ├───docs (sphinx documentation)
 ├───orbitpy (folder with the source files)
 ├───propcov (propcov package)
@@ -46,7 +46,7 @@ In order to uninstall run `make bare` in the terminal.
         └───STK (STK reference data)
             ├───test_coveragecalculator_GridCoverage_with_STK
             └───test_propagation_with_STK
-
+```
 ## License and Copyright
 
 Copyright 2021 Bay Area Environmental Research Institute
