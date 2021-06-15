@@ -2,15 +2,12 @@
 # Date:           2020.02.11
 
 
-PROJECT := OrbitPy
-
+PROJECT := orbitpy
 
 .DEFAULT_GOAL := all
 
 AUX = propcov
 TEST = tests
-AUX_OBJ = $(AUX_DRIVER).o
-AUX_BIN = $(AUX)/bin
 
 DOC = docs
 
@@ -24,9 +21,9 @@ help:
 	@echo "  clean      to remove *.pyc files and __pycache__ directories"
 	@echo "  bare       to uninstall the package and remove *egg*"
 
-all: bare aux install docs
+all: bare install docs
 
-aux: aux_bare 
+aux: aux_bare # install the propcov package
 	-X=`pwd`; \
 	echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); make all;
 
@@ -46,16 +43,12 @@ docs_clean:
 	-X=`pwd`; \
 	echo '<<<' $$DOC '>>>'; cd $$X; cd $(DOC); make clean;
 
-install: 
-	-X=`pwd`; \
-	echo '<<<' $$AUX '>>>'; cd $$X; cd $(AUX); pip install -e . \
-	cd ..; \
+install: aux
 	pip install -e .
 
 runtest:
 	-X=`pwd`; \
-	cd $$X; cd $(TESTS); 
-	python -m unittest discover
+	cd $$X; cd $(TEST); python -m unittest discover
 
 clean: aux_clean docs_clean
 	@echo "Cleaning up..."
@@ -64,7 +57,5 @@ clean: aux_clean docs_clean
 
 bare: clean aux_bare docs_clean
 	pip uninstall -y $(PROJECT) 
-	rm -rf $(PROJECT).egg-info .eggs
-	-X=`pwd`; \
-	cd $$X; cd $(AUX); pip uninstall -y $(PROJECT) \
-	rm -rf $(PROJECT).egg-info .eggs
+	rm -rf $(PROJECT).egg-info
+

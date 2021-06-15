@@ -28,6 +28,8 @@ docs/_templates/*
 !docs/_templates/.gitkeep
 
 propcov/tests/tests-cpp/bin/SystemTest_Analysis
+propcov/build/
+*.so
 TBD/oci/bin/genCovGrid
 TBD/oci/bin/orbitpropcov_grid
 TBD/oci/bin/orbitpropcov_popts

@@ -1,7 +1,17 @@
-# Define macros for locations
-SUBS = extern lib tests
+PACKAGE := propcov
 
-all install clean bare runtest:
-	-X=`pwd`; \
-	for i in $(SUBS); \
-	do echo '<<<' $$i '>>>'; cd $$X/$$i; make $@; done
+all: bare install
+
+install:
+	pip install -e .
+
+clean: 
+	@echo "Cleaning up..."
+	@find . -name "*.pyc" -delete
+	@find . -type d -name __pycache__ -print0 | xargs -0 rm -rf
+
+bare: clean
+	pip uninstall -y $(PACKAGE) 
+	rm -rf $(PACKAGE).egg-info
+	rm -rf build
+	find . -name '*.so' -delete # remove any previously created the library file
