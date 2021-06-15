@@ -34,7 +34,7 @@ The directory structure and build is based on the *cmake_example* git-repo avail
 
 ## Installation
 
-Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `cmake`.
+**Requires:** Unix-like operating system, `python 3.8`, `pip`, `gcc`, `cmake`.
 
 **To install:** Run `make` from the main git directory.
 
