@@ -14,9 +14,9 @@ The directory structure and build is based on the *cmake_example* git-repo avail
 
 ### Notes
 
-> `cmake`, `gcc` are primary requirements.
+* `cmake`, `gcc` are primary requirements.
 
-> The primary work needed to utilize `pybind11` is to:
+* The primary work needed to utilize `pybind11` is to:
 
     * The `pybind11` source folder in `propcov/extern/`
     
@@ -26,17 +26,17 @@ The directory structure and build is based on the *cmake_example* git-repo avail
 
     * The `setup.py` file in the `propcov` folder.
 
-> The `propcov/src/main.cpp` source ile contains the wrapping code of the C++ sources. Note that not all the C++ source is currently wrapped.
+* The `propcov/src/main.cpp` source ile contains the wrapping code of the C++ sources. Note that not all the C++ source is currently wrapped.
 
-> When the `propcov` package is installed a `build` folder and `***.so` library file is created along with `***.egg-info`. These must be deleted in the un-installation process so as to allow for smooth re-installation.
+* When the `propcov` package is installed a `build` folder and `***.so` library file is created along with `***.egg-info`. These must be deleted in the un-installation process so as to allow for smooth re-installation.
 
-> The `Makefile` present in the `propcov` folder is to facilitate easy installation, cleanup of the `propcov` package. It is not associated with the `cmake` build process.
+* The `Makefile` present in the `propcov` folder is to facilitate easy installation, cleanup of the `propcov` package. It is not associated with the `cmake` build process.
 
 ## Installation
 
-Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `cmake`
+Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `cmake`.
 
-> Run `make` from the main git directory.
+**To install:** Run `make` from the main git directory.
 
 In case of MacOS, there may arise a compiler selection error, in which case please try the installation after running:
 ```
@@ -82,17 +82,17 @@ The `gmatutil` folder is a copy of the same folder from the GMAT2020a repository
 
 * Passing `propcov` objects as arguments in functions shows *pass-by-reference* C++ behavior.
 
-Modification of the `propcov` objects within the function to which they have been passed *seems* to result in modification of the parent 
-object outside the function, i.e. it is a pass-by-reference. This behavior is to still confirmed and investigated. 
+    Modification of the `propcov` objects within the function to which they have been passed *seems* to result in modification of the parent 
+    object outside the function, i.e. it is a pass-by-reference. This behavior is to still confirmed and investigated. 
 
-In order to bypass this undesired behavior, a copy of the original argument is made within the function and the copy is used. Example in the `orbitpy.propagator.J2AnalyticalPropagator.execute(.)` function, the following snippet is used to make a copy of the `start_date` function argument.
+    In order to bypass this undesired behavior, a copy of the original argument is made within the function and the copy is used. Example in the `orbitpy.propagator.J2AnalyticalPropagator.execute(.)` function, the following snippet is used to make a copy of the `start_date` function argument.
 
-```
-_start_date = propcov.AbsoluteDate()
-_start_date.SetJulianDate(start_date.GetJulianDate())
-```
+    ```
+    _start_date = propcov.AbsoluteDate()
+    _start_date.SetJulianDate(start_date.GetJulianDate())
+    ```
 
-Also note that in order to make a deep-copy, we need to initialize a new object with the same object parameters as the original object as seen in the above example.
+    Also note that in order to make a deep-copy, we need to initialize a new object with the same object parameters as the original object as seen in the above example.
 
 
 
