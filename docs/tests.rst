@@ -27,7 +27,7 @@ Testing strategies
 3. Using known inputs, and outputs from external sources (eg: literature, other orbital simulation softwares such as GMAT, STK)
 4. Run tests after making any revisions to the code. This helps to check that the revisions do not have unintended effects on the results.
 
-Refer to the page :ref:`external_validation` for description of the validation tests.
+Refer to the page :ref:`validation` for description of the validation tests.
 
 
 Test Modules

@@ -1,7 +1,7 @@
-.. _output_desc:
+.. _output_data_file_desc:
 
-Output Description
-*******************
+Output Data File Description
+******************************
 
 Satellite States Data
 =========================

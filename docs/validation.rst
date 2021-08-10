@@ -1,6 +1,6 @@
-.. _external_validation:
+.. _validation:
 
-External Validation
+Validation
 *******************
 
 About

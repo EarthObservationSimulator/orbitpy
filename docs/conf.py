@@ -36,8 +36,13 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary'
     ]
+
+# Controlling automatically generating summary tables in the docs
+autosummary_generate = True
+autosummary_imported_members = True
 
 mathjax_path="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
 
@@ -54,13 +59,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata_sphinx_theme'
 # to fix long table-wdith problem
-html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',  # override wide tables in RTD theme
-        ],
-     }
+#html_context = {
+#    'css_files': [
+#        '_static/theme_overrides.css',  # override wide tables in RTD theme
+#        ],
+#     }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -73,7 +78,6 @@ intersphinx_mapping = {
     'python': ('http://docs.python.org/3.8', None),
     'numpy': ('http://docs.scipy.org/doc/numpy/', None),
     'pycodestyle': ('https://pycodestyle.readthedocs.io/en/latest/', None),
-    'nose': ('https://nose.readthedocs.io/en/latest/', None),
 }
 
 # -- Options for todo extension ----------------------------------------------

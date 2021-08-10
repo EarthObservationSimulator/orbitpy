@@ -1,16 +1,15 @@
 """ 
 .. module:: constellation
 
-:synopsis: *Collection of different types satellite Constellation classes to be used for handling
+:synopsis: *Collection of different types satellite constellation classes to be used for handling
             storage of the respective constellation model parameters and generation of orbits.* 
 
 """
 
-import numpy as np
 import uuid
 
 import propcov
-from .util import DateType, OrbitState
+from .util import OrbitState
 from instrupy.util import Entity, Constants
 
 class ConstellationFactory:
@@ -230,7 +229,8 @@ class WalkerDeltaConstellation(Entity):
         print(".......Done.......")
         return orbits
 class TrainConstellation(Entity):
-
+    """ TBD
+    """
     def __init__(self):
         raise NotImplementedError
 

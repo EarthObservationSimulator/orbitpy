@@ -22,6 +22,7 @@ core
 # untracked subdirectories
 .vscode
 .ipynb_checkpoints
+desktop.ini
 docs/_build/*
 !docs/_static/.gitkeep
 docs/_templates/*
