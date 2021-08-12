@@ -2,7 +2,8 @@
 .. module:: constellation
 
 :synopsis: *Collection of different types satellite constellation classes to be used for handling
-            storage of the respective constellation model parameters and generation of orbits.* 
+            storage of the respective constellation model parameters and generation of orbits of the
+            satellites in the constellation.* 
 
 """
 
@@ -14,17 +15,54 @@ from instrupy.util import Entity, Constants
 
 class ConstellationFactory:
     """ Factory class which allows to register and invoke the appropriate constellation-model class. 
+    See https://realpython.com/factory-method-python/#supporting-additional-formats
     
-    :class:`WalkerDeltaConstellation`, :class:`CustomOrbit` and :class:`TrainConstellation` constellation-model classes are registered 
+    :class:`WalkerDeltaConstellation` and :class:`TrainConstellation` constellation-model classes are registered 
     in the factory. Additional user-defined constellation-model classes can be registered as shown below: 
 
     Usage: 
     
+    Initializing in-built constellation object.
+
     .. code-block:: python
-        
-        factory = orbitpy.ConstellationFactory()
-        factory.register_constellation_model('Sentinel-Constellation', SentinelConstellation)
-        const1 = factory.get_constellation_model('Sentinel-Constellation')
+    
+        factory = ConstellationFactory()
+        specs = {"@type": 'Walker Delta Constellation', "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
+                            "relativeSpacing": 1, "alt": 500, "ecc": 0.001, "inc": 45, "aop": 135, "@id": "abc"}
+        wd_model = factory.get_constellation_model(specs)
+    
+    Registering and initializing a custom constellation object.
+
+    .. code-block:: python
+
+        class NewConstellation2021():
+            def __init__(self, alt):
+               self.alt = alt
+               
+            @staticmethod
+            def from_dict(d):
+               return NewConstellation2021(alt = d.get('alt', 0))
+            
+            def __eq__(self, other):
+               if(isinstance(self, other.__class__)):
+                     return (self.alt==other.alt)
+               else:
+                     return NotImplemented 
+            
+            def generate_orbits(self):
+
+               orbits = []
+               date = propcov.AbsoluteDate()
+               state_dict = {"stateType":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": 6378 + self.alt, "ecc": 0, "inc": 0, "raan": 0, "aop": 0, "ta": 0}
+               state = OrbitState.state_from_dict(state_dict)
+               orbits.append(OrbitState(date, state, 0))
+
+               return orbits
+
+        factory = ConstellationFactory()
+        factory.register_constellation_model('New Constellation 2021', NewConstellation2021) # register user defined constellation
+        specs = {'@type': 'New Constellation 2021', 'alt': 700}
+        const1 = factory.get_constellation_model(specs) # initialization of the constellation object const1
 
     :ivar _creators: Dictionary mapping constellation type label to the appropriate constellation class. 
     :vartype _creators: dict
@@ -54,6 +92,9 @@ class ConstellationFactory:
                     type in the "@type" dict key. The constellation type is valid if it has been
                     registered with the ``ConstellationFactory`` instance.
         :vartype _type: dict
+
+        :return: The appropriate constellation object initialized to the input specifications.
+        :rtype: :class:`orbitpy.constellation.WalkerDeltaConstellation` or :class:`orbitpy.constellation.TrainConstellation` or custom constellation class.
         
         """
         _type = specs.get("@type", None)
@@ -96,6 +137,29 @@ class WalkerDeltaConstellation(Entity):
 
     :ivar _id: Unique constellation identifier.
     :vartype _id: str
+
+    Usage:
+
+    1. 
+        .. code-block:: python
+
+                factory = ConstellationFactory()
+                specs = {"@type": 'Walker Delta Constellation', "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
+                        "relativeSpacing": 1, "alt": 500, "ecc": 0.001, "inc": 45, "aop": 135, "@id": "abc"}
+                wd_model = factory.get_constellation_model(specs) # initialization
+                print(wd_model.generate_orbits())
+
+                >> [OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
+
+    2.
+        .. code-block:: python
+
+                date =  OrbitState.date_from_dict({"dateType": "JULIAN_DATE_UT1", "jd":2459270.75})
+                wd_model = WalkerDeltaConstellation( date=date, numberSatellites=2, numberPlanes=1, relativeSpacing=1, alt=500, ecc=0.001, inc=45, aop=135, _id="abc")
+                print(wd_model.generate_orbits())
+
+                >> [OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
+
 
     """
     def __init__(self, date=None, numberSatellites=None, numberPlanes=None, relativeSpacing=None, alt=None, ecc=None, inc=None, aop=None, _id=None):
@@ -178,7 +242,7 @@ class WalkerDeltaConstellation(Entity):
         # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
         if(isinstance(self, other.__class__)):
             return (self.date==other.date) and (self.numberSatellites==other.numberSatellites) and (self.numberPlanes==other.numberPlanes) and \
-                    (self.relativeSpacing==other.relativeSpacing) and (self.relativeSpacing==other.relativeSpacing) and (self.alt==other.alt) and \
+                    (self.relativeSpacing==other.relativeSpacing) and (self.alt==other.alt) and \
                    (self.ecc==other.ecc) and (self.inc==other.inc)  and (self.aop==other.aop) 
                 
         else:
@@ -228,6 +292,7 @@ class WalkerDeltaConstellation(Entity):
                 print('{orb_id}, {sma}, {ecc}, {inc}, {raan}, {aop}, {ta}'.format(orb_id=orb_id, sma=sma, ecc=ecc, inc=inc, raan=raan, aop=aop, ta=ta))
         print(".......Done.......")
         return orbits
+
 class TrainConstellation(Entity):
     """ TBD
     """
@@ -236,5 +301,3 @@ class TrainConstellation(Entity):
 
     def generate_orbits(self):
         pass
-
-    

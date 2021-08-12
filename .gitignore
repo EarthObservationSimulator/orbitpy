@@ -25,8 +25,9 @@ core
 desktop.ini
 docs/_build/*
 !docs/_static/.gitkeep
-docs/_templates/*
 !docs/_templates/.gitkeep
+docs/generated/*
+
 
 propcov/tests/tests-cpp/bin/SystemTest_Analysis
 propcov/build/

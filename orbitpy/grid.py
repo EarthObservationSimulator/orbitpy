@@ -13,16 +13,23 @@ import propcov
 from instrupy.util import Entity, EnumEntity, Constants
 import orbitpy.util
 
+
 GridPoint = namedtuple("GridPoint", ["latitude", "longitude"])
+"""Function returns a namedtuple class to store grid-points as (in general this shall be a list) latitudes and longitudes in degrees.
+
+"""
 
 class Grid(Entity):
     """ Class to handle grid related operations. 
 
     :ivar point_group: A ``propcov`` object of the instance ``propcov.PointGroup``, used to store and handle 
-                       the grid locations (latitudes and longitudes). The grid-points are referred by indices starting from 0.
+                       the grid locations (latitudes and longitudes in degrees). The grid-points are referred by indices starting from 0.
                        E.g. Grid-point 0 refers to the first grid-point in the point_group object (which can be obtained 
                        using the ``GetLatLon(.)``, ``GetPointPositionVector(.)`` function.).
-    :vartype lon: point_group, :class:`propcov.PointGroup`
+    :vartype point_group: :class:`propcov.PointGroup`
+
+    :ivar num_points: Total number of grid points.
+    :vartype num_points: int
 
     :ivar _id: Unique identifier of the grid. Could be used to indicate a region identifier, where the set of grid-points represent a region.
     :vartype _id: str
@@ -36,7 +43,7 @@ class Grid(Entity):
         super(Grid, self).__init__(_id, "Grid")
 
     class Type(EnumEntity):
-        """Enumeration of recognized coverage-grid types."""
+        """Enumeration of recognized grid types."""
         CUSTOMGRID = "CUSTOMGRID",
         AUTOGRID = "AUTOGRID"
 
@@ -50,8 +57,6 @@ class Grid(Entity):
                 
                 * "@type": (str) Grid type. Possible values are "autoGrid" or "customGrid". Depending on the value, other key/value pairs manifest, as described
                                  in the functions ``from_autogrid(d)`` and ``from_custom_grid(d)``.
-                * "@id": (str) Unique identifier of the grid. Could be used to indicate a region identifier, where the set of grid-points 
-                          represent a region. Default: A random string.
 
         :paramtype d: dict
 
@@ -76,6 +81,7 @@ class Grid(Entity):
         
         :return: Grid object as python dictionary
         :rtype: dict
+
         """
         self.write_to_file(filepath)
         return {"@type": "CUSTOMGRID", "covGridFilePath": filepath, "@id": self._id}
@@ -86,14 +92,14 @@ class Grid(Entity):
 
         Following keys are to be specified:
 
-                * latUpper: (float) Upper latitude in degrees. Default value is 90 deg.
-                * latLower: (float) Lower latitude in degrees. Default value is -90 deg.
-                * lonUpper: (float) Upper longitude in degrees. Default value is 180 deg.
-                * lonLower: (float) Lower longitude in degrees. Default value is -180 deg.
-                * gridRes: (float)  Grid resolution in degrees. Default value is 1 deg.
-                * _id : (str or int) Unique grid-identifier. If absent a random id is assigned.
+                * "latUpper": (float) Upper latitude in degrees. Default value is 90 deg.
+                * "latLower": (float) Lower latitude in degrees. Default value is -90 deg.
+                * "lonUpper": (float) Upper longitude in degrees. Default value is 180 deg.
+                * "lonLower": (float) Lower longitude in degrees. Default value is -180 deg.
+                * "gridRes": (float)  Grid resolution in degrees. Default value is 1 deg.
+                * "@id" : (str or int) Unique grid-identifier. If absent a random id is assigned.
 
-        Specify latitude bounds in the range of -90 deg to +90 deg. Specify longitude bounds in the range of -180 deg to +180 deg. 
+        *Specify latitude bounds in the range of -90 deg to +90 deg. Specify longitude bounds in the range of -180 deg to +180 deg.*
         
         Example:
 
@@ -132,8 +138,8 @@ class Grid(Entity):
 
         Following keys are to be specified:
 
-                * covGridFilePath: (str) Filepath to the file containing the grid points.
-                * _id : (str or int) Unique grid-identifier. If absent a random id is assigned.
+                * "covGridFilePat"h": (str) Filepath to the file containing the grid points.
+                * "@id" : (str or int) Unique grid-identifier. If absent a random id is assigned.
 
         Example:
 
@@ -149,7 +155,7 @@ class Grid(Entity):
         in degrees, and *lon[deg]* is the longitude in degrees. The grid-points are referred by indices starting from 0.
 
         .. csv-table:: Example of the coverage grid data file.
-            :header: lat[deg],lon[deg]
+            :header: lat [deg], lon [deg]
             :widths: 10,10
         
             9.9,20
@@ -163,7 +169,7 @@ class Grid(Entity):
             -49.1,22.7493
             -49.1,22.902
 
-        .. note:: Please specify latitudes in the range of -90 deg to +90 deg and longitudes in the range of -180 deg to +180 deg. Do *NOT* 
+        .. warning:: Please specify latitudes in the range of -90 deg to +90 deg and longitudes in the range of -180 deg to +180 deg. Do *NOT* 
                   specify the longitudes in range of 0 deg to 360 deg.
         
         :return: Grid object
@@ -198,7 +204,7 @@ class Grid(Entity):
                                         )
 
     def get_lat_lon(self):
-        """ Get the grid points (coordinates).
+        """ Get all the grid points (coordinates).
 
         :return: Grid points (latitudes and longitudes in degrees).
         :rtype: namedtuple, (list, list), float
@@ -242,20 +248,12 @@ class Grid(Entity):
 def compute_grid_res(spacecraft, grid_res_fac):
     """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.
 
-    The grid resolution is set such that at any given arbitrary time, the sensor footprint from its (scene) field-of-**view** captures atleast one grid-point
+    The grid resolution is to be set such that at any given arbitrary time, the sensor footprint from its (scene) field-of-**view** captures atleast one grid-point
     when the satellite is somewhere well within the interior of a region. This can be achieved by setting the grid resolution (spacing between
     the grid points) to be less than the minimum footprint dimension. A grid resolution factor :code:`grid_res_fac` is defined 
     (with default value 0.9) and the grid resolution is computed as (:code:`grid_res_fac` . minimum footprint angular dimension).
     For example, in case of rectangular sensor with FOV: 5 deg x 15 deg at an altitude of 500km, the minimum footprint angular dimension 
     is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives the grid resolution as 0.3530 deg.
-
-    .. figure:: grid_res_illus.png
-        :scale: 75 %
-        :align: center
-
-        Illustration of relationship between grid resolution and sensor footprint.
-
-    .. note:: Note that the grid-resolution is calculated from the FOV.
 
     :param spacecraft: List of spacecrafts in the mission.
     :paramtype spacecraft: list, :class:`orbitpy:util.Spacecraft`
@@ -305,13 +303,13 @@ def compute_grid_res(spacecraft, grid_res_fac):
 class GridOutputInfo(Entity):
     """ Class to hold information about the grid-data (geo-coordinates).
     
-    :ivar gridId: Spacecraft identifier.
+    :ivar gridId: Grid identifier.
     :vartype gridId: str or int
 
     :ivar gridFile: File (filename with path) where the grid data is saved.
     :vartype gridFile: str
 
-    :ivar _id: Unique identifier.
+    :ivar _id: Unique identifier of the ``GridOutputInfo`` instance.
     :vartype _id: str or int
 
     """
@@ -326,10 +324,17 @@ class GridOutputInfo(Entity):
         """ Parses an ``GridOutputInfo`` object from a normalized JSON dictionary.
         
         :param d: Dictionary with the GridOutputInfo attributes.
+
+        Following keys are to be specified:
+
+                * "gridId": (str or int) Grid identifier.
+                * "gridFile": (str)  File (filename with path) where the grid data is saved.
+                * "@id" : (str or int) Unique identifier. Default is None.
+
         :paramtype d: dict
 
         :return: GridOutputInfo object.
-        :rtype: :class:`orbitpy.datametricscalculator.GridOutputInfo`
+        :rtype: :class:`orbitpy.grid.GridOutputInfo`
 
         """
         return GridOutputInfo( gridId = d.get('gridId', None),
@@ -352,7 +357,7 @@ class GridOutputInfo(Entity):
         return "GridOutputInfo.from_dict({})".format(self.to_dict())
     
     def __eq__(self, other):
-        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different
         if(isinstance(self, other.__class__)):
             return (self.gridId==other.gridId) and (self.gridFile==other.gridFile)
                 

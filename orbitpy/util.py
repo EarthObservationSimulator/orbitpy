@@ -214,7 +214,7 @@ class OrbitState(Entity):
         :param d: Dictionary with the date and state description. 
         
         :return: Parsed python object. 
-        :rtype: :class:`orbitpy.util.InitialOrbitState`
+        :rtype: :class:`orbitpy.util.OrbitState`
 
         """
 
