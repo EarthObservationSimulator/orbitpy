@@ -60,7 +60,6 @@ Examples
          50,-106.044
          50,-102.088
          50,-98.1319
-
    
          from orbitpy.grid import Grid
          import os

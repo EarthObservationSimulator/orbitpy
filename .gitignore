@@ -28,7 +28,6 @@ docs/_build/*
 !docs/_templates/.gitkeep
 docs/generated/*
 
-
 propcov/tests/tests-cpp/bin/SystemTest_Analysis
 propcov/build/
 *.so

@@ -7,8 +7,8 @@ Description
 This module allows initialization of constellation (i.e. collection of satellites) from the respective model parameters. The orbits of the satellites in the
 constellation can also be generated. Currently only Walker-Delta constellation [1] is supported.
 
-Factory method pattern is used for initializing the constellation object [2]. Users may additionally define their own constellation objects adherent to the same interface 
-functions (``from_dict(.)``, ``to_dict(.)``, ``generate_orbits(.)``, ``__eq__(.)``) as in the in-built constellation objects.
+Factory method pattern is used for initializing the constellation object [2]. Users may additionally define their own constellation classes
+adherent to the same interface functions (``from_dict(.)``, ``to_dict(.)``, ``generate_orbits(.)``, ``__eq__(.)``) as in the in-built constellation objects.
 
 References
 ------------
