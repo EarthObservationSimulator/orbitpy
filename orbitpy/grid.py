@@ -3,6 +3,8 @@
 
 :synopsis: *Module to handle grid (array of geo-coordinates) related operations.*
 
+.. todo:: Revise the module to a factory pattern implementation. 
+
 """
 import numpy as np
 import pandas as pd
@@ -237,8 +239,6 @@ class Grid(Entity):
                 return GridPoint(latitude=np.rad2deg(lat).round(decimals=3), longitude=np.rad2deg(lon).round(decimals=3))
 
         (_lat, _lon) = self.get_lat_lon()
-        # make indexes into a list if not list
-        indexes = [indexes] if not isinstance(indexes, list) else indexes
         # filter
         lat = [_lat[x] for x in indexes]
         lon = [_lon[x] for x in indexes]        

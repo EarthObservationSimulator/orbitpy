@@ -24,8 +24,8 @@ class CoverageCalculatorFactory:
     The following classes are registered in the factory:
     
     * :class:`GridCoverage` 
-    * :class:`PointingOptionCoverage`
-    * :class:`GridWithPointingOptionCoverage`
+    * :class:`PointingOptionsCoverage`
+    * :class:`PointingOptionsWithGridCoverage`
      
     Additional user-defined coverage calculator classes can be registered as shown below: 
 
@@ -71,23 +71,11 @@ class CoverageCalculatorFactory:
         _type = specs.get("@type", None)
         if _type is None:
             raise KeyError('Coverage Calculator type key/value pair not found in specifications dictionary.')
-        else:
-            try:
-                _type = CoverageType.get(_type).value
-            except:
-                pass # a new user defined type not present in the CoverageType class.
 
         creator = self._creators.get(_type)
         if not creator:
             raise ValueError(_type)
         return creator.from_dict(specs)
-
-class CoverageType(EnumEntity):
-    """ Enumeration of the orbitpy recognized coverage calculators.
-    """
-    GRID_COVERAGE = 'GRID COVERAGE'
-    POINTING_OPTIONS_COVERAGE = 'POINTING OPTIONS COVERAGE'
-    POINTING_OPTIONS_WITH_GRID_COVERAGE = 'POINTING OPTIONS WITH GRID COVERAGE'
 
 def helper_extract_coverage_parameters_of_spacecraft(spc):
     """ Helper function to extract tuples of (instrument_id, mode_id, scene-field-of-view, field-of-regard, pointing_option(s)).
@@ -701,7 +689,7 @@ class PointingOptionsCoverage(Entity):
 
                     if intersect_point is not False:
                         geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
-                        access_writer.writerow([time_index, pnt_opt_idx, np.rad2deg(geo_coords[0]).round(decimals=2), np.rad2deg(geo_coords[1]).round(decimals=2)])
+                        access_writer.writerow([time_index, pnt_opt_idx, np.rad2deg(geo_coords[0]).round(decimals=3), np.rad2deg(geo_coords[1]).round(decimals=3)])
 
         ##### Close file #####                
         if access_file:
@@ -936,7 +924,7 @@ class CoverageOutputInfo(Entity):
         of the coverage calculator.
     
     :ivar coverageType: Type of coverage calculator which produced the results.
-    :vartype coverageType: :class:`orbitpy.coveragecalculator.CoverageType`
+    :vartype coverageType: str
 
     :ivar spacecraftId: Spacecraft identifier.
     :vartype spacecraftId: str or int
@@ -976,7 +964,7 @@ class CoverageOutputInfo(Entity):
     """
     def __init__(self, coverageType=None, spacecraftId=None, instruId=None, modeId=None, usedFieldOfRegard=None, filterMidIntervalAccess=None, 
                  gridId=None,  stateCartFile=None, accessFile=None, startDate=None, duration=None, _id=None):
-        self.coverageType = coverageType if coverageType is not None and isinstance(coverageType, CoverageType) else None
+        self.coverageType = coverageType if coverageType is not None else None
         self.spacecraftId = spacecraftId if spacecraftId is not None else None
         self.instruId = instruId if instruId is not None else None
         self.modeId = modeId if modeId is not None else None
@@ -1001,10 +989,7 @@ class CoverageOutputInfo(Entity):
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
 
         """
-        cov_type = d.get('coverageType', None)
-        coverageType = CoverageType.get(cov_type) if cov_type is not None else None
-
-        return CoverageOutputInfo( coverageType = coverageType,
+        return CoverageOutputInfo( coverageType = d.get('coverageType', None),
                                    spacecraftId = d.get('spacecraftId', None),
                                    instruId = d.get('instruId', None),
                                    modeId = d.get('modeId', None),

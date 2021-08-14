@@ -135,6 +135,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
 
         # check that the grid indices are interpreted correctly
         access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
+        access_data = access_data.round(3)
         if not access_data.empty:
             (lat, lon) = grid.get_lat_lon_from_index(access_data['GP index'].tolist())
             self.assertTrue(lat==access_data['lat [deg]'].tolist())

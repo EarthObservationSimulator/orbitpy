@@ -24,7 +24,7 @@ from .constellation import ConstellationFactory
 import orbitpy.propagator
 import orbitpy.grid
 from .propagator import PropagatorFactory
-from .coveragecalculator import CoverageCalculatorFactory, CoverageType, GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
+from .coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
 from datametricscalculator import DataMetricsCalculator, AccessFileInfo
 from .contactfinder import ContactFinder
 from .grid import Grid
@@ -36,7 +36,7 @@ class Settings(Entity):
     :vartype outDir: str 
 
     :ivar coverageType: Type of coverage calculation. 
-    :vartype coverageType: :class:`orbitpy.coveragecalculator.CoverageType` or None
+    :vartype coverageType: str or None
 
     :ivar propTimeResFactor: Factor which influences the propagation step-size calculation. See :class:`orbitpy.propagator.compute_time_step`.
     :vartype propTimeResFactor: float
@@ -47,7 +47,7 @@ class Settings(Entity):
     """
     def __init__(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, _id=None):
         self.outDir = str(outDir) if outDir is not None else None
-        self.coverageType = coverageType if coverageType is not None and isinstance(coverageType, CoverageType) else None
+        self.coverageType = coverageType if coverageType is not None else None
         self.propTimeResFactor = float(propTimeResFactor) if propTimeResFactor is not None else None
         self.gridResFactor = float(gridResFactor) if gridResFactor is not None else None
 
@@ -72,14 +72,8 @@ class Settings(Entity):
         :rtype: :class:`orbitpy.mission.Settings`
 
         """
-        
-        try: 
-            coverageType = CoverageType.get(d.get('coverageType', None))
-        except:
-            coverageType = None
-
         return Settings( outDir= d.get('outDir', os.path.dirname(os.path.realpath(__file__))), # current directory as default
-                         coverageType = coverageType,
+                         coverageType = d.get('coverageType', None),
                          propTimeResFactor = d.get('propTimeResFactor', 0.25), # default value is 0.25
                          gridResFactor = d.get('gridResFactor', 0.9) # default value is 0.9
                         )                        
@@ -286,7 +280,7 @@ class Mission(Entity):
 
                     for mode_idx, mode in enumerate(instru.mode):                        
                         
-                        if self.settings.coverageType == CoverageType.GRID_COVERAGE:
+                        if self.settings.coverageType == "GRID COVERAGE":
                             if self.grid is None:
                                 warnings.warn('Grid not specified, skipping Grid Coverage, Data metrics calculations.')
                                 continue
@@ -310,7 +304,7 @@ class Mission(Entity):
                                 x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id)
                                 out_info.append(x)                  
 
-                        elif self.settings.coverageType == CoverageType.POINTING_OPTIONS_COVERAGE:
+                        elif self.settings.coverageType == "POINTING OPTIONS COVERAGE":
                             acc_fl = sat_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '.csv'
                             cov_calc = PointingOptionsCoverage(spacecraft=spc, state_cart_file=state_cart_file)
                             x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl)
@@ -321,7 +315,7 @@ class Mission(Entity):
                             x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id)
                             out_info.append(x) 
 
-                        elif self.settings.coverageType == CoverageType.POINTING_OPTIONS_WITH_GRID_COVERAGE:
+                        elif self.settings.coverageType == "POINTING OPTIONS WITH GRID COVERAGE":
                             if self.grid is None:
                                 warnings.warn('Grid not specified, skipping Grid Coverage, Data metrics calculations.')
                                 continue

@@ -237,7 +237,7 @@ sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "N
 
 grid = Grid.from_dict({"@type": "customGrid", "covGridFilePath": wdir+"covGrid.csv"})
 
-propagator = J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 1})
+propagator = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 1})
 
 
 instru_id = sat.instrument[0]._id

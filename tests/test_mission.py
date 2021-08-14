@@ -62,7 +62,7 @@ class TestMission(unittest.TestCase):
                                                                           "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
                                                                                             "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}} 
                                                                         }))
-        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 173.31598026839598})) # corresponds to time-step calculated considering horizon angle = 136.0373... deg and time-resolution factor = 0.25
+        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 173.31598026839598})) # corresponds to time-step calculated considering horizon angle = 136.0373... deg and time-resolution factor = 0.25
         self.assertIsNone(mission.grid)
         self.assertIsNone(mission.groundStation)
         self.assertAlmostEqual(mission.propagator.stepSize, 173.31598026839598) 
@@ -87,7 +87,7 @@ class TestMission(unittest.TestCase):
                             }'
         mission = Mission.from_json(mission_json_str)
         self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459270.75)
-        self.assertAlmostEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 86.657990134197990})) # corresponds to time-step calculated considering horizon angle = 136.0373... deg and time-resolution factor = 1/8
+        self.assertAlmostEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 86.657990134197990})) # corresponds to time-step calculated considering horizon angle = 136.0373... deg and time-resolution factor = 1/8
         self.assertEqual(mission.settings.propTimeResFactor, 1/8)
 
         out_info = mission.execute()
@@ -110,8 +110,8 @@ class TestMission(unittest.TestCase):
                                                    "@id":"bs1", "@type":"Basic Sensor" \
                                             } \
                                     }, \
-                                "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 200}, \
-                                "settings": {"outDir": "temp/", "coverageType": "Grid COverage"} \
+                                "propagator": {"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 200}, \
+                                "settings": {"outDir": "temp/", "coverageType": "GRID COVERAGE"} \
                             }'
         with self.assertWarns(Warning): # check for warning that user specified step-size is greater than auto-calculated step-size.
             mission = Mission.from_json(mission_json_str)
@@ -135,14 +135,14 @@ class TestMission(unittest.TestCase):
                                                    "@id":"bs1", "@type":"Basic Sensor" \
                                             } \
                                     }], \
-                                "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 60}, \
+                                "propagator": {"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 60}, \
                                 "grid": [{"@type": "autogrid", "@id": "cus", "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180}, {"@type": "autogrid", "@id": "auto", "latUpper":20, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}], \
-                                "settings": {"outDir": "temp/", "coverageType": "Grid COverage", "gridResFactor": 0.5} \
+                                "settings": {"outDir": "temp/", "coverageType": "GRID COVERAGE", "gridResFactor": 0.5} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
  
-        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 60}))
+        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 60}))
 
 
         self.assertEqual(len(mission.grid), 2)
@@ -172,14 +172,14 @@ class TestMission(unittest.TestCase):
                                                    "@id":"bs1", "@type":"Basic Sensor" \
                                                   }] \
                                     }, \
-                                "settings": {"outDir": "temp/", "coverageType": "Pointing Options COverage"} \
+                                "settings": {"outDir": "temp/", "coverageType": "POINTING OPTIONS COVERAGE"} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
 
  
         self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459286.4668055554)
-        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 6.820899943040534}))
+        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 6.820899943040534}))
 
         out_info = mission.execute()
     
@@ -207,12 +207,12 @@ class TestMission(unittest.TestCase):
                                                     } \
                                     }, \
                                 "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180}, {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180}], \
-                                "settings": {"outDir": "temp/", "coverageType": "Pointing Options with Grid COverage"} \
+                                "settings": {"outDir": "temp/", "coverageType": "POINTING OPTIONS WITH GRID COVERAGE"} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
         self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2458254.0084722224)
-        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 Analytical Propagator", "stepSize": 2.2600808214710266}))
+        self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 2.2600808214710266}))
         self.assertEqual(mission.grid[0].num_points, 46299)
         self.assertEqual(mission.grid[1].num_points, 43234)
 
@@ -428,7 +428,7 @@ class TestMission(unittest.TestCase):
                                                     }] \
                                     }], \
                                 "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180, "gridRes": 1}], \
-                                "settings": {"outDir": "temp/", "coverageType": "Grid COverage"} \
+                                "settings": {"outDir": "temp/", "coverageType": "GRID COVERAGE"} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
@@ -452,7 +452,7 @@ class TestMission(unittest.TestCase):
                                         "aop": 302.6503 \
                                     }, \
                                 "groundStation":{"name": "AtMetro", "latitude": 33, "longitude": -98, "altitude":0, "minimumElevation":35}, \
-                                "propagator": {"@type": "J2 Analytical Propagator", "stepSize": 4}, \
+                                "propagator": {"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 4}, \
                                 "settings": {"outDir": "temp/"} \
                             }'
         mission = Mission.from_json(mission_json_str)

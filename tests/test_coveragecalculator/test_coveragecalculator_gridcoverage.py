@@ -25,17 +25,13 @@ import random
 import warnings 
 import json 
 
-import propcov
-from orbitpy.coveragecalculator import CoverageCalculatorFactory, CoverageOutputInfo, GridCoverage
+from orbitpy.coveragecalculator import CoverageOutputInfo, GridCoverage
 from orbitpy.grid import Grid
-from orbitpy.util import Spacecraft, OrbitState, SpacecraftBus
+from orbitpy.util import Spacecraft
 from orbitpy.propagator import PropagatorFactory
 
-from instrupy.util import ViewGeometry, Orientation, SphericalGeometry
-from instrupy import Instrument
-
 sys.path.append('../')
-from util.spacecrafts import spc1_json, spc2_json, spc3_json, spc4_json, spc5_json
+from util.spacecrafts import spc1_json, spc4_json, spc5_json
 
 RE = 6378.137 # radius of Earth in kilometers
     
@@ -122,14 +118,15 @@ class TestGridCoverage(unittest.TestCase):
         self.assertEqual(column_headers.iloc[0][3],"lon [deg]")
 
         # check that the grid indices are interpreted correctly
-        access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
+        access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data     
+        access_data = access_data.round(3)   
         if not access_data.empty:
             (lat, lon) = grid.get_lat_lon_from_index(access_data['GP index'].tolist())
             self.assertTrue(lat==access_data['lat [deg]'].tolist())
             self.assertTrue(lon==access_data['lon [deg]'].tolist())
         else:
             warnings.warn('No data was generated in test_execute_0(.). Run the test again.')
-    
+
     def test_execute_1(self):
         """ Orient the sensor with roll, and an equatorial orbit and check that the ground-points captured are on either
             side of hemisphere only. (Conical Sensor)

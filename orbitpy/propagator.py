@@ -16,20 +16,16 @@ import orbitpy.util
 def compute_time_step(spacecraft, time_res_fac):
     """ Compute time step to be used for orbit propagation based on list of input spacecrafts (considering the orbit sma and the sensor field-of-regard.)
     
-    The propagation time step is selected based on the time taken to cover the length (along-track) of the sensor footprint from it's field-of-**regard** 
-    and a time-resolution factor (:code:`time_res_fac`) which is typically set to 0.25. Smaller :code:`time_res_fac` implies higher precision
-    in calculation of the access interval over a grid-point. In case of CIRCULAR sensors there is always a chance that a grid-point
-    is missed during the access calculations.
+    The propagation time step is calculated based on the time taken to cover the length (along-track) of the sensor field-of-**regard** footprint 
+    and a time-resolution factor (:code:`time_res_fac`) (default = 0.25). 
+    Smaller :code:`time_res_fac` implies higher precision in calculation of the access interval over a grid-point. 
+    Note that in case of sensors with circular FOV there is always a chance that grid-points are missed during the access calculations.
 
-    The field-of-regard is assumed to be oriented about the nadir (aligned to the NADIR_POINTING frame) and the calculated time-step is based on the 
-    resulting along-track footprint length. Only CIRCULAR and RECTANGULAR field-of-regard spherical geometry shapes are supported. In case of RECTANGULAR
+    The field-of-regard is assumed to be oriented about the nadir (aligned to the ``NADIR_POINTING`` frame) and the calculated time-step is based on the 
+    resulting along-track footprint length. Only ``CIRCULAR`` and ``RECTANGULAR`` field-of-regard spherical geometry shapes are supported. In case of ``RECTANGULAR``
     shaped spherical geometry note that the FOV/FOR angle-height would correspond to the along-track FOV/FOR.
 
-    .. figure:: time_step_illus.png
-        :scale: 75 %
-        :align: center
-
-        Illustration of possible inaccuracies due to a large time resolution factor (0.75 in above figure).
+    .. note:: The field-of-**regard** is considered here, and not the field-of-**view**.
     
     :param spacecraft: List of spacecrafts in the mission.
     :paramtype spacecraft: list, :class:`orbitpy:util.Spacecraft`
@@ -37,10 +33,8 @@ def compute_time_step(spacecraft, time_res_fac):
     :param time_res_fac: Factor which decides the time resolution of orbit propagation.
     :paramtype time_res_fac: float    
 
-    :return: Minimum require propagation time step in seconds.
+    :return: Minimum required propagation time step in seconds.
     :rtype: float      
-    
-    .. note:: The field-of-**regard** is considered here, and not the field-of-**view**.
 
     """
     RE = Constants.radiusOfEarthInKM
@@ -121,26 +115,19 @@ class PropagatorFactory:
                     type in the "@type" dict key. The propagator type is valid if it has been
                     registered with the ``PropagatorFactory`` instance.
         :vartype _type: dict
+
+        :return: The appropriate propagator object initialized to the input specifications.
+        :rtype: :class:`orbitpy.propagator.J2AnalyticalPropagator` or custom propagator class.
         
         """
         _type = specs.get("@type", None)
         if _type is None:
             raise KeyError('Propagator type key/value pair not found in specifications dictionary.')
-        else:
-            try:
-                _type = PropagatorType.get(_type).value
-            except:
-                pass
 
         creator = self._creators.get(_type)
         if not creator:
             raise ValueError(_type)
         return creator.from_dict(specs)
-
-class PropagatorType(EnumEntity):
-    """ Enumeration of the orbitpy recognized orbit-propagators.
-    """
-    J2ANALYTICALPROPAGATOR = 'J2 ANALYTICAL PROPAGATOR'
 
 class J2AnalyticalPropagator(Entity):
     """A J2 ANALYTICAL PROPAGATOR class.
@@ -210,23 +197,26 @@ class J2AnalyticalPropagator(Entity):
         :param out_file_cart: File name with path of the file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are written.
                                If ``None`` the file is not written.
 
-                               The format of the data of the output file is as follows:
-                               The first four rows contain general information, with the second row containing the mission epoch in Julian Day UT1. The time
-                               in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
-                               The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
-                               Description of the data (comma-seperated) is given below:
+                               *  The first row specifies if the states are in ``CARTESIAN_EARTH_CENTERED_INERTIAL`` or ``KEPLERIAN_EARTH_CENTERED_INERTIAL`` reference frame.
+                               *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                               *  The third row contains the time-step size in seconds. 
+                               *  The fourth row contains the mission duration in days.
+                               *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
 
-                               .. csv-table:: CARTESIAN_EARTH_CENTERED_INERTIAL State data description
+                                Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+                                Description of the data (comma-seperated) is given below:
+
+                               .. csv-table:: CARTESIAN_EARTH_CENTERED_INERTIAL state data description
                                     :header: Column, Data type, Units, Description
-                                    :widths: 10,10,5,40
+                                    :widths: 10,10,10,40
 
                                     time index, int, , Time-index
-                                    x [km], float, kilometers, X component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
-                                    y [km], float, kilometers, Y component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
-                                    z [km], float, kilometers, Z component of spacecraft position in CARTESIAN_EARTH_CENTERED_INERTIAL
-                                    vx [km], float, kilometers per sec, X component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
-                                    vy [km], float, kilometers per sec, Y component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
-                                    vz [km], float, kilometers per sec, Z component of spacecraft velocity in CARTESIAN_EARTH_CENTERED_INERTIAL
+                                    x [km], float, km, X component of spacecraft position.
+                                    y [km], float, km, Y component of spacecraft position.
+                                    z [km], float, km, Z component of spacecraft position.
+                                    vx [km/s], float, km per sec, X component of spacecraft velocity.
+                                    vy [km/s], float, km per sec, Y component of spacecraft velocity.
+                                    vz [km/s], float, km per sec, Z component of spacecraft velocity.
 
 
         :paramtype out_file_cart: str
@@ -235,12 +225,12 @@ class J2AnalyticalPropagator(Entity):
                                 If ``None`` the file is not written. The output data format is similar to the data format of the *out_file_cart*
                                 file, except the columns headers are as follows:
 
-                                .. csv-table:: KEPLERIAN_EARTH_CENTERED_INERTIAL State data description
+                                .. csv-table:: KEPLERIAN_EARTH_CENTERED_INERTIAL state data description
                                     :header: Column, Data type, Units, Description
                                     :widths: 10,10,5,40
 
                                     time index, int, , Time-index
-                                    sma [km], float, kilometers, Orbit semi-major axis dimension.
+                                    sma [km], float, km, Orbit semi-major axis dimension.
                                     ecc, float, , Orbit eccentricity
                                     inc [deg], float, degrees, Orbit inclination
                                     raan [deg], float, degrees, Orbit right ascension of ascending node
@@ -270,13 +260,13 @@ class J2AnalyticalPropagator(Entity):
         spc_orbitstate = propcov.OrbitState()
         spc_orbitstate.SetCartesianState(spacecraft.orbitState.state.GetCartesianState())
         
-        spc = propcov.Spacecraft(spc_date, spc_orbitstate, attitude, interp, 0, 0, 0, 1, 2, 3) # TODO: initialization to the correct orientation of spacecraft is not necessary, so ignored for time-being.
+        spc = propcov.Spacecraft(spc_date, spc_orbitstate, attitude, interp, 0, 0, 0, 1, 2, 3) # TODO: initialization to the correct orientation of spacecraft is not necessary for the purpose of orbit-propagation, so ignored for time-being.
         
         if(start_date is None):
-            # following code sequence is required to make an *independent/8 copy of the spacecraft.orbitState.date object. 
             start_date = spacecraft.orbitState.date
 
         # following snippet is required, because any copy, changes to the input start_date is reflected outside the function. (Similar to pass by reference in C++.)
+        # so instead a separate copy of the start_date is made and is used within this function.
         _start_date = propcov.AbsoluteDate()
         _start_date.SetJulianDate(start_date.GetJulianDate())
 
@@ -338,7 +328,7 @@ class PropagatorOutputInfo(Entity):
         of the propagator.
     
     :ivar propagatorType: Type of orbit propagator which produced the results.
-    :vartype propagatorType: :class:`orbitpy.propagator.PropagatorType`
+    :vartype propagatorType: str
 
     :ivar spacecraftId: Spacecraft identifier for which propagation was carried out.
     :vartype spacecraftId: str or int
@@ -361,7 +351,7 @@ class PropagatorOutputInfo(Entity):
     """
     def __init__(self, propagatorType=None, spacecraftId=None, stateCartFile=None, stateKeplerianFile=None, 
                  startDate=None, duration=None, _id=None):
-        self.propagatorType = propagatorType if propagatorType is not None and isinstance(propagatorType, PropagatorType) else None
+        self.propagatorType = propagatorType if propagatorType is not None else None
         self.spacecraftId = spacecraftId if spacecraftId is not None else None
         self.stateCartFile = str(stateCartFile) if stateCartFile is not None else None
         self.stateKeplerianFile = str(stateKeplerianFile) if stateKeplerianFile is not None else None
@@ -381,10 +371,7 @@ class PropagatorOutputInfo(Entity):
         :rtype: :class:`orbitpy.propagator.PropagatorOutputInfo`
 
         """
-        prop_type = d.get('propagatorType', None)
-        propagatorType = PropagatorType.get(prop_type) if prop_type is not None else None
-
-        return PropagatorOutputInfo( propagatorType = propagatorType,
+        return PropagatorOutputInfo( propagatorType = d.get('propagatorType', None),
                                      spacecraftId = d.get('spacecraftId', None),
                                      stateCartFile = d.get('stateCartFile', None),
                                      stateKeplerianFile = d.get('stateKeplerianFile', None),
@@ -393,9 +380,9 @@ class PropagatorOutputInfo(Entity):
                                      _id  = d.get('@id', None))
 
     def to_dict(self):
-        """ Translate the GridCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        """ Translate the PropagatorOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: GridCoverage object as python dictionary
+        :return: PropagatorOutputInfo object as python dictionary
         :rtype: dict
         
         """

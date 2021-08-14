@@ -1,3 +1,5 @@
+.. _constellation_module:
+
 ``orbit.constellation`` --- Constellation Module
 ===================================================
 
@@ -8,7 +10,7 @@ This module allows initialization of constellation (i.e. collection of satellite
 constellation can also be generated. Currently only Walker-Delta constellation [1] is supported.
 
 Factory method pattern is used for initializing the constellation object [2]. Users may additionally define their own constellation classes
-adherent to the same interface functions (``from_dict(.)``, ``to_dict(.)``, ``generate_orbits(.)``, ``__eq__(.)``) as in the in-built constellation objects.
+adherent to the same interface functions (``from_dict(.)``, ``to_dict(.)``, ``generate_orbits(.)``, ``__eq__(.)``) as in the in-built constellation classes.
 
 References
 ------------
@@ -22,6 +24,8 @@ Examples
 
    .. code-block:: python
 
+         from orbitpy.constellation import ConstellationFactory
+
          factory = ConstellationFactory()
          specs = {"@type": 'Walker Delta Constellation', "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
                            "relativeSpacing": 1, "alt": 500, "ecc": 0.001, "inc": 45, "aop": 135, "@id": "abc"}
@@ -32,12 +36,14 @@ Examples
 
    .. code-block:: python
 
+         from orbitpy.constellation import ConstellationFactory
+         from orbitpy.util import OrbitState
+
          date =  OrbitState.date_from_dict({"dateType": "JULIAN_DATE_UT1", "jd":2459270.75})
          wd_model = WalkerDeltaConstellation( date=date, numberSatellites=2, numberPlanes=1, relativeSpacing=1, alt=500, ecc=0.001, inc=45, aop=135, _id="abc")
          print(wd_model.generate_orbits())
 
          >> [OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
-
 
 2. Working with a custom constellation.
 

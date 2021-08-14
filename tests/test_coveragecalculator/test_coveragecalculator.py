@@ -247,15 +247,15 @@ class TestCoverageCalculatorFactory(unittest.TestCase):
         
         # test the coverage calculator model classes can be obtained depending on the input specifications
         # GRID COVERAGE
-        specs = {"@type": 'Grid coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
+        specs = {"@type": 'GRID COVERAGE'} # in practice additional coverage calculator specs shall be present in the dictionary
         grid_cov = factory.get_coverage_calculator(specs)
         self.assertIsInstance(grid_cov, GridCoverage)
         # POINTING OPTIONS COVERAGE
-        specs = {"@type": 'pointing OPTIONS COVERAGE'} # in practice additional coverage calculator specs shall be present in the dictionary
+        specs = {"@type": 'POINTING OPTIONS COVERAGE'} # in practice additional coverage calculator specs shall be present in the dictionary
         popt_cov = factory.get_coverage_calculator(specs)
         self.assertIsInstance(popt_cov, PointingOptionsCoverage)
         # POINTING OPTIONS WITH GRID COVERAGE
-        specs = {"@type": 'POINTING OpTiOns with GRID coverage'} # in practice additional coverage calculator specs shall be present in the dictionary
+        specs = {"@type": 'POINTING OPTIONS WITH GRID COVERAGE'} # in practice additional coverage calculator specs shall be present in the dictionary
         popt_with_grid_cov = factory.get_coverage_calculator(specs)
         self.assertIsInstance(popt_with_grid_cov, PointingOptionsWithGridCoverage)
 

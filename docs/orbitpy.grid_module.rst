@@ -7,7 +7,7 @@ Description
 Module to handle grid (array of geo-coordinates) related operations. The ``Grid`` class of this module can be used to either generate set of 
 grid points given latitude/ longitude bounds or load a custom set of grid points. 
 
-The module also offers computation of an appropriate grid-resolution for list of satellites and an user-set *grid-resolution factor* 
+The module also offers computation of an appropriate grid-resolution for a list of satellites and an user-set *grid-resolution factor* 
 by using the ``compute_grid_res(.)`` function. The grid resolution is to be set such that at any given arbitrary time, the sensor footprint 
 from its (scene) field-of-**view** captures atleast one grid-point when the satellite is somewhere well within the interior of a region. 
 This can be achieved by setting the grid resolution (spacing between the grid points) to be less than the minimum footprint dimension. 
@@ -29,6 +29,8 @@ is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives 
             from a data file. Do *NOT* specify the longitudes in range of 0 deg to 360 deg.
 
 .. todo:: Describe the grid pattern of the auto generated grid points.
+
+.. todo:: Revise the module to a factory pattern implementation. 
 
 Examples
 ^^^^^^^^^
@@ -80,7 +82,7 @@ Examples
          from orbitpy.grid import Grid
          import os
 
-         out_file = os.path.dirname(os.path.realpath(__file__)) + '/gridDataOut.csv'
+         out_file = os.path.dirname(os.path.realpath(__file__)) + '/gridDataOut.csv' # path to the output file containing the grid points
          o = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
          out_info = o.write_to_file(out_file)
          print(out_info)
@@ -95,29 +97,27 @@ Examples
          20.0,47.13
          ...
 
-4. Computing grid resolution for a set of 2 satellites with 1 and 2 instruments respectively. The altitude of both the satellites and the FOV of all 
-   the instruments impact the footprint-size and hence the grid-resolution. Output is in degrees.
+4. Computing grid resolution for a set of 2 satellites with 1 and 2 instruments respectively. Output is in degrees.
 
    .. code-block:: python
          
          import orbitpy.grid 
          from orbitpy.util import OrbitState, Spacecraft
          from instrupy import Instrument
-
+         
          RE = 6378.137 # radius of Earth in kilometers
          instru1 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 20}}')
-         instru2 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 5}}')
+         instru2 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 5}, "maneuver":{"maneuverType": "Double_Roll_Only", "A_rollMin":10, "A_rollMax":15, "B_rollMin":-15, "B_rollMax":-10}}')
          instru3 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 15}}')
-
+         
          orbit1 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+700, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-         orbit2 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+710, "ecc": 0.001, "inc": 30, "raan": 0, "aop": 0, "ta": 0}})
-
+         orbit2 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+510, "ecc": 0.001, "inc": 30, "raan": 0, "aop": 0, "ta": 0}})
+         
          sats = [Spacecraft(orbitState=orbit1, instrument=[instru1]), # list of 2 satellites with 1 and 2 instruments respectively
-                 Spacecraft(orbitState=orbit2, instrument=[instru2, instru3])]
-         x = orbitpy.grid.compute_grid_res(sats, 1) # custom grid resolution factor is chosen as 0.9
-         print(x)
-
-         >> 0.5013032847651403
+               Spacecraft(orbitState=orbit2, instrument=[instru2, instru3])]
+         x = orbitpy.grid.compute_grid_res(sats, 0.9) # custom grid resolution factor is chosen as 0.9
+         
+         >> 0.36007964028136996
 
 
 API

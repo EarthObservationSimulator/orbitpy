@@ -11,14 +11,17 @@ import pandas as pd
 from orbitpy.util import OrbitState, Spacecraft
 from orbitpy.propagator import PropagatorFactory, PropagatorOutputInfo, J2AnalyticalPropagator
 import orbitpy.propagator
-import propcov
 from instrupy import Instrument
 
 RE = 6378.137 # radius of Earth in kilometers
 class TestPropagatorModuleFunction(unittest.TestCase):
 
     def test_compute_time_step(self):
-        """ Test that the time-step computed with precomputed values for fixed orbit altitude and sensor Along-Track **FOR** """
+        """ Test that the time-step computed with precomputed values for fixed orbit altitude and sensor Along-Track **FOR** 
+        
+        .. todo:: Include tests with instrument maneuverability.
+
+        """
         
         # FOR = FOV for the below cases since default "FIXED" manueverability is used. The crosstrack FOV does not influence the results.
         instru1 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 15, "angleWidth": 0.01}}')
@@ -31,9 +34,7 @@ class TestPropagatorModuleFunction(unittest.TestCase):
         orbit2 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+710, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
         orbit3 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+510, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
         orbit4 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1000, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-
-        
-        
+       
         # single satellite, multiple instruments
         sats = [Spacecraft(orbitState=orbit1, instrument=[instru1, instru2])]
         self.assertAlmostEqual(orbitpy.propagator.compute_time_step(sats, 1), 18.6628, places=4)
@@ -125,7 +126,7 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         # setup a simple random propagation test case
         factory = PropagatorFactory()
         self.step_size = 0.5 + random.random()
-        specs = {"@type": 'J2 analytical prOPAGator', 'stepSize':self.step_size } 
+        specs = {"@type": 'J2 ANALYTICAL PROPAGATOR', 'stepSize':self.step_size } 
         self.j2_prop = factory.get_propagator(specs)
 
         self.duration=random.random()
