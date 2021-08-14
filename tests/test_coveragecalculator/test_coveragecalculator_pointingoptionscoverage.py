@@ -177,10 +177,11 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         for idx, state in states_df.iterrows():
             [lat,lon,alt] = GeoUtilityFunctions.eci2geo([state['x [km]'], state['y [km]'], state['z [km]']], 
                                                          epoch_JDUT1 + state['time index']*step_size*(1.0/86400.0))
-            sat_lat.append(round(lat, 2))
-            sat_lon.append(round(lon, 2))
+            sat_lat.append(round(lat, 3))
+            sat_lon.append(round(lon, 3))
         # compare the results of the coverage calculation with the satellite position data
         access_data_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+        access_data_df = access_data_df.round(3)
         # iterate over each pointing-option
         access_data_grp = access_data_df.groupby('pnt-opt index') # group according to ground-point indices
         # iterate over all the groups (ground-point indices)
@@ -245,6 +246,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
 
         # perform checks on the output access data
         access_data_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+        access_data_df = access_data_df.round(3)
         # iterate over each pointing-option
         access_data_grp = access_data_df.groupby('pnt-opt index') # group according to ground-point indices
         
@@ -254,11 +256,11 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         self.assertTrue(np.allclose(group0['lat [deg]'].to_numpy(), group0_truth))
         # pointing option with random roll roll_po2
         group1 = access_data_grp.get_group(1)
-        group1_truth = np.zeros((len(group1),))  + round(0.5*GeoUtilityFunctions.get_eca(2*roll_po2, alt),2)        
+        group1_truth = np.zeros((len(group1),))  + round(0.5*GeoUtilityFunctions.get_eca(2*roll_po2, alt),3)        
         self.assertTrue(np.allclose(group1['lat [deg]'].to_numpy(), group1_truth))
         # pointing option with random roll roll_po3
         group2 = access_data_grp.get_group(2) 
-        group2_truth = np.zeros((len(group2),)) + round(0.5*GeoUtilityFunctions.get_eca(2*roll_po3, alt), 2)
+        group2_truth = np.zeros((len(group2),)) + round(0.5*GeoUtilityFunctions.get_eca(2*roll_po3, alt), 3)
         self.assertTrue(np.allclose(group2['lat [deg]'].to_numpy(), group2_truth))
 
      

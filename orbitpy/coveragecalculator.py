@@ -689,7 +689,7 @@ class PointingOptionsCoverage(Entity):
 
                     if intersect_point is not False:
                         geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
-                        access_writer.writerow([time_index, pnt_opt_idx, np.rad2deg(geo_coords[0]).round(decimals=3), np.rad2deg(geo_coords[1]).round(decimals=3)])
+                        access_writer.writerow([time_index, pnt_opt_idx, np.rad2deg(geo_coords[0]), np.rad2deg(geo_coords[1])])
 
         ##### Close file #####                
         if access_file:
