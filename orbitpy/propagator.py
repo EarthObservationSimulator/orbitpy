@@ -40,6 +40,7 @@ def compute_time_step(spacecraft, time_res_fac):
     RE = Constants.radiusOfEarthInKM
     GMe = Constants.GMe
 
+
     params = orbitpy.util.helper_extract_spacecraft_params(spacecraft) # obtain list of tuples of relevant spacecraft parameters
 
     # Iterate over each tuple and compute the corresponding time-step. Choose the minimum required time-step.
@@ -62,8 +63,14 @@ def compute_time_step(spacecraft, time_res_fac):
         satVel = np.sqrt(GMe/sma)
         satGVel = f * satVel
         sinRho = RE/sma
-        hfor_deg = for_at/2 # half-angle
-        elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfor_deg))/sinRho))
+        hfor_deg = for_at/2 # half-angle        
+        
+        # below snippet is needed because sometimes when for_at = horizon angle, it leads to x slightly greater then 1 due to floating-point errors.
+        x = np.sin(np.deg2rad(hfor_deg))/sinRho
+        if abs(np.sin(np.deg2rad(hfor_deg)) - sinRho) < 1e-7:
+            x = 1
+        elev_deg = np.rad2deg(np.arccos(x))        
+
         lambda_deg = 90 - hfor_deg - elev_deg # half-earth centric angle 
         eca_deg = lambda_deg*2 # total earth centric angle
         AT_FP_len = RE * np.deg2rad(eca_deg) # along-track footprint length           
