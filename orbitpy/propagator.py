@@ -394,7 +394,7 @@ class PropagatorOutputInfo(Entity):
         
         """
         return dict({"@type": "PropagatorOutputInfo",
-                     "propagatorType": self.propagatorType.value,
+                     "propagatorType": self.propagatorType,
                      "spacecraftId": self.spacecraftId,
                      "stateCartFile": self.stateCartFile,
                      "stateKeplerianFile": self.stateKeplerianFile,

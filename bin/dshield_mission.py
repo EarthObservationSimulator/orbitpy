@@ -249,7 +249,6 @@ if os.path.exists(sat_dir):
     shutil.rmtree(sat_dir)
 os.makedirs(sat_dir)
 
-
 for k in range(0,12):
 
     print('processing at {} hrs'.format(k*6))

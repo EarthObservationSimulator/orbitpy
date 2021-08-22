@@ -10,10 +10,6 @@
                         "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"},
                         "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 },
                         "maneuver":{"maneuverType": "CIRCULAR", "diameter":10},
-                        "numberDetectorRows":5, "numberDetectorCols":10,
-                        "pointingOption": [{"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":2.5, "zRotation":0},
-                        {"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":-2.5, "zRotation":0}
-                        ],
                         "@id":"bs1", "@type":"Basic Sensor"},
         "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
@@ -22,5 +18,5 @@
     ],
     "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, 
              {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180, "gridRes": 1}],
-    "settings": {"coverageType": "POINTING OPTIONS WITH GRID COVERAGE"}
+    "settings": {"coverageType": "GRID COVERAGE"}
 }

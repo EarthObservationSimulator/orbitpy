@@ -1,4 +1,6 @@
-﻿``orbit.grid`` --- Grid Module
+﻿.. _grid_module:
+
+``orbit.grid`` --- Grid Module
 ================================
 
 Description

@@ -26,9 +26,9 @@ def main(user_dir):
 
     mission = Mission.from_json(mission_dict)   
 
-    mission.execute()
+    out_info = mission.execute()
 
-    #print(out_info)
+    print(out_info)
     print("Time taken to execute in seconds is ", time.process_time() - start_time)
 
 class readable_dir(argparse.Action):

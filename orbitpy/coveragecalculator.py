@@ -1013,7 +1013,7 @@ class CoverageOutputInfo(Entity):
         
         """
         return dict({"@type": "CoverageOutputInfo",
-                     "coverageType": self.coverageType.value,
+                     "coverageType": self.coverageType,
                      "spacecraftId": self.spacecraftId,
                      "instruId": self.instruId,
                      "modeId": self.modeId,
