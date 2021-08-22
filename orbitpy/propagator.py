@@ -55,11 +55,11 @@ def compute_time_step(spacecraft, time_res_fac):
             f = RE/sma
             for_at = np.rad2deg(2*np.arcsin(f))
         
-        # calculate maximum horizon angle
+        # calculate horizon angle
         f = RE/sma
-        max_horizon_angle = np.rad2deg(2*np.arcsin(f))
-        if(for_at > max_horizon_angle):
-            for_at = max_horizon_angle # use the maximum horizon angle if the instrument AT-FOR is larger than the maximum horizon angle
+        horizon_angle = np.rad2deg(2*np.arcsin(f))
+        if(for_at > horizon_angle):
+            for_at = horizon_angle # use the horizon angle if the instrument AT-FOR is larger than the horizon angle
         satVel = np.sqrt(GMe/sma)
         satGVel = f * satVel
         sinRho = RE/sma

@@ -743,7 +743,7 @@ def helper_extract_spacecraft_params(spacecraft):
                     [fov_height, fov_width] = field_of_view.sph_geom.get_fov_height_and_width()
 
                     scene_field_of_view  = instru.get_scene_field_of_view(mode_id)
-                    [scfov_height, scfov_width] = field_of_view.sph_geom.get_fov_height_and_width()
+                    [scfov_height, scfov_width] = scene_field_of_view.sph_geom.get_fov_height_and_width()
 
                     field_of_regard  = instru.get_field_of_regard(mode_id) 
 

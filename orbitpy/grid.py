@@ -284,14 +284,20 @@ def compute_grid_res(spacecraft, grid_res_fac):
             f = RE/sma
             fov = np.rad2deg(2*np.arcsin(f))
 
-        # calculate maximum horizon angle
+        # calculate horizon angle
         sinRho = RE/sma            
-        max_horizon_angle = np.rad2deg(2*np.arcsin(sinRho))
-        if(fov > max_horizon_angle):
-            fov = max_horizon_angle # use the maximum horizon angle if the instrument fov is larger than the maximum horizon angle
+        horizon_angle = np.rad2deg(2*np.arcsin(sinRho))
+        if(fov > horizon_angle):
+            fov = horizon_angle # use the horizon angle if the instrument fov is larger than the horizon angle
 
         hfov_deg = 0.5*fov
-        elev_deg = np.rad2deg(np.arccos(np.sin(np.deg2rad(hfov_deg))/sinRho))
+        
+        # below snippet is needed because sometimes when for_at = horizon angle, it leads to x slightly greater then 1 due to floating-point errors.
+        x = np.sin(np.deg2rad(hfov_deg))/sinRho
+        if abs(np.sin(np.deg2rad(hfov_deg)) - sinRho) < 1e-7:
+            x = 1
+        elev_deg = np.rad2deg(np.arccos(x))
+
         lambda_deg = 90 - hfov_deg - elev_deg # half-earth centric angle 
         eca_deg = lambda_deg*2 # total earth centric angle
         grid_res_deg = eca_deg*grid_res_fac 

@@ -6,7 +6,5 @@ User Guide
 
    package_overview
    installation
-   examples
-   user_json_desc
-   output_data_file_desc
+   run
    miscellaneous

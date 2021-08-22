@@ -103,8 +103,8 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
                 field_of_regard  = instru.get_field_of_regard(mode_id) 
                 pointing_option = instru.get_pointing_option(mode_id)
 
-                if field_of_regard is None or []: # if FOR is None, use FOV for FOR
-                    field_of_regard = [instru.get_field_of_view(mode_id)]
+                if field_of_regard is None or []: # if FOR is None, use sceneFOV for FOR
+                    field_of_regard = [instru.get_scene_field_of_view(mode_id)]
                 
                 params.append(_p(instru_id, mode_id, scene_field_of_view, field_of_regard, pointing_option))
                     
@@ -396,6 +396,7 @@ class GridCoverage(Entity):
         
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
+        #print("cov_param ", cov_param)
         # the input instru_id, mode_id may be None, so get the sensor, mode ids.
         instru_id = cov_param.instru_id
         mode_id = cov_param.mode_id
@@ -404,7 +405,9 @@ class GridCoverage(Entity):
             view_geom = cov_param.field_of_regard # a list
         else:
             view_geom = [cov_param.scene_field_of_view] # make into list 
+            
         
+        #print("view_geom ", view_geom)
         ###### iterate and calculate coverage seperately for each view_geom element. TODO: Streamline this behavior ######
         for __view_geom in view_geom:
             
@@ -689,7 +692,7 @@ class PointingOptionsCoverage(Entity):
 
                     if intersect_point is not False:
                         geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
-                        access_writer.writerow([time_index, pnt_opt_idx, np.rad2deg(geo_coords[0]), np.rad2deg(geo_coords[1])])
+                        access_writer.writerow([time_index, pnt_opt_idx, np.round(np.rad2deg(geo_coords[0]),3), np.round(np.rad2deg(geo_coords[1]),3)])
 
         ##### Close file #####                
         if access_file:
