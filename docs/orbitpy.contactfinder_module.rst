@@ -3,7 +3,8 @@
 
 Description
 ^^^^^^^^^^^^^
-This module provides class to compute line-of-sight (LOS) contact opportunities between two entities (satellite to ground-station or satellite to satellite).
+This module provides the class (``ContactFinder``) to compute line-of-sight (LOS) contact opportunities between two entities 
+(satellite to ground-station or satellite to satellite). 
 
 The :class:`instrupy.util.GeoUtilityFunctions.checkLOSavailability` function from the InstruPy package is called to determine if line-of-sight exists between two entities 
 with the occluding body as Earth. The algorithm from Page 198, *Fundamental of Astrodynamics and Applications,* David A. Vallado is used (the first algorithm 
@@ -12,6 +13,9 @@ of the two described) to check for LOS.
 In case of entity being a satellite, a data file with the satellite states at different times of the mission is required. At each of these times the LOS condition is evaluated
 with another entity (another satellite or ground-station). The format of the input data file of the satellite states is the same as the format of the output data file of the 
 :class:`orbitpy.propagator` module (see :ref:`propagator_module`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
+
+.. note:: The ``ContactFinder`` class is to be utilized by invoking the static-methods ``execute(.)`` and ``find_all_pairs(.)``, i.e. utilization of this
+          class does **not** involve creation of a class instance.
 
 .. warning:: In case of satellite-to-satellite contact finder the input time-series of the states of the two satellites must be in sync, i.e. the epoch, time-step and duration must be the same.
 
