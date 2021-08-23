@@ -17,6 +17,12 @@ import orbitpy.util
 from orbitpy.util import Spacecraft, GroundStation
 
 ContactPairs = namedtuple("ContactPairs", ["entityA", "entityA_state_cart_fl", "entityB", "entityB_state_cart_fl"])
+""" Function returns a namedtuple class to store entity pairs (entityA, entityB) where each entity can be a :class:`orbitpy.util.Spacecraft`
+    or :class:`orbitpy.util.GroundStation` object. In case the entity is a spacecraft, the corresponding Cartesian state file path 
+    (entityA_state_cart_fl/ entityB_state_cart_fl), which file contains the states of the spacecraft at different times of the mission 
+    is stored.
+
+"""
 
 class ContactFinder(Entity):
 
@@ -59,28 +65,38 @@ class ContactFinder(Entity):
 
         The results are available in two different formats *INTERVAL* or *DETAIL* (either of which can be specified in the input argument ``out_type``).
 
-        1. *INTERVAL*: The first line of the file indicates the entity identifiers. The second line contains the epoch in Julian Date UT1. The 
-            third line contains the step-size in seconds. The later lines contain the interval data in csv format with the following column headers:
+        1. *INTERVAL*: 
 
-            .. csv-table:: Contact file INTERVAL data format
-                    :header: Column, Data type, Units, Description
-                    :widths: 10,10,10,30
+        *  The first row indicates the entity identifiers of the entities between which the contacts were evaluated.
+        *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+        *  The third row contains the time step-size in seconds. 
 
-                    start index, int, , Contact start time-index.
-                    stop index, int, , Contact stop time-index.
+        The later lines contain the interval data in csv format with the following column headers:
+        
+        .. csv-table:: Contact file INTERVAL data format
+                :header: Column, Data type, Units, Description
+                :widths: 10,10,10,30
 
-        2. *DETAIL*: The first line of the file indicates the entity identifiers. The second line contains the epoch in Julian Date UT1. The 
-            third line contains the step-size in seconds. The later lines contain the interval data in csv format with the following column headers:
-            The 'elevation [deg]' column appears only for the case of satellite-to-ground-station contact finder results.
+                start index, int, , Contact start time-index.
+                stop index, int, , Contact stop time-index.
 
-            .. csv-table:: Contact file INTERVAL data format
-                    :header: Column, Data type, Units, Description
-                    :widths: 10,10,10,30
+        1. *DETAIL*: 
 
-                    time index, int, , Contact time-index.
-                    access, bool, , 'T' indicating True or F indicating False.
-                    range [km], float, kilometer, Distance between the two entities at the corresponding time.
-                    elevation [deg], float, degrees, Angle between the ground-plane and the ground-station to satellite line.
+        *  The first row indicates the entity identifiers of the entities between which the contacts were evaluated.
+        *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+        *  The third row contains the time step-size in seconds.
+
+        The later lines contain the interval data in csv format with the following column headers:
+        (The 'elevation [deg]' column appears only for the case of satellite-to-ground-station contact finder results.)
+
+        .. csv-table:: Contact file DETAIL data format
+                :header: Column, Data type, Units, Description
+                :widths: 10,10,10,30
+
+                time index, int, , Contact time-index.
+                access, bool, , 'T' indicating True or F indicating False.
+                range [km], float, kilometer, Distance between the two entities at the corresponding time.
+                elevation [deg], float, degrees, Angle between the ground-plane and the ground-station to satellite line.
 
         :param entityA: Spacecraft or Ground-station ``orbitpy.util`` object.
         :paramtype entityA: :class:`orbitpy.util.Spacecraft` or :class:`orbitpy.util.GroundStation`
@@ -103,7 +119,7 @@ class ContactFinder(Entity):
         :paramtype entityB_state_cart_fl: str or None
 
         :param out_filename: Name of output file in when the results are written. If not specified, the output filename is derived from the entity names
-                             in the following format: entityAName_to_entityBName_contact.csv
+                             in the following format: entityAName_to_entityBName.csv
         :paramtype out_filename: str or None
 
         :param out_type: Indicates the type of output data to be saved. Default is OutType.INTERVAL.

@@ -27,12 +27,31 @@ is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives 
 .. note:: The field-of-**view** is used here, and not the field-of-**regard**. The scene-field-of-view is used if different from the field-of-view. 
           The scene-field-of-view is typically larger than the instrument field-of-view to allow for coarser grid-resolution (and hence faster coverage computation).
 
-.. warning:: Please specify latitudes in the range of -90 deg to +90 deg and longitudes in the range of -180 deg to +180 deg while loading points
-            from a data file. Do *NOT* specify the longitudes in range of 0 deg to 360 deg.
-
 .. todo:: Describe the grid pattern of the auto generated grid points.
 
-.. todo:: Revise the module to a factory pattern implementation. 
+Input grid file format
+-----------------------
+
+In the case of loading grid-data from external files, the data file needs to be of csv format as indicated in the example below. 
+The column headers are *lat [deg]* (which indicates latitude in degrees), and *lon [deg]* (which indicates longitude in degrees). 
+The grid-points are referred by indices starting from 0.
+
+.. code-block:: python
+   
+   lat [deg],lon [deg] 
+     9.9,20
+     9.9,20.10
+     9.9,20.20
+   -49.1,-75
+   -49.1,-75.46
+   -49.1,-75.43
+    79.1,80.32
+    79.1,80.56
+    79.1,80.88
+    79.1,81.02
+
+.. warning:: Please specify latitudes in the range of -90 deg to +90 deg and longitudes in the range of -180 deg to +180 deg while loading points
+             from a data file. Do *NOT* specify the longitudes in range of 0 deg to 360 deg.
 
 Examples
 ^^^^^^^^^

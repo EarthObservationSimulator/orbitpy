@@ -2,15 +2,11 @@
 """
 import unittest
 import os, shutil
-import sys
 import pandas as pd
-import csv
 import datetime
 
-from instrupy.util import Entity, Constants, MathUtilityFunctions, GeoUtilityFunctions
-import orbitpy.util
 from orbitpy.util import Spacecraft, GroundStation
-from orbitpy.propagator import J2AnalyticalPropagator, PropagatorFactory
+from orbitpy.propagator import PropagatorFactory
 from orbitpy.contactfinder import ContactFinder, ContactFinderOutputInfo
 
 class TestContactFinder(unittest.TestCase):
