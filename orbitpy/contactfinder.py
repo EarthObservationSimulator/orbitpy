@@ -67,36 +67,36 @@ class ContactFinder(Entity):
 
         1. *INTERVAL*: 
 
-        *  The first row indicates the entity identifiers of the entities between which the contacts were evaluated.
-        *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
-        *  The third row contains the time step-size in seconds. 
+            *  The first row indicates the entity identifiers of the entities between which the contacts were evaluated.
+            *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+            *  The third row contains the time step-size in seconds. 
 
-        The later lines contain the interval data in csv format with the following column headers:
-        
-        .. csv-table:: Contact file INTERVAL data format
-                :header: Column, Data type, Units, Description
-                :widths: 10,10,10,30
+            The later lines contain the interval data in csv format with the following column headers:
+            
+            .. csv-table:: Contact file INTERVAL data format
+                    :header: Column, Data type, Units, Description
+                    :widths: 10,10,10,30
 
-                start index, int, , Contact start time-index.
-                stop index, int, , Contact stop time-index.
+                    start index, int, , Contact start time-index.
+                    stop index, int, , Contact stop time-index.
 
-        1. *DETAIL*: 
+        2. *DETAIL*: 
 
-        *  The first row indicates the entity identifiers of the entities between which the contacts were evaluated.
-        *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
-        *  The third row contains the time step-size in seconds.
+            *  The first row indicates the entity identifiers of the entities between which the contacts were evaluated.
+            *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+            *  The third row contains the time step-size in seconds.
 
-        The later lines contain the interval data in csv format with the following column headers:
-        (The 'elevation [deg]' column appears only for the case of satellite-to-ground-station contact finder results.)
+            The later lines contain the interval data in csv format with the following column headers:
+            (The 'elevation [deg]' column appears only for the case of satellite-to-ground-station contact finder results.)
 
-        .. csv-table:: Contact file DETAIL data format
-                :header: Column, Data type, Units, Description
-                :widths: 10,10,10,30
+            .. csv-table:: Contact file DETAIL data format
+                    :header: Column, Data type, Units, Description
+                    :widths: 10,10,10,30
 
-                time index, int, , Contact time-index.
-                access, bool, , 'T' indicating True or F indicating False.
-                range [km], float, kilometer, Distance between the two entities at the corresponding time.
-                elevation [deg], float, degrees, Angle between the ground-plane and the ground-station to satellite line.
+                    time index, int, , Contact time-index.
+                    access, bool, , 'T' indicating True or F indicating False.
+                    range [km], float, kilometer, Distance between the two entities at the corresponding time.
+                    elevation [deg], float, degrees, Angle between the ground-plane and the ground-station to satellite line.
 
         :param entityA: Spacecraft or Ground-station ``orbitpy.util`` object.
         :paramtype entityA: :class:`orbitpy.util.Spacecraft` or :class:`orbitpy.util.GroundStation`

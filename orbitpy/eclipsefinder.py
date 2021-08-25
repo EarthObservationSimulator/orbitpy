@@ -7,20 +7,17 @@
 """
 
 import numpy as np
-import copy
 import pandas as pd
 import csv
-from collections import namedtuple
 
-from instrupy.util import Entity, EnumEntity, Constants, MathUtilityFunctions, GeoUtilityFunctions
+from instrupy.util import Entity, EnumEntity, Constants, GeoUtilityFunctions
 import orbitpy.util
-from orbitpy.util import Spacecraft, GroundStation
 
 class EclipseFinder(Entity):
     
     class OutType(EnumEntity):
         """ Indicates the type of output data to be saved. 'INTERVAL' indicates that the eclipse time-intervals are stored, 
-            while 'DETAIL' stores the eclipse (true or false) at each time-step of mission.  
+            while 'DETAIL' stores the eclipse (true or false) at each time-tick of the mission.  
         """
         INTERVAL = 'INTERVAL'
         DETAIL = 'DETAIL'
@@ -30,27 +27,35 @@ class EclipseFinder(Entity):
         """ Find the eclipse times of a spacecraft. The eclipsed times correspond to the times when the line-of-sight does *NOT* exist between 
             the spacecraft and Sun.
 
-        The results are available in two different formats *INTERVAL* or *DETAIL* (either of which can be specified in the input argument ``out_type``).
+            1. *INTERVAL*: 
 
-        1. *INTERVAL*: The first line of the file indicates the spacecraft identifier. The second line contains the epoch in Julian Date UT1. The 
-            third line contains the step-size in seconds. The later lines contain the interval data in csv format with the following column headers:
+                *  The first row indicates the spacecraft identifier for which the eclipses were evaluated.
+                *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                *  The third row contains the time step-size in seconds. 
 
-            .. csv-table:: Contact file INTERVAL data format
-                    :header: Column, Data type, Units, Description
-                    :widths: 10,10,10,30
+                The later lines contain the interval data in csv format with the following column headers:
+                
+                .. csv-table:: Eclipse file INTERVAL data format
+                        :header: Column, Data type, Units, Description
+                        :widths: 10,10,10,30
 
-                    start index, int, , Eclipse start time-index.
-                    stop index, int, , Eclipse stop time-index.
+                        start index, int, , Eclipse start time-index.
+                        stop index, int, , Eclipse stop time-index.
 
-        2. *DETAIL*: The first line of the file indicates the spacecraft identifier. The second line contains the epoch in Julian Date UT1. The 
-            third line contains the step-size in seconds. The later lines contain the interval data in csv format with the following column headers:
+            2. *DETAIL*: 
 
-            .. csv-table:: Eclipse file INTERVAL data format
-                    :header: Column, Data type, Units, Description
-                    :widths: 10,10,10,30
+                *  The first row indicates the spacecraft identifier for which the eclipses were evaluated.
+                *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                *  The third row contains the time step-size in seconds.
 
-                    time index, int, , Time-index.
-                    eclipse, bool, , 'T' indicating True or F indicating False.
+                The later lines contain the interval data in csv format with the following column headers:
+
+                .. csv-table:: Eclipse file DETAIL data format
+                        :header: Column, Data type, Units, Description
+                        :widths: 10,10,10,30
+
+                        time index, int, , Time-index.
+                        eclipse, bool, , 'T' indicating True or F indicating False.
 
         :param spacecraft: Spacecraft object.
         :paramtype spacecraft: :class:`orbitpy.util.Spacecraft`
@@ -62,7 +67,7 @@ class EclipseFinder(Entity):
                               Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
         :paramtype state_cart_fl: str
 
-        :param out_filename: Name of output file in when the results are written. If not specified, the output filename is: *eclipse.csv*
+        :param out_filename: Name of output file in when the results are written. If not specified, the output filename is provided as *eclipse.csv*.
         :paramtype out_filename: str or None
 
         :param out_type: Indicates the type of output data to be saved. Default is OutType.INTERVAL.
@@ -149,9 +154,7 @@ class EclipseFinder(Entity):
                     indx = indx + 2    
 
         else:
-            raise RuntimeError("Unknown specification of the contact finder output data format.") 
-
-        
+            raise RuntimeError("Unknown specification of the contact finder output data format.")         
         
         return EclipseFinderOutputInfo.from_dict({"@type": "EclipseFinderOutputInfo",
                                                 "spacecraftId": spacecraft._id,
@@ -240,7 +243,7 @@ class EclipseFinderOutputInfo(Entity):
         return "EclipseFinderOutputInfo.from_dict({})".format(self.to_dict())
     
     def __eq__(self, other):
-        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different.
         if(isinstance(self, other.__class__)):
             return (self.spacecraftId==other.spacecraftId) and (self.stateCartFile==other.stateCartFile) and \
                    (self.eclipseFile==other.eclipseFile) and  (self.outType==other.outType) and \
