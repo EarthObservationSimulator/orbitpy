@@ -183,7 +183,7 @@ class Grid(Entity):
         point_group = propcov.PointGroup()
         point_group.AddUserDefinedPoints(data['lat [deg]'].tolist(),data['lon [deg]'].tolist())
         return Grid( point_group = point_group,
-                     _id = d.get('@id', uuid.uuid4())
+                     _id = d.get('@id', str(uuid.uuid4()))
                     )
 
     def write_to_file(self, filepath):

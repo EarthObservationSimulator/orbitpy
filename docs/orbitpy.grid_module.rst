@@ -62,7 +62,7 @@ Examples
    .. code-block:: python
 
          from orbitpy.grid import Grid
-         regionA = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
+         regionA = Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
          print(regionA.num_points) # access total number of generated points
          print(regionA.get_lat_lon_from_index([0,2,10])) # access the lat, lon coordinates of grid-points 0, 2, 10. Note that the indx starts from 0.
          print(regionA.get_lat_lon) # get all the generated grid-points
@@ -88,7 +88,7 @@ Examples
          import os
 
          covGridFilePath = os.path.dirname(os.path.realpath(__file__)) + '/gridDataIn.csv' # path to the file containing the grid-data
-         regionB = Grid.from_customgrid_dict({"@type": "customGRID", "covGridFilePath": covGridFilePath, "@id": 5})
+         regionB = Grid.from_dict({"@type": "customGRID", "covGridFilePath": covGridFilePath, "@id": 5})
          print(regionB.num_points) # access total number of generated points
          print(regionB.get_lat_lon_from_index([0,2,10])) # access the lat, lon coordinates of grid-points 0, 2, 10
 
@@ -104,7 +104,7 @@ Examples
          import os
 
          out_file = os.path.dirname(os.path.realpath(__file__)) + '/gridDataOut.csv' # path to the output file containing the grid points
-         o = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
+         o = Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
          out_info = o.write_to_file(out_file)
          print(out_info)
 

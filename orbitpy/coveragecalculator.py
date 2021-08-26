@@ -3,6 +3,8 @@
 
 :synopsis: *Module providing classes and functions to handle coverage related calculations.*
 
+.. todo:: Revise to include coverage calculations of spacecrafts without sensors.
+
 """
 import numpy as np
 from collections import namedtuple
@@ -10,11 +12,11 @@ import csv
 import pandas as pd
 
 import propcov
-from instrupy.util import Entity, EnumEntity, Constants
+from instrupy.util import Entity
 from orbitpy.grid import Grid
 import orbitpy.util
 from orbitpy.util import Spacecraft
-from instrupy.util import ViewGeometry, Orientation, ReferenceFrame, SphericalGeometry
+from instrupy.util import ReferenceFrame, SphericalGeometry
 
 DAYS_PER_SEC = 1.1574074074074074074074074074074e-5
 
@@ -34,8 +36,8 @@ class CoverageCalculatorFactory:
     .. code-block:: python
         
         factory = orbitpy.CoverageCalculatorFactory()
-        factory.register_coverage_calculator('Custom Coverage Finder', CoverageFinder)
-        cov_calc1 = factory.get_coverage_calculator('CoverageFinder')
+        factory.register_coverage_calculator('Custom Coverage Finder', CoverageFinder) # CoverageFinder is the user class
+        cov_calc = factory.get_coverage_calculator('CoverageFinder')
 
     :ivar _creators: Dictionary mapping coverage type label to the appropriate coverage calculator class. 
     :vartype _creators: dict
@@ -63,10 +65,13 @@ class CoverageCalculatorFactory:
         """ Function to get the appropriate coverage calculator instance.
 
         :var specs: Coverage calculator specifications which also contains a valid coverage calculator
-                    type in the "@type" dict key. The propagator type is valid if it has been
+                    type in the "@type" dict key. The coverage calculator type is valid if it has been
                     registered with the ``CoverageCalculatorFactory`` instance.
         :vartype _type: dict
-        
+
+        :return: The appropriate coverage calculator object initialized to the input specifications.
+        :rtype: :class:`orbitpy.coveragecalculator.GridCoverage` or :class:`orbitpy.coveragecalculator.PointingOptionsCoverage` or :class:`orbitpy.coveragecalculator.PointingOptionsWithGridCoverage` or custom coverage calculator class.
+                
         """
         _type = specs.get("@type", None)
         if _type is None:
@@ -269,10 +274,10 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
         return out_df
 
 class GridCoverage(Entity):
-    """A coverage calculator which handles coverage calculation for a spacecraft over a grid. Each coverage object is specific to 
+    """A coverage calculator class which handles coverage calculation for a spacecraft over a grid. Each ``GridCoverage`` object is specific to 
         a particular grid and spacecraft.
 
-    :ivar grid: Locations (longitudes, latitudes) over which coverage calculation is performed.
+    :ivar grid: Locations (longitudes, latitudes) (represented by a :class:`orbitpy.util.grid` object) over which coverage calculation is to be performed.
     :vartype grid: :class:`orbitpy.util.grid`
 
     :ivar spacecraft: Spacecraft for which the coverage calculation is performed.
@@ -298,7 +303,7 @@ class GridCoverage(Entity):
     def from_dict(d):
         """ Parses an ``GridCoverage`` object from a normalized JSON dictionary.
         
-        :param d: Dictionary with the GridCoverage specifications.
+        :param d: Dictionary with the GRID COVERAGE specifications.
 
                 Following keys are to be specified.
                 
@@ -329,8 +334,8 @@ class GridCoverage(Entity):
         
         """
         return dict({"@type": "GRID COVERAGE",
-                     "grid": self.grid.to_dict,
-                     "spacecraft": self.to_dict,
+                     "grid": self.grid.to_dict(),
+                     "spacecraft": self.to_dict(),
                      "cartesianStateFilePath": self.state_cart_file,
                      "@id": self._id})
 
@@ -338,30 +343,36 @@ class GridCoverage(Entity):
         return "GridCoverage.from_dict({})".format(self.to_dict())
 
     def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, filter_mid_acc=False):
-        """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
+        """ Perform orbit coverage calculation for a specific instrument and mode of the instrument in the object instance. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
             same as the time resolution at which the spacecraft states are available. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV)
-            is used for coverage calculations.
+            is used for coverage calculations unless it has been specified to use the field-of-regard.
 
-        :param instru_id: Sensor identifier (corresponding to the input spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
+        :param instru_id: Instrument identifier (must be present in the input spacecraft). If ``None``, the first instrument in the spacecraft's list of instruments is considered.
         :paramtype instru_id: str (or) int
 
-        :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
+        :param mode_id: Mode identifier (corresponding to the input instrument (id)). If ``None``, the first mode of the instrument is considered.
         :paramtype mode_id: str (or) int
 
-        :param use_field_of_regard: This is a boolean flag to specify if the field-of-view is to be considered or the field-of-regard is to be considered for the coverage calculations. 
-                                    Default value is ``False`` (i.e. the field-of-view is to be considered in the coverage calculations).
+        :param use_field_of_regard: This is a boolean flag to specify if the the field-of-regard is to be considered for the coverage calculations. 
+                                    Default value is ``False`` (i.e. the scene-field-of-view will be considered in the coverage calculations).
         :paramtype use_field_of_regard: bool
 
         :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
                 
-                The first four rows contain general information. The first row contains the coverage calculation type.
-                The second row containing the mission epoch in Julian Day UT1. The time
-                in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
-                The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
-                Description of the data (comma-seperated) is given below:
+                The file format is as follows:
 
-                .. csv-table:: Observation data metrics description
+                *  The first row contains the coverage calculation type.
+                *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                *  The third row contains the time-step size in seconds. 
+                *  The fourth row contains the mission duration in days.
+                *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+                Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+                Description of the coverage data is given below:
+
+                .. csv-table:: Coverage data description
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
@@ -369,11 +380,11 @@ class GridCoverage(Entity):
                     GP index, integer, , Grid-point index.
                     lat [deg], float, degrees, Latitude corresponding to the GP index.
                     lon [deg], float, degrees, Longitude corresponding to the GP index.
-        
+
         :paramtype out_file_access: str
 
         :param filter_mid_acc: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
-                                           Default value is ``False``.
+                                Default value is ``False``.
         :paramtype filter_mid_acc: bool
 
         :return: Coverage output info.
@@ -486,9 +497,9 @@ class GridCoverage(Entity):
                                                 "@id": None})
             
 class PointingOptionsCoverage(Entity):
-    """A coverage calculator which handles coverage calculation for a spacecraft with specified set of pointing-options.
-       A pointing-option refers to orientation of the instrument in the NADIR_POINTING frame. Set of pointing-options 
-       present all the possible orientations of the instrument due to maneuverability of the instrument and/or satellite-bus.
+    """A coverage calculator which handles coverage calculation for an instrument (on a spacecraft) with a set of pointing-options.
+       A pointing-option refers to orientation of the instrument in the NADIR_POINTING frame. The set of pointing-options 
+       represent all the possible orientations of the instrument due to maneuverability of the instrument and/or satellite-bus.
        The ground-locations for each pointing-option, at each propagation time-step is calculated as the coverage result.      
 
     :ivar spacecraft: Spacecraft for which the coverage calculation is performed. The pointing options are included in the instrument definitions of the spacecraft. 
@@ -595,7 +606,7 @@ class PointingOptionsCoverage(Entity):
         return intersect_point.tolist()
 
     def execute(self, instru_id=None, mode_id=None, out_file_access=None):
-        """ Perform orbit coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
+        """ Perform coverage calculation for a specific instrument and mode. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
             same as the time resolution at which the spacecraft states are available.
 
@@ -607,18 +618,24 @@ class PointingOptionsCoverage(Entity):
 
         :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
                 
-                The first four rows contain general information. The first row contains the coverage calculation type.
-                The second row containing the mission epoch in Julian Day UT1. The time
-                in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
-                The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
-                Description of the data (comma-seperated) is given below:
+                The format of the output data file is as follows:
 
-                .. csv-table:: Observation data metrics description
+                *  The first row contains the coverage calculation type.
+                *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                *  The third row contains the time-step size in seconds. 
+                *  The fourth row contains the mission duration in days.
+                *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+                Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+                Description of the coverage data is given below:
+
+                .. csv-table:: Coverage data description
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
                     time index, int, , Access time-index.
-                    pnt-opt index, int, , "Pointing options index. The indexing is implicit and starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
+                    pnt-opt index, int, , "Pointing options index. The indexing starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
                     lat [deg], float, degrees, Latitude of accessed ground-location.
                     lon [deg], float, degrees, Longitude of accessed ground-location.
         

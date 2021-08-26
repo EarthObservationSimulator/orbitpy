@@ -10,24 +10,16 @@
 * ``test_execute_3``: Pitch Rectangular sensor tests
 
 """
-
-import json
 import os, shutil
 import sys
 import unittest
-import numpy as np
 import pandas as pd
-import random
-import warnings 
 
 from orbitpy.coveragecalculator import CoverageCalculatorFactory, GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
 import orbitpy.coveragecalculator
-from orbitpy.grid import Grid
-from orbitpy.util import Spacecraft, OrbitState, SpacecraftBus
-from orbitpy.propagator import PropagatorFactory
+from orbitpy.util import Spacecraft
 
-from instrupy.util import ViewGeometry, Orientation, SphericalGeometry
-from instrupy import Instrument
+from instrupy.util import ViewGeometry, Orientation
 
 sys.path.append('../')
 from util.spacecrafts import spc1_json, spc2_json, spc3_json
