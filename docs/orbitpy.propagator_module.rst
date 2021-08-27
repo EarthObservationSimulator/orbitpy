@@ -24,7 +24,7 @@ The output of executing the propagator is a csv data file containing the satelli
 
 Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
 
-Description of the data (in either ``CARTESIAN_EARTH_CENTERED_INERTIAL`` or ``KEPLERIAN_EARTH_CENTERED_INERTIAL`` reference frame) is given below:
+Description of the column headers and data (in either ``CARTESIAN_EARTH_CENTERED_INERTIAL`` or ``KEPLERIAN_EARTH_CENTERED_INERTIAL`` reference frame) is given below:
 
 .. csv-table:: CARTESIAN_EARTH_CENTERED_INERTIAL state data description
    :header: Column, Data type, Units, Description

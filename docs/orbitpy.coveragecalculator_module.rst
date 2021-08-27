@@ -4,12 +4,12 @@
 Description
 ^^^^^^^^^^^^^
 
-Module providing classes and functions to handle coverage related calculations. Factory method pattern is used for initializing the coverage Calculator 
+Module providing classes and functions to handle coverage related calculations. Factory method pattern is used for initializing the coverage calculator 
 object (please see :ref:`constellation_module` for details). The module provides for three types of coverage calculations which are described in detail below.
 Users may additionally define their own coverage calculator classes adherent to the same interface functions 
 (``from_dict(.)``, ``to_dict(.)``, ``execute(.)``, ``__eq__(.)``) as in any of the built in coverage calculator classes.
 
-.. grid_cov_desc::
+.. _grid_cov_desc:
 
 *GRID COVERAGE* 
 ----------------
@@ -22,18 +22,19 @@ The format of the input data file of the spacecraft states is the same as the fo
 ``GridCoverage.execute`` function
 ..................................
 
-The coverage calculation can be executed using the ``execute(.)`` function. The instrument and the mode of the instrument (in the spacecraft) can be specified 
+The coverage calculation can be executed using the ``execute(.)`` function. The instrument (in the spacecraft) and the mode of the instrument can be specified 
 by means of their respective identifiers (in the ``instru_id``, ``mode_id`` input arguments). If not specified, the first instrument in the list of spacecraft's instruments, the first mode of the instrument (see the docs of :class:`instrupy.base.Instrument`)
 in the list of modes of the instrument shall be selected. 
 
 Coverage is calculated for the period over which the input spacecraft propagated states are available. The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
 Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations unless it has been specified to use the field-of-regard (using the ``use_field_of_regard`` input argument).
 
-The ``filter_mid_acc`` input argument can be used to specify if the access times only at the middle of an continuous access-interval. Finally the ``out_file_access`` input argument is 
-used to specify the filepath (with filename) at which the results are to be written.
+The ``filter_mid_acc`` input argument can be used to specify if the access times only at the middle of an continuous access-interval. 
 E.g. If the access takes place at time-indices 450, 451, 452, 453, 454, and if the ``filter_mid_acc`` flag is specified to be true, then only the access time-index = 452 is written
 in the results.
 
+Finally the ``out_file_access`` input argument is 
+used to specify the filepath (with filename) at which the results are to be written.
 A ``CoverageOutputInfo`` object containing meta-info about the results is returned at the end of execution of the function.
 
 Output data file format
@@ -43,13 +44,13 @@ The output of executing the coverage calculator is a csv data file containing th
 
 *  The first row contains the coverage calculation type.
 *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
-*  The third row contains the time-step size in seconds. 
+*  The third row contains the time step-size in seconds. 
 *  The fourth row contains the mission duration in days.
 *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
 
 Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
 
-Description of the coverage data is given below:
+Description of the columns headers and data is given below:
 
 .. csv-table:: Coverage data description
       :header: Column, Data type, Units, Description
@@ -60,13 +61,13 @@ Description of the coverage data is given below:
       lat [deg], float, degrees, Latitude corresponding to the GP index.
       lon [deg], float, degrees, Longitude corresponding to the GP index.
 
-.. pointing_opt_cov_desc::
+.. _pointing_opt_cov_desc:
 
 *POINTING OPTIONS COVERAGE*
 ----------------------------
 
 This type of coverage calculations is possible for an instrument (on a spacecraft) with a set of pointing-options.
-A pointing-option refers to orientation of the instrument in the NADIR_POINTING frame. The set of pointing-options 
+A pointing-option refers to orientation of the instrument in the nadir-pointing frame. The set of pointing-options 
 represent all the possible orientations of the instrument due to maneuverability of the instrument and/or satellite-bus.
 The ground-locations for each pointing-option, at each propagation time-step is calculated as the coverage result.
 
@@ -95,7 +96,7 @@ The output of executing the coverage calculator is a csv data file containing th
 
 Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
 
-Description of the coverage data is given below:
+Description of the columns headers and data is given below:
 
 .. csv-table:: Coverage data description
       :header: Column, Data type, Units, Description
@@ -116,7 +117,8 @@ This type of coverage calculations is similar to the :ref:`grid_cov_desc`, excep
 ``PointingOptionsWithGridCoverage.execute`` function
 .......................................................
 
-The function behavior is similar to the ``execute`` function of the ``GridCoverage`` object. Coverage calculations are performed for a specific instrument and mode. 
+The function behavior is similar to the ``execute`` function of the ``GridCoverage`` object. Coverage calculations are performed for a specific instrument and mode,
+and the results are written out for separately for each pointing-option of the instrument/mode. 
 A key difference is that only the scene-field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
 
 Output data file format
@@ -132,7 +134,7 @@ The output of executing the coverage calculator is a csv data file containing th
 
 Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
 
-Description of the coverage data is given below:
+Description of the columns headers and data is given below:
 
 .. csv-table:: Coverage data description
       :header: Column, Data type, Units, Description
@@ -144,26 +146,50 @@ Description of the coverage data is given below:
       lat [deg], float, degrees, Latitude corresponding to the GP index.
       lon [deg], float, degrees, Longitude corresponding to the GP index.
 
-Helper functions
--------------------
+      
+*Correction* of access files for purely side-looking instruments with narrow along-track FOV
+-----------------------------------------------------------------------------------------------
 
-``helper_extract_coverage_parameters_of_spacecraft``
-.......................................................
+In case of purely side-looking instruments with narrow-FOV (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place
+when the grid-point is seen with no squint angle and the access is almost instantaneous (i.e. access duration is very small). 
+The coverage calculations is carried out with the corresponding instrument scene-field-of-view or field-of-regard (built using the scene-field-of-view) 
+(see :code:`instrupy` package documentation). 
+If the instrument FOV is to be used for coverage calculations, a *very very* small time step-size would need to be used which to impractically leads to long computation time.
 
-``find_in_cov_params_list``
-.............................
+The access files in general list rows of access-time, ground-points, and thus independent access opportunities for the instrument
+when the scene-field-of-view / field-of-regard is used for coverage calculations. 
+If the generated access files from the these coverage calculations of a purely side-looking, narrow along-track FOV instrument is
+interpreted in the same manner, it would be erroneous.
 
-``filter_mid_interval_access``
-.................................
+Thus the generated access files are then *corrected* to show access only at approximately (to the nearest propagation time-step) 
+the middle of the access interval. 
+This should be coupled with the required scene-scan-duration (from scene-field-of-view) to get complete information about the access. 
+
+For example, consider a SAR instrument pointing sideways as shown in the figure below. The along-track FOV is narrow
+corresponding to narrow strips, and a scene is built from concatenated strips. A SceneFOV is associated with the SAR and is used for access 
+calculation over the grid point shown in the figure. Say the propagation time-step is 1s as shown in the figure. An access interval between
+t=100s to t=105s is registered. However as shown the actual access takes place over a small interval of time at t=103.177s. 
+
+An approximation can be applied (i.e. correction is made) that the observation time of the ground point is at the middle of the access
+interval as calculated using the SceneFOV, rounded of to the nearest propagation time, i.e. :math:`t= 100 + ((105-100)/2) % 1 = 103s`. The state 
+of the spacecraft at :math:`t=103s` and access duration corresponding to the instrument FOV (note: *not* the sceneFOV) (can be determined analytically) 
+is to be used for the data-metrics calculation.
+
+.. figure:: sar_access.png
+      :scale: 75 %
+      :align: center
+
+.. warning:: The correction method is to be used only when the instrument access-duration (determined from the instrument FOV) is smaller 
+            than the propagation time step (determined from the sceneFOV).
 
 Examples
 ^^^^^^^^^
 
-1. *GRID COVERAGE example*
+1. *GRID COVERAGE example 1*
    
-   The following snippet of code initializes and executes coverage calculation for a spacecraft in an equatorial orbit, and a grid along the
+   The following snippet of code initializes and executes coverage calculation for a spacecraft in an equatorial orbit, and a grid about the
    equator. The spacecraft is aligned to the nadir-pointing frame (:class:`instrupy.util.ReferenceFrame.NADIR_POINTING`) and the instrument in turn is
-   aligned to the spacecraft body frame (:class:`instrupy.util.ReferenceFrame.SC_BODY_FIXED`). The access data the grid-points accessed at every time tick
+   aligned to the spacecraft body frame (:class:`instrupy.util.ReferenceFrame.SC_BODY_FIXED`). The access data shows the grid-points accessed at every time tick
    of the mission. The interval between the time-ticks is equal to the propagation step-size which here is 2 seconds.
 
    .. code-block:: python
@@ -232,7 +258,7 @@ Examples
          ...
    
    In below snippet the ``filter_mid_acc`` flag is set to ``True`` instead of ``False``. Observe the difference in the output access data between the above result
-   and the below result. In the below result only access at the middle of the access time-interval is shown. E.g. The access to the GP 4303 is from time-index = 0 to 10 
+   and the below result. In the below result only access at the middle of the access time-interval is shown. E.g. The very-first access to the GP 4303 is from time-index = 0 to 10 
    and the mid-interval access is at time-index = 5.
 
    .. code-block:: python
@@ -252,12 +278,12 @@ Examples
       51,4306,0.0,82.0
       ...
 
-2. *GRID COVERAGE example*
+2. *GRID COVERAGE example 2*
    
-   In the below snippet, the satellite is equipped with two instruments with multiple modes. The second instrument, and second mode is selected for
+   In the below snippet, the satellite is equipped with two instruments. The second instrument, and second mode is selected for
    coverage calculation. The ``use_field_of_regard`` flag is set true to indicate that the field-of-regard should be considered for the coverage calculation.
    Note that in absence of the ``orientation`` specifications for the ``SpacecraftBus`` object, the default is assumed to be aligned to the nadir-pointing frame.
-   In case of the instrument, the default orientation is aligned to the spacecraft bus.
+   In case of the instrument, the default orientation is alignment to the spacecraft bus.
 
    .. code-block:: python
 
@@ -368,7 +394,7 @@ Examples
 
 4. *POINTING OPTIONS WITH GRID COVERAGE example*
    
-      In the below snippet, the satellite is equipped with two instruments with multiple modes. The second instrument with the pointing-options specifications is chosen for
+      In the below snippet, the satellite is equipped with two instruments. The second instrument with the pointing-options specifications is chosen for
       coverage calculations.  The ``filter_mid_acc`` flag is set to ``True`` to have only the access-times at the middle of access-intervals. The output csv file
       shows the grid-points accessed (if any) for each of the pointing-options at every time-step.
    

@@ -92,7 +92,7 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
     :return: Tuples with instrument-id, mode-id, scene-field-of-view, field-of-regard and pointing_option(s).
     :rtype: list, namedtuple, (str or int, str or int, :class:`instrupy.util.ViewGeometry`, <list,:class:`instrupy.util.ViewGeometry`>, <list,:class:`instrupy.util.Orientation`>)
 
-    .. note::  The field-of-regard parameter and pointing_option parameter is a list in the tuple. 
+    .. note::  The field-of-regard parameter and pointing_option parameter are lists in the tuple. 
 
     """
     _p = namedtuple("spc_cov_params", ["instru_id", "mode_id", "scene_field_of_view", "field_of_regard", "pointing_option"])
@@ -102,7 +102,7 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
         for instru in spc.instrument: # iterate over each instrument
             instru_id = instru.get_id()
 
-            for mode_id in instru.get_mode_id():# iterate over each mode in the instrument
+            for mode_id in instru.get_mode_id(): # iterate over each mode in the instrument
 
                 scene_field_of_view  = instru.get_scene_field_of_view(mode_id)
                 field_of_regard  = instru.get_field_of_regard(mode_id) 
@@ -116,7 +116,7 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
     return params
 
 def find_in_cov_params_list(cov_param_list, instru_id=None, mode_id=None):
-    """ For an input instrument-id, mode-id, find the corresponding FOV, FOR and pointing_option(s) in an input list of coverage-parameters 
+    """ For an input instrument-id, mode-id, find the corresponding coverage-parameter in an input list of coverage-parameters 
         (list of tuples of (instru_id, mode_id, field-of-view, field-of-regard, pointing_option)). 
 
     :param cov_param_list: List of tuples of (instrument id, mode id, field-of-view, field-of-regard, pointing_option).
@@ -125,7 +125,7 @@ def find_in_cov_params_list(cov_param_list, instru_id=None, mode_id=None):
     :param instru_id: Instrument identifier. If ``None``, the first tuple in the list of coverage parameters is returned.
     :paramtype instru_id: str (or) int
 
-    :param mode_id: Mode identifier. If ``None``, the first tuple in the list of the instance ``access_file_info`` attribute with the matching instru_id is returned.
+    :param mode_id: Mode identifier. If ``None``, the first tuple in the list of coverage parameters with the matching instru_id is returned.
     :paramtype mode_id: str (or) int
 
     :return: (Single) Tuple of (instrument id, mode id, field-of-view, field-of-regard, pointing-option(s)), such that the instrument-id and 
@@ -151,38 +151,27 @@ def find_in_cov_params_list(cov_param_list, instru_id=None, mode_id=None):
 def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None):
         """ Extract the access times at middle of access intervals. The input can be a path to a file or a dataframe. 
 
-        This function can be used for "correction" of access files for purely side-looking instruments with narrow (along-track) FOV described below:
+        This function can be used for "correction" of access files for purely side-looking instruments with narrow along-track FOV as described below:
 
         In case of purely side-looking instruments with narrow-FOV (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place
-        when the grid-point is seen with no squint angle and the access is relatively instantaneous (i.e. access duration is very small). 
-        The field-of-regard coverage calculations are carried out with the corresponding *sceneFOV* (see :code:`instrupy` package documentation). 
+        when the grid-point is seen with no squint angle and the access is almost instantaneous (i.e. access duration is very small). 
+        The coverage calculations is carried out with the corresponding instrument scene-field-of-view or field-of-regard (built using the scene-filed-of-view) 
+        (see :code:`instrupy` package documentation). 
+        If the instrument FOV is to be used for coverage calculations, a *very very* small time step-size would need to be used which to impractically long computation time.
 
         The access files list rows of access-time, ground-points, and thus independent access opportunities for the instrument
-        when the field-of-regard is used for coverage calculations. 
-        If the generated access files from the field-of-regard coverage calculations (using sceneFOV) of purely side-looking, narrow-FOV instruments are
+        when the scene-field-of-view / field-of-regard is used for coverage calculations. 
+        If the generated access files from the these coverage calculations of a purely side-looking, narrow along-track FOV instrument is
         interpreted in the same manner, it would be erroneous.
 
         Thus the generated access files are then *corrected* to show access only at approximately (to the nearest propagation time-step) 
         the middle of the access interval. 
-        This should be coupled with the required scene-scan-duration (from sceneFOV) to get complete information about the access. 
+        This should be coupled with the required scene-scan-duration (from scene-field-of-view) to get complete information about the access. 
 
-        For example, consider a SAR instrument pointing sideways as shown in the figure below. The along-track FOV is narrow
-        corresponding to narrow strips, and a scene is built from concatenated strips. A SceneFOV is associated with the SAR and is used for access 
-        calculation over the grid point shown in the figure. Say the propagation time-step is 1s as shown in the figure. An access interval between
-        t=100s to t=105s is registered. However as shown the actual access takes place over a small interval of time at t=103.177s. 
+        .. warning:: The correction method is to be used only when the instrument access-duration (determined from the instrument FOV) is smaller 
+                     than the propagation time step (determined from the sceneFOV). 
 
-        An approximation can be applied (i.e. correction is made) that the observation time of the ground point is at the middle of the access
-        interval rounded of to the nearest propagation time as calculated using the SceneFOV, i.e. :math:`t= 100 + ((105-100)/2) % 1 = 103s`. The state 
-        of the spacecraft at :math:`t=103s` and access duration corresponding to the instrument FOV (note: *not* the sceneFOV) (can be determined analytically) 
-        is to be used for the data-metrics calculation.
-
-        .. figure:: sar_access.png
-            :scale: 75 %
-            :align: center
-
-        .. warning:: The correction method is to be used only when the instrument access-duration is smaller than the propagation time step (which is determined from sceneFOV). 
-
-        :ivar inp_acc_df: Dataframe with the access data which needs to be filtered. The rows correspond to pair of 
+        :ivar inp_acc_df: Dataframe with the access data which needs to be filtered. The rows correspond to pairs of 
                           access time and corresponding ground-point index. The columns are to be named as: ``time index``, ``GP index``, ``lat [deg]``, ``lon [deg]``.
                           If ``None``, the ``inp_acc_fl`` input argument must be specified.
         :vartype inp_acc_df: pd.DataFrame or None
@@ -198,7 +187,6 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
         :rtype: pd.DataFrame
 
         """
-        print("start correction")
         if inp_acc_fl: # If input file is specified, the data is taken from it. 
             df = pd.read_csv(inp_acc_fl, skiprows=4)            
         else:
