@@ -352,7 +352,7 @@ class ContactFinderOutputInfo(Entity):
         :param d: Dictionary with the ContactFinderOutputInfo attributes.
         :paramtype d: dict
 
-        :return: ContactFinderOutputInfo object.
+        :return: ``ContactFinderOutputInfo`` object.
         :rtype: :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
 
         """
@@ -372,7 +372,7 @@ class ContactFinderOutputInfo(Entity):
     def to_dict(self):
         """ Translate the ContactFinderOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: ContactFinderOutputInfo object as python dictionary
+        :return: ``ContactFinderOutputInfo`` object as python dictionary
         :rtype: dict
         
         """

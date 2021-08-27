@@ -165,7 +165,7 @@ class J2AnalyticalPropagator(Entity):
 
         :paramtype d: dict
 
-        :return: J2AnalyticalPropagator object.
+        :return: ``J2AnalyticalPropagator`` object.
         :rtype: :class:`orbitpy.propagate.J2AnalyticalPropagator`
 
         """ 
@@ -175,7 +175,7 @@ class J2AnalyticalPropagator(Entity):
     def to_dict(self):
         """ Translate the J2AnalyticalPropagator object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: J2AnalyticalPropagator object as python dictionary
+        :return: ``J2AnalyticalPropagator`` object as python dictionary
         :rtype: dict
         
         """
@@ -374,7 +374,7 @@ class PropagatorOutputInfo(Entity):
         :param d: Dictionary with the PropagatorOutputInfo attributes.
         :paramtype d: dict
 
-        :return: PropagatorOutputInfo object.
+        :return: ``PropagatorOutputInfo`` object.
         :rtype: :class:`orbitpy.propagator.PropagatorOutputInfo`
 
         """
@@ -389,7 +389,7 @@ class PropagatorOutputInfo(Entity):
     def to_dict(self):
         """ Translate the PropagatorOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: PropagatorOutputInfo object as python dictionary
+        :return: ``PropagatorOutputInfo`` object as python dictionary
         :rtype: dict
         
         """

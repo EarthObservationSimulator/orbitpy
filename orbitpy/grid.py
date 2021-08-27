@@ -62,7 +62,7 @@ class Grid(Entity):
 
         :paramtype d: dict
 
-        :return: Grid object.
+        :return: ``Grid`` object.
         :rtype: :class:`orbitpy.grid.Grid`
 
         """ 
@@ -81,7 +81,7 @@ class Grid(Entity):
         :param filepath: Path to the file (with filename) where the grid data is to be stored.
         :paramtype filepath: str
         
-        :return: Grid object as python dictionary
+        :return: ``Grid`` object as python dictionary
         :rtype: dict
 
         """

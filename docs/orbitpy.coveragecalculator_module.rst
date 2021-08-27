@@ -9,6 +9,8 @@ object (please see :ref:`constellation_module` for details). The module provides
 Users may additionally define their own coverage calculator classes adherent to the same interface functions 
 (``from_dict(.)``, ``to_dict(.)``, ``execute(.)``, ``__eq__(.)``) as in any of the built in coverage calculator classes.
 
+.. grid_cov_desc::
+
 *GRID COVERAGE* 
 ----------------
 
@@ -37,7 +39,7 @@ A ``CoverageOutputInfo`` object containing meta-info about the results is return
 Output data file format
 .........................
 
-The output of executing the propagator is a csv data file containing the access data.
+The output of executing the coverage calculator is a csv data file containing the access data.
 
 *  The first row contains the coverage calculation type.
 *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
@@ -57,6 +59,8 @@ Description of the coverage data is given below:
       GP index, integer, , Grid-point index.
       lat [deg], float, degrees, Latitude corresponding to the GP index.
       lon [deg], float, degrees, Longitude corresponding to the GP index.
+
+.. pointing_opt_cov_desc::
 
 *POINTING OPTIONS COVERAGE*
 ----------------------------
@@ -81,7 +85,7 @@ A ``CoverageOutputInfo`` object containing meta-info about the results is return
 Output data file format
 .........................
 
-The output of executing the propagator is a csv data file containing the access data.
+The output of executing the coverage calculator is a csv data file containing the access data.
 
 *  The first row contains the coverage calculation type.
 *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
@@ -106,13 +110,39 @@ Description of the coverage data is given below:
 *POINTING OPTIONS WITH GRID COVERAGE*
 --------------------------------------
 
+This type of coverage calculations is similar to the :ref:`grid_cov_desc`, except that the coverage calculations are carried out for the list of pointing-options
+(see :ref:`pointing_opt_cov_desc`) available for an instrument. 
 
 ``PointingOptionsWithGridCoverage.execute`` function
 .......................................................
 
+The function behavior is similar to the ``execute`` function of the ``GridCoverage`` object. Coverage calculations are performed for a specific instrument and mode. 
+A key difference is that only the scene-field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
+
 Output data file format
 .........................
 
+The output of executing the coverage calculator is a csv data file containing the access data.
+
+*  The first row contains the coverage calculation type.
+*  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+*  The third row contains the time-step size in seconds. 
+*  The fourth row contains the mission duration in days.
+*  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+Description of the coverage data is given below:
+
+.. csv-table:: Coverage data description
+      :header: Column, Data type, Units, Description
+      :widths: 10,10,10,30
+
+      time index, int, , Access time-index.
+      pnt-opt index, int, , "Pointing options index. The indexing starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
+      GP index, integer, , Grid-point index.
+      lat [deg], float, degrees, Latitude corresponding to the GP index.
+      lon [deg], float, degrees, Longitude corresponding to the GP index.
 
 Helper functions
 -------------------
@@ -336,7 +366,68 @@ Examples
       1,1,-0.197,76.108
       2,0,0.197,76.226
 
+4. *POINTING OPTIONS WITH GRID COVERAGE example*
+   
+      In the below snippet, the satellite is equipped with two instruments with multiple modes. The second instrument with the pointing-options specifications is chosen for
+      coverage calculations.  The ``filter_mid_acc`` flag is set to ``True`` to have only the access-times at the middle of access-intervals. The output csv file
+      shows the grid-points accessed (if any) for each of the pointing-options at every time-step.
+   
+      .. code-block:: python
 
+            from orbitpy.util import OrbitState, Spacecraft, SpacecraftBus
+            from orbitpy.propagator import J2AnalyticalPropagator
+            from orbitpy.coveragecalculator import PointingOptionsWithGridCoverage
+            from orbitpy.grid import Grid
+            from instrupy.base import Instrument
+            import os
+            
+            out_dir = os.path.dirname(os.path.realpath(__file__))
+            
+            # initialize J2 analytical propagator with 2 secs propagation step-size
+            j2_prop = J2AnalyticalPropagator.from_dict({"@type": 'J2 ANALYTICAL PROPAGATOR', 'stepSize':2} )
+            
+            # initialize orbit (initial state of the satellite)
+            orbit = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0},
+                              "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6378+500, "ecc": 0.001, "inc": 0, "raan": 20, "aop": 0, "ta": 120}
+                              })
+            bus = SpacecraftBus.from_dict({"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}}) # bus is aligned to the NADIR_POINTING frame.
+            instru1= Instrument.from_json({"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "circular", "diameter":10}, "@id": "A"}) 
+            instru2 = Instrument.from_json({"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "circular", "diameter":20},
+                                          "pointingOption":[{"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":10, "zRotation":0},
+                                                            {"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":-10, "zRotation":0}],
+                                          "@id": "B"}) 
+            # spacecraft with 1 instrument
+            sc = Spacecraft(orbitState=orbit, spacecraftBus=bus, instrument=[instru1, instru2])
+            
+            state_cart_file = os.path.dirname(os.path.realpath(__file__)) + '/cart_state.csv'
+            
+            # execute the propagator for duration of 0.1 days 
+            j2_prop.execute(sc, None, state_cart_file, None, duration=0.1) 
+            
+            # make the Grid object
+            grid = Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":45, "latLower":-45, "lonUpper":180, "lonLower":-180, "gridRes": 1})
+            
+            # set output file path
+            out_file_access = out_dir + '/access.csv'
+            
+            # run the coverage calculator
+            cov_cal = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sc, state_cart_file=state_cart_file)
+            out_info = cov_cal.execute(instru_id="B", mode_id=None, out_file_access=out_file_access, filter_mid_acc=True)
+
+            access.csv
+            -----------
+            POINTING OPTIONS WITH GRID COVERAGE
+            Epoch [JDUT1] is 2458265.0
+            Step size [s] is 2.0
+            Mission Duration [Days] is 0.1
+            time index,pnt-opt index,GP index,lat [deg],lon [deg]
+            2,1,28958,-1.0,75.71
+            3,0,28599,1.0,76.0
+            6,1,28959,-1.0,76.71300000000001
+            8,0,28600,1.0,77.0
+            ...
+   
+   
 
 
 API

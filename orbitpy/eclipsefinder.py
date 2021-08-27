@@ -209,7 +209,7 @@ class EclipseFinderOutputInfo(Entity):
         :param d: Dictionary with the EclipseFinderOutputInfo attributes.
         :paramtype d: dict
 
-        :return: EclipseFinderOutputInfo object.
+        :return: ``EclipseFinderOutputInfo`` object.
         :rtype: :class:`orbitpy.eclipsefinder.EclipseFinderOutputInfo`
 
         """
@@ -226,7 +226,7 @@ class EclipseFinderOutputInfo(Entity):
     def to_dict(self):
         """ Translate the EclipseFinderOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: EclipseFinderOutputInfo object as python dictionary
+        :return: ``EclipseFinderOutputInfo`` object as python dictionary
         :rtype: dict
         
         """

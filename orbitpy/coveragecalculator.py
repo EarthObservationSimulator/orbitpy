@@ -286,6 +286,10 @@ class GridCoverage(Entity):
     :ivar state_cart_file: File name with path of the (input) file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are available.
     :vartype state_cart_file: str
 
+    :ivar cov_params: List of coverage parameters corresponding to all the instruments, modes per instrument in the spacecraft.
+                        Refer to the :class:`orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft` function.
+    :vartype cov_params: list, namedtuple
+
     :ivar _id: Unique identifier.
     :vartype _id: str
 
@@ -315,7 +319,7 @@ class GridCoverage(Entity):
 
         :paramtype d: dict
 
-        :return: GridCoverage object.
+        :return: ``GridCoverage`` object.
         :rtype: :class:`orbitpy.coveragecalculator.GridCoverage`
 
         """
@@ -329,7 +333,7 @@ class GridCoverage(Entity):
     def to_dict(self):
         """ Translate the GridCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: GridCoverage object as python dictionary
+        :return: ``GridCoverage`` object as python dictionary
         :rtype: dict
         
         """
@@ -509,6 +513,10 @@ class PointingOptionsCoverage(Entity):
                            Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
     :vartype state_cart_file: str
 
+    :ivar cov_params: List of coverage parameters corresponding to all the instruments, modes per instrument in the spacecraft.
+                        Refer to the :class:`orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft` function.
+    :vartype cov_params: list, namedtuple
+
     :ivar _id: Unique identifier.
     :vartype _id: str
 
@@ -536,7 +544,7 @@ class PointingOptionsCoverage(Entity):
 
         :paramtype d: dict
 
-        :return: PointingOptionsCoverage object.
+        :return: ``PointingOptionsCoverage`` object.
         :rtype: :class:`orbitpy.coveragecalculator.PointingOptionsCoverage`
 
         """
@@ -549,7 +557,7 @@ class PointingOptionsCoverage(Entity):
     def to_dict(self):
         """ Translate the PointingOptionsCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: PointingOptionsCoverage object as python dictionary
+        :return: ``PointingOptionsCoverage`` object as python dictionary
         :rtype: dict
         
         """
@@ -730,13 +738,13 @@ class PointingOptionsCoverage(Entity):
                                                 "@id": None})
 
 class PointingOptionsWithGridCoverage(Entity):
-    """A coverage calculator which handles coverage calculation for a spacecraft over a grid for a set of pointing-options.         
+    """A coverage calculator which handles coverage calculation for a spacecraft over a grid for a set of pointing-options (of an instrument (on a spacecraft)).   
         A pointing-option refers to orientation of the instrument in the NADIR_POINTING frame. Set of pointing-options 
-        present all the possible orientations of the instrument due to maneuverability of the instrument and/or satellite-bus.
-        A access opportunities (set of access-time, grid-point) is calculated seperately for each pointing-option at each propagation time-step.
-        Each coverage object is specific to a particular grid and spacecraft.
+        represent all the possible orientations of the instrument due to maneuverability of the instrument and/or satellite-bus.
+        Access opportunities (set of access-time, grid-point) is calculated seperately for each pointing-option at each propagation time-step.
+        Each coverage object is specific to a particular grid and spacecraft. 
 
-    :ivar grid: Locations (longitudes, latitudes) over which coverage calculation is performed.
+    :ivar grid: Locations (longitudes, latitudes) over which coverage calculation is to be performed.
     :vartype grid: :class:`orbitpy.util.grid`
 
     :ivar spacecraft: Spacecraft for which the coverage calculation is performed.
@@ -745,6 +753,10 @@ class PointingOptionsWithGridCoverage(Entity):
     :ivar state_cart_file: File name with path of the (input) file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are available.
                            Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
     :vartype state_cart_file: str
+
+    :ivar cov_params: List of coverage parameters corresponding to all the instruments, modes per instrument in the spacecraft.
+                        Refer to the :class:`orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft` function.
+    :vartype cov_params: list, namedtuple
 
     :ivar _id: Unique identifier.
     :vartype _id: str
@@ -775,21 +787,21 @@ class PointingOptionsWithGridCoverage(Entity):
 
         :paramtype d: dict
 
-        :return: PointingOptionsWithGridCoverage object.
+        :return: ``PointingOptionsWithGridCoverage`` object.
         :rtype: :class:`orbitpy.coveragecalculator.PointingOptionsWithGridCoverage`
 
         """
         grid_dict = d.get('grid', None)
         spc_dict = d.get('spacecraft', None)
         return PointingOptionsWithGridCoverage(grid = Grid.from_dict(grid_dict) if grid_dict else None, 
-                            spacecraft = Spacecraft.from_dict(spc_dict) if spc_dict else None, 
-                            state_cart_file = d.get('cartesianStateFilePath', None),
-                            _id  = d.get('@id', None))
+                                               spacecraft = Spacecraft.from_dict(spc_dict) if spc_dict else None, 
+                                               state_cart_file = d.get('cartesianStateFilePath', None),
+                                               _id  = d.get('@id', None))
 
     def to_dict(self):
         """ Translate the GridCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: GridCoverage object as python dictionary
+        :return: ``PointingOptionsWithGridCoverage`` object as python dictionary
         :rtype: dict
         
         """
@@ -804,7 +816,7 @@ class PointingOptionsWithGridCoverage(Entity):
 
     def execute(self, instru_id=None, mode_id=None, out_file_access=None, filter_mid_acc=False):
         """ Perform orbit coverage calculation for a specific instrument and mode. 
-            The field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
+            The scene-field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
             Coverage is calculated for the period over which the input spacecraft propagated states are available. 
             The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
             The access-times, grid-points are calculated seperately for each pointing-option.
@@ -818,18 +830,24 @@ class PointingOptionsWithGridCoverage(Entity):
 
         :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
                 
-                The first four rows contain general information. The first row contains the coverage calculation type.
-                The second row containing the mission epoch in Julian Day UT1. The time
-                in the state data is referenced to this epoch. The third row contains the time-step size in seconds. 
-                The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
-                Description of the data (comma-seperated) is given below:
+                The format of the output data file is as follows:
 
-                .. csv-table:: Observation data metrics description
+                *  The first row contains the coverage calculation type.
+                *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                *  The third row contains the time-step size in seconds. 
+                *  The fourth row contains the mission duration in days.
+                *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+                Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+                Description of the coverage data is given below:
+
+                .. csv-table:: Coverage data description
                     :header: Column, Data type, Units, Description
                     :widths: 10,10,10,30
 
                     time index, int, , Access time-index.
-                    pnt-opt index, int, , "Pointing options index.  The indexing is implicit and starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
+                    pnt-opt index, int, , "Pointing options index. The indexing starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
                     GP index, integer, , Grid-point index.
                     lat [deg], float, degrees, Latitude corresponding to the GP index.
                     lon [deg], float, degrees, Longitude corresponding to the GP index.
@@ -837,7 +855,7 @@ class PointingOptionsWithGridCoverage(Entity):
         :paramtype out_file_access: str
 
         :param filter_mid_acc: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
-                                           Default value is ``False``.
+                                Default value is ``False``.
         :paramtype filter_mid_acc: bool
 
         :return: Coverage output info.
@@ -1005,7 +1023,7 @@ class CoverageOutputInfo(Entity):
         :param d: Dictionary with the CoverageOutputInfo attributes.
         :paramtype d: dict
 
-        :return: CoverageOutputInfo object.
+        :return: ``CoverageOutputInfo`` object.
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
 
         """
@@ -1025,7 +1043,7 @@ class CoverageOutputInfo(Entity):
     def to_dict(self):
         """ Translate the CoverageOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: CoverageOutputInfo object as python dictionary
+        :return: ``CoverageOutputInfo`` object as python dictionary
         :rtype: dict
         
         """
@@ -1047,7 +1065,7 @@ class CoverageOutputInfo(Entity):
         return "CoverageOutputInfo.from_dict({})".format(self.to_dict())
     
     def __eq__(self, other):
-        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different.
         if(isinstance(self, other.__class__)):
             return (self.coverageType==other.coverageType) and (self.spacecraftId==other.spacecraftId) and (self.instruId==other.instruId) and (self.modeId==other.modeId) and \
                    (self.usedFieldOfRegard==other.usedFieldOfRegard) and (self.filterMidIntervalAccess == other.filterMidIntervalAccess) and (self.gridId==other.gridId) and  (self.stateCartFile==other.stateCartFile) and (self.accessFile==other.accessFile) and \

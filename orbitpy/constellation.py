@@ -195,7 +195,7 @@ class WalkerDeltaConstellation(Entity):
 
         :paramtype d: dict
 
-        :return: WalkerDeltaConstellation object.
+        :return: ``WalkerDeltaConstellation`` object.
         :rtype: :class:`orbitpy.constellation.WalkerDeltaConstellation`
 
         """
@@ -219,7 +219,7 @@ class WalkerDeltaConstellation(Entity):
     def to_dict(self):
         """ Translate the WalkerDeltaConstellation object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: WalkerDeltaConstellation object as python dictionary
+        :return: ``WalkerDeltaConstellation`` object as python dictionary
         :rtype: dict
         
         """
