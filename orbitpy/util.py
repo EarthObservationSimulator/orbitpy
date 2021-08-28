@@ -5,11 +5,7 @@
             Note that some utility classes/functions are imported from the :code:`instrupy` package.*
 
 """
-import json
-from enum import Enum
-from numbers import Number
 import numpy as np
-import math
 import uuid
 from collections import namedtuple
 import pandas as pd
@@ -17,164 +13,13 @@ import pandas as pd
 import propcov
 from instrupy.util import Entity, EnumEntity, Constants, Orientation
 from instrupy import Instrument
-class CoverageCalculationsApproach(EnumEntity):
-    """ Enumeration of recognized approaches to calculation coverage."""
-    PNTOPTS_WITH_GRIDPNTS = "PNTOPTS_WITH_GRIDPNTS"
-    GRIDPNTS = "GRIDPNTS"
-    PNTOPTS = "PNTOPTS"
-    SKIP = "SKIP"
-class PropagationCoverageParameters():
-    """ Data structure holding propagation and coverage parameters.
-    
-    :ivar sat_id: Satellite (Orbit) identifier
-    :vartype sat_id: str
-
-    :ivar epoch: Mission epoch in UTC Greogrian in the following CSV format: `'year,month,day,hr,min,secs'`
-    :vartype epoch: str
-
-    :ivar sma: Orbit semi-major axis in kilometers
-    :vartype sma: float
-
-    :ivar ecc: Orbit eccentricity 
-    :vartype ecc: float
-
-    :ivar inc: Orbit inclination in degrees
-    :vartype inc: float
-
-    :ivar raan: Orbit Right Ascension of Ascending Node in degrees
-    :vartype raan: float
-
-    :ivar aop: Orbit Argument of Perigee in degrees
-    :vartype aop: float
-
-    :ivar ta: Orbit True Anomaly in degrees
-    :vartype ta: float
-    
-    :ivar duration: Mission duration in days
-    :vartype duration: float
-
-    :ivar cov_grid_fl: Filepath to the coverage grid data
-    :vartype cov_grid_fl: str
-
-    :ivar sen_fov_geom: FOV/FOR geometry of the sensor
-    :vartype sen_fov_geom:  str
-
-    :ivar sen_orien: Sensor orientation specification in the following CSV string format: :code:`Euler-Seq1, Euler-Seq2, Euler-Seq3, Euler-Angle1, Euler-Angle2,, Euler-Angle3`. Angles are specifed in degrees.
-    :vartype sen_orien:  str
-
-    :ivar sen_clock: Sensor FOV/FOR clock angles in degrees in CSV string format.
-    :vartype sen_clock: str
-
-    :ivar sen_cone: Sensor FOV/FOR cone angles in degrees in CSV string format.
-    :vartype sen_cone: str
-
-    :ivar purely_sidelook: Flag to specify if instrument operates in a strictly side-looking viewing geometry.
-    :vartype purely_sidelook: bool
-
-    :ivar yaw180_flag: Flag indicating if FOR includes the FOV defined by the above clock, cone angles rotated by 180 deg around the nadir.
-    :vartype yaw180_flag:  (0/1)
-
-    :ivar step_size: Propagation step size in seconds.
-    :vartype step_size: float
-
-    :ivar sat_state_fl: Filepath to write the resulting satellite states.
-    :vartype sat_state_fl: str
-
-    :ivar sat_acc_fl: Filepath to write the resulting satellite access data over the grid of points given in the coverage grid file.
-    :vartype sat_acc_fl: str
-
-    :ivar popts_fl: Filepath from which to read the pointing options
-    :vartype popts_fl: str
-
-    :ivar cov_calcs_app: Coverage caclulations approach
-    :vartype cov_calcs_app: str
-
-    :ivar do_prop: Flag indicating if propagation calculation is to be performed.
-    :vartype do_prop: bool
-
-    :ivar do_cov: Flag indicating if coverage calculation is to be performed.
-    :vartype do_cov: bool
-    
-    """
-    def __init__(self, sat_id=str(), epoch=str(), sma=float(), ecc=float(), inc=float(), raan=float(), aop=float(), ta=float(), 
-                 duration=float(), cov_grid_fl=str(), sen_fov_geom=str(), sen_orien=str(), sen_clock=str(), 
-                 sen_cone=str(), purely_sidelook = bool(), yaw180_flag = int(), step_size=float(), sat_state_fl=str(), 
-                 sat_acc_fl=str(), popts_fl=str(), cov_calcs_app = str(), do_prop=bool(), do_cov=bool()):
-        self.sat_id = str(sat_id)
-        self.epoch = str(epoch) 
-        self.sma = float(sma) 
-        self.ecc = float(ecc) 
-        self.inc = float(inc) 
-        self.raan = float(raan) 
-        self.aop = float(aop) 
-        self.ta = float(ta)
-        self.duration = float(duration) 
-        self.cov_grid_fl = str(cov_grid_fl) if cov_grid_fl else None
-        self.popts_fl = str(popts_fl) if popts_fl else None 
-        self.sen_fov_geom = str(sen_fov_geom) if sen_fov_geom else None
-        self.sen_orien = str(sen_orien) if sen_orien else None
-        self.sen_clock = str(sen_clock) if sen_clock else None
-        self.sen_cone = str(sen_cone) if sen_cone else None
-        self.purely_sidelook = bool(purely_sidelook) if purely_sidelook else None
-        self.yaw180_flag = int(yaw180_flag) if yaw180_flag is not None else None
-        self.step_size = float(step_size) 
-        self.sat_state_fl = str(sat_state_fl) 
-        self.sat_acc_fl = str(sat_acc_fl) if sat_acc_fl else None
-        self.cov_calcs_app = CoverageCalculationsApproach.get(cov_calcs_app) 
-        self.do_prop = bool(do_prop) if do_prop is not None else True
-        self.do_cov = bool(do_cov) if do_cov is not None else True
 
 class OrbitPyDefaults(object):
     """ Enumeration of various default values used by package **OrbitPy**.
+        NOT USED.
     """
     grid_res_fac = 0.9
     time_res_fac = 0.25
-    
-class Satellite():
-    """ Data structure holding attributes of a Satellite. Note the implicit relation that the :code:`ics_fov`
-        and :code:`ics_for` lists are linkes. I.e. :code:`ics_fov[0]` and :code:`ics_for[0]` refer to the FOV 
-        and FOR of the first instrument on the satellite, and so on. 
-    
-    :ivar orbit: Orbital parameters of the satellite. 
-    :vartype orbit: :class:`orbitpy.preprocess.OrbitParameters` 
-
-    :ivar instru: List of Instruments
-    :vartype instru: :class:`instrupy.public_library.Instrument` 
-
-    :ivar dir_pth: Directory path which contains file relevant to the satellite
-    :vartype dir_pth: str
-
-    """ 
-    def __init__(self, orbit = None, instru =None, dir_pth=None):
-
-        self.orbit = orbit if orbit is not None else None
-        self.instru = instru if instru is not None else None
-        self.dir_pth =  dir_pth if dir_pth is not None else None
-
-
-def calculate_inclination_circular_SSO(altitude_km):
-    # circular SSO with fixed altitude specified, 
-    e = 0
-    Re = Constants.radiusOfEarthInKM 
-    sma = Re + altitude_km
-    J2  = 0.0010826269      # Second zonal gravity harmonic of the Earth
-    we = 1.99106e-7    # Mean motion of the Earth in its orbit around the Sun [rad/s]
-    mu    = 398600.440      # Earth’s gravitational parameter [km^3/s^2]
-    n = np.sqrt(mu/(sma**3)) # Mean motion [s-1]
-    h = sma*(1 - e**2)    # note that here h is *NOT* the altitude!!
-
-    tol = 1e-10         # Error tolerance
-    # Initial guess for the orbital inclination
-    i0 = 180/np.pi*np.arccos(-2/3*(h/Re )**2*we/(n*J2))
-    err = 1e1
-    while(err >= tol):
-        # J2 perturbed mean motion
-        _np  = n*(1 + (1.5*J2*(Re/h))**2*np.sqrt(1 - e**2)*(1 - (3/2*np.sin(np.deg2rad(i0))**2)))
-        i = 180/np.pi*(np.arccos(-2/3*((h/Re)**2)*we/(_np*J2)))
-        err = abs(i - i0)
-        i0 = i
-    return i
-
 class StateType(EnumEntity):
     KEPLERIAN_EARTH_CENTERED_INERTIAL = "KEPLERIAN_EARTH_CENTERED_INERTIAL"
     CARTESIAN_EARTH_CENTERED_INERTIAL = "CARTESIAN_EARTH_CENTERED_INERTIAL"
@@ -188,8 +33,8 @@ class OrbitState(Entity):
     """ Class to store and handle the orbit state (i.e. the date, position and velocity of satellite).
         The :class:`propcov.AbsoluteDate` and :class:`propcov.OrbitState` objects are used to maintain the 
         date and state respectively. Note that :class:`propcov.OrbitState` and :class:`orbitpy.util.OrbitState`
-        classes are different. The class also provides staticmethods to convert python-dict/ propcov-class representations 
-        to/from propcov-class/ python-dict inputs.
+        classes are different. The class also provides several staticmethods to convert propcov-class representations 
+        to/from inbuilt python datatypes.
 
     :ivar date: Date at which the orbit state is defined.
     :vartype date: :class:`propcov.AbsoluteDate`
@@ -211,13 +56,13 @@ class OrbitState(Entity):
     def from_dict(d):
         """ Parses orbit state from a dictionary.
 
-        :param d: Dictionary with the date and state description. 
+        :param d: Dictionary with the date and state description. Refer to the ``date_from_dict`` and ``state_from_dict``
+                  for description of the expected dictionary key/value pairs.
         
         :return: Parsed python object. 
         :rtype: :class:`orbitpy.util.OrbitState`
 
         """
-
         date = OrbitState.date_from_dict(d.get("date", None))
         state = OrbitState.state_from_dict(d.get("state", None))
 
@@ -229,7 +74,7 @@ class OrbitState(Entity):
         :param state_type: Indicate either "CARTESIAN_EARTH_CENTERED_INERTIAL" or "KEPLERIAN_EARTH_CENTERED_INERTIAL". Default is "CARTESIAN_EARTH_CENTERED_INERTIAL".
         :paramtype state_type: str
 
-        :returns: OrbitState specifications as python dictionary.
+        :returns: ``OrbitState`` as a python dictionary.
         :rtype: dict
 
         """        
@@ -276,7 +121,7 @@ class OrbitState(Entity):
             
             In case of ``GREGORIAN_UTC`` date type the following keys apply: year (int), month (int), day (int), hour (int), minute (int) and second (float).
 
-            In case of `JULIAN_DATE_UT1` date type the following keys apply: jd (float)
+            In case of ``JULIAN_DATE_UT1`` date type the following keys apply: jd (float)
 
         :paramtype d: dict
 
@@ -328,7 +173,7 @@ class OrbitState(Entity):
 
         :paramtype d: dict
 
-        :returns: ``propcov`` date object.
+        :returns: ``propcov`` state object.
         :rtype: :class:`propcov.OrbitState`
 
         """
@@ -357,7 +202,7 @@ class OrbitState(Entity):
     
     @staticmethod
     def date_to_dict(date):
-        """ Get a Python dictionary representation of the input date. 
+        """ Get a Python dictionary representation of the input ``propcov`` date object. 
 
         :param date: ``propcov`` date object.
         :paramtype date: :class:`propcov.AbsoluteDate`
@@ -370,7 +215,7 @@ class OrbitState(Entity):
 
     @staticmethod
     def state_to_dict(state, state_type=None):
-        """ Get a Python dictionary representation of the input state. Description shall be in 
+        """ Get a Python dictionary representation of the input ``propcov`` state object. Description shall be in 
             CARTESIAN_EARTH_CENTERED_INERTIAL or KEPLERIAN_EARTH_CENTERED_INERTIAL.
 
         :param date: ``propcov`` state object.
@@ -403,7 +248,7 @@ class OrbitState(Entity):
         return self.date.GetJulianDate()     
 
 class SpacecraftBus(Entity):
-    """ Class to store and handle the spacecraft bus attributes. Note that this is different from ``propcov.Spacecraft`` class.
+    """ Class to store and handle the spacecraft bus attributes.
 
     :ivar name: Name of the bus.
     :vartype name: str
@@ -482,93 +327,7 @@ class SpacecraftBus(Entity):
         else:
             return NotImplemented
 
-class GroundStation(Entity):
-    """ Class to store and handle the ground-station attributes.
 
-    :ivar name: Name of the ground-station
-    :vartype name: str
-
-    :ivar latitude: [deg] Geocentric latitude coordinates of the ground-station.
-    :vartype latitude: float
-
-    :ivar longitude: [deg] Geocentric longitude coordinates of the ground-station.
-    :vartype longitude: float
-    
-    :ivar altitude: [km] Altitude of the ground-station.
-    :vartype altitude: float
-
-    :ivar minimumElevation: [deg] Minmum required elevation (angle from ground-plane to satellite) for communication with satellite. 
-    :vartype minimumElevation: float
-
-    :ivar _id: Unique identifier.
-    :vartype _id: str
-    
-    """
-    def __init__(self, name=None, latitude=None, longitude=None, altitude=None, minimumElevation=None, _id=None):
-
-        self.name = str(name) if name is not None else None
-        self.latitude = float(latitude) if latitude is not None else None
-        self.longitude = float(longitude) if longitude is not None else None
-        self.altitude = float(altitude) if altitude is not None else None
-        self.minimumElevation = float(minimumElevation) if minimumElevation is not None else None
-
-        super(GroundStation, self).__init__(_id, "GroundStation")   
-
-    @staticmethod
-    def from_dict(d):
-        """ Parses ``GroundStation`` object from a dictionary.
-
-        :param d: Dictionary with the ground-station properties.
-        
-        :return: Parsed python object. 
-        :rtype: :class:`orbitpy.util.GroundStation`
-
-        """
-        return GroundStation(
-                name = d.get("name", None),
-                latitude = d.get("latitude", None),
-                longitude = d.get("longitude", None),
-                altitude = d.get("altitude", 0), # Altitude default value is 0km
-                minimumElevation = d.get("minimumElevation", 7), # 7 deg minimum elevation default
-                _id = d.get("@id", uuid.uuid4()) # random default id
-                )
-
-    def to_dict(self, state_type=None):
-        """ Translate the GroundStation object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
-
-        :returns: GroundStation specifications as python dictionary.
-        :rtype: dict
-
-        """        
-        return dict({"name": self.name,
-                     "latitude": self.latitude,
-                     "longitude": self.longitude,
-                     "altitude": self.altitude, 
-                     "minimumElevation": self.minimumElevation, 
-                     "@id": self._id
-                    })
-    
-    def __repr__(self):
-        return "GroundStation.from_dict({})".format(self.to_dict())
-
-    def __eq__(self, other):
-        """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
-            Note that _id data attribute may be different.
-        """
-        if(isinstance(self, other.__class__)):
-            return (self.name == other.name and self.latitude == other.latitude and self.longitude == other.longitude \
-                    and self.altitude==other.altitude and self.minimumElevation == other.minimumElevation)
-        else:
-            return NotImplemented
-    
-    def get_coords(self):
-        """ Get coordinates of the ground-station.
-
-        :return: Ground-station position (latitude in degrees, longitude in degrees, altitude in kilometers)
-        :rtype: tuple, (float, float, float)
-        
-        """
-        return (self.latitude, self.longitude, self.altitude)
 
 class Spacecraft(Entity):
     """ Class to store and handle the spacecraft attributes.
@@ -608,14 +367,21 @@ class Spacecraft(Entity):
 
         :param d: Dictionary with the spacecraft properties.
 
-        The following default values are assigned to the object instance parameters in case of 
-        :class:`None` values or missing key/value pairs in the input dictionary.
+            The following key/value pairs are expected:: 
+                
+                * "name" : (str) Name of the spacecraft.
+                * "orbitState" : (dict) Spacecraft orbit-state specification (see :class:`orbitpy.util.OrbitState.from_dict`).
+                * "spacecraftBus" : (dict) Spacecraft bus specification (see :class:`orbitpy.util.SpacecraftBus.from_dict`).
+                * "instrument": (list, dict) Instrument(s) specification (see :class:`instrupy.base.Instrument.from_dict`).
 
-        .. csv-table:: Default values
-            :header: Parameter, Default Value
-            :widths: 10,40
+            The following default values are assigned to the object instance parameters in case of 
+            :class:`None` values or missing key/value pairs in the input dictionary.
 
-            spacecraftBus, A `SpacecraftBus` object with the orientation in the ``NADIR_POINTING`` frame and convention ``REF_FRAME_ALIGNED``. 
+            .. csv-table:: Default values
+                :header: Parameter, Default Value
+                :widths: 10,40
+
+                spacecraftBus, A `SpacecraftBus` object with the orientation in the ``NADIR_POINTING`` frame and convention ``REF_FRAME_ALIGNED``. 
 
         :paramtype d: dict
         
@@ -640,10 +406,10 @@ class Spacecraft(Entity):
                 _id = d.get("@id", str(uuid.uuid4()))
                 )
 
-    def to_dict(self, state_type=None):
+    def to_dict(self):
         """ Translate the Spacecraft object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
 
-        :returns: Spacecraft specifications as python dictionary.
+        :returns: ``Spacecraft`` object as python dictionary.
         :rtype: dict
 
         """        
@@ -661,13 +427,6 @@ class Spacecraft(Entity):
                      "instrument": instrument_dict, 
                      "@id": self._id
                     })
-    
-    
-    def get_copy(self):
-        """
-        """
-        spacecraft_dict =  self.to_dict()
-        return Spacecraft.from_dict(spacecraft_dict)
 
     def __repr__(self):
         return "Spacecraft.from_dict({})".format(self.to_dict())
@@ -676,7 +435,7 @@ class Spacecraft(Entity):
         """ Get spacecraft identifier.
 
         :returns: spacecraft identifier.
-        :rtype: str
+        :rtype: str or int
 
         """
         return self._id
@@ -710,7 +469,106 @@ class Spacecraft(Entity):
                     and self.instrument==other.instrument)                
         else:
             return NotImplemented    
+
+class GroundStation(Entity):
+    """ Class to store and handle the ground-station attributes.
+
+    :ivar name: Name of the ground-station
+    :vartype name: str
+
+    :ivar latitude: [deg] Geocentric latitude coordinates of the ground-station.
+    :vartype latitude: float
+
+    :ivar longitude: [deg] Geocentric longitude coordinates of the ground-station.
+    :vartype longitude: float
     
+    :ivar altitude: [km] Altitude of the ground-station.
+    :vartype altitude: float
+
+    :ivar minimumElevation: [deg] Minmum required elevation (angle from ground-plane to satellite) for communication with satellite. 
+    :vartype minimumElevation: float
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+    
+    """
+    def __init__(self, name=None, latitude=None, longitude=None, altitude=None, minimumElevation=None, _id=None):
+
+        self.name = str(name) if name is not None else None
+        self.latitude = float(latitude) if latitude is not None else None
+        self.longitude = float(longitude) if longitude is not None else None
+        self.altitude = float(altitude) if altitude is not None else None
+        self.minimumElevation = float(minimumElevation) if minimumElevation is not None else None
+
+        super(GroundStation, self).__init__(_id, "GroundStation")   
+
+    @staticmethod
+    def from_dict(d):
+        """ Parses ``GroundStation`` object from a dictionary.
+
+        :param d: Dictionary with the ground-station properties. 
+
+                The following key/value pairs are expected:
+
+                * "name" : (str) Name of the ground-station.
+                * "latitude": (float) geocentric latitude coordinates of the ground-station in degrees.
+                * "longitude": (float) geocentric longitude coordinates of the ground-station in degrees.
+                * "altitude": (float) ground-station altitude in kilometers.
+                * "minimumElevation": (float) Minmum required elevation (angle from ground-plane to satellite in degrees) for communication with satellite. 
+                * "@id": (str/int) Unique ground-station identifier.
+
+        
+        :return: Parsed python object. 
+        :rtype: :class:`orbitpy.util.GroundStation`
+
+        """
+        return GroundStation(
+                name = d.get("name", None),
+                latitude = d.get("latitude", None),
+                longitude = d.get("longitude", None),
+                altitude = d.get("altitude", 0), # Altitude default value is 0km
+                minimumElevation = d.get("minimumElevation", 7), # 7 deg minimum elevation default
+                _id = d.get("@id", uuid.uuid4()) # random default id
+                )
+
+    def to_dict(self):
+        """ Translate the ``GroundStation`` object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+
+        :returns: ``GroundStation`` object as python dictionary.
+        :rtype: dict
+
+        """        
+        return dict({"name": self.name,
+                     "latitude": self.latitude,
+                     "longitude": self.longitude,
+                     "altitude": self.altitude, 
+                     "minimumElevation": self.minimumElevation, 
+                     "@id": self._id
+                    })
+    
+    def __repr__(self):
+        return "GroundStation.from_dict({})".format(self.to_dict())
+
+    def __eq__(self, other):
+        """ Simple equality check. Returns True if the class attributes are equal, else returns False. 
+            Note that _id data attribute may be different.
+        """
+        if(isinstance(self, other.__class__)):
+            return (self.name == other.name and self.latitude == other.latitude and self.longitude == other.longitude \
+                    and self.altitude==other.altitude and self.minimumElevation == other.minimumElevation)
+        else:
+            return NotImplemented
+    
+    def get_coords(self):
+        """ Get coordinates of the ground-station.
+
+        :return: Ground-station position (latitude in degrees, longitude in degrees, altitude in kilometers)
+        :rtype: tuple, (float, float, float)
+        
+        """
+        return (self.latitude, self.longitude, self.altitude)
+
+
 def helper_extract_spacecraft_params(spacecraft):
     """ Helper function for the time step and grid resolution computation which returns tuples 
         of spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, sceneFOV height, sceneFOV width, FOR height and FOR width. 
@@ -842,3 +700,28 @@ def initialize_object_list(inp, cls):
         elif(isinstance(inp, cls)): # make into list if not list
             obj_list = [inp]
     return obj_list
+
+def calculate_inclination_circular_SSO(altitude_km):
+    ''' NOT USED.
+    '''
+    # circular SSO with fixed altitude specified, 
+    e = 0
+    Re = Constants.radiusOfEarthInKM 
+    sma = Re + altitude_km
+    J2  = 0.0010826269      # Second zonal gravity harmonic of the Earth
+    we = 1.99106e-7    # Mean motion of the Earth in its orbit around the Sun [rad/s]
+    mu    = 398600.440      # Earth’s gravitational parameter [km^3/s^2]
+    n = np.sqrt(mu/(sma**3)) # Mean motion [s-1]
+    h = sma*(1 - e**2)    # note that here h is *NOT* the altitude!!
+
+    tol = 1e-10         # Error tolerance
+    # Initial guess for the orbital inclination
+    i0 = 180/np.pi*np.arccos(-2/3*(h/Re )**2*we/(n*J2))
+    err = 1e1
+    while(err >= tol):
+        # J2 perturbed mean motion
+        _np  = n*(1 + (1.5*J2*(Re/h))**2*np.sqrt(1 - e**2)*(1 - (3/2*np.sin(np.deg2rad(i0))**2)))
+        i = 180/np.pi*(np.arccos(-2/3*((h/Re)**2)*we/(_np*J2)))
+        err = abs(i - i0)
+        i0 = i
+    return i

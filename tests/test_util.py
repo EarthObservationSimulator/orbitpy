@@ -7,7 +7,7 @@ import sys
 import unittest
 
 import numpy as np
-from instrupy.util import SphericalGeometry, Orientation, ViewGeometry, Maneuver, SyntheticDataConfiguration
+from instrupy.util import Orientation
 from instrupy import Instrument
 from orbitpy.util import OrbitState, SpacecraftBus, Spacecraft
 import orbitpy.util
