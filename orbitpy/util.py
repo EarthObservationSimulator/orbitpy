@@ -580,7 +580,7 @@ def helper_extract_spacecraft_params(spacecraft):
 
     :return: Tuples with spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, sceneFOV height, sceneFOV width, FOR height and FOR width.
              of all input spacecrafts.
-    :rtype: list, namedtuple, <str, str, str, float, float, float, float, float, float, float>
+    :rtype: list, namedtuple, <str/int, str/int, str/int, float, float, float, float, float, float, float>
 
     """
     _p = namedtuple("sc_params", ["sc_id", "instru_id", "mode_id", "sma", "fov_height", "fov_width", "scfov_height", "scfov_width", "for_height", "for_width"])
@@ -681,10 +681,11 @@ def object_list_to_dictionary_list(obj_list):
     return dict_list
 
 def initialize_object_list(inp, cls):
-    """ Utility function to return list of objects from a valid input or else to return ``None``. 
+    """ Utility function to return list of objects from a valid input (a single object or list of objects where each object is of the class ``cls``).
+        If invalid input ``None`` is returned. 
     
     :param inp: Input.
-    :paramtype inp: list, cls or cls
+    :paramtype inp: (list, cls) or cls
 
     :param cls: Class of each element of the list.
     :paramtype cls: cls

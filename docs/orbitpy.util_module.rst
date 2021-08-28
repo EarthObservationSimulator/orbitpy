@@ -4,7 +4,7 @@
 Description
 ^^^^^^^^^^^^^
 
-This module is a collection of utility classes and functions used by the :code:`orbitpy` package. They are all described as follows.
+This module is a collection of utility classes and functions used by the :code:`orbitpy` package.
 
 
 ``StateType``
@@ -18,7 +18,7 @@ use the equatorial plane (not the ecliptic plane) as the XY plane.
 ^^^^^^^^^^^^^^
 
 This is an enumeration class listing the allowed date types. ``GREGORIAN_UTC`` refers to the date taken from the Gregorian calender
-and the time scale as the the Universal Coordinate Time (UTC). 
+and the time scale as the Universal Coordinate Time (UTC). 
 ``JULIAN_DATE_UT1`` refers to the number of days elapsed on the Julian calender (with the fractional part included) 
 and the time scale as Universal TIme (UT1).
 
@@ -26,10 +26,10 @@ and the time scale as Universal TIme (UT1).
 ^^^^^^^^^^^^^^^
 
 This class is used to store and handle the orbit state (i.e. the date, position and velocity of satellite). The ``from_dict(.)`` and 
-``to_dict(.)`` functions can be used to convert from and to python dictionary representations. The :class:`propcov.AbsoluteDate` and 
+``to_dict(.)`` functions can be used to convert from/to python dictionary representations. The :class:`propcov.AbsoluteDate` and 
 :class:`propcov.OrbitState` objects are used to maintain the date and state respectively. 
 Note that :class:`propcov.OrbitState` and :class:`orbitpy.util.OrbitState` classes are different. 
-The class also provides several staticmethods to convert propcov-class representations to/from inbuilt python datatypes.
+The class also provides several staticmethods to convert date, orbit-state propcov-class representations to/from inbuilt python datatypes.
 
 Examples
 ----------
@@ -60,7 +60,8 @@ Examples
       x = OrbitState.date_from_dict({"dateType":"JULIAN_DATE_UT1", "jd":2459270.75})
       print(x)
       >> AbsoluteDate.fromJulianDate(2459270.750000)
-
+      
+      # convert the propcov orbit-state object to a python dict
       x = OrbitState.state_to_dict(propcov.OrbitState.fromCartesianState(propcov.Rvector6([-5219.8,1473.95,4201.35,-3.86085,-5.99712,-2.69806])))
       >> {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -5219.8, 'y': 1473.95, 'z': 4201.35, 'vx': -3.86085, 'vy': -5.99712, 'vz': -2.69806}
       
@@ -141,7 +142,7 @@ Example
 ``GroundStation``
 ^^^^^^^^^^^^^^^^^^
 
-This class is used to store and handle ground-station attributes: name, position (geocentric lat/lon coords and altitude) and minimum elevation angle at
+This class is used to store and handle ground-station attributes: name, unique-identifier, position (geocentric lat/lon coords and altitude) and minimum elevation angle at
 which communication from satellite can take place. 
 
 *An unique identifier is assigned to the ``GroundStation`` object if the user does not provide one.*
@@ -161,22 +162,6 @@ Example
                                   '@id': UUID('bd96e327-36e5-4ffb-8da6-864322621e21')})
 
 
-``helper_extract_spacecraft_params``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``extract_auxillary_info_from_state_file``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``dictionary_list_to_object_list``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``object_list_to_dictionary_list``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-``initialize_object_list``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
 API
 ^^^^^
 
@@ -192,8 +177,8 @@ API
    orbitpy.util.DateType
    orbitpy.util.OrbitState
    orbitpy.util.SpacecraftBus
-   orbitpy.util.GroundStation
    orbitpy.util.Spacecraft
+   orbitpy.util.GroundStation
 
 .. rubric:: Functions
 
