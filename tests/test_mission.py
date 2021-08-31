@@ -213,8 +213,8 @@ class TestMission(unittest.TestCase):
         mission = Mission.from_json(mission_json_str)
         self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2458254.0084722224)
         self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 2.2600808214710266}))
-        self.assertEqual(mission.grid[0].num_points, 46299)
-        self.assertEqual(mission.grid[1].num_points, 43234)
+        self.assertEqual(mission.grid[0].num_points, 2906)
+        self.assertEqual(mission.grid[1].num_points, 2710)
 
         out_info = mission.execute()
 
@@ -264,7 +264,16 @@ class TestMission(unittest.TestCase):
                                 "settings": {"outDir": "temp/"} \
                             }'
         mission = Mission.from_json(mission_json_str)
-        self.assertEqual(len(mission.spacecraft), 8)        
+        self.assertEqual(len(mission.spacecraft), 8)   
+        # check the assigned spacecraft's ids.
+        self.assertEqual(mission.spacecraft[0]._id, "spc_abc_11")   
+        self.assertEqual(mission.spacecraft[1]._id, "spc_abc_12") 
+        self.assertEqual(mission.spacecraft[2]._id, "spc_abc_13") 
+        self.assertEqual(mission.spacecraft[3]._id, "spc_abc_14") 
+        self.assertEqual(mission.spacecraft[4]._id, "spc_abc_15") 
+        self.assertEqual(mission.spacecraft[5]._id, "spc_abc_16") 
+        self.assertEqual(mission.spacecraft[6]._id, "spc_abc_17") 
+        self.assertEqual(mission.spacecraft[7]._id, "spc_abc_18")   
 
         out_info = mission.execute()
 

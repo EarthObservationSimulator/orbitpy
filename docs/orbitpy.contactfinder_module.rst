@@ -21,6 +21,8 @@ from the satellite to another entity (another satellite or ground-station). The 
 
 .. todo:: Include docs about find_all_pairs(.) function.
 
+.. _contacts_file_format:
+
 Output data file format
 -------------------------
 The results can be stored in a concise manner where the time-intervals at which the LOS exists are written and/or in a descriptive manner with 

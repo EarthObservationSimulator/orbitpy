@@ -186,7 +186,7 @@ class Mission(Entity):
             instru_list = orbitpy.util.dictionary_list_to_object_list(instru_dict, Instrument) # list of instruments
             spacecraft = []
             for orb in orbits:
-                spacecraft.append(Spacecraft(orbitState=orb, spacecraftBus=spc_bus, instrument=instru_list, _id=uuid.uuid4()))
+                spacecraft.append(Spacecraft(orbitState=orb, spacecraftBus=spc_bus, instrument=instru_list, _id='spc_'+orb._id)) # note the assignment of the spacecraft-id
 
         # parse propagator
         factory = PropagatorFactory()

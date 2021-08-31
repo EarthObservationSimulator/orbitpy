@@ -11,6 +11,8 @@ object (please see :ref:`constellation_module` for details). The module provides
 which has been validated with the STK J2 analytical propagator. Users may additionally define their own propagator classes
 adherent to the same interface functions (``from_dict(.)``, ``to_dict(.)``, ``execute(.)``, ``__eq__(.)``) as in the in-built propagator class.
 
+.. _propagated_state_file_format:
+
 Output data file format
 -------------------------
 

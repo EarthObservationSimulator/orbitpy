@@ -29,6 +29,8 @@ is the Earth centric angle subtended by the 5 deg side = 0.3922 deg. This gives 
 
 .. todo:: Describe the grid pattern of the auto generated grid points.
 
+.. _input_grid_file_format:
+
 Input grid file format
 -----------------------
 

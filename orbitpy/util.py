@@ -327,8 +327,6 @@ class SpacecraftBus(Entity):
         else:
             return NotImplemented
 
-
-
 class Spacecraft(Entity):
     """ Class to store and handle the spacecraft attributes.
 
@@ -371,17 +369,10 @@ class Spacecraft(Entity):
                 
                 * "name" : (str) Name of the spacecraft.
                 * "orbitState" : (dict) Spacecraft orbit-state specification (see :class:`orbitpy.util.OrbitState.from_dict`).
-                * "spacecraftBus" : (dict) Spacecraft bus specification (see :class:`orbitpy.util.SpacecraftBus.from_dict`).
+                * "spacecraftBus" : (dict) Spacecraft bus specification (see :class:`orbitpy.util.SpacecraftBus.from_dict`). 
+                                     If missing or :class:`None`, a bus with the orientation in the ``NADIR_POINTING`` frame and convention ``REF_FRAME_ALIGNED`` is assigned. 
                 * "instrument": (list, dict) Instrument(s) specification (see :class:`instrupy.base.Instrument.from_dict`).
-
-            The following default values are assigned to the object instance parameters in case of 
-            :class:`None` values or missing key/value pairs in the input dictionary.
-
-            .. csv-table:: Default values
-                :header: Parameter, Default Value
-                :widths: 10,40
-
-                spacecraftBus, A `SpacecraftBus` object with the orientation in the ``NADIR_POINTING`` frame and convention ``REF_FRAME_ALIGNED``. 
+                * "@id": (str/int) Spacecraft unique identifier. If missing, a random string is assigned.
 
         :paramtype d: dict
         
@@ -513,9 +504,9 @@ class GroundStation(Entity):
                 * "name" : (str) Name of the ground-station.
                 * "latitude": (float) geocentric latitude coordinates of the ground-station in degrees.
                 * "longitude": (float) geocentric longitude coordinates of the ground-station in degrees.
-                * "altitude": (float) ground-station altitude in kilometers.
-                * "minimumElevation": (float) Minmum required elevation (angle from ground-plane to satellite in degrees) for communication with satellite. 
-                * "@id": (str/int) Unique ground-station identifier.
+                * "altitude": (float) ground-station altitude in kilometers. If not defined, value of 0km is assigned.
+                * "minimumElevation": (float) Minimum required elevation (angle from ground-plane to satellite in degrees) for communication with satellite. If not defined, value of 7 deg is assigned.
+                * "@id": (str/int) Unique ground-station identifier. If not defined, a random string is assigned.
 
         
         :return: Parsed python object. 
@@ -528,7 +519,7 @@ class GroundStation(Entity):
                 longitude = d.get("longitude", None),
                 altitude = d.get("altitude", 0), # Altitude default value is 0km
                 minimumElevation = d.get("minimumElevation", 7), # 7 deg minimum elevation default
-                _id = d.get("@id", uuid.uuid4()) # random default id
+                _id = d.get("@id", str(uuid.uuid4())) # random default id
                 )
 
     def to_dict(self):
