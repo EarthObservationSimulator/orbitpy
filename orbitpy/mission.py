@@ -44,6 +44,9 @@ class Settings(Entity):
     :ivar gridResFactor: Factor which influences the grid-resolution of an auto-generated grid. See :class:`orbitpy.grid.compute_grid_res`. 
     :vartype gridResFactor: float
 
+    :ivar _id: Unique identifier of the settings object.
+    :vartype _id: int/ str
+
     """
     def __init__(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, _id=None):
         self.outDir = str(outDir) if outDir is not None else None
@@ -65,6 +68,7 @@ class Settings(Entity):
         * coverageType: Type of coverage calculation. Default value is ``None``.
         * propTimeResFactor: Factor which influences the propagation step-size calculation. See :class:`orbitpy.propagator.compute_time_step`. Default value is 0.25.
         * gridResFactor: Factor which influences the grid-resolution of an auto-generated grid. See :class:`orbitpy.grid.compute_grid_res`. Default value is 0.9.
+        * @id: Unique identifier. Default is ``None``.
 
         :paramtype d: dict
 
@@ -75,13 +79,14 @@ class Settings(Entity):
         return Settings( outDir= d.get('outDir', os.path.dirname(os.path.realpath(__file__))), # current directory as default
                          coverageType = d.get('coverageType', None),
                          propTimeResFactor = d.get('propTimeResFactor', 0.25), # default value is 0.25
-                         gridResFactor = d.get('gridResFactor', 0.9) # default value is 0.9
+                         gridResFactor = d.get('gridResFactor', 0.9), # default value is 0.9
+                         _id = d.get('@id', None)
                         )                        
         
     def to_dict(self):
-        """ Translate the Settings object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        """ Translate the ``Settings`` object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: Settings object as python dictionary.
+        :return: ``Settings`` object as python dictionary.
         :rtype: dict
         
         """
@@ -96,7 +101,7 @@ class Settings(Entity):
         return "Settings.from_dict({})".format(self.to_dict())
     
     def __eq__(self, other):
-        # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
+        # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different.
         if(isinstance(self, other.__class__)):
             return (self.outDir==other.outDir) and (self.coverageType==other.coverageType) \
                     and (self.propTimeResFactor==other.propTimeResFactor) and (self.gridResFactor==other.gridResFactor)                    
@@ -152,13 +157,19 @@ class Mission(Entity):
  
     @staticmethod
     def from_dict(d):
-        """Parses an Mission object from a normalized JSON dictionary.
+        """Parses an ``Mission`` object from a normalized JSON dictionary.
         
         :param d: Dictionary with the mission specifications.
         :paramtype d: dict
 
-        :return: Mission object.
+        :return: ``Mission`` object.
         :rtype: :class:`orbitpy.mission.Mission`
+
+        .. note:: *Either* of the ``constellation``, ``instrument`` json objects or the ``spacecraft`` json object should be provided in the mission specifications. Both should not be specified.
+
+        .. note:: The valid key/value pairs in building the mission specifications json/ dict is identical to the key/value pairs expected in the obtaining
+                the corresponding OrbitPy objects using the ``from_dict`` or ``from_json`` function. 
+
 
         """
         epoch = OrbitState.date_from_dict(d.get('epoch', {"dateType":"JULIAN_DATE_UT1", "jd":2459270.5}) ) # 25 Feb 2021 0:0:0 default startDate
@@ -228,9 +239,9 @@ class Mission(Entity):
                       ) 
     
     def to_dict(self):
-        """ Translate the Mission object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        """ Translate the ``Mission`` object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
-        :return: Mission object as python dictionary.
+        :return: ``Mission`` object as python dictionary.
         :rtype: dict
         
         """
@@ -253,8 +264,12 @@ class Mission(Entity):
             ground-station contact-periods computed between all spacecraft-ground-station pairs and intersatellite contact-periods
             computed for all possible spacecraft pairs.
 
-        :return: Mission output info as an heterogenous list of output info objects from propagation, coverage and contact calculations.
-        :rtype: list, :class:`orbitpy.propagate.PropagatorOutputInfo`, :class:`orbitpy.coveragecalculator.CoverageOutputInfo`, :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
+            .. note:: In case of *GRID COVERAGE* calculation, the field-of-regard is used (and not the scene-field-of-view). In case of SAR instruments and coverage calculations
+                        involving grid (i.e. *GRID COVERAGE* and *POINTING OPTIONS WITH GRID COVERAGE*), only the access at the middle of a continuous access interval is shown
+                        (see :ref:`correction_of_access_files`). 
+
+            :return: Mission output info as an heterogenous list of output info objects from propagation, coverage and contact calculations.
+            :rtype: list, :class:`orbitpy.propagate.PropagatorOutputInfo`, :class:`orbitpy.coveragecalculator.CoverageOutputInfo`, :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
 
         """           
 

@@ -37,6 +37,8 @@ Finally the ``out_file_access`` input argument is
 used to specify the filepath (with filename) at which the results are to be written.
 A ``CoverageOutputInfo`` object containing meta-info about the results is returned at the end of execution of the function.
 
+.. _grid_coverage_output_file_format:
+
 Output data file format
 .........................
 
@@ -83,6 +85,8 @@ by means of their respective identifiers (in the ``instru_id``, ``mode_id`` inpu
 in the list of modes of the instrument shall be selected.
 A ``CoverageOutputInfo`` object containing meta-info about the results is returned at the end of execution of the function.
 
+.. _pointing_options_coverage_output_file_format:
+
 Output data file format
 .........................
 
@@ -107,6 +111,7 @@ Description of the columns headers and data is given below:
       lat [deg], float, degrees, Latitude of accessed ground-location.
       lon [deg], float, degrees, Longitude of accessed ground-location.
 
+.. _pointing_options_with_grid_coverage_output_file_format:
 
 *POINTING OPTIONS WITH GRID COVERAGE*
 --------------------------------------
@@ -146,7 +151,8 @@ Description of the columns headers and data is given below:
       lat [deg], float, degrees, Latitude corresponding to the GP index.
       lon [deg], float, degrees, Longitude corresponding to the GP index.
 
-      
+.. _correction_of_access_files:
+
 *Correction* of access files for purely side-looking instruments with narrow along-track FOV
 -----------------------------------------------------------------------------------------------
 

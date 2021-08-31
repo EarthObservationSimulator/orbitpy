@@ -34,7 +34,7 @@ class Grid(Entity):
     :vartype num_points: int
 
     :ivar _id: Unique identifier of the grid. Could be used to indicate a region identifier, where the set of grid-points represent a region.
-    :vartype _id: str
+    :vartype _id: str/ int
 
     """
 

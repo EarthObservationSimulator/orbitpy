@@ -24,7 +24,6 @@ or pointing-options based coverage caclulations.*
 .. note:: Whenever list of JSON objects is required, please specify as a list (i.e. within square brackets "[..]") even in the case only 
           one object is to be specified.
 
-.. _constellation_json_object:
 
 :code:`constellation` JSON object
 ##################################
@@ -236,7 +235,6 @@ Example:
 
 
 
-.. _grid_json_object:
 
 :code:`grid` JSON object
 ####################################
@@ -387,7 +385,6 @@ Example of the data-file:
     1,0,20,0
     2,0,-20,0
 
-.. _propagator_json_object:
 
 :code:`propagator` JSON object
 ####################################

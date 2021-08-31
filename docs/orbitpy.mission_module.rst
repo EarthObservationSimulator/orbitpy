@@ -6,10 +6,8 @@
 Description
 ^^^^^^^^^^^^^
 
-The ``Mission`` object can be used to read in *mission specifications* JSON string/ python dict and run all possible OrbitPy functionalities on it.
-The valid key/value pairs in building the mission specifications json/ dict is mostly identical to the key/value pairs expected in the
-initialization (from json/ dict) of the corresponding OrbitPy objects. Each of the acceptable JSON objects in the mission specifications
-is described below:
+The ``Mission`` object can be used to read in a *mission specifications* json string/ python dict and run all possible OrbitPy functionalities on it.
+Each of the acceptable json objects in the mission specifications is described below:
 
 .. csv-table:: Mission specifications description 
    :header: Parameter, Data type, Units, Description
@@ -19,13 +17,21 @@ is described below:
    duration, float, days, Length of mission in days. Eg: :code:`0.25`.
    constellation, :ref:`constellation_json_object`, ,Constellation specifications.
    instrument, "list, *instrument* json object", ,Instrument specifications (please refer :code:`InstruPy` documentation). A list of instruments can be specified.
-   spacecraft, :ref:`spacecraft_json_object`, , Spacecraft(s) specifications.
-   groundStation, :ref:`groundstation_json_object`, , Ground station(s) specifications.
-   grid, :ref:`grid_json_object`, ,Coverage grid specifications. 
+   spacecraft, "list, :ref:`spacecraft_json_object`", , Spacecraft specifications. A list of spacecrafts can be specified.
+   groundStation, "list, :ref:`groundstation_json_object`", , Ground station specifications. A list of ground-stations can be specified.
+   grid, "list, :ref:`grid_json_object`", ,Coverage grid specifications. A list of grids can be specified.
    propagator, :ref:`propagator_json_object`, ,Propagator specifications.
    settings, :ref:`settings_json_object`, , General settings.
 
-.. note:: **Either** of the ``constellation``, ``instrument`` json objects or the ``spacecraft`` json object should be provided in the mission specifications.
+.. note:: In case of *GRID COVERAGE* calculation, the field-of-regard is used (and not the scene-field-of-view). In case of SAR instruments and coverage calculations
+          involving grid (i.e. *GRID COVERAGE* and *POINTING OPTIONS WITH GRID COVERAGE*), only the access at the middle of a continuous access interval is shown
+          (see :ref:`correction_of_access_files`). 
+
+.. note:: *Either* of the ``constellation``, ``instrument`` json objects or the ``spacecraft`` json object should be provided in the mission specifications. Both should not be specified.
+
+.. note:: The valid key/value pairs in building the mission specifications json/ dict is identical to the key/value pairs expected in the obtaining
+         the corresponding OrbitPy objects using the ``from_dict`` or ``from_json`` function. E.g. the key/value pair expected for the :ref:`groundstation_json_object` is the same
+         as the key/value pairs expected in obtaining a :class:`orbitpy.util.GroundStation` object using the :class:`orbitpy.util.GroundStation.from_dict` function.
 
 .. _date_json_object:
 
@@ -74,7 +80,7 @@ The date type can be either ``GREGORIAN_UTC`` or ``JULIAN_DATE_UT1``.
 This json object is used to define constellation parameters. An in-built constellation type is the Walker-Delta constellation (as defined in SMAD 3rd edition, Section 7.6) whose 
 accepted key/value pairs are described below:
 
-.. csv-table:: Expected parameters
+.. csv-table:: 
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
@@ -90,11 +96,11 @@ accepted key/value pairs are described below:
 
 **Notes**
 
-1. The spacecrafts in the constellation are assigned identifiers in the following format: spc_``constellation id``_``xy``
-   where :code:`x` indicates the plane number and :code:`y` indicates the satellite number within the orbital plane.
+1. The spacecrafts in the constellation are assigned identifiers in the following format: spc_*constellation id*_*xy*
+   where *constellation id* is the constellation identifier, *x* indicates the plane number and *y* indicates the satellite number within the orbital plane.
 
-2. If the ``instrument`` key/value pair is defined in the mission specifications, the instrument(s) shall be attached to each of the spacecraft
-   in the constellation.
+2. If the ``instrument`` json object is defined in the mission specifications, the instrument(s) shall be attached to each of the spacecraft
+   in the constellation. Similarly in the case of the :ref:`spacecraftBus_json_object`, each spacecraft of the constellation is assigned a common bus.
 
 **Example**
 
@@ -117,31 +123,31 @@ accepted key/value pairs are described below:
 ``spacecraft`` json object
 ---------------------------
 
-This json object is used to specify the spacecraft(s) in the mission. This is an alternate to the specification of a constellation.
-The ``spacecraft`` json object is made of several json objects as described below:
+This json object is used to specify the spacecraft in the mission. The ``spacecraft`` json object is made up of several json objects as described below:
 
-.. csv-table:: Expected parameters
+.. csv-table:: 
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
    name, str, , Spacecraft name.
    @id, str/int, , "Unique identifier. If not specified, a random string is assigned."
-   orbitState, orbitState json object, , Specifications of the orbit-state of the spacecraft.
-   spacecraftBus, spacecraftBus json object, , "Specifications of the spacecraft bus. If not specified, a bus with orientation aligned to the nadir-pointing frame is assigned."
+   orbitState, :ref:`orbitState_json_object`, , Specifications of the orbit-state of the spacecraft.
+   spacecraftBus, :ref:`spacecraftBus_json_object`, , "Specifications of the spacecraft bus. If not specified, a bus with orientation aligned to the nadir-pointing frame is assigned."
    instrument, "list, *instrument* json object", ,Instrument specifications (please refer :code:`InstruPy` documentation). A list of instruments can be specified.
+
+.. _orbitState_json_object:
 
 ``orbitState`` json object
 ..............................
    
-This json object defines the spacecraft orbit-state (at a particular time). It consists of defining the ``date`` json object and the ``state``
-json object. Please refer to :ref:`date_json_object` for knowing the acceptable key/value pairs. In case of the ``state`` json object, there are
-two acceptable types of state definitions:
+This json object defines the spacecraft orbit-state (at a particular time). It consists of defining the :ref:`date_json_object` and the ``state``
+json object. In case of the ``state`` json object, there are two acceptable types of state definitions:
 
 * ``KEPLERIAN_EARTH_CENTERED_INERTIAL`` state type
          
    The following key/value pairs apply: 
 
-   .. csv-table:: Expected parameters
+   .. csv-table:: 
       :header: Parameter, Data type, Units, Description
       :widths: 10,10,5,40
 
@@ -156,7 +162,7 @@ two acceptable types of state definitions:
    
    The following key/value pairs apply: 
 
-   .. csv-table:: Expected parameters
+   .. csv-table:: 
       :header: Parameter, Data type, Units, Description
       :widths: 10,10,5,40
 
@@ -167,13 +173,15 @@ two acceptable types of state definitions:
       vy, float, km/s, satellite y-velocity.
       vz, float, km/s, satellite z-velocity.
 
+.. _spacecraftBus_json_object:
+
 ``spacecraftBus`` json object
 ..............................
 
 This json object defines the spacecraft bus. An important attribute is the orientation of the bus, i.e. ``orientation`` which specifies
 the bus orientation with respect to a reference frame. By default the orientation is alignment to the nadir-pointing frame. 
 
-.. csv-table:: Expected parameters
+.. csv-table:: 
       :header: Parameter, Data type, Units, Description
       :widths: 10,10,5,40
 
@@ -232,9 +240,9 @@ the bus orientation with respect to a reference frame. By default the orientatio
 ``groundstation`` json object
 ------------------------------
 
-This json object is used to model ground-station(s). The accepted key/value pairs are as follows:
+This json object is used to model ground-station. The accepted key/value pairs are as follows:
 
-.. csv-table:: Expected parameters
+.. csv-table:: 
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
@@ -258,8 +266,8 @@ This json object is used to model ground-station(s). The accepted key/value pair
 ``grid`` json object
 ---------------------
 
-This json object is used to define the grid(s), i.e. the array of grid-points of interest over which coverage, data-metrics calculations shall take place.
-Multiple grid, each with their own unique identifiers can be defined in a list. 
+This json object is used to define the grid, i.e. the array of grid-points over which coverage, data-metrics calculations shall take place.
+Multiple grids, each with their own unique identifiers can be defined in a list. 
 
 There are two types of grid definitions:
 
@@ -267,10 +275,10 @@ There are two types of grid definitions:
 ........................
 
 In this grid-type the lat/lon bounds of a region are given. An optional grid-resolution can be supplied in which case a grid is generated with points
-spaced at the user-defined grid resolution. If the grid-resolution is not given, an appropriate grid-resolution is set according to the constellation configuration
-and the value of the ``gridResFactor`` key in the ``settings`` json field (described in :ref:`settings_json_object`).
+spaced at the user-defined grid resolution. If the grid-resolution is not given, an appropriate grid-resolution is set according to the
+value of the ``gridResFactor`` key in the ``settings`` json field (described in :ref:`settings_json_object`).
 
-.. csv-table:: Expected parameters
+.. csv-table:: 
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
@@ -288,7 +296,7 @@ and the value of the ``gridResFactor`` key in the ``settings`` json field (descr
 
 In this grid definition, the user supplies the list of grid-points in a data-file (see :ref:`input_grid_file_format`). 
 
-.. csv-table:: Expected parameters
+.. csv-table:: 
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
@@ -319,10 +327,10 @@ In this grid definition, the user supplies the list of grid-points in a data-fil
 ---------------------------
 
 This json object specifies the propagator to be used for propagation of the satellite states. Currently there is only one in-built propagator, the J2 analytical propagator.
-The time step-size of propagation can be specified by the ``stepSize`` key/value pair. If the time step-size is not specified, an appropriate step-size is set according to the constellation configuration
-and the value of the ``propTimeResFactor`` key in the ``settings`` json field (described in :ref:`settings_json_object`).
+The time step-size of propagation can be specified by the ``stepSize`` key/value pair. If the time step-size is not specified, an appropriate step-size is set according to the
+value of the ``propTimeResFactor`` key in the ``settings`` json field (described in :ref:`settings_json_object`).
 
-.. csv-table:: Expected parameters
+.. csv-table:: 
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
@@ -341,7 +349,7 @@ and the value of the ``propTimeResFactor`` key in the ``settings`` json field (d
 
 This json object is used to specify some common mission settings. Following key/value pairs can be provided:
 
-.. csv-table:: Expected parameters
+.. csv-table:: 
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
@@ -359,7 +367,7 @@ This json object is used to specify some common mission settings. Following key/
 Output
 ^^^^^^^
 
-All the results of the various calculations are written in the directory specified in the ``outDir`` key/value pair of the :ref:`settings_json_object`.
+After initialization of the mission, it can be executed by calling the ``Mission.execute`` function. All the results of the various calculations are written in the directory specified in the ``outDir`` key/value pair of the :ref:`settings_json_object`.
 Description of the location, naming-convention and data-format of the results is in the table below:
 
 .. csv-table:: 
@@ -369,23 +377,23 @@ Description of the location, naming-convention and data-format of the results is
    Main output-directory, ``outDir`` key/value pair, ,
    Auto-generated grid files, main output-directory, "*grid_N*, where *N* is the grid index", :ref:`input_grid_file_format` 
    Satellite folder, main output-directory, "*satN*, where *N* is the index of the satellite",
-   State files, respective satellite folder, *state_cartesian.csv* and *state_keplerian.csv*, 
-   Access files (results of the coverage calculations), respective satellite folder, "*access_instruN_modeM_gridK.csv*, where *N* is the instrument index, *M* is the mode index and *K* is the grid index", :ref:`Propagated state file format<propagated_state_file_format>`
+   State files, respective satellite folder, *state_cartesian.csv* and *state_keplerian.csv*, :ref:`Propagated state file format<propagated_state_file_format>`
+   Access files (results of the coverage calculations), respective satellite folder, "*access_instruN_modeM_gridK.csv*, where *N* is the instrument index, *M* is the mode index and *K* is the grid index", :ref:`Grid cov o/p file format<grid_coverage_output_file_format>` (or) :ref:`Pointing options o/p file format<pointing_options_coverage_output_file_format>` (or) :ref:`Pointing options with grid cov o/p file format<pointing_options_with_grid_coverage_output_file_format>`
    Datametrics files, respective satellite folder,"*datametrics_instruN_modeM_gridK.csv*, where *N* is the instrument index, *M* is the mode index and *K* is the grid index", 
    Groundstation communication files, respective satellite folder, "*gndStnN_contacts.csv*, where *N* is the groundstation index", :ref:`Contact data file format<contacts_file_format>` (``INTERVAL`` format)
    Intersatellite communication directory, main output-directory, *comm*, 
    Intersatellite communication files, intersatellite communication directory, "*satM_to_satN_contacts.csv*, where *M* and *N* are the indices of the two satellites between which contacts are evaluated", :ref:`Contact data file format<contacts_file_format>` (``INTERVAL`` format)
 
-As seen above, the index of a satellite or instrument or .... is used in the folder/file names. The name or the identifier is **not** used. A mapping between the
+As seen above, the index of a satellite, instrument, etc is used in the folder/file names. The name or the identifier of the entity is **not** used. A mapping between the
 folder/file names to the identifiers is available from the list of ``...OutputInfo`` objects returned upon running the  ``execute`` function on the ``Mission`` object.
 For example if the mission involved propagation of a satellite, a :class:`orbitpy.propagator.PropagatorOutputInfo` object shall be present in the list of ``...OutputInfo`` objects.
 
 Examples
 ^^^^^^^^^
 
-1. Example with a single spacecraft, and only propagation.
+1. Example with a single spacecraft, and only propagation. Note that a random identifier is assigned to the spacecraft.
 
-   .. code-block:: python
+   .. code-block:: bash
 
       from orbitpy.mission import Mission
             
@@ -407,18 +415,19 @@ Examples
       >> [PropagatorOutputInfo.from_dict({'@type': 'PropagatorOutputInfo', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
                   'spacecraftId': '35252ff4-731d-4e6b-b0ab-419243e9450b', 'stateCartFile': 'temp//sat0/state_cartesian.csv', 
                   'stateKeplerianFile': 'temp//sat0/state_keplerian.csv', 'startDate': 2459299.1292592594, 'duration': 0.1, '@id': None})]
-
-      ------
+      
+      Output directory structure
+      ---------------------------
       out1
          ├───comm
          └───sat0
                state_cartesian.csv
                state_keplerian.csv
 
-2. Example with a constellation and ground-station. ALl the 8 spacecrafts are propagated, inter-satellite contact periods calculated and the ground-station
+2. Example with a constellation and ground-station. All the 8 spacecrafts are propagated, inter-satellite contact periods calculated and the ground-station
    contacts calculated.
    
-.. code-block:: python
+.. code-block:: bash
 
       from orbitpy.mission import Mission
             
@@ -442,9 +451,8 @@ Examples
       mission = Mission.from_json(mission_json_str)
       out_info = mission.execute()
 
-      out2
-      ------
-
+      Output directory structure
+      ---------------------------
       out2/
          ├───comm
          │       sat0_to_sat1.csv
