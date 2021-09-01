@@ -15,5 +15,5 @@ setup(
     'bin/dshield_mission.py'
     ],
     install_requires=['numpy', 'instrupy', 'nose', 'pandas', 'scipy', 'sphinx', 
-                      'pydata-sphinx-theme', 'propcov']
+                      'sphinx-rtd-theme', 'propcov']
 )

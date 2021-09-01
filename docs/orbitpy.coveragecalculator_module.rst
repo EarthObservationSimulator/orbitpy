@@ -47,7 +47,7 @@ The output of executing the coverage calculator is a csv data file containing th
 *  The first row contains the coverage calculation type.
 *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
 *  The third row contains the time step-size in seconds. 
-*  The fourth row contains the mission duration in days.
+*  The fourth row contains the duration (in days) for which coverage calculation is executed.
 *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
 
 Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
@@ -59,7 +59,7 @@ Description of the columns headers and data is given below:
       :widths: 10,10,10,30
 
       time index, int, , Access time-index.
-      GP index, integer, , Grid-point index.
+      GP index, int, , Grid-point index.
       lat [deg], float, degrees, Latitude corresponding to the GP index.
       lon [deg], float, degrees, Longitude corresponding to the GP index.
 
@@ -95,7 +95,7 @@ The output of executing the coverage calculator is a csv data file containing th
 *  The first row contains the coverage calculation type.
 *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
 *  The third row contains the time-step size in seconds. 
-*  The fourth row contains the mission duration in days.
+*  The fourth row contains the duration (in days) for which coverage calculation is executed.
 *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
 
 Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
@@ -134,7 +134,7 @@ The output of executing the coverage calculator is a csv data file containing th
 *  The first row contains the coverage calculation type.
 *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
 *  The third row contains the time-step size in seconds. 
-*  The fourth row contains the mission duration in days.
+*  The fourth row contains the duration (in days) for which coverage calculation is executed.
 *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
 
 Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
@@ -147,7 +147,7 @@ Description of the columns headers and data is given below:
 
       time index, int, , Access time-index.
       pnt-opt index, int, , "Pointing options index. The indexing starts from 0, where 0 is the first pointing-option in the list of instrument pointing-options."
-      GP index, integer, , Grid-point index.
+      GP index, int, , Grid-point index.
       lat [deg], float, degrees, Latitude corresponding to the GP index.
       lon [deg], float, degrees, Longitude corresponding to the GP index.
 
