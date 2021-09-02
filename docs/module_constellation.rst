@@ -1,4 +1,4 @@
-.. _constellation_module:
+.. _module_constellation:
 
 ``orbit.constellation`` --- Constellation Module
 ===================================================

@@ -1,4 +1,4 @@
-.. _propagator_module:
+.. _module_propagator:
 
 ``orbit.propagator`` --- Propagator Module
 ===========================================
@@ -7,7 +7,7 @@ Description
 ^^^^^^^^^^^^^
 
 Module providing classes and functions to handle orbit propagation. Factory method pattern is used for initializing the propagator 
-object (please see :ref:`constellation_module` for details). The module provides for an J2 analytical propagator class (model) 
+object (please see :ref:`module_constellation` for details). The module provides for an J2 analytical propagator class (model) 
 which has been validated with the STK J2 analytical propagator. Users may additionally define their own propagator classes
 adherent to the same interface functions (``from_dict(.)``, ``to_dict(.)``, ``execute(.)``, ``__eq__(.)``) as in the in-built propagator class.
 

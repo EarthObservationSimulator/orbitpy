@@ -5,7 +5,7 @@ Description
 ^^^^^^^^^^^^^
 
 Module providing classes and functions to handle coverage related calculations. Factory method pattern is used for initializing the coverage calculator 
-object (please see :ref:`constellation_module` for details). The module provides for three types of coverage calculations which are described in detail below.
+object (please see :ref:`module_constellation` for details). The module provides for three types of coverage calculations which are described in detail below.
 Users may additionally define their own coverage calculator classes adherent to the same interface functions 
 (``from_dict(.)``, ``to_dict(.)``, ``execute(.)``, ``__eq__(.)``) as in any of the built in coverage calculator classes.
 
@@ -17,7 +17,7 @@ Users may additionally define their own coverage calculator classes adherent to 
 The *GRID COVERAGE* type of coverage calculation involves find the access-times of a spacecraft over a region represented by a grid. Each ``GridCoverage`` object is specific to 
 a particular grid and spacecraft. The class instance is initialized using the grid object, spacecraft object and path to a data file containing the satellite propagated orbit-states. 
 The format of the input data file of the spacecraft states is the same as the format of the output data file of the 
-:class:`orbitpy.propagator` module (see :ref:`propagator_module`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
+:class:`orbitpy.propagator` module (see :ref:`module_propagator`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
 
 ``GridCoverage.execute`` function
 ..................................
@@ -75,7 +75,7 @@ The ground-locations for each pointing-option, at each propagation time-step is 
 
 The class instance is initialized using the spacecraft object and path to a data file containing the satellite propagated orbit-states. 
 The format of the input data file of the spacecraft states is the same as the format of the output data file of the 
-:class:`orbitpy.propagator` module (see :ref:`propagator_module`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
+:class:`orbitpy.propagator` module (see :ref:`module_propagator`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
 
 ``PointingOptionsCoverage.execute`` function
 ...............................................

@@ -13,7 +13,7 @@ satellite and the Sun with the occluding body as Earth based on the algorithm in
 
 A data file with the satellite states at different times of the mission is required as input. At each of these times the LOS condition is evaluated
 from the satellite to the Sun. The format of the input data file of the satellite states is the same as the format of the output data file of the 
-:class:`orbitpy.propagator` module (see :ref:`propagator_module`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
+:class:`orbitpy.propagator` module (see :ref:`module_propagator`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
 
 .. note:: The ``EclipseFinder`` class is to be utilized by invoking the static-methods ``execute(.)``, i.e. utilization of this
           class does **not** involve creation of a class instance.

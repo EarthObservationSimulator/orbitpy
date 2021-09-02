@@ -19,3 +19,25 @@ This package contain set of modules to compute *mission-data* of satellites. It 
 10. Sensor pixel-array projection.
 
 The ``orbitpy`` package is built on top of the ``propcov`` package available in the ``propcov`` folder. Please refer to the README.MD file within the `propcov` folder for description of the respective package.
+
+**References**
+
+* V. Ravindra, R. Ketzner, S. Nag, *"Earth Observation Simulator (EO-SIM): An Open-Source Software for Observation Systems Design",* IEEE International Geoscience and Remote Sensing Symposium, Brussels Belgium, July 2021.
+
+
+Glossary of terms used in the package
+----------------------------------------
+
+* Satellite and spacecraft are synonymous.
+  
+* Instrument, payload and sensor are synonymous.
+
+* Grid-point, ground-point and target-point synonymous.
+
+* Access vs Coverage
+
+      * Sometimes access and coverage are used synonymously.
+
+      * Other times access refers to a target falling under a sensor FOV while coverage includes an additional condition that the satellite
+        should be able to be make an observation. 
+

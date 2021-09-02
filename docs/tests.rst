@@ -4,7 +4,7 @@ Tests
 How to
 ======
 
-Testing is done using the :mod:`unittest` module and :mod:`nose` module. Use the below command to run all the tests:
+Testing is done using the :mod:`unittest` module. Use the below command to run all the tests:
 
 .. code-block:: shell
 

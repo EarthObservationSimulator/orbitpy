@@ -10,16 +10,16 @@ Please navigate below for detailed descriptions of OrbitPy's classes and functio
 .. toctree::
    :maxdepth: 1
    
-   orbitpy.constellation_module
-   orbitpy.propagator_module 
-   orbitpy.grid_module
-   orbitpy.coveragecalculator_module
-   orbitpy.contactfinder_module
-   orbitpy.eclipsefinder_module
-   orbitpy.datametricscalculator_module
-   orbitpy.mission_module
-   orbitpy.sensorpixelprojection_module
-   orbitpy.util_module
+   module_constellation
+   module_propagator 
+   module_grid
+   module_coveragecalculator
+   module_contactfinder
+   module_eclipsefinder
+   module_datametricscalculator
+   module_mission
+   module_sensorpixelprojection
+   module_util
 
    
 

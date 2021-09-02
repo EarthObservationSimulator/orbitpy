@@ -3,6 +3,8 @@ Installation
 
 Requires: Unix-like operating system, ``python 3.8``, ``pip``, ``gcc``
 
+**Steps**
+
 1. Make sure the ``instrupy`` package (dependency) has been installed.
 2. Run ``make`` from the main git directory.
 3. Run ``make runtest``. This runs all the tests and can be used to verify the package.

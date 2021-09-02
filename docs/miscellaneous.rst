@@ -1,6 +1,8 @@
 Miscellaneous
 **************
 
+.. todo:: OUTDATED. REVISION NECESSARY.
+
 .. _grid_pnts_cov_calc_app:
 
 Grid-points coverage calculations approach
