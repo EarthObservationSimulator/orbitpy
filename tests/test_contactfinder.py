@@ -27,29 +27,29 @@ class TestContactFinder(unittest.TestCase):
         j2_prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": cls.step_size})
         
         # sentinel1A
-        cls.spcA = Spacecraft.from_dict({"name":"sentinel1A", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
-                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
+        cls.spcA = Spacecraft.from_dict({"name":"sentinel1A", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
+                                                         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
                                          }})
         cls.state_cart_file_sentinel1A = cls.out_dir + '/cart_states_sentinel1A.csv'
         j2_prop.execute(spacecraft=cls.spcA, out_file_cart=cls.state_cart_file_sentinel1A, duration=cls.duration)
 
         # sentinel1B
-        cls.spcB = Spacecraft.from_dict({"name":"sentinel1B", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":12, "minute":38, "second":58}, \
-                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1816, "raan": 38.1151, "aop": 84.837, "ta": 275.3} \
+        cls.spcB = Spacecraft.from_dict({"name":"sentinel1B", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":12, "minute":38, "second":58}, \
+                                                         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1816, "raan": 38.1151, "aop": 84.837, "ta": 275.3} \
                                          }})
         cls.state_cart_file_sentinel1B = cls.out_dir + '/cart_states_sentinel1B.csv'
         j2_prop.execute(spacecraft=cls.spcB, out_file_cart=cls.state_cart_file_sentinel1B, duration=cls.duration)
 
         # Test satellite close to sentinel1A
-        cls.spcC = Spacecraft.from_dict({"name":"testSat", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
-                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 250} \
+        cls.spcC = Spacecraft.from_dict({"name":"testSat", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
+                                                         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 250} \
                                          }})
         cls.state_cart_file_spcC = cls.out_dir + '/cart_states_spcC.csv'
         j2_prop.execute(spacecraft=cls.spcC, out_file_cart=cls.state_cart_file_spcC, duration=cls.duration)
         
         # Another test satellite, 90 deg RAAN offset from spcC
-        cls.spcD = Spacecraft.from_dict({"name":"testSat", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
-                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 90+38.3243, "aop": 86.2045, "ta": 250} \
+        cls.spcD = Spacecraft.from_dict({"name":"testSat", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
+                                                         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 90+38.3243, "aop": 86.2045, "ta": 250} \
                                          }})
         cls.state_cart_file_spcD = cls.out_dir + '/cart_states_spcD.csv'
         j2_prop.execute(spacecraft=cls.spcD, out_file_cart=cls.state_cart_file_spcD, duration=cls.duration)

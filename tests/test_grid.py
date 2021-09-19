@@ -29,11 +29,11 @@ class TestGridModuleFunction(unittest.TestCase):
         instru8 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 25, "angleWidth": 55}}')
         instru9 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 150, "angleWidth": 180}}')
 
-        orbit1 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+700, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-        orbit2 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+710, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-        orbit3 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+510, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-        orbit4 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1000, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-        orbit5 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1100, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit1 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+700, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit2 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+710, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit3 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+510, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit4 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1000, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit5 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1100, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
 
         # Test single sat, single instrument. The smallest fov dimension must be chosen.
         sats = [Spacecraft(orbitState=orbit1, instrument=[instru1])]

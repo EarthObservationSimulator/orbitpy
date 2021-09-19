@@ -27,7 +27,7 @@ class ConstellationFactory:
     .. code-block:: python
     
         factory = ConstellationFactory()
-        specs = {"@type": 'Walker Delta Constellation', "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
+        specs = {"@type": 'Walker Delta Constellation', "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
                             "relativeSpacing": 1, "alt": 500, "ecc": 0.001, "inc": 45, "aop": 135, "@id": "abc"}
         wd_model = factory.get_constellation_model(specs)
     
@@ -53,7 +53,7 @@ class ConstellationFactory:
 
                orbits = []
                date = propcov.AbsoluteDate()
-               state_dict = {"stateType":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": 6378 + self.alt, "ecc": 0, "inc": 0, "raan": 0, "aop": 0, "ta": 0}
+               state_dict = {"@type":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": 6378 + self.alt, "ecc": 0, "inc": 0, "raan": 0, "aop": 0, "ta": 0}
                state = OrbitState.state_from_dict(state_dict)
                orbits.append(OrbitState(date, state, 0))
 
@@ -144,21 +144,21 @@ class WalkerDeltaConstellation(Entity):
         .. code-block:: python
 
                 factory = ConstellationFactory()
-                specs = {"@type": 'Walker Delta Constellation', "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
+                specs = {"@type": 'Walker Delta Constellation', "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
                         "relativeSpacing": 1, "alt": 500, "ecc": 0.001, "inc": 45, "aop": 135, "@id": "abc"}
                 wd_model = factory.get_constellation_model(specs) # initialization
                 print(wd_model.generate_orbits())
 
-                >> [OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
+                >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
 
     2.
         .. code-block:: python
 
-                date =  OrbitState.date_from_dict({"dateType": "JULIAN_DATE_UT1", "jd":2459270.75})
+                date =  OrbitState.date_from_dict({"@type": "JULIAN_DATE_UT1", "jd":2459270.75})
                 wd_model = WalkerDeltaConstellation( date=date, numberSatellites=2, numberPlanes=1, relativeSpacing=1, alt=500, ecc=0.001, inc=45, aop=135, _id="abc")
                 print(wd_model.generate_orbits())
 
-                >> [OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
+                >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
 
 
     """
@@ -200,7 +200,7 @@ class WalkerDeltaConstellation(Entity):
 
         """
         _id = d.get("@id",str(uuid.uuid4()))
-        date_dict = d.get("date",{"dateType": "JULIAN_DATE_UT1", "jd":2415019.5}) 
+        date_dict = d.get("date",{"@type": "JULIAN_DATE_UT1", "jd":2415019.5}) 
         if(date_dict):
             date = OrbitState.date_from_dict(date_dict)
         else:
@@ -285,7 +285,7 @@ class WalkerDeltaConstellation(Entity):
                     orb_id = str(pl_i+1) + str(sat_i+1)
                 ta = (ta_ref + sat_i * 360.0/num_sats_pp)%360
                 # construct the state object
-                state_dict = {"stateType":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": sma, "ecc": ecc, "inc": inc, "raan": raan, "aop": aop, "ta": ta}
+                state_dict = {"@type":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": sma, "ecc": ecc, "inc": inc, "raan": raan, "aop": aop, "ta": ta}
                 state = OrbitState.state_from_dict(state_dict)
                 # append to list of orbits
                 orbits.append(OrbitState(date, state, orb_id))

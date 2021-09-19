@@ -131,13 +131,13 @@ class OrbitState(Entity):
         """
         date = propcov.AbsoluteDate()
         if d is not None:            
-            if(DateType.get(d["dateType"]) == DateType.GREGORIAN_UTC):
+            if(DateType.get(d["@type"]) == DateType.GREGORIAN_UTC):
                 try:
                     date.SetGregorianDate(year=d["year"], month=d["month"], day=d["day"], hour=d["hour"], minute=d["minute"], second=d["second"])
                 except:
                     raise Exception("Something wrong in setting of Gregorian UTC date object. Check that the year, month, day, hour, second key/value pairs have been specified in the input dictionary.")
         
-            elif(DateType.get(d["dateType"]) == DateType.JULIAN_DATE_UT1):
+            elif(DateType.get(d["@type"]) == DateType.JULIAN_DATE_UT1):
                 try:
                     date.SetJulianDate(jd=d["jd"])
                 except:
@@ -178,7 +178,7 @@ class OrbitState(Entity):
 
         """
         state = propcov.OrbitState()
-        stateType = d.get('stateType', None)
+        stateType = d.get('@type', None)
         state_type = StateType.get(stateType) if stateType is not None else None
         
         if state_type is not None:
@@ -196,7 +196,7 @@ class OrbitState(Entity):
             else:
                 raise NotImplementedError
         else:
-            raise Exception("Please enter a stateType specification.")
+            raise Exception("Please enter a state-type (@type) specification.")
 
         return state
     
@@ -211,7 +211,7 @@ class OrbitState(Entity):
         :rtype: dict
 
         """
-        return { "dateType": "JULIAN_DATE_UT1", "jd": date.GetJulianDate()}
+        return { "@type": "JULIAN_DATE_UT1", "jd": date.GetJulianDate()}
 
     @staticmethod
     def state_to_dict(state, state_type=None):
@@ -231,11 +231,11 @@ class OrbitState(Entity):
         state_type = StateType.get(state_type) if state_type is not None else StateType.CARTESIAN_EARTH_CENTERED_INERTIAL # default
         if state_type == StateType.CARTESIAN_EARTH_CENTERED_INERTIAL:
             state_list = state.GetCartesianState().GetRealArray()
-            return {"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": state_list[0], "y": state_list[1], "z": state_list[2], 
+            return {"@type": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": state_list[0], "y": state_list[1], "z": state_list[2], 
                     "vx": state_list[3], "vy": state_list[4], "vz": state_list[5]}
         elif state_type == StateType.KEPLERIAN_EARTH_CENTERED_INERTIAL:
             state_list = state.GetKeplerianState().GetRealArray()
-            return {"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": state_list[0], "ecc": state_list[1], "inc": np.rad2deg(state_list[2]), 
+            return {"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": state_list[0], "ecc": state_list[1], "inc": np.rad2deg(state_list[2]), 
                 "raan": np.rad2deg(state_list[3]), "aop": np.rad2deg(state_list[4]), "ta": np.rad2deg(state_list[5])}        
 
     def get_julian_date(self):

@@ -31,7 +31,7 @@ the results (file locations, assigned unique identifiers, etc) is displayed.
     -----------------
 
     {   
-        "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":12, "hour":12, "minute":0, "second":0},
+        "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":12, "hour":12, "minute":0, "second":0},
         "duration": 0.25,
         "spacecraft": [{
             "@id": "sp1", "name": "Mars",
@@ -43,8 +43,8 @@ the results (file locations, assigned unique identifiers, etc) is displayed.
                             "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 },
                             "maneuver":{"maneuverType": "CIRCULAR", "diameter":10},
                             "@id":"bs1", "@type":"Basic Sensor"},
-            "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
-                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
+            "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
+                            "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
                             } 
             }        
         ],
@@ -86,7 +86,7 @@ orbit.
         from orbitpy.propagator import PropagatorFactory
         from instrupy import Instrument
 
-        orbit = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7031, "ecc": 0.001, "inc": 35, "raan": 0, "aop": 0, "ta": 20}})
+        orbit = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7031, "ecc": 0.001, "inc": 35, "raan": 0, "aop": 0, "ta": 20}})
         instru = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 15, "angleWidth": 5}}')
         sat = Spacecraft(orbitState=orbit, instrument=[instru])
 

@@ -43,13 +43,13 @@ class TestMission(unittest.TestCase):
         """  1 satellite, no instrument ; propagation only, auto, custom-time-step. The mission epoch is same, different from the satellite orbit-state date.
         """
         # auto propagation step-size, mission-date different from spacecraft orbitstate date
-        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
+        mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
                                 "duration": 0.1, \
                                 "spacecraft": { \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                   "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                 } \
                                     }, \
                                 "settings": {"outDir": "temp/"} \
@@ -59,8 +59,8 @@ class TestMission(unittest.TestCase):
         self.assertAlmostEqual(mission.duration, 0.1)
         self.assertEqual(len(mission.spacecraft), 1)
         self.assertAlmostEqual(mission.spacecraft[0], Spacecraft.from_dict({ "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}}, 
-                                                                          "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
-                                                                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}} 
+                                                                          "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
+                                                                                            "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}} 
                                                                         }))
         self.assertEqual(mission.propagator, J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 173.31598026839598})) # corresponds to time-step calculated considering horizon angle = 136.0373... deg and time-resolution factor = 0.25
         self.assertIsNone(mission.grid)
@@ -74,13 +74,13 @@ class TestMission(unittest.TestCase):
         out_info = mission.execute()
 
         # custom propagation step-size, mission-date same as spacecraft orbitstate date, custom propTimeResFactor = 1/8
-        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+        mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                 "duration": 0.1, \
                                 "spacecraft": { \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                   "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                 } \
                                     }, \
                                 "settings": {"outDir": "temp/", "propTimeResFactor": 0.125} \
@@ -96,13 +96,13 @@ class TestMission(unittest.TestCase):
         """  1 satellite, 1 instrument ; propagation (custom time-step), (field-of-regard) grid-coverage (2 (auto) grids, default and custom-grid res), basic-sensor data-metrics calculation.
         """
         # check warnings are issued.
-        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+        mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                 "duration": 0.1, \
                                 "spacecraft": { \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                   "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                 }, \
                                    "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
                                                    "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":15 }, \
@@ -121,13 +121,13 @@ class TestMission(unittest.TestCase):
             out_info = mission.execute()
 
         # check execution with single grid.
-        mission_json_str = '{   "epoch":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
+        mission_json_str = '{   "epoch":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
                                 "duration": 0.5, \
                                 "spacecraft": [{ \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 30, "raan": 35, "aop": 145, "ta": -25} \
+                                   "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 30, "raan": 35, "aop": 145, "ta": -25} \
                                                 }, \
                                    "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
                                                    "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":15 }, \
@@ -156,13 +156,13 @@ class TestMission(unittest.TestCase):
     def test_scenario_3(self):
         """  1 satellite, 1 instrument ; propagation, pointing-options coverage, basic-sensor data-metrics calculation.
         """
-        mission_json_str = '{   "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":12, "hour":23, "minute":12, "second":12}, \
+        mission_json_str = '{   "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":12, "hour":23, "minute":12, "second":12}, \
                                 "duration": 0.05, \
                                 "spacecraft": { \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":15, "hour":12, "minute":12, "second":12}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                   "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":15, "hour":12, "minute":12, "second":12}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
                                                 }, \
                                    "instrument": [{ "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
                                                    "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight":15, "angleWidth":10 }, \
@@ -188,18 +188,19 @@ class TestMission(unittest.TestCase):
             Using default propagation step-size and grid-resolution. The scene FOV has angleWidth = instrument FOV angleWidth. The scene FOV angleHeight is larger to allow for coarser propagation step-size and gird-resolution.
 
         """
-        mission_json_str = '{   "epoch":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
+        mission_json_str = '{   "epoch":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
                                 "duration": 0.1, \
                                 "spacecraft": { \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                   "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":15, "hour":12, "minute":12, "second":12}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
                                                 }, \
                                    "instrument": { "@type": "Synthetic Aperture Radar", "@id": "sar1", \
                                                     "orientation": { "convention": "SIDE_LOOK", "sideLookAngle": 20.5 }, \
+                                                    "antenna":{"shape": "RECTANGULAR", "height": 10.7, "width": 2.16, "apertureEfficiency": 0.6, "apertureExcitation": "UNIFORM"}, \
                                                     "sceneFieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":6.233630110575892}, \
-                                                    "pulseWidth": 33.4e-6, "antennaHeight": 10.7, "antennaWidth": 2.16, "antennaApertureEfficiency": 0.6, \
+                                                    "pulseWidth": 33.4e-6, \
                                                     "operatingFrequency": 1.2757e9, "peakTransmitPower": 1000, "chirpBandwidth": 19e6, \
                                                     "minimumPRF": 1463, "maximumPRF": 1686, "radarLoss": 3.5, "systemNoiseFigure": 5.11, \
                                                     "pointingOption":[{"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":-20.5}, \
@@ -221,13 +222,13 @@ class TestMission(unittest.TestCase):
     def test_scenario_5(self):
         """    1 satellite, multiple ground-stations ; propagation, contact-finder (ground-station only).
         """
-        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
+        mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
                                 "duration": 0.5, \
                                 "spacecraft": { \
                                    "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                   "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                   "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
                                                 } \
                                     }, \
                                 "groundStation":[{"name": "TrollSAR", "latitude": -72.0029, "longitude": 2.5257, "altitude":0}, \
@@ -247,10 +248,10 @@ class TestMission(unittest.TestCase):
     def test_scenario_6(self):
         """    Multiple satellites from constellation, common instrument; propagation, contact-finder (ground-station, inter-satellite only).
         """
-        mission_json_str = '{  "epoch":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, \
+        mission_json_str = '{  "epoch":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75}, \
                                 "duration": 0.25, \
                                 "constellation": { "@type": "Walker Delta Constellation", \
-                                        "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, \
+                                        "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75}, \
                                         "numberSatellites": 8, \
                                         "numberPlanes": 1, \
                                         "relativeSpacing": 1, \
@@ -390,22 +391,22 @@ class TestMission(unittest.TestCase):
             Spacecraft #3 : 2 instruments (Passive Optical Scanner, SAR)
 
         """
-        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
+        mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
                                "duration": 0.1, \
                                "spacecraft": [{ \
                                   "@id": "spc1", \
                                   "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                   }, \
-                                  "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                 "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
+                                  "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                 "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -25} \
                                                } \
                                    }, \
                                    { \
                                     "@id": "spc2", \
                                     "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -35} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -35} \
                                                 }, \
                                     "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
                                                    "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight":15, "angleWidth":10 }, \
@@ -415,8 +416,8 @@ class TestMission(unittest.TestCase):
                                     "@id": "spc3", \
                                     "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -145} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -145} \
                                                 }, \
                                     "instrument": [{"@type": "Passive Optical Scanner", "@id": "opt1",\
                                                     "fieldOfViewGeometry": { "shape": "RECTanGULAR", "angleHeight": 0.628, "angleWidth": 115.8 }, \
@@ -430,8 +431,9 @@ class TestMission(unittest.TestCase):
                                                    }, \
                                                    {"@type": "Synthetic Aperture Radar", "@id": "sar1", \
                                                     "orientation": { "convention": "SIDE_LOOK", "sideLookAngle": 20.5 }, \
+                                                    "antenna":{"shape": "RECTANGULAR", "height": 10.7, "width": 2.16, "apertureEfficiency": 0.6, "apertureExcitation": "UNIFORM"}, \
                                                     "sceneFieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":5, "angleWidth":6.233630110575892}, \
-                                                    "pulseWidth": 33.4e-6, "antennaHeight": 10.7, "antennaWidth": 2.16, "antennaApertureEfficiency": 0.6, \
+                                                    "pulseWidth": 33.4e-6, \
                                                     "operatingFrequency": 1.2757e9, "peakTransmitPower": 1000, "chirpBandwidth": 19e6, \
                                                     "minimumPRF": 1463, "maximumPRF": 1686, "radarLoss": 3.5, "systemNoiseFigure": 5.11 \
                                                     }] \
@@ -448,10 +450,10 @@ class TestMission(unittest.TestCase):
     '''
     def test_scenario_x(self):
         """ Hydrology paper """
-        mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":27, "hour":18, "minute":43, "second":5}, \
+        mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":27, "hour":18, "minute":43, "second":5}, \
                                 "duration": 3, \
                                 "constellation": { "@type": "Walker Delta Constellation", \
-                                        "date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":27, "hour":18, "minute":43, "second":5}, \
+                                        "date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":27, "hour":18, "minute":43, "second":5}, \
                                         "numberSatellites": 8, \
                                         "numberPlanes": 1, \
                                         "relativeSpacing": 1, \

@@ -207,14 +207,14 @@ start_time = time.process_time()
 
 wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/20210909_500kmSARConstellation/"
 
-epoch_dict = {"dateType":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0}
+epoch_dict = {"@type":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0}
 epoch = OrbitState.date_from_dict(epoch_dict)
 epoch_JDUt1 = epoch.GetJulianDate()
 
 sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
                                             },
                              "orbitState": {"date": epoch_dict,
-                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 120}
+                                            "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 120}
                                         },
                              "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle":45},
                                             "fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight":5, "angleWidth": 10 },
@@ -241,7 +241,7 @@ for k in range(0,4):
     print('processing at {} hrs'.format(k*6))
 
     duration = 0.25
-    sim_start_date = OrbitState.date_from_dict({"dateType":"JULIAN_DATE_UT1", "jd": epoch_JDUt1 + k*duration})
+    sim_start_date = OrbitState.date_from_dict({"@type":"JULIAN_DATE_UT1", "jd": epoch_JDUt1 + k*duration})
 
 
     state_cart_file = sat_dir + 'state_cartesian_' + str(6*k) + 'hrs.csv'

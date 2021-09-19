@@ -18,21 +18,21 @@ from util.spacecrafts import spc1_json, spc2_json, spc3_json
 class TestOrbitState(unittest.TestCase):
   
     def test_date_from_dict(self):
-        x = OrbitState.date_from_dict({"dateType":"JULIAN_DATE_UT1", "jd":2459270.75})
+        x = OrbitState.date_from_dict({"@type":"JULIAN_DATE_UT1", "jd":2459270.75})
         self.assertIsInstance(x, propcov.AbsoluteDate)
 
-        y = OrbitState.date_from_dict({"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0})
+        y = OrbitState.date_from_dict({"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0})
         self.assertIsInstance(y, propcov.AbsoluteDate)
 
         self.assertEqual(x, y)
 
     def test_state_from_dict(self):
-        x = OrbitState.state_from_dict({"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6867, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25})
+        x = OrbitState.state_from_dict({"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6867, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25})
         self.assertIsInstance(x, propcov.OrbitState)
 
         cart_state = x.GetCartesianState().GetRealArray()
 
-        y = OrbitState.state_from_dict({"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": cart_state[0], "y": cart_state[1], "z": cart_state[2], "vx": cart_state[3], "vy": cart_state[4], "vz": cart_state[5]})
+        y = OrbitState.state_from_dict({"@type": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": cart_state[0], "y": cart_state[1], "z": cart_state[2], "vx": cart_state[3], "vy": cart_state[4], "vz": cart_state[5]})
         self.assertIsInstance(y, propcov.OrbitState) 
 
         self.assertEqual(x, y)
@@ -54,8 +54,8 @@ class TestOrbitState(unittest.TestCase):
 
     def test_from_dict(self):
         # Julian date, Cartesian state
-        o = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, 
-                                  "state":{"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": 6878.137, "y": 0, "z": 0, "vx": 0, "vy": 7.6126, "vz": 0},
+        o = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75}, 
+                                  "state":{"@type": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": 6878.137, "y": 0, "z": 0, "vx": 0, "vy": 7.6126, "vz": 0},
                                   "@id": 123})
         self.assertIsInstance(o, OrbitState)
         self.assertEqual(o._id, 123)
@@ -63,8 +63,8 @@ class TestOrbitState(unittest.TestCase):
         self.assertEqual(o.state, propcov.OrbitState.fromCartesianState(propcov.Rvector6([6878.137,0,0,0,7.6126,0])))
 
         # Gregorian date, Keplerian state
-        o = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
-                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
+        o = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
+                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                                   })
         self.assertIsInstance(o, OrbitState)
         self.assertIsNone(o._id)
@@ -73,13 +73,13 @@ class TestOrbitState(unittest.TestCase):
     
     def test_to_dict(self): #@TODO test Keplerian state output
         # Input: Julian date, Cartesian state
-        o = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, 
-                                  "state":{"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": 6878.137, "y": 0, "z": 0, "vx": 0, "vy": 7.6126, "vz": 0},
+        o = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75}, 
+                                  "state":{"@type": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": 6878.137, "y": 0, "z": 0, "vx": 0, "vy": 7.6126, "vz": 0},
                                  })
         d = o.to_dict()
-        self.assertEqual(d["date"]["dateType"], "JULIAN_DATE_UT1")
+        self.assertEqual(d["date"]["@type"], "JULIAN_DATE_UT1")
         self.assertEqual(d["date"]["jd"], 2459270.75)
-        self.assertEqual(d["state"]["stateType"], "CARTESIAN_EARTH_CENTERED_INERTIAL")
+        self.assertEqual(d["state"]["@type"], "CARTESIAN_EARTH_CENTERED_INERTIAL")
         self.assertAlmostEqual(d["state"]["x"], 6878.137)
         self.assertEqual(d["state"]["y"], 0)
         self.assertEqual(d["state"]["z"], 0)
@@ -89,15 +89,15 @@ class TestOrbitState(unittest.TestCase):
         self.assertIsNone(d["@id"])
 
         # Input: Gregorian date, Keplerian state
-        o = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
-                                  "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
+        o = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
+                                  "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                                   "@id": "123"})
         d = o.to_dict()
         date = o.get_julian_date()
         state = o.get_cartesian_earth_centered_inertial_state()
-        self.assertEqual(d["date"]["dateType"], "JULIAN_DATE_UT1")
+        self.assertEqual(d["date"]["@type"], "JULIAN_DATE_UT1")
         self.assertEqual(d["date"]["jd"], date)
-        self.assertEqual(d["state"]["stateType"], "CARTESIAN_EARTH_CENTERED_INERTIAL")
+        self.assertEqual(d["state"]["@type"], "CARTESIAN_EARTH_CENTERED_INERTIAL")
         self.assertAlmostEqual(d["state"]["x"], state[0])
         self.assertEqual(d["state"]["y"], state[1])
         self.assertEqual(d["state"]["z"], state[2])
@@ -199,8 +199,8 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}')])
-        self.assertEqual(spc1.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                              "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
+        self.assertEqual(spc1.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                              "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
         self.assertEqual(spc1._id, "sp1")
 
         # no instruments        
@@ -209,8 +209,8 @@ class TestSpacecraft(unittest.TestCase):
                                                     "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }'))
         self.assertIsNone(spc2.instrument)
-        self.assertEqual(spc2.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                              "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
+        self.assertEqual(spc2.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                              "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
         self.assertEqual(spc2._id, 12)
 
         # 3 instruments with multiple modes, no spacecraft id assignment        
@@ -230,8 +230,8 @@ class TestSpacecraft(unittest.TestCase):
         self.assertEqual(spc3.instrument[2].get_mode_id()[0], 0)
         self.assertEqual(spc3.instrument[2].get_mode_id()[1], 1)
         self.assertIsNotNone(spc3.instrument[2].get_mode_id()[2])
-        self.assertEqual(spc3.orbitState, OrbitState.from_json('{"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                              "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
+        self.assertEqual(spc3.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                              "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
         self.assertIsNotNone(spc3._id)
 
     
@@ -270,8 +270,8 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
         o2 = Spacecraft.from_json('{"@id": "sp1", "name": "Spock", \
@@ -283,8 +283,8 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
         self.assertEqual(o1, o2)
@@ -298,8 +298,8 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
         self.assertNotEqual(o1, o2)
@@ -313,8 +313,8 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":15 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
         self.assertNotEqual(o1, o2)
@@ -328,8 +328,8 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":15 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
         self.assertNotEqual(o1, o2)
@@ -349,8 +349,8 @@ class TestUtilModuleFunction(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
         # no instruments
@@ -358,8 +358,8 @@ class TestUtilModuleFunction(unittest.TestCase):
                                    "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
                                                     "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
         # 3 instruments with multiple modes, no spacecraft id assignment
@@ -391,8 +391,8 @@ class TestUtilModuleFunction(unittest.TestCase):
                                                         "numberDetectorRows":5, "numberDetectorCols":10, "@id": "bs3", "@type":"Basic Sensor" \
                                                     } \
                                                   ], \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                    "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
         

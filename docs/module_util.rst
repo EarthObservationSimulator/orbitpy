@@ -40,30 +40,30 @@ Examples
       import propcov
 
       # initialize orbit-state using Julian Date UT1 and Cartesian state coordinates
-      x = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, 
-                              "state":{"stateType": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": 6878.137, "y": 0, "z": 0, "vx": 0, "vy": 7.6126, "vz": 0},
+      x = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75}, 
+                              "state":{"@type": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": 6878.137, "y": 0, "z": 0, "vx": 0, "vy": 7.6126, "vz": 0},
                               "@id": 123})
 
       # Convert the OrbitState object to a python dict representation. Specify the state as Keplerian. 
       print(x.to_dict(state_type=StateType.KEPLERIAN_EARTH_CENTERED_INERTIAL))
-      >> {'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 
-          'state': {'stateType': 'KEPLERIAN_EARTH_CENTERED_INERTIAL', 'sma': 6878.122235888328, 'ecc': 2.1465323187573002e-06, 
+      >> {'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 
+          'state': {'@type': 'KEPLERIAN_EARTH_CENTERED_INERTIAL', 'sma': 6878.122235888328, 'ecc': 2.1465323187573002e-06, 
                     'inc': 0.0, 'raan': 0.0, 'aop': 180.0, 'ta': 180.0}, '@id': 123}
 
 
       # initialize orbit-state using Gregorian UTC and Keplerian state coordinates
-      x = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
-                              "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
+      x = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
+                              "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                               })
 
       # Get the propcov object representation of date from a python dictionary
-      x = OrbitState.date_from_dict({"dateType":"JULIAN_DATE_UT1", "jd":2459270.75})
+      x = OrbitState.date_from_dict({"@type":"JULIAN_DATE_UT1", "jd":2459270.75})
       print(x)
       >> AbsoluteDate.fromJulianDate(2459270.750000)
       
       # convert the propcov orbit-state object to a python dict
       x = OrbitState.state_to_dict(propcov.OrbitState.fromCartesianState(propcov.Rvector6([-5219.8,1473.95,4201.35,-3.86085,-5.99712,-2.69806])))
-      >> {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -5219.8, 'y': 1473.95, 'z': 4201.35, 'vx': -3.86085, 'vy': -5.99712, 'vz': -2.69806}
+      >> {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -5219.8, 'y': 1473.95, 'z': 4201.35, 'vx': -3.86085, 'vy': -5.99712, 'vz': -2.69806}
       
 ``Orientation``
 ^^^^^^^^^^^^^^^^^^
@@ -113,8 +113,8 @@ Example
                                                              {"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":-2.5, "zRotation":0}  \
                                                             ], \
                                           "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                                   "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                    } \
                                        }')
       # initialize spacecraft with multiple, heterogenous instruments
@@ -133,8 +133,8 @@ Example
                                  "operatingWavelength": 4.2e-6, "bandwidth": 1.9e-6, "quantumEff": 0.5, "targetBlackBodyTemp": 290,
                                  "bitsPerPixel": 8, "opticsSysEff": 0.75, "numOfReadOutE": 25, "apertureDia": 0.26, "Fnum": 2.7, "atmosLossModel": "LOWTRAN7"
                                  }],
-                              "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
-                                          "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
+                              "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
+                                          "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
                                           }
                               }             
                            )

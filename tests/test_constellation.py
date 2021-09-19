@@ -76,7 +76,7 @@ class TestConstellationFactory(unittest.TestCase):
         
         # test the constellation model classes can be obtained depending on the input specifications
         # Walker Delta Constellation model
-        specs = {"@type": 'Walker Delta Constellation', "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}} # in practice additional constellation specs shall be present in the dictionary
+        specs = {"@type": 'Walker Delta Constellation', "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75}} # in practice additional constellation specs shall be present in the dictionary
         wd_model = factory.get_constellation_model(specs)
         self.assertIsInstance(wd_model, WalkerDeltaConstellation)
 
@@ -94,7 +94,7 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
     def test_from_dict(self):
         # typical case
         specs = {"@type": 'Walker Delta Constellation', 
-                  "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75},
+                  "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75},
                   "numberSatellites": 2,
                   "numberPlanes": 1,
                   "relativeSpacing": 1,
@@ -107,7 +107,7 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
         self.assertIsInstance(wd_model, WalkerDeltaConstellation) 
         self.assertEqual(wd_model._id, "abc")
         self.assertEqual(wd_model._type, "Walker Delta Constellation")
-        self.assertEqual(wd_model.date, OrbitState.date_from_dict({"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}))
+        self.assertEqual(wd_model.date, OrbitState.date_from_dict({"@type": "JULIAN_DATE_UT1", "jd":2459270.75}))
         self.assertEqual(wd_model.numberSatellites, 2)
         self.assertEqual(wd_model.numberPlanes, 1)
         self.assertEqual(wd_model.relativeSpacing, 1)
@@ -122,7 +122,7 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
         self.assertIsInstance(wd_model, WalkerDeltaConstellation) 
         self.assertIsNotNone(wd_model._id)
         self.assertEqual(wd_model._type, "Walker Delta Constellation")
-        self.assertEqual(wd_model.date, OrbitState.date_from_dict({"dateType": "JULIAN_DATE_UT1", "jd":2415019.5}))
+        self.assertEqual(wd_model.date, OrbitState.date_from_dict({"@type": "JULIAN_DATE_UT1", "jd":2415019.5}))
         self.assertEqual(wd_model.numberSatellites, 3)
         self.assertEqual(wd_model.numberPlanes, 3)
         self.assertEqual(wd_model.relativeSpacing, 1)
@@ -143,7 +143,7 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
         """
         # partial truth data from SMAD 4th ed, Pg. 274, Table 10.26.
         specs = {"@type": 'Walker Delta Constellation', 
-                  "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75},
+                  "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75},
                   "numberSatellites": 15,
                   "numberPlanes": 5,
                   "relativeSpacing": 1,
@@ -227,7 +227,7 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
             parameters using fixed inputs and expected outputs. """
         
         specs = {"@type": 'Walker Delta Constellation', 
-                  "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75},
+                  "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75},
                   "numberSatellites": 6,
                   "numberPlanes": 3,
                   "relativeSpacing": 2,

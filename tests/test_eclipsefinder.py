@@ -32,15 +32,15 @@ class TestEclipseFinder(unittest.TestCase):
         
         
         # Jaxel, expected eclipse period = 35% of orbit
-        cls.jaxel = Spacecraft.from_dict({"name":"Jaxel", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":12, "day":15, "hour":0, "minute":0, "second":0}, \
-                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6873.9, "ecc": 0.0001, "inc": 97.24, "raan": 46.10, "aop": 150, "ta": 210} \
+        cls.jaxel = Spacecraft.from_dict({"name":"Jaxel", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":12, "day":15, "hour":0, "minute":0, "second":0}, \
+                                                         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6873.9, "ecc": 0.0001, "inc": 97.24, "raan": 46.10, "aop": 150, "ta": 210} \
                                          }})
         cls.state_cart_file_jaxel = cls.out_dir + '/cart_states_jaxel.csv'
         j2_prop.execute(spacecraft=cls.jaxel, out_file_cart=cls.state_cart_file_jaxel, duration=cls.duration)
 
         # sentinel1A in dawn-dusk orbit
-        cls.sentinel1A = Spacecraft.from_dict({"name":"sentinel1A", "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
-                                                         "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
+        cls.sentinel1A = Spacecraft.from_dict({"name":"sentinel1A", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":13, "minute":29, "second":2}, \
+                                                         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
                                          }})
         cls.state_cart_file_sentinel1A = cls.out_dir + '/cart_states_sentinel1A.csv'
         j2_prop.execute(spacecraft=cls.sentinel1A, out_file_cart=cls.state_cart_file_sentinel1A, duration=cls.duration)

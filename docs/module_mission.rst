@@ -66,10 +66,10 @@ The date type can be either ``GREGORIAN_UTC`` or ``JULIAN_DATE_UT1``.
 
 .. code-block:: javascript
    
-   "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, 
+   "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, 
                                         "hour":6, "minute":0, "second":0}
 
-   'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2459270.75}  
+   'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}  
 
 
 .. _constellation_json_object:
@@ -107,7 +107,7 @@ accepted key/value pairs are described below:
 .. code-block:: javascript
    
    "constellation": { "@type": "Walker Delta Constellation",
-      "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75},
+      "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75},
       "numberSatellites": 8,
       "numberPlanes": 1,
       "relativeSpacing": 1,
@@ -206,8 +206,8 @@ the bus orientation with respect to a reference frame. By default the orientatio
                         "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 },
                         "maneuver":{"maneuverType": "CIRCULAR", "diameter":10},
                         "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"},
-         "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
-                        "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
+         "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
+                        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
                         } \
    
          }
@@ -230,8 +230,8 @@ the bus orientation with respect to a reference frame. By default the orientatio
                               "bitsPerPixel": 8, "opticsSysEff": 0.75, "numOfReadOutE": 25, "apertureDia": 0.26, "Fnum": 2.7, "atmosLossModel": "LOWTRAN7"
                            }
                         ],
-         "orbitState": {"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},
-                        "state":{'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -5219.8, 'y': 1473.95, 'z': 4201.35, 'vx': -3.86085, 'vy': -5.99712, 'vz': -2.69806}
+         "orbitState": {"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},
+                        "state":{'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -5219.8, 'y': 1473.95, 'z': 4201.35, 'vx': -3.86085, 'vy': -5.99712, 'vz': -2.69806}
                         }
       }   
 
@@ -397,13 +397,13 @@ Examples
 
       from orbitpy.mission import Mission
             
-      mission_json_str = '{  "epoch":{"dateType":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
+      mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
                               "duration": 0.1, \
                               "spacecraft": { \
                                  "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                              }, \
-                                 "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
-                                             "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
+                                 "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                              } \
                                  }, \
                               "settings": {"outDir": "out1/"} \
@@ -431,10 +431,10 @@ Examples
 
       from orbitpy.mission import Mission
             
-      mission_json_str = '{  "epoch":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75}, \
+      mission_json_str = '{  "epoch":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75}, \
                                     "duration": 0.25, \
                                     "constellation": { "@type": "Walker Delta Constellation", \
-                                             "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, \
+                                             "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75}, \
                                              "numberSatellites": 8, \
                                              "numberPlanes": 1, \
                                              "relativeSpacing": 1, \

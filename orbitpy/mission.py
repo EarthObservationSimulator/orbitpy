@@ -167,7 +167,7 @@ class Mission(Entity):
 
 
         """
-        epoch = OrbitState.date_from_dict(d.get('epoch', {"dateType":"JULIAN_DATE_UT1", "jd":2459270.5}) ) # 25 Feb 2021 0:0:0 default startDate
+        epoch = OrbitState.date_from_dict(d.get('epoch', {"@type":"JULIAN_DATE_UT1", "jd":2459270.5}) ) # 25 Feb 2021 0:0:0 default startDate
 
         # parse settings
         settings_dict = d.get('settings', dict())

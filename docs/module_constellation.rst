@@ -27,23 +27,23 @@ Examples
          from orbitpy.constellation import ConstellationFactory
 
          factory = ConstellationFactory()
-         specs = {"@type": 'Walker Delta Constellation', "date":{"dateType": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
+         specs = {"@type": 'Walker Delta Constellation', "date":{"@type": "JULIAN_DATE_UT1", "jd":2459270.75}, "numberSatellites": 2, "numberPlanes": 1,
                            "relativeSpacing": 1, "alt": 500, "ecc": 0.001, "inc": 45, "aop": 135, "@id": "abc"}
          wd_model = factory.get_constellation_model(specs) # initialization
          print(wd_model.generate_orbits())
 
-         >> [OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
+         >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
 
    .. code-block:: python
 
          from orbitpy.constellation import ConstellationFactory
          from orbitpy.util import OrbitState
 
-         date =  OrbitState.date_from_dict({"dateType": "JULIAN_DATE_UT1", "jd":2459270.75})
+         date =  OrbitState.date_from_dict({"@type": "JULIAN_DATE_UT1", "jd":2459270.75})
          wd_model = WalkerDeltaConstellation( date=date, numberSatellites=2, numberPlanes=1, relativeSpacing=1, alt=500, ecc=0.001, inc=45, aop=135, _id="abc")
          print(wd_model.generate_orbits())
 
-         >> [OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
+         >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
 
 2. Working with a custom constellation.
 
@@ -74,7 +74,7 @@ Examples
 
                orbits = []
                date = propcov.AbsoluteDate()
-               state_dict = {"stateType":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": 6378 + self.alt, "ecc": 0, "inc": 0, "raan": 0, "aop": 0, "ta": 0}
+               state_dict = {"@type":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": 6378 + self.alt, "ecc": 0, "inc": 0, "raan": 0, "aop": 0, "ta": 0}
                state = OrbitState.state_from_dict(state_dict)
                orbits.append(OrbitState(date, state, 0))
 
@@ -86,7 +86,7 @@ Examples
          const1 = factory.get_constellation_model(specs) # initialization of the constellation object const1
          print(const1.generate_orbits())
 
-         >> [OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -4858.713737315466, 'y': 3435.629431500001, 'z': 3435.6294315, 'vx': -5.388312480793739, 'vy': -3.8101122943213612, 'vz': -3.810112294321361}, '@id': 'abc_11'}), OrbitState.from_dict({'date': {'dateType': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 'state': {'stateType': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 4868.440891944725, 'y': -3442.5075685000006, 'z': -3442.5075685, 'vx': 5.377546621691256, 'vy': 3.8024996823446955, 'vz': 3.8024996823446946}, '@id': 'abc_12'})]
+         >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -4858.713737315466, 'y': 3435.629431500001, 'z': 3435.6294315, 'vx': -5.388312480793739, 'vy': -3.8101122943213612, 'vz': -3.810112294321361}, '@id': 'abc_11'}), OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 4868.440891944725, 'y': -3442.5075685000006, 'z': -3442.5075685, 'vx': 5.377546621691256, 'vy': 3.8024996823446955, 'vz': 3.8024996823446946}, '@id': 'abc_12'})]
 
 
 

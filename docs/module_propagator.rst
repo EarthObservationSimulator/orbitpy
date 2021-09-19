@@ -92,8 +92,8 @@ Examples
          j2_prop = factory.get_propagator(specs)
          
          # initialize orbit (initial state of the satellite)
-         orbit = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, 
-                        "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 700, "ecc": 0.002, "inc": 98.8, "raan": 120, "aop": 10, "ta": 39} })
+         orbit = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, 
+                        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 700, "ecc": 0.002, "inc": 98.8, "raan": 120, "aop": 10, "ta": 39} })
          # spacecraft with 1 instrument
          sc = Spacecraft(orbitState=orbit)
          out_file_kep = os.path.dirname(os.path.realpath(__file__)) + '/kep_state.csv' # path to the output file containing the Keplerian states
@@ -121,7 +121,7 @@ Examples
 
    .. code-block:: python
 
-         prop_start_date = OrbitState.date_from_dict({"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":27, "hour":12, "minute":0, "second":0})
+         prop_start_date = OrbitState.date_from_dict({"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":27, "hour":12, "minute":0, "second":0})
          j2_prop.execute(sc, prop_start_date, out_file_cart, out_file_kep, duration=0.25)
 
 2. Propagation time-step calculation
@@ -141,8 +141,8 @@ Examples
       instru2 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 5}}')
       instru3 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 10, "angleWidth": 15}}')
       
-      orbit1 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+700, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-      orbit2 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+750, "ecc": 0.001, "inc": 30, "raan": 0, "aop": 0, "ta": 0}})
+      orbit1 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+700, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+      orbit2 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+750, "ecc": 0.001, "inc": 30, "raan": 0, "aop": 0, "ta": 0}})
       
       sats = [Spacecraft(orbitState=orbit1, instrument=[instru1]), # list of 2 satellites with 1 and 2 instruments respectively
               Spacecraft(orbitState=orbit2, instrument=[instru2, instru3])]

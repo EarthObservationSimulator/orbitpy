@@ -30,10 +30,10 @@ class TestPropagatorModuleFunction(unittest.TestCase):
         instru4 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight": 150, "angleWidth": 0.01}}')
         instru5 = Instrument.from_json('{"@type": "Basic Sensor","fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter": 136.03734762889385}}')
 
-        orbit1 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+500, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-        orbit2 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+710, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-        orbit3 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+510, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
-        orbit4 = OrbitState.from_dict({"date":{"dateType":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1000, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit1 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+500, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit2 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+710, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit3 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+510, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
+        orbit4 = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75},"state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+1000, "ecc": 0.001, "inc": 0, "raan": 0, "aop": 0, "ta": 0}})
        
         # single satellite, multiple instruments
         sats = [Spacecraft(orbitState=orbit1, instrument=[instru1, instru2])]
@@ -133,8 +133,8 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         self.sma = RE+random.uniform(350,850)
         
         # circular orbit
-        orbit = OrbitState.from_dict({"date":{"dateType":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
-                                       "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": self.sma, 
+        orbit = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+                                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": self.sma, 
                                                 "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
                                                 "aop": random.uniform(0,360), "ta": random.uniform(0,360)}
                                        })
