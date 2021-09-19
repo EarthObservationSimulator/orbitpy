@@ -4,13 +4,7 @@
 :synopsis: *Module to handle mission initialization and execution.*
 
 """
-import json
 import os, shutil
-import numpy as np
-import math
-import uuid
-from collections import namedtuple
-import pandas as pd
 import warnings
 
 from instrupy.util import Entity
@@ -23,6 +17,7 @@ from .util import Spacecraft, GroundStation, SpacecraftBus
 from .constellation import ConstellationFactory
 import orbitpy.propagator
 import orbitpy.grid
+from orbitpy import util
 from .propagator import PropagatorFactory
 from .coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
 from datametricscalculator import DataMetricsCalculator, AccessFileInfo
@@ -238,6 +233,34 @@ class Mission(Entity):
                        _id = d.get('@id', None)
                       ) 
     
+    def update_epoch_from_dict(self, d):
+        """ Update the instance variable ``epoch`` from input dictionary of date specifications.
+
+            :param d: Dictionary with the date specifications.
+            :paramtype d: dict
+
+        """
+        self.epoch = OrbitState.date_from_dict(d)
+
+    def add_spacecraft_from_dict(self, d):
+        """ Add one or more spacecrafts to the list of spacecrafts (instance variable ``spacecraft``) from the input.
+
+            :param d: Dictionary or list of dictionaries with the spacecraft specifications.
+            :paramtype d: list, dict or dict
+
+        """
+        sc_list = util.dictionary_list_to_object_list( d, Spacecraft)
+        self.spacecraft.extend(sc_list)
+
+    def update_duration(self, duration):
+        """ Update the instance variable epoch from input dictionary of date specifications.
+
+            :param d: Dictionary with the date specifications.
+            :paramtype d: dict
+
+        """
+        self.duration = float(duration)  
+
     def to_dict(self):
         """ Translate the ``Mission`` object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
@@ -246,14 +269,13 @@ class Mission(Entity):
         
         """
         return dict({"@type": "Mission",
-                     "epoch": self.epoch,
+                     "epoch": orbitpy.util.OrbitState.date_to_dict(self.epoch),
                      "duration": self.duration,                     
-                     "spacecraft": orbitpy.util.object_list_to_dictionary_list(self.spacecraft),
-                     "propagator": self.propagator.to_dict(),
-                     "coverageType": self.coverageType.value,
-                     "grid": self.grid.to_dict,                     
-                     "groundStation": orbitpy.util.object_list_to_dictionary_list(self.groundStation),
-                     "settings": self.settings.to_dict(),
+                     "spacecraft": orbitpy.util.object_list_to_dictionary_list(self.spacecraft) if self.spacecraft is not None else None,
+                     "propagator": self.propagator.to_dict() if self.propagator is not None else None,
+                     "grid": self.grid.to_dict() if self.grid is not None else None,                     
+                     "groundStation": orbitpy.util.object_list_to_dictionary_list(self.groundStation) if self.groundStation is not None else None,
+                     "settings": self.settings.to_dict() if self.settings is not None else None,
                      "@id": self._id})
 
     def __repr__(self):
@@ -272,7 +294,6 @@ class Mission(Entity):
             :rtype: list, :class:`orbitpy.propagate.PropagatorOutputInfo`, :class:`orbitpy.coveragecalculator.CoverageOutputInfo`, :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
 
         """           
-
         out_info = [] # list to accululate info objects of the various objects        
 
         # execute orbit propagation for all satellites in the mission

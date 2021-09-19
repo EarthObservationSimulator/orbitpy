@@ -1,32 +1,18 @@
-import json
 import os, shutil
 import numpy as np
-import math
-import uuid
-from collections import namedtuple
 import pandas as pd
-import warnings
 import csv
 import time
 
-from instrupy.util import Entity
-from instrupy import Instrument
-import propcov
-
-import orbitpy.util
-from orbitpy.util import OrbitState
-from orbitpy.util import Spacecraft, GroundStation, SpacecraftBus
-from orbitpy.constellation import ConstellationFactory
-import orbitpy.propagator
-import orbitpy.grid
+from orbitpy.util import OrbitState, Spacecraft
 from orbitpy.propagator import J2AnalyticalPropagator
 from orbitpy.coveragecalculator import GridCoverage
 from datametricscalculator import DataMetricsCalculator, AccessFileInfo
-from orbitpy.contactfinder import ContactFinder
 from orbitpy.eclipsefinder import EclipseFinder
 from orbitpy.grid import Grid
 
 """
+2020-03-01 12:00:00
 3 satellites in 1 plane, both L+P (spaced by 120 degrees of true anomaly):
 502.5 km altitude
 89 degree inclination
@@ -219,15 +205,16 @@ def assign_pointing_bins(obsmetrics_fp, swath_width, spc_acc_fp):
 
 start_time = time.process_time()    
 
-wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/20210419_500kmSARConstellation_2/"
+wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/20210909_500kmSARConstellation/"
 
-epoch = OrbitState.date_from_dict({"dateType":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0})
+epoch_dict = {"dateType":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0}
+epoch = OrbitState.date_from_dict(epoch_dict)
 epoch_JDUt1 = epoch.GetJulianDate()
 
 sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
                                             },
-                             "orbitState": {"date":{"dateType":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0},
-                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 240}
+                             "orbitState": {"date": epoch_dict,
+                                            "state":{"stateType": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 120}
                                         },
                              "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle":45},
                                             "fieldOfViewGeometry": {"shape": "Rectangular", "angleHeight":5, "angleWidth": 10 },
@@ -243,13 +230,13 @@ propagator = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATO
 instru_id = sat.instrument[0]._id
 mode_id = sat.instrument[0].mode[0]._id
 
-sat_dir = wdir + '/sat3/'
+sat_dir = wdir + '/sat2/'
 
 if os.path.exists(sat_dir):
     shutil.rmtree(sat_dir)
 os.makedirs(sat_dir)
 
-for k in range(0,12):
+for k in range(0,4):
 
     print('processing at {} hrs'.format(k*6))
 
@@ -270,7 +257,8 @@ for k in range(0,12):
     
     print("start eclipse finder")
     eclipse_filename = 'eclipse_' + str(6*k) + 'hrs.csv'
-    out_info = EclipseFinder.execute(sat, sat_dir, state_cart_file, eclipse_filename, EclipseFinder.OutType.INTERVAL)
+    x = EclipseFinder.execute(sat, sat_dir, state_cart_file, eclipse_filename, EclipseFinder.OutType.INTERVAL)
+    out_info.append(x) 
     print('finished eclipse finder, time until now: {}s'.format(time.process_time() - start_time))
 
     
