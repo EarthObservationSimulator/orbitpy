@@ -175,7 +175,7 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         # test default step size
         o = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR"})
         self.assertIsInstance(o, J2AnalyticalPropagator)
-        self.assertEqual(o.stepSize, 60)
+        self.assertIsNone(o.stepSize)
         self.assertIsNone(o._id)
 
     def test_to_dict(self):

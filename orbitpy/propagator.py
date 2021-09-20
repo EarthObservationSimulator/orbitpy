@@ -141,15 +141,15 @@ class J2AnalyticalPropagator(Entity):
 
     The instance variable(s) correspond to the propagator setting(s). 
 
-    :ivar stepSize: Orbit propagation time-step. Default is False.
-    :vartype stepSize: float
+    :ivar stepSize: Orbit propagation time-step.
+    :vartype stepSize: float or None
 
     :ivar _id: Unique identifier.
     :vartype _id: str
 
     """
     def __init__(self, stepSize=None, _id=None):
-        self.stepSize = float(stepSize) if stepSize is not None and stepSize is not False else False
+        self.stepSize = float(stepSize) if stepSize is not None else None
         super(J2AnalyticalPropagator, self).__init__(_id, "J2 ANALYTICAL PROPAGATOR")
 
     @staticmethod
@@ -169,7 +169,7 @@ class J2AnalyticalPropagator(Entity):
         :rtype: :class:`orbitpy.propagate.J2AnalyticalPropagator`
 
         """ 
-        return J2AnalyticalPropagator(stepSize = d.get('stepSize', 60), 
+        return J2AnalyticalPropagator(stepSize = d.get('stepSize', None), 
                                            _id = d.get('@id', None))
 
     def to_dict(self):
