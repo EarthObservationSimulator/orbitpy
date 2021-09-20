@@ -126,7 +126,7 @@ class ContactFinder(Entity):
         :paramtype out_type: :class:`orbitpy.contactfinder.ContactFinder.OutType`
 
         :param opaque_atmos_height: Relevant in-case both the input entities are spacecrafts. Height of atmosphere (in kilometers) below which line-of-sight 
-                                    communication between two satellites cannot take place. Default value is 0 km.
+                                    communication between two satellites **cannot** take place. Default value is 0 km.
         :paramtype opaque_atmos_height_km: float or None
 
         :return: Output info.
