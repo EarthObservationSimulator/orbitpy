@@ -250,6 +250,10 @@ class Mission(Entity):
                        _id = d.get('@id', None)
                       ) 
     
+    def clear(self):
+        """ Re-initialize. """
+        self.__init__()
+
     def add_groundstation_from_dict(self, d):
         """ Add one or more ground-stations to the list of ground-stations (instance variable ``groundStation``).
 
