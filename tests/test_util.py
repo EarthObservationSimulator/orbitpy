@@ -253,6 +253,9 @@ class TestSpacecraft(unittest.TestCase):
         self.assertEqual(spc3.get_instrument(), spc3.instrument[0])
         self.assertEqual(spc3.get_instrument(sensor_id='bs3'), spc3.instrument[2])
 
+    def test_add_instrument(self): #TODO
+        pass
+    
     def test_get_id(self): #TODO
         pass
     

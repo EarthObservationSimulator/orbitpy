@@ -6,9 +6,10 @@
 """
 import os, shutil
 import warnings
+from collections import namedtuple
 
 from instrupy.util import Entity
-from instrupy import Instrument
+from instrupy.base import Instrument
 import propcov
 
 import orbitpy.util
@@ -94,7 +95,7 @@ class Settings(Entity):
         """
         return dict({"@type": "Settings",
                      "outDir": self.outDir,
-                     "coverageType": self.coverageType.value if self.coverageType is not None else None,
+                     "coverageType": self.coverageType if self.coverageType is not None else None,
                      "propTimeResFactor": self.propTimeResFactor,                     
                      "gridResFactor": self.gridResFactor,
                      "opaque_atmos_height": self.opaque_atmos_height,
@@ -173,6 +174,12 @@ class Mission(Entity):
 
         .. note:: The valid key/value pairs in building the mission specifications json/ dict is identical to the key/value pairs expected in the obtaining
                 the corresponding OrbitPy objects using the ``from_dict`` or ``from_json`` function. 
+        
+        .. note:: The propagation time step-size if not specified is calculated from the list of available spacecraft and propagation time-resolution factor. 
+                    If no spacecraft, 60s is the assumed step-size.
+        
+        .. note:: The grid-resolution if not specified is calculated from the list of available spacecraft and grid-resolution factor. 
+                    If no spacecraft, 1 deg grid-resolution is assumed.
 
 
         """
@@ -231,7 +238,10 @@ class Mission(Entity):
             for gd in grid_dict:
                 if ((gd.get('@type', None)=='autogrid') and (gd.get('gridRes', None) is None)):
                     # calculate grid resolution factor
-                    gridRes = orbitpy.grid.compute_grid_res(spacecraft, settings.gridResFactor)
+                    if spacecraft:
+                        gridRes = orbitpy.grid.compute_grid_res(spacecraft, settings.gridResFactor)
+                    else:
+                        gridRes = 1 # 1 deg grid-resolution in case of no spacecraft.
                     gd['gridRes'] = gridRes
 
                 grid.append(Grid.from_dict(gd))
@@ -253,6 +263,44 @@ class Mission(Entity):
     def clear(self):
         """ Re-initialize. """
         self.__init__()
+
+    def get_spacecraft_orbit_specs(self):
+        """ Get the Keplerian elements of the orbit of the spacecraft(s).
+
+            :return: List of namedtuple objects with the following entries: <spacecraft-id, sma, ecc, inc, raan, aop, ta> 
+            :rtype: list, namedtuple
+
+        """ 
+        specs = namedtuple("Specs", ["spc_id", "sma", "ecc", "inc", "raan", "aop", "ta"])
+        orb_specs = []
+        spacecraft = self.spacecraft
+        if isinstance(spacecraft, Spacecraft):
+            spacecraft = [spacecraft]
+        if isinstance(spacecraft, list):
+            for spc in spacecraft:
+                kep_state = spc.orbitState.get_keplerian_earth_centered_inertial_state()
+                orb_specs.append(specs(spc._id, kep_state.sma, kep_state.ecc, kep_state.inc, kep_state.raan, kep_state.aop, kep_state.ta))
+
+        return orb_specs
+
+    def add_instrument_to_spacecraft(self, new_instru, sensor_to_spc):
+        """ Add instrument to the given list of spacecrafts.
+
+            :param new_instru: New instrument.
+            :paramtype new_instru: :class:`instrupy.base.Instrument`
+
+            :param sensor_to_spc: Unique IDs of spacecrafts to which the instrument is to be attached. 
+            :paramtype sensor_to_spc: list
+
+        """
+        if isinstance(self.spacecraft, Spacecraft):
+            self.spacecraft = [self.spacecraft] # make into list
+        if isinstance(self.spacecraft, list):
+            # iterate over the list of available spacecrafts
+            for spc_indx, spc in enumerate(self.spacecraft):
+                if spc._id in sensor_to_spc:
+                    # add the sensor to the spacecraft
+                    self.spacecraft[spc_indx].add_instrument(new_instru)
 
     def add_groundstation_from_dict(self, d):
         """ Add one or more ground-stations to the list of ground-stations (instance variable ``groundStation``).
@@ -280,7 +328,13 @@ class Mission(Entity):
         self.epoch = OrbitState.date_from_dict(d)
     
     def update_propagator_settings(self, prop_dict, propTimeResFactor=None):
-        """
+        """ Update the propagator settings.
+
+            :param prop_dict: Dictionary with the specifications of the orbit propagator. See the :class:`orbitpy.propagator` module for available propagators and their descriptions.
+            :paramtype prop_dict: dict
+
+            :param propTimeResFactor: Factor which influences the propagation step-size calculation. See :class:`orbitpy.propagator.compute_time_step`.
+            :paramtype propTimeResFactor: float
         """
         
         self.update_settings(propTimeResFactor=propTimeResFactor) # update settings
@@ -298,6 +352,24 @@ class Mission(Entity):
         # parse propagator
         factory = PropagatorFactory()
         self.propagator = factory.get_propagator(prop_dict)
+
+    def update_coverage_settings_from_dict(self, d):
+        """ Update the coverage settings.
+
+            :param d: Dictionary with the coverage settings. Expected key/value pairs are: 
+
+                                        * coverageType: Type of coverage calculation.
+                                        * gridResFactor: Factor which influences the grid-resolution of an auto-generated grid. See :class:`orbitpy.grid.compute_grid_res`.
+
+            :paramtype d: dict
+
+        """
+        coverageType = d.get('coverageType', None)
+        self.update_settings(coverageType=coverageType)
+
+        gridResFactor = d.get('gridResFactor', None)
+        self.update_settings(gridResFactor=gridResFactor)
+        
 
     def update_settings(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaque_atmos_height=None):
         """ Update settings.
@@ -329,6 +401,41 @@ class Mission(Entity):
             self.settings.gridResFactor = float(gridResFactor)
         if opaque_atmos_height:
             self.settings.opaque_atmos_height = float(opaque_atmos_height)
+
+    def add_coverage_grid_from_dict(self, grid_dict):
+        """ Add coverage grid(s) from the input dictionary.
+
+            :param grid_dict: Dictionary with the grid specifications. Grid can be of type 'autoGrid' or 'customGrid'. 
+                                Refer to :class:`orbitpy.grid.Grid.from_autogrid_dict` and :class:`orbitpy.grid.Grid.from_customgrid_dict` for description 
+                                of the expected key/value pairs of the dictionary.
+            :paramtype grid_dict: dict or list, dict
+
+        """    
+        grid = []    
+        if grid_dict:
+            # make into list of dictionaries if not already list
+            if not isinstance(grid_dict, list):
+                grid_dict = [grid_dict]
+            # iterate through the list of grids            
+            for gd in grid_dict:
+                grid_type = Grid.Type.get(gd['@type'])
+                if ((grid_type==Grid.Type.AUTOGRID) and (gd.get('gridRes', None) is None)):
+                    # calculate grid resolution factor
+                    if self.spacecraft:
+                        gridRes = orbitpy.grid.compute_grid_res(self.spacecraft, self.settings.gridResFactor)
+                        print('Auto-calculated grid resolution is %f using a grid-resolution factor of %f.' %(gridRes, self.settings.gridResFactor))
+                    else:
+                        gridRes = 1 # 1 deg grid-resolution in case of no spacecraft.
+                    gd['gridRes'] = gridRes
+
+                grid.append(Grid.from_dict(gd))
+        
+        if isinstance(self.grid, Grid):
+            self.grid = [self.grid] # make into list
+        if isinstance(self.grid, list):
+            self.grid.extend(grid)
+        else:
+            self.grid = grid
 
     def add_spacecraft_from_dict(self, d):
         """ Add one or more spacecrafts to the list of spacecrafts (instance variable ``spacecraft``).
@@ -401,12 +508,23 @@ class Mission(Entity):
         :rtype: dict
         
         """
+        
+        # Grids needs to be saved in file(s) and filepaths must be provided.
+        grid_dict = None
+        if isinstance(self.grid, Grid):
+            self.grid = [self.grid] # make into list
+        if isinstance(self.grid, list):
+            grid_dict = []
+            for indx, grid in enumerate(self.grid):
+                grid_filepath = self.settings.outDir + 'auto_grid_' + str(indx)
+                grid_dict.append(grid.to_dict(grid_filepath))                
+
         return dict({"@type": "Mission",
                      "epoch": orbitpy.util.OrbitState.date_to_dict(self.epoch) if self.epoch is not None else None,
                      "duration": self.duration,                     
                      "spacecraft": orbitpy.util.object_list_to_dictionary_list(self.spacecraft) if self.spacecraft is not None else None,
                      "propagator": self.propagator.to_dict() if self.propagator is not None else None,
-                     "grid": self.grid.to_dict() if self.grid is not None else None,                     
+                     "grid": grid_dict,                     
                      "groundStation": orbitpy.util.object_list_to_dictionary_list(self.groundStation) if self.groundStation is not None else None,
                      "settings": self.settings.to_dict() if self.settings is not None else None,
                      "@id": self._id})

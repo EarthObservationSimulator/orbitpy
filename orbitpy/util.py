@@ -12,7 +12,7 @@ import pandas as pd
 
 import propcov
 from instrupy.util import Entity, EnumEntity, Constants, Orientation
-from instrupy import Instrument
+from instrupy.base import Instrument
 
 class OrbitPyDefaults(object):
     """ Enumeration of various default values used by package **OrbitPy**.
@@ -357,7 +357,7 @@ class Spacecraft(Entity):
                 self.instrument = instrument
         elif(isinstance(instrument, Instrument)): # make into list if not list
             self.instrument = [instrument]
-        super(Spacecraft, self).__init__(_id, "Spacecraft")   
+        super(Spacecraft, self).__init__(_id, "Spacecraft") 
 
     @staticmethod
     def from_dict(d):
@@ -421,6 +421,21 @@ class Spacecraft(Entity):
 
     def __repr__(self):
         return "Spacecraft.from_dict({})".format(self.to_dict())
+    
+    def add_instrument(self, new_instru):
+        """ Add input instrument to the spacecraft's list of instruments.
+
+            :param new_instru: New instrument(s) to be added to the spacecraft. 
+            :paramtype new_instru: :class:`instrupy.base.Instrument` or list, :class:`instrupy.base.Instrument`
+            
+        """
+        new_instru = initialize_object_list(new_instru, Instrument) # make into list if not already a list
+        if isinstance(self.instrument, Instrument):
+            self.instrument = [self.instrument] # make into list
+        if isinstance(self.instrument, list):
+            self.instrument.extend(new_instru) 
+        else:
+            self.instrument = new_instru 
     
     def get_id(self):
         """ Get spacecraft identifier.
@@ -656,11 +671,11 @@ def object_list_to_dictionary_list(obj_list):
     """ Utility function to convert list of objects to list of dictionaries. 
         The objects must have the function ``to_dict(.)`` associated with it.
     
-    :param obj_list: List of objects.
-    :paramtype obj_list: list, cls or cls
+        :param obj_list: List of objects.
+        :paramtype obj_list: list, cls or cls
 
-    :return: List of dictionaries.
-    :rtype: list, dict
+        :return: List of dictionaries.
+        :rtype: list, dict
 
     """
     dict_list = None
@@ -689,13 +704,17 @@ def initialize_object_list(inp, cls):
     if inp is not None and isinstance(inp, list):
         if all(isinstance(x, cls) for x in inp):
             obj_list = inp
-        elif(isinstance(inp, cls)): # make into list if not list
-            obj_list = [inp]
+    if inp is not None and isinstance(inp, cls): # make into list if not list
+        obj_list = [inp]
     return obj_list
 
 def calculate_inclination_circular_SSO(altitude_km):
-    ''' NOT USED.
-    '''
+    """ Calculate the inclination of a circular (ecc=0) orbit with the input altitude.
+
+        :param altitude_km: Altitude of the orbit in kilometers.
+        :paramtype altitude_km: float
+
+    """
     # circular SSO with fixed altitude specified, 
     e = 0
     Re = Constants.radiusOfEarthInKM 
