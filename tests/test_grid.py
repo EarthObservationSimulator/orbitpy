@@ -77,6 +77,7 @@ class TestGrid(unittest.TestCase):
         self.assertEqual(o._id, 1)
         self.assertIsInstance(o.point_group, propcov.PointGroup)
         self.assertEqual(o.num_points, 169)
+        self.assertIsNone(o.filepath)
 
         #  case using default values
         o = Grid.from_autogrid_dict({"@type": "autogrid"})
@@ -84,6 +85,7 @@ class TestGrid(unittest.TestCase):
         self.assertIsNotNone(o._id)
         self.assertIsInstance(o.point_group, propcov.PointGroup)
         self.assertEqual(o.num_points, 41252)
+        self.assertIsNone(o.filepath)
 
     def test_from_custom_grid(self):
         # check with data file in the ``test_data``` folder
@@ -93,6 +95,7 @@ class TestGrid(unittest.TestCase):
         self.assertEqual(o._id, 5)
         self.assertIsInstance(o.point_group, propcov.PointGroup)
         self.assertEqual(o.num_points, 140)
+        self.assertEqual(o.filepath, covGridFilePath)
 
         true_data = pd.read_csv(covGridFilePath)
         test_data = o.get_lat_lon()
@@ -108,6 +111,7 @@ class TestGrid(unittest.TestCase):
         out_file = self.out_dir+'/grid_test_write_to_file.csv'
         o = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
         out_info = o.write_to_file(out_file)
+        self.assertEqual(o.filepath, out_file)
         self.assertEqual(out_info.gridId, 1)
         self.assertEqual(out_info.gridFile, out_file)
         self.assertEqual(out_info._type, 'GridOutputInfo')
@@ -130,6 +134,7 @@ class TestGrid(unittest.TestCase):
         self.assertEqual(o._id, 1)
         self.assertIsInstance(o.point_group, propcov.PointGroup)
         self.assertEqual(o.num_points, 169)
+        self.assertIsNone(o.filepath)
 
         # CustomGrid
         o = Grid.from_customgrid_dict({"@type": "customGRID", "covGridFilePath": self.dir_path+'/test_data/gridData.csv', "@id": 5})
@@ -137,11 +142,13 @@ class TestGrid(unittest.TestCase):
         self.assertEqual(o._id, 5)
         self.assertIsInstance(o.point_group, propcov.PointGroup)
         self.assertEqual(o.num_points, 140)
+        self.assertEqual(o.filepath, self.dir_path+'/test_data/gridData.csv')
 
     def test_to_dict(self):
         o = Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":15, "lonUpper":80, "lonLower":45, "gridRes": 1})
         out_file = self.out_dir + '/grid_test_to_dict.csv'
-        d = o.to_dict(out_file)
+        o.write_to_file(out_file)
+        d = o.to_dict()
         self.assertEqual(d['@type'], 'CUSTOMGRID')
         self.assertEqual(d['covGridFilePath'][-21:], 'grid_test_to_dict.csv')
         # check if file is written and is in proper format

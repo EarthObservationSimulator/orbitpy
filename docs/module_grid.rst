@@ -97,7 +97,8 @@ Examples
          >> 4
          >> GridPoint(latitude=[50.0, 50.0], longitude=[-110, -102.088])
 
-3. Writing data to a file. Note the ``GridOutputInfo`` object which is returned. This object stores metadata about the grid data 
+3. Writing data to a file. The ``Grid`` object ``filepath`` instance variable is updated to respective file-location.
+   Note the ``GridOutputInfo`` object which is returned. This object stores metadata about the grid data 
    (such as location of output file, grid-id, etc).
    
    .. code-block:: python

@@ -33,15 +33,20 @@ class Grid(Entity):
     :ivar num_points: Total number of grid points.
     :vartype num_points: int
 
+    :ivar filepath: Path to file (with filename) where the grid-point locations are stored. See :class:`orbitpy.grid.Grid.from_customgrid_dict`
+                    for description of the file-format. The instance variable is ``None`` if no file is present.
+    :vartype filepath: str or None
+
     :ivar _id: Unique identifier of the grid. Could be used to indicate a region identifier, where the set of grid-points represent a region.
     :vartype _id: str/ int
 
     """
 
-    def __init__(self, point_group=None,_id=None):
+    def __init__(self, point_group=None, filepath=None, _id=None):
 
         self.point_group = point_group if point_group is not None and isinstance(point_group, propcov.PointGroup) else None
         self.num_points = self.point_group.GetNumPoints()
+        self.filepath = str(filepath) if filepath is not None else None
         super(Grid, self).__init__(_id, "Grid")
 
     class Type(EnumEntity):
@@ -74,19 +79,15 @@ class Grid(Entity):
         else:
             raise Exception("Please specify a valid grid type.")
 
-    def to_dict(self, filepath):
+    def to_dict(self):
         """ Translate the Grid object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
             The grid data is stored in a file whose path is to supplied as an argument.
         
-        :param filepath: Path to the file (with filename) where the grid data is to be stored.
-        :paramtype filepath: str
-        
-        :return: ``Grid`` object as python dictionary
-        :rtype: dict
+            :return: ``Grid`` object as python dictionary
+            :rtype: dict
 
         """
-        self.write_to_file(filepath)
-        return {"@type": "CUSTOMGRID", "covGridFilePath": filepath, "@id": self._id}
+        return {"@type": "CUSTOMGRID", "covGridFilePath": self.filepath, "@id": self._id}
 
     @staticmethod
     def from_autogrid_dict(d):
@@ -183,6 +184,7 @@ class Grid(Entity):
         point_group = propcov.PointGroup()
         point_group.AddUserDefinedPoints(data['lat [deg]'].tolist(),data['lon [deg]'].tolist())
         return Grid( point_group = point_group,
+                     filepath = d['covGridFilePath'],
                      _id = d.get('@id', str(uuid.uuid4()))
                     )
 
@@ -200,8 +202,9 @@ class Grid(Entity):
         grid_points = self.get_lat_lon()
         df = pd.DataFrame(list(zip(grid_points.latitude, grid_points.longitude)), columns =['lat [deg]','lon [deg]'])
         df.to_csv(filepath, index=False)
+        self.filepath = filepath # update the instance variable
         return GridOutputInfo.from_dict({'gridId': self._id,
-                                         'gridFile': filepath,
+                                         'gridFile': self.filepath,
                                          '_id': None}    
                                         )
 
