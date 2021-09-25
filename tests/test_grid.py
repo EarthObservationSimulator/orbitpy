@@ -114,7 +114,7 @@ class TestGrid(unittest.TestCase):
         self.assertEqual(o.filepath, out_file)
         self.assertEqual(out_info.gridId, 1)
         self.assertEqual(out_info.gridFile, out_file)
-        self.assertEqual(out_info._type, 'GridOutputInfo')
+        self.assertEqual(out_info._type, 'GRID OUTPUT INFO')
         self.assertIsNone(out_info._id)
         # check written data
         data = pd.read_csv(out_file)

@@ -145,18 +145,17 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         # run the coverage calculator
         out_info = PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
         
-        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                        "coverageType": "POINTING OPTIONS COVERAGE",
-                        "spacecraftId": sat._id,
-                        "instruId": sat.get_instrument(None)._id,
-                        "modeId": sat.get_instrument(None).get_mode_id()[0],
-                        "usedFieldOfRegard": None,
-                        "filterMidIntervalAccess": None,
-                        "gridId": None,
-                        "stateCartFile": state_cart_file,
-                        "accessFile": out_file_access,
-                        "startDate": 2458265.00000,
-                        "duration": duration, "@id":None}))
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS COVERAGE",
+                                                                    "spacecraftId": sat._id,
+                                                                    "instruId": sat.get_instrument(None)._id,
+                                                                    "modeId": sat.get_instrument(None).get_mode_id()[0],
+                                                                    "usedFieldOfRegard": None,
+                                                                    "filterMidIntervalAccess": None,
+                                                                    "gridId": None,
+                                                                    "stateCartFile": state_cart_file,
+                                                                    "accessFile": out_file_access,
+                                                                    "startDate": 2458265.00000,
+                                                                    "duration": duration, "@id":None}))
 
         # extract satellite position data from state file
         epoch_JDUT1 = pd.read_csv(out_file_access, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
@@ -226,18 +225,17 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         # run the coverage calculator
         out_info = PointingOptionsCoverage(spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
 
-        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                        "coverageType": "POINTING OPTIONS COVERAGE",
-                        "spacecraftId": sat._id,
-                        "instruId": 'bs1',
-                        "modeId": 111,
-                        "usedFieldOfRegard": None,
-                        "filterMidIntervalAccess": None,
-                        "gridId": None,
-                        "stateCartFile": state_cart_file,
-                        "accessFile": out_file_access,
-                        "startDate": 2458265.00000,
-                        "duration": duration, "@id":None}))
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS COVERAGE",
+                                                                    "spacecraftId": sat._id,
+                                                                    "instruId": 'bs1',
+                                                                    "modeId": 111,
+                                                                    "usedFieldOfRegard": None,
+                                                                    "filterMidIntervalAccess": None,
+                                                                    "gridId": None,
+                                                                    "stateCartFile": state_cart_file,
+                                                                    "accessFile": out_file_access,
+                                                                    "startDate": 2458265.00000,
+                                                                    "duration": duration, "@id":None}))
 
         # perform checks on the output access data
         access_data_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data

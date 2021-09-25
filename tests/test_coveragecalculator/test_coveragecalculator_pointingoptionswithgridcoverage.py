@@ -92,18 +92,17 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
         out_info = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
-        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                        "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
-                        "spacecraftId": sat._id,
-                        "instruId": sat.get_instrument(None)._id,
-                        "modeId": sat.get_instrument(None).get_mode_id()[0],
-                        "usedFieldOfRegard": None,
-                        "filterMidIntervalAccess": False,
-                        "gridId": grid._id,
-                        "stateCartFile": state_cart_file,
-                        "accessFile": out_file_access,
-                        "startDate": 2458265.00000,
-                        "duration": duration, "@id":None}))
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
+                                                                    "spacecraftId": sat._id,
+                                                                    "instruId": sat.get_instrument(None)._id,
+                                                                    "modeId": sat.get_instrument(None).get_mode_id()[0],
+                                                                    "usedFieldOfRegard": None,
+                                                                    "filterMidIntervalAccess": False,
+                                                                    "gridId": grid._id,
+                                                                    "stateCartFile": state_cart_file,
+                                                                    "accessFile": out_file_access,
+                                                                    "startDate": 2458265.00000,
+                                                                    "duration": duration, "@id":None}))
 
         # check the outputs
         cov_calc_type = pd.read_csv(out_file_access, nrows=1, header=None).astype(str) # 1st row contains the coverage calculation type
@@ -177,18 +176,17 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         out_file_access = self.out_dir+'/test_cov_access1.csv'
         # run the coverage calculator, bs1 instrument
         out_info = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id='bs1', mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
-        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                        "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
-                        "spacecraftId": sat._id,
-                        "instruId": 'bs1',
-                        "modeId": sat.get_instrument('bs1').get_mode_id()[0],
-                        "usedFieldOfRegard": None,
-                        "filterMidIntervalAccess": False,
-                        "gridId": grid._id,
-                        "stateCartFile": state_cart_file,
-                        "accessFile": out_file_access,
-                        "startDate": 2459457.1666666665,
-                        "duration": duration, "@id":None}))
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
+                                                                    "spacecraftId": sat._id,
+                                                                    "instruId": 'bs1',
+                                                                    "modeId": sat.get_instrument('bs1').get_mode_id()[0],
+                                                                    "usedFieldOfRegard": None,
+                                                                    "filterMidIntervalAccess": False,
+                                                                    "gridId": grid._id,
+                                                                    "stateCartFile": state_cart_file,
+                                                                    "accessFile": out_file_access,
+                                                                    "startDate": 2459457.1666666665,
+                                                                    "duration": duration, "@id":None}))
 
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data 
         access_data1_grp = access_data1.groupby('pnt-opt index') # group according to ground-point indices
@@ -262,17 +260,16 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         out_file_access = self.out_dir+'/test_cov_access2.csv'
         # run the coverage calculator, bs1 instrument
         out_info = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id='bs1', mode_id=None, out_file_access=out_file_access, filter_mid_acc=True) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
-        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                        "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
-                        "spacecraftId": sat._id,
-                        "instruId": 'bs1',
-                        "modeId": sat.get_instrument('bs1').get_mode_id()[0],
-                        "usedFieldOfRegard": None,
-                        "filterMidIntervalAccess": True,
-                        "gridId": grid._id,
-                        "stateCartFile": state_cart_file,
-                        "accessFile": out_file_access,
-                        "startDate": 2459457.1666666665,
-                        "duration": duration, "@id":None}))
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
+                                                                    "spacecraftId": sat._id,
+                                                                    "instruId": 'bs1',
+                                                                    "modeId": sat.get_instrument('bs1').get_mode_id()[0],
+                                                                    "usedFieldOfRegard": None,
+                                                                    "filterMidIntervalAccess": True,
+                                                                    "gridId": grid._id,
+                                                                    "stateCartFile": state_cart_file,
+                                                                    "accessFile": out_file_access,
+                                                                    "startDate": 2459457.1666666665,
+                                                                    "duration": duration, "@id":None}))
     
         

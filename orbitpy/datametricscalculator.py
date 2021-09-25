@@ -11,7 +11,7 @@ import pandas as pd
 
 from instrupy.util import Entity
 import orbitpy.util
-from orbitpy.util import Spacecraft
+from orbitpy.util import Spacecraft, InfoType
 
 AccessFileInfo = namedtuple("AccessFileInfo", ["instru_id", "mode_id", "access_filepath"])
 """ Function returns a namedtuple class to store the parameters (``instru_id``, ``mode_id``, ``access_filepath``).
@@ -273,8 +273,7 @@ class DataMetricsCalculator(Entity):
                 w.writerow(_v.values())
                 idx = idx + 1
         
-        return DataMetricsOutputInfo.from_dict({"@type": "DataMetricsOutputInfo",
-                                                "spacecraftId": self.spacecraft._id,
+        return DataMetricsOutputInfo.from_dict({"spacecraftId": self.spacecraft._id,
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
                                                 "accessFile": acc_filepath,
@@ -322,7 +321,7 @@ class DataMetricsOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(DataMetricsOutputInfo, self).__init__(_id, "DataMetricsOutputInfo")
+        super(DataMetricsOutputInfo, self).__init__(_id, InfoType.DataMetricsOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -351,7 +350,7 @@ class DataMetricsOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "DataMetricsOutputInfo",
+        return dict({"@type": InfoType.DataMetricsOutputInfo.value,
                      "spacecraftId": self.spacecraftId,
                      "instruId": self.instruId,
                      "modeId": self.modeId,

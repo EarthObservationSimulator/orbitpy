@@ -111,7 +111,7 @@ Examples
          out_info = o.write_to_file(out_file)
          print(out_info)
 
-         >> GridOutputInfo.from_dict({'@type': 'GridOutputInfo', 'gridId': 1, 'gridFile': '/mnt/hgfs/Workspace/orbits/gridDataOut.csv', '@id': None})
+         >> GridOutputInfo.from_dict({'@type': 'GRID OUTPUT INFO', 'gridId': 1, 'gridFile': '/mnt/hgfs/Workspace/orbits/gridDataOut.csv', '@id': None})
 
          gridDataOut.csv
          ----------------

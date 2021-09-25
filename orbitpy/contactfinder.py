@@ -14,7 +14,7 @@ from collections import namedtuple
 
 from instrupy.util import Entity, EnumEntity, Constants, MathUtilityFunctions, GeoUtilityFunctions
 import orbitpy.util
-from orbitpy.util import Spacecraft, GroundStation
+from orbitpy.util import Spacecraft, GroundStation, InfoType
 
 ContactPairs = namedtuple("ContactPairs", ["entityA", "entityA_state_cart_fl", "entityB", "entityB_state_cart_fl"])
 """ Function returns a namedtuple class to store entity pairs (entityA, entityB) where each entity can be a :class:`orbitpy.util.Spacecraft`
@@ -282,17 +282,16 @@ class ContactFinder(Entity):
         else:
             raise RuntimeError("Unknown specification of the contact finder output data format.")    
         
-        return ContactFinderOutputInfo.from_dict({"@type": "ContactFinderOutputInfo",
-                                                "entityAId": entityA._id,
-                                                "entityBId": entityB._id,
-                                                "entityAStateCartFile": entityA_state_cart_fl,
-                                                "entityBStateCartFile": entityB_state_cart_fl,
-                                                "contactFile": out_filepath,
-                                                "outType": out_type.value,
-                                                "opaqueAtmosHeight": opaque_atmos_height,
-                                                "startDate": epoch_JDUT1,
-                                                "duration": duration,
-                                                "@id": None})
+        return ContactFinderOutputInfo.from_dict({  "entityAId": entityA._id,
+                                                    "entityBId": entityB._id,
+                                                    "entityAStateCartFile": entityA_state_cart_fl,
+                                                    "entityBStateCartFile": entityB_state_cart_fl,
+                                                    "contactFile": out_filepath,
+                                                    "outType": out_type.value,
+                                                    "opaqueAtmosHeight": opaque_atmos_height,
+                                                    "startDate": epoch_JDUT1,
+                                                    "duration": duration,
+                                                    "@id": None})
              
 class ContactFinderOutputInfo(Entity):
     """ Class to hold information about the results of the contact finder. An object of this class is returned upon the execution
@@ -343,7 +342,7 @@ class ContactFinderOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(ContactFinderOutputInfo, self).__init__(_id, "ContactFinderOutputInfo")
+        super(ContactFinderOutputInfo, self).__init__(_id, InfoType.ContactFinderOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -376,7 +375,7 @@ class ContactFinderOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "ContactFinderOutputInfo",
+        return dict({"@type": InfoType.ContactFinderOutputInfo.value,
                      "entityAId": self.entityAId,
                      "entityBId": self.entityBId,
                      "entityAStateCartFile": self.entityAStateCartFile,

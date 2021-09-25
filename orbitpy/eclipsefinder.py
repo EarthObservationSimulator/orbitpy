@@ -12,6 +12,7 @@ import csv
 
 from instrupy.util import Entity, EnumEntity, Constants, GeoUtilityFunctions
 import orbitpy.util
+from orbitpy.util import InfoType
 
 class EclipseFinder(Entity):
     
@@ -156,14 +157,13 @@ class EclipseFinder(Entity):
         else:
             raise RuntimeError("Unknown specification of the contact finder output data format.")         
         
-        return EclipseFinderOutputInfo.from_dict({"@type": "EclipseFinderOutputInfo",
-                                                "spacecraftId": spacecraft._id,
-                                                "stateCartFile": state_cart_fl,
-                                                "eclipseFile": out_filepath,
-                                                "outType": out_type.value,
-                                                "startDate": epoch_JDUT1,
-                                                "duration": duration,
-                                                "@id": None})
+        return EclipseFinderOutputInfo.from_dict({  "spacecraftId": spacecraft._id,
+                                                    "stateCartFile": state_cart_fl,
+                                                    "eclipseFile": out_filepath,
+                                                    "outType": out_type.value,
+                                                    "startDate": epoch_JDUT1,
+                                                    "duration": duration,
+                                                    "@id": None})
              
 class EclipseFinderOutputInfo(Entity):
     """ Class to hold information about the results of the eclipse-finder. An object of this class is returned upon the execution
@@ -200,7 +200,7 @@ class EclipseFinderOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(EclipseFinderOutputInfo, self).__init__(_id, "EclipseFinderOutputInfo")
+        super(EclipseFinderOutputInfo, self).__init__(_id, InfoType.EclipseFinderOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -230,7 +230,7 @@ class EclipseFinderOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "EclipseFinderOutputInfo",
+        return dict({"@type": InfoType.EclipseFinderOutputInfo.value,
                      "spacecraftId": self.spacecraftId,
                      "stateCartFile": self.stateCartFile,
                      "eclipseFile": self.eclipseFile,

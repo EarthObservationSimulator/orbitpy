@@ -10,7 +10,8 @@ import csv
 import copy 
 
 import propcov
-from instrupy.util import Entity, EnumEntity, Constants
+from instrupy.util import Entity, Constants
+from orbitpy.util import InfoType
 import orbitpy.util
 
 def compute_time_step(spacecraft, time_res_fac):
@@ -365,7 +366,7 @@ class PropagatorOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(PropagatorOutputInfo, self).__init__(_id, "PropagatorOutputInfo")
+        super(PropagatorOutputInfo, self).__init__(_id, InfoType.PropagatorOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -393,7 +394,7 @@ class PropagatorOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "PropagatorOutputInfo",
+        return dict({"@type": InfoType.PropagatorOutputInfo.value,
                      "propagatorType": self.propagatorType,
                      "spacecraftId": self.spacecraftId,
                      "stateCartFile": self.stateCartFile,

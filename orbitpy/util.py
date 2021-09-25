@@ -22,7 +22,12 @@ class OrbitPyDefaults(object):
     time_res_fac = 0.25
 
 class InfoType(EnumEntity):
-    PropagatorOutputInfo = "PropagatorOutputInfo"
+    PropagatorOutputInfo = "PROPAGATOR OUTPUT INFO"
+    ContactFinderOutputInfo = "CONTACT FINDER OUTPUT INFO"
+    CoverageOutputInfo = "COVERAGE OUTPUT INFO"
+    DataMetricsOutputInfo = "DATAMETRICS OUTPUT INFO"
+    EclipseFinderOutputInfo = "ECLIPSE FINDER OUTPUT INFO"
+    GridOutputInfo = "GRID OUTPUT INFO"
 class StateType(EnumEntity):
     KEPLERIAN_EARTH_CENTERED_INERTIAL = "KEPLERIAN_EARTH_CENTERED_INERTIAL"
     CARTESIAN_EARTH_CENTERED_INERTIAL = "CARTESIAN_EARTH_CENTERED_INERTIAL"

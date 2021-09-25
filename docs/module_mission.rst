@@ -412,7 +412,7 @@ Examples
       out_info = mission.execute()
       print(out_info)
 
-      >> [PropagatorOutputInfo.from_dict({'@type': 'PropagatorOutputInfo', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
+      >> [PropagatorOutputInfo.from_dict({'@type': 'Propagator Output Info', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
                   'spacecraftId': '35252ff4-731d-4e6b-b0ab-419243e9450b', 'stateCartFile': 'temp//sat0/state_cartesian.csv', 
                   'stateKeplerianFile': 'temp//sat0/state_keplerian.csv', 'startDate': 2459299.1292592594, 'duration': 0.1, '@id': None})]
       

@@ -262,20 +262,19 @@ class Mission(Entity):
             grid = None        
 
         # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
-        if grid:
-            for indx, val in enumerate(grid):
-                if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
-                    fp = settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
-                    grid[indx].write_to_file(fp)
+        outputInfo = [] # list of outputInfo objects
+        for indx, val in enumerate(grid):
+            if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
+                fp = settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
+                oi = grid[indx].write_to_file(fp)
+                outputInfo.append(oi)
 
         # parse ground-station(s) 
         groundStation = orbitpy.util.dictionary_list_to_object_list(d.get("groundStation", None), GroundStation)
 
-        # parse any available outputInfo objects
-        outputInfo = None # list of outputInfo objects
+        # parse any available outputInfo objects. Note that there may be output-info objects from executing the auto-grid function.
         outputInfo_dict = d.get('outputInfo', None)
         if outputInfo_dict:
-            outputInfo = []
             # make into list
             if not isinstance(outputInfo_dict, list):
                 outputInfo_dict = [outputInfo_dict]
@@ -283,7 +282,7 @@ class Mission(Entity):
             for oi_d in outputInfo_dict:
                 output_info_type = InfoType.get(oi_d.get('@type')) if oi_d.get('@type') else None
                 if output_info_type == InfoType.PropagatorOutputInfo:
-                    outputInfo.append(PropagatorOutputInfo.from_dict(oi_d))
+                    outputInfo.append(PropagatorOutputInfo.from_dict(oi_d)) # append to existing list of output-info objects
 
         return Mission(epoch = epoch, # 25 Feb 2021 0:0:0 default startDate
                        duration = d.get('duration') if d.get('duration') is not None else 1, # 1 day default
@@ -292,7 +291,7 @@ class Mission(Entity):
                        grid = grid,
                        groundStation = groundStation,
                        settings = settings,
-                       outputInfo = outputInfo,
+                       outputInfo = outputInfo if outputInfo else None, # make into None strictly, it could be [].
                        _id = d.get('@id', None)
                       ) 
     
@@ -439,7 +438,7 @@ class Mission(Entity):
             self.settings.opaque_atmos_height = float(opaque_atmos_height)
 
     def add_coverage_grid_from_dict(self, grid_dict):
-        """ Add coverage grid(s) from the input dictionary.
+        """ Add coverage grid(s) from the input dictionary. Update the output-info instanace variable.
 
             :param grid_dict: Dictionary with the grid specifications. Grid can be of type 'autoGrid' or 'customGrid'. 
                                 Refer to :class:`orbitpy.grid.Grid.from_autogrid_dict` and :class:`orbitpy.grid.Grid.from_customgrid_dict` for description 
@@ -467,10 +466,15 @@ class Mission(Entity):
                 grid.append(Grid.from_dict(gd))
         
         # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
+        out_info = []
         for indx, val in enumerate(grid):
             if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
                 fp = self.settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
-                grid[indx].write_to_file(fp)
+                oi = grid[indx].write_to_file(fp)
+                out_info.append(oi)
+        if out_info:
+            # add output-info to the instance variable
+            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)
 
         if isinstance(self.grid, Grid):
             self.grid = [self.grid] # make into list

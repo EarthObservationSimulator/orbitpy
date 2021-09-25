@@ -100,7 +100,7 @@ Examples
          out_info = j2_prop.execute(sc, None, None, out_file_kep, duration=0.25) # execute the propagator for duration of 0.25 days 
          print(out_info)
    
-         >> PropagatorOutputInfo.from_dict({'@type': 'PropagatorOutputInfo', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
+         >> PropagatorOutputInfo.from_dict({'@type': 'PROPAGATOR OUTPUT INFO', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
                   'spacecraftId': None, 'stateCartFile': None, 
                   'stateKeplerianFile': '/mnt/hgfs/Workspace/orbits/kep_state.csv', 
                   'startDate': 2458265.0, 'duration': 0.25, '@id': None})

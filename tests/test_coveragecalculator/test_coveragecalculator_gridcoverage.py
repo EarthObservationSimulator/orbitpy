@@ -155,18 +155,17 @@ class TestGridCoverage(unittest.TestCase):
         # run the coverage calculator
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
         out_info = cov.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access)
-        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                        "coverageType": "GRID COVERAGE",
-                        "spacecraftId": sat._id,
-                        "instruId": sat.get_instrument(None)._id,
-                        "modeId": sat.get_instrument(None).get_mode_id()[0],
-                        "usedFieldOfRegard": False,
-                        "filterMidIntervalAccess": False,
-                        "gridId": grid._id,
-                        "stateCartFile": state_cart_file,
-                        "accessFile": out_file_access,
-                        "startDate": 2458265.00000,
-                        "duration": duration, "@id":None}))        
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "GRID COVERAGE",
+                                                                    "spacecraftId": sat._id,
+                                                                    "instruId": sat.get_instrument(None)._id,
+                                                                    "modeId": sat.get_instrument(None).get_mode_id()[0],
+                                                                    "usedFieldOfRegard": False,
+                                                                    "filterMidIntervalAccess": False,
+                                                                    "gridId": grid._id,
+                                                                    "stateCartFile": state_cart_file,
+                                                                    "accessFile": out_file_access,
+                                                                    "startDate": 2458265.00000,
+                                                                    "duration": duration, "@id":None}))        
         
         # check the outputs
         access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
@@ -230,18 +229,17 @@ class TestGridCoverage(unittest.TestCase):
         # run the coverage calculator
         out_info = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
         
-        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                        "coverageType": "GRID COVERAGE",
-                        "spacecraftId": sat._id,
-                        "instruId": sat.get_instrument(None)._id,
-                        "modeId": sat.get_instrument(None).get_mode_id()[0],
-                        "usedFieldOfRegard": False,
-                        "filterMidIntervalAccess": False,
-                        "gridId": grid._id,
-                        "stateCartFile": state_cart_file,
-                        "accessFile": out_file_access,
-                        "startDate": 2458265.00000,
-                        "duration": duration, "@id":None}))
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "GRID COVERAGE",
+                                                                    "spacecraftId": sat._id,
+                                                                    "instruId": sat.get_instrument(None)._id,
+                                                                    "modeId": sat.get_instrument(None).get_mode_id()[0],
+                                                                    "usedFieldOfRegard": False,
+                                                                    "filterMidIntervalAccess": False,
+                                                                    "gridId": grid._id,
+                                                                    "stateCartFile": state_cart_file,
+                                                                    "accessFile": out_file_access,
+                                                                    "startDate": 2458265.00000,
+                                                                    "duration": duration, "@id":None}))
 
         access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
@@ -259,18 +257,17 @@ class TestGridCoverage(unittest.TestCase):
         # run the coverage calculator
         out_info = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access) 
 
-        self.assertEqual(out_info, CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                        "coverageType": "GRID COVERAGE",
-                        "spacecraftId": sat._id,
-                        "instruId": "sen1",
-                        "modeId": "m1",
-                        "usedFieldOfRegard": False,
-                        "filterMidIntervalAccess": False,
-                        "gridId": grid._id,
-                        "stateCartFile": state_cart_file,
-                        "accessFile": out_file_access,
-                        "startDate": 2458265.00000,
-                        "duration": duration, "@id":None}))
+        self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "GRID COVERAGE",
+                                                                    "spacecraftId": sat._id,
+                                                                    "instruId": "sen1",
+                                                                    "modeId": "m1",
+                                                                    "usedFieldOfRegard": False,
+                                                                    "filterMidIntervalAccess": False,
+                                                                    "gridId": grid._id,
+                                                                    "stateCartFile": state_cart_file,
+                                                                    "accessFile": out_file_access,
+                                                                    "startDate": 2458265.00000,
+                                                                    "duration": duration, "@id":None}))
 
         access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 

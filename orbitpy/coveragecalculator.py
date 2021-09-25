@@ -15,7 +15,7 @@ import propcov
 from instrupy.util import Entity
 from orbitpy.grid import Grid
 import orbitpy.util
-from orbitpy.util import Spacecraft
+from orbitpy.util import Spacecraft, InfoType
 from instrupy.util import ReferenceFrame, SphericalGeometry
 
 DAYS_PER_SEC = 1.1574074074074074074074074074074e-5
@@ -474,8 +474,7 @@ class GridCoverage(Entity):
         if filter_mid_acc is True:
             filter_mid_interval_access(inp_acc_fl=out_file_access, out_acc_fl=out_file_access)        
         
-        return CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                                                "coverageType": "GRID COVERAGE",
+        return CoverageOutputInfo.from_dict({   "coverageType": "GRID COVERAGE",
                                                 "spacecraftId": self.spacecraft._id,
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
@@ -711,8 +710,7 @@ class PointingOptionsCoverage(Entity):
         if access_file:
             access_file.close()
         
-        return CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                                                "coverageType": "POINTING OPTIONS COVERAGE",
+        return CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS COVERAGE",
                                                 "spacecraftId": self.spacecraft._id,
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
@@ -931,8 +929,7 @@ class PointingOptionsWithGridCoverage(Entity):
             #inp_acc_df = pd.read_csv(out_file_access, skiprows = 4)
             filter_mid_interval_access(inp_acc_fl=out_file_access, out_acc_fl=out_file_access)
 
-        return CoverageOutputInfo.from_dict({"@type": "CoverageOutputInfo",
-                                                "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
+        return CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
                                                 "spacecraftId": self.spacecraft._id,
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
@@ -1002,7 +999,7 @@ class CoverageOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(CoverageOutputInfo, self).__init__(_id, "CoverageOutputInfo")
+        super(CoverageOutputInfo, self).__init__(_id, InfoType.CoverageOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -1035,7 +1032,7 @@ class CoverageOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": "CoverageOutputInfo",
+        return dict({"@type": InfoType.CoverageOutputInfo.value,
                      "coverageType": self.coverageType,
                      "spacecraftId": self.spacecraftId,
                      "instruId": self.instruId,

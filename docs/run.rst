@@ -104,6 +104,6 @@ orbit.
 
         print(out_info) # print meta-data of the results
 
-        >> PropagatorOutputInfo.from_dict({'@type': 'PropagatorOutputInfo', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
+        >> PropagatorOutputInfo.from_dict({'@type': 'Propagator Output Info', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
                                            'spacecraftId': None, 'stateCartFile': None, 'stateKeplerianFile': 'C/workspace/states.csv', 
                                            'startDate': 2459270.75, 'duration': 1.5, '@id': None})
