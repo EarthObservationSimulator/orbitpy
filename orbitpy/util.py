@@ -20,6 +20,9 @@ class OrbitPyDefaults(object):
     """
     grid_res_fac = 0.9
     time_res_fac = 0.25
+
+class InfoType(EnumEntity):
+    PropagatorOutputInfo = "PropagatorOutputInfo"
 class StateType(EnumEntity):
     KEPLERIAN_EARTH_CENTERED_INERTIAL = "KEPLERIAN_EARTH_CENTERED_INERTIAL"
     CARTESIAN_EARTH_CENTERED_INERTIAL = "CARTESIAN_EARTH_CENTERED_INERTIAL"
@@ -707,6 +710,33 @@ def initialize_object_list(inp, cls):
     if inp is not None and isinstance(inp, cls): # make into list if not list
         obj_list = [inp]
     return obj_list
+
+def add_to_list(existing_list, inp_list):
+    """ Add input list to an existing list. The existing "list" and input "list" are checked to see if they are list instances, 
+        and if not configured to be a lists. The existing list is extended with the input list.
+
+        :param existing_list: Existing list, which needs to be extended. Can be made of heterogenous objects.
+        :paramtype existing_list: list
+
+        :param inp_list: Input list. Can be made of heterogenous objects.
+        :paramtype inp_list: list
+
+        :return: Extended list.
+        :rtype: list
+
+    """
+    if inp_list is not None:
+        if not isinstance(inp_list, list):
+            inp_list = [inp_list] # make to list
+
+    if existing_list is not None:
+        if not isinstance(existing_list, list):
+            existing_list = [existing_list] # make to list
+        existing_list.extend(inp_list)
+    else:
+        existing_list = inp_list
+    
+    return existing_list
 
 def calculate_inclination_circular_SSO(altitude_km):
     """ Calculate the inclination of a circular (ecc=0) orbit with the input altitude.

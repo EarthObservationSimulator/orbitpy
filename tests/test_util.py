@@ -256,6 +256,9 @@ class TestSpacecraft(unittest.TestCase):
     def test_add_instrument(self): #TODO
         pass
     
+    def test_add_to_list(self): #TODO
+        pass
+
     def test_get_id(self): #TODO
         pass
     
