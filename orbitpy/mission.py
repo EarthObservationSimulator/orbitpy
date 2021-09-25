@@ -14,12 +14,12 @@ import propcov
 
 import orbitpy.util
 from orbitpy.util import OrbitState
-from .util import Spacecraft, GroundStation, SpacecraftBus
+from .util import Spacecraft, GroundStation, SpacecraftBus, InfoType, add_to_list
 from .constellation import ConstellationFactory
 import orbitpy.propagator
 import orbitpy.grid
 from orbitpy import util
-from .propagator import PropagatorFactory
+from .propagator import PropagatorFactory, PropagatorOutputInfo
 from .coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
 from datametricscalculator import DataMetricsCalculator, AccessFileInfo
 from .contactfinder import ContactFinder
@@ -144,12 +144,15 @@ class Mission(Entity):
     :ivar settings: Mission settings. Refer to the ``Settings.from_dict(.)`` method for the default values.
     :vartype settings: :class:`orbitpy.mission.settings`
 
+    :ivar outputInfo: List of output-info objects produced after execution of a OrbitPy function, e.g. :class:`orbitpy.propagator.PropagatorOutputInfo`, :class:`orbitpy.propagator.ContactFinderOutputInfo`, etc. 
+    :vartype outputInfo: list, output-info object
+
     :ivar _id: Unique identifier.
     :vartype _id: str
 
     """
     def __init__(self, epoch=None, duration=None, spacecraft=None, propagator=None,
-                 grid=None, groundStation=None, settings=None, _id=None):
+                 grid=None, groundStation=None, settings=None, outputInfo=None, _id=None):
         self.epoch = epoch if epoch is not None and isinstance(epoch, propcov.AbsoluteDate) else None
         self.duration = float(duration) if duration is not None else None
         self.spacecraft = orbitpy.util.initialize_object_list(spacecraft, Spacecraft)
@@ -157,6 +160,14 @@ class Mission(Entity):
         self.grid = orbitpy.util.initialize_object_list(grid, Grid)
         self.groundStation = orbitpy.util.initialize_object_list(groundStation, GroundStation)
         self.settings = settings if isinstance(settings, Settings) else Settings.from_dict({})
+        # Make sure self.outputInfo is a list. Each element of the list could be a different object instance.
+        # TODO: check the individual elements of the outputInfo list are of valid class-types. 
+        if isinstance(outputInfo, list):
+            self.outputInfo = outputInfo
+        elif outputInfo is not None:
+            self.outputInfo = [outputInfo]
+        else:
+            self.outputInfo = None
 
         super(Mission, self).__init__(_id, "Mission")        
  
@@ -183,10 +194,11 @@ class Mission(Entity):
 
 
         """
-        epoch = OrbitState.date_from_dict(d.get('epoch', {"@type":"JULIAN_DATE_UT1", "jd":2459270.5}) ) # 25 Feb 2021 0:0:0 default startDate
+        date_dict = d.get('epoch') if d.get('epoch') is not None else {"@type":"JULIAN_DATE_UT1", "jd":2459270.5} # 25 Feb 2021 0:0:0 default startDate
+        epoch = OrbitState.date_from_dict(date_dict) 
 
-        # parse settings
-        settings_dict = d.get('settings', dict())
+        # parse settings            
+        settings_dict = d.get('settings', None) if  d.get('settings', None) is not None else dict()
         settings = Settings.from_dict(settings_dict)
 
         # parse spacecraft(s) 
@@ -220,7 +232,8 @@ class Mission(Entity):
             time_step = orbitpy.propagator.compute_time_step(spacecraft, settings.propTimeResFactor)
         else:
             time_step = 60
-        prop_dict = d.get('propagator', {'@type': 'J2 ANALYTICAL PROPAGATOR', 'stepSize': time_step}) # default to J2 Analytical propagator and time-step as calculated before 
+        # default to J2 Analytical propagator and time-step as calculated before 
+        prop_dict = d.get('propagator') if d.get('propagator') is not None else {'@type': 'J2 ANALYTICAL PROPAGATOR', 'stepSize': time_step} 
         if prop_dict.get("stepSize") is None: # i.e. user has not specified step-size
             prop_dict["stepSize"] = time_step # use the autocalculate step-size
         if prop_dict.get("stepSize") > time_step:
@@ -248,15 +261,38 @@ class Mission(Entity):
         else:
             grid = None        
 
+        # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
+        if grid:
+            for indx, val in enumerate(grid):
+                if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
+                    fp = settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
+                    grid[indx].write_to_file(fp)
+
         # parse ground-station(s) 
         groundStation = orbitpy.util.dictionary_list_to_object_list(d.get("groundStation", None), GroundStation)
+
+        # parse any available outputInfo objects
+        outputInfo = None # list of outputInfo objects
+        outputInfo_dict = d.get('outputInfo', None)
+        if outputInfo_dict:
+            outputInfo = []
+            # make into list
+            if not isinstance(outputInfo_dict, list):
+                outputInfo_dict = [outputInfo_dict]
+            # iterate over the list
+            for oi_d in outputInfo_dict:
+                output_info_type = InfoType.get(oi_d.get('@type')) if oi_d.get('@type') else None
+                if output_info_type == InfoType.PropagatorOutputInfo:
+                    outputInfo.append(PropagatorOutputInfo.from_dict(oi_d))
+
         return Mission(epoch = epoch, # 25 Feb 2021 0:0:0 default startDate
-                       duration = d.get('duration', 1), # 1 day default
+                       duration = d.get('duration') if d.get('duration') is not None else 1, # 1 day default
                        spacecraft = spacecraft,
                        propagator = propagator,                       
                        grid = grid,
                        groundStation = groundStation,
                        settings = settings,
+                       outputInfo = outputInfo,
                        _id = d.get('@id', None)
                       ) 
     
@@ -430,6 +466,12 @@ class Mission(Entity):
 
                 grid.append(Grid.from_dict(gd))
         
+        # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
+        for indx, val in enumerate(grid):
+            if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
+                fp = self.settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
+                grid[indx].write_to_file(fp)
+
         if isinstance(self.grid, Grid):
             self.grid = [self.grid] # make into list
         if isinstance(self.grid, list):
@@ -508,24 +550,20 @@ class Mission(Entity):
         :rtype: dict
         
         """
-        
-        # Grids needs to be saved in file(s) and filepaths must be provided.
-        grid_dict = None
-        if isinstance(self.grid, Grid):
-            self.grid = [self.grid] # make into list
-        if isinstance(self.grid, list):
-            grid_dict = []
-            for indx, grid in enumerate(self.grid):
-                grid_filepath = self.settings.outDir + 'auto_grid_' + str(indx)
-                grid_dict.append(grid.to_dict(grid_filepath))                
+        outputInfo_dict = None
+        if self.outputInfo is not None:
+            if not isinstance(self.outputInfo, list):
+                self.outputInfo = [self.outputInfo] # make into list
+            outputInfo_dict = orbitpy.util.object_list_to_dictionary_list(self.outputInfo)
 
         return dict({"@type": "Mission",
                      "epoch": orbitpy.util.OrbitState.date_to_dict(self.epoch) if self.epoch is not None else None,
                      "duration": self.duration,                     
                      "spacecraft": orbitpy.util.object_list_to_dictionary_list(self.spacecraft) if self.spacecraft is not None else None,
                      "propagator": self.propagator.to_dict() if self.propagator is not None else None,
-                     "grid": grid_dict,                     
+                     "grid": orbitpy.util.object_list_to_dictionary_list(self.grid) if self.grid is not None else None,                     
                      "groundStation": orbitpy.util.object_list_to_dictionary_list(self.groundStation) if self.groundStation is not None else None,
+                     "outputInfo": outputInfo_dict,
                      "settings": self.settings.to_dict() if self.settings is not None else None,
                      "@id": self._id})
 
@@ -545,7 +583,7 @@ class Mission(Entity):
             :rtype: list, :class:`orbitpy.propagate.PropagatorOutputInfo`, :class:`orbitpy.coveragecalculator.CoverageOutputInfo`, :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
 
         """           
-        out_info = [] # list to accululate info objects of the various objects        
+        out_info = [] # list to accululate info objects of the various executions        
 
         # execute orbit propagation for all satellites in the mission
         for spc_idx, spc in enumerate(self.spacecraft):
@@ -655,6 +693,30 @@ class Mission(Entity):
                 x = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaque_atmos_height)
                 out_info.append(x)
     
+        return out_info
+    
+    def execute_propagation(self):
+        """ Execute orbit propagation for all spacecrafts in the mission.
+        """
+        out_info = [] # list to accululate info objects of the various executions        
+
+        # execute orbit propagation for all satellites in the mission
+        for spc_idx, spc in enumerate(self.spacecraft):
+            
+            # make satellite directory
+            sat_dir = self.settings.outDir + '/sat' + str(spc_idx) + '/'
+            if os.path.exists(sat_dir):
+                shutil.rmtree(sat_dir)
+            os.makedirs(sat_dir)
+
+            state_cart_file = sat_dir + 'state_cartesian.csv'
+            state_kep_file = sat_dir + 'state_keplerian.csv'
+            x = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
+            out_info.append(x)
+        
+        # add output-info to the instance variable
+        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)
+
         return out_info
                     
 

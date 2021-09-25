@@ -141,7 +141,7 @@ class Grid(Entity):
 
         Following keys are to be specified:
 
-                * "covGridFilePat"h": (str) Filepath to the file containing the grid points.
+                * "covGridFilePath": (str) Filepath to the file containing the grid points.
                 * "@id" : (str or int) Unique grid-identifier. If absent a random id is assigned.
 
         Example:
