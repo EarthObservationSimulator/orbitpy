@@ -14,7 +14,7 @@ from collections import namedtuple
 
 from instrupy.util import Entity, EnumEntity, Constants, MathUtilityFunctions, GeoUtilityFunctions
 import orbitpy.util
-from orbitpy.util import Spacecraft, GroundStation, InfoType
+from orbitpy.util import Spacecraft, GroundStation, OutputInfoUtility
 
 ContactPairs = namedtuple("ContactPairs", ["entityA", "entityA_state_cart_fl", "entityB", "entityB_state_cart_fl"])
 """ Function returns a namedtuple class to store entity pairs (entityA, entityB) where each entity can be a :class:`orbitpy.util.Spacecraft`
@@ -282,7 +282,9 @@ class ContactFinder(Entity):
         else:
             raise RuntimeError("Unknown specification of the contact finder output data format.")    
         
-        return ContactFinderOutputInfo.from_dict({  "entityAId": entityA._id,
+        return ContactFinderOutputInfo.from_dict({  "entityAtype": entityA._type,
+                                                    "entityAId": entityA._id,
+                                                    "entityBtype": entityB._type,
                                                     "entityBId": entityB._id,
                                                     "entityAStateCartFile": entityA_state_cart_fl,
                                                     "entityBStateCartFile": entityB_state_cart_fl,
@@ -297,13 +299,20 @@ class ContactFinderOutputInfo(Entity):
     """ Class to hold information about the results of the contact finder. An object of this class is returned upon the execution
         of the data contact finder.
     
-    :ivar entityAId: Entity A identifier (spacecraft).
+    :ivar entityAtype: Entity A type (Spacecraft or GroundStation). 
+    :vartype entityAtype: str
+
+    :ivar entityAId: Entity A identifier.
     :vartype entityAId: str or int
 
-    :ivar entityBId: Entity B identifier (spacecraft or ground-station).
+    :ivar entityBtype: Entity B type (Spacecraft or GroundStation). 
+    :vartype entityBtype: str
+
+    :ivar entityBId: Entity B identifier.
     :vartype entityBId: str or int
 
-    :ivar entityAStateCartFile: File (filename with path) where the entity A (spacecraft) time-series state data is saved.
+    :ivar entityAStateCartFile: File (filename with path) where the entity A (spacecraft) time-series state data is saved. If entity A is ground-station,
+                                the entry is ``None``.
     :vartype entityAStateCartFile: str
 
     :ivar entityBStateCartFile: File (filename with path) where the entity B (spacecraft) time-series state data is saved. If entity B is ground-station,
@@ -330,9 +339,11 @@ class ContactFinderOutputInfo(Entity):
     :vartype _id: str or int
 
     """
-    def __init__(self, entityAId=None, entityBId=None, entityAStateCartFile=None, entityBStateCartFile=None, 
+    def __init__(self, entityAtype=None, entityAId=None, entityBtype=None, entityBId=None, entityAStateCartFile=None, entityBStateCartFile=None, 
                  contactFile=None, outType=None, opaqueAtmosHeight=None,  startDate=None, duration=None, _id=None):
+        self.entityAtype = str(entityAtype) if entityAtype is not None else None
         self.entityAId = entityAId if entityAId is not None else None
+        self.entityBtype = str(entityBtype) if entityBtype is not None else None
         self.entityBId = entityBId if entityBId is not None else None
         self.entityAStateCartFile = str(entityAStateCartFile) if entityAStateCartFile is not None else None
         self.entityBStateCartFile = str(entityBStateCartFile) if entityBStateCartFile is not None else None 
@@ -342,7 +353,7 @@ class ContactFinderOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(ContactFinderOutputInfo, self).__init__(_id, InfoType.ContactFinderOutputInfo.value)
+        super(ContactFinderOutputInfo, self).__init__(_id, OutputInfoUtility.OutputInfoType.ContactFinderOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -357,7 +368,9 @@ class ContactFinderOutputInfo(Entity):
         """
         out_type_str = d.get('outType', None)
         
-        return ContactFinderOutputInfo( entityAId = d.get('entityAId', None),
+        return ContactFinderOutputInfo( entityAtype = d.get('entityAtype', None),
+                                        entityAId = d.get('entityAId', None),
+                                        entityBtype = d.get('entityBtype', None),
                                         entityBId = d.get('entityBId', None),
                                         entityAStateCartFile = d.get('entityAStateCartFile', None),
                                         entityBStateCartFile = d.get('entityBStateCartFile', None),
@@ -375,8 +388,10 @@ class ContactFinderOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": InfoType.ContactFinderOutputInfo.value,
+        return dict({"@type": OutputInfoUtility.OutputInfoType.ContactFinderOutputInfo.value,
+                     "entityAtype": self.entityAtype,
                      "entityAId": self.entityAId,
+                     "entityBtype": self.entityBtype,
                      "entityBId": self.entityBId,
                      "entityAStateCartFile": self.entityAStateCartFile,
                      "entityBStateCartFile": self.entityBStateCartFile,
@@ -393,7 +408,7 @@ class ContactFinderOutputInfo(Entity):
     def __eq__(self, other):
         # Equality test is simple one which compares the data attributes.Note that _id data attribute may be different
         if(isinstance(self, other.__class__)):
-            return (self.entityAId==other.entityAId) and (self.entityBId==other.entityBId) and (self.entityAStateCartFile==other.entityAStateCartFile) and \
+            return (self.entityAtype==other.entityAtype) and (self.entityAId==other.entityAId) and (self.entityBtype==other.entityBtype) and (self.entityBId==other.entityBId) and (self.entityAStateCartFile==other.entityAStateCartFile) and \
                    (self.entityBStateCartFile==other.entityBStateCartFile) and  (self.contactFile==other.contactFile) and  (self.outType==other.outType) and \
                    (self.opaqueAtmosHeight==other.opaqueAtmosHeight) and (self.startDate==other.startDate) and (self.duration==other.duration) 
                 

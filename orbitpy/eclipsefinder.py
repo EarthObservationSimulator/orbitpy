@@ -12,7 +12,7 @@ import csv
 
 from instrupy.util import Entity, EnumEntity, Constants, GeoUtilityFunctions
 import orbitpy.util
-from orbitpy.util import InfoType
+from orbitpy.util import OutputInfoUtility
 
 class EclipseFinder(Entity):
     
@@ -200,7 +200,7 @@ class EclipseFinderOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(EclipseFinderOutputInfo, self).__init__(_id, InfoType.EclipseFinderOutputInfo.value)
+        super(EclipseFinderOutputInfo, self).__init__(_id, OutputInfoUtility.OutputInfoType.EclipseFinderOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -230,7 +230,7 @@ class EclipseFinderOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": InfoType.EclipseFinderOutputInfo.value,
+        return dict({"@type": OutputInfoUtility.OutputInfoType.EclipseFinderOutputInfo.value,
                      "spacecraftId": self.spacecraftId,
                      "stateCartFile": self.stateCartFile,
                      "eclipseFile": self.eclipseFile,

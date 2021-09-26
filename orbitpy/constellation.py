@@ -10,7 +10,7 @@
 import uuid
 
 import propcov
-from .util import OrbitState
+from orbitpy.util import OrbitState
 from instrupy.util import Entity, Constants
 
 class ConstellationFactory:

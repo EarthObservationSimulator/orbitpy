@@ -11,7 +11,7 @@ import pandas as pd
 
 from instrupy.util import Entity
 import orbitpy.util
-from orbitpy.util import Spacecraft, InfoType
+from orbitpy.util import Spacecraft, OutputInfoUtility
 
 AccessFileInfo = namedtuple("AccessFileInfo", ["instru_id", "mode_id", "access_filepath"])
 """ Function returns a namedtuple class to store the parameters (``instru_id``, ``mode_id``, ``access_filepath``).
@@ -321,7 +321,7 @@ class DataMetricsOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(DataMetricsOutputInfo, self).__init__(_id, InfoType.DataMetricsOutputInfo.value)
+        super(DataMetricsOutputInfo, self).__init__(_id, OutputInfoUtility.OutputInfoType.DataMetricsOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -350,7 +350,7 @@ class DataMetricsOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": InfoType.DataMetricsOutputInfo.value,
+        return dict({"@type": OutputInfoUtility.OutputInfoType.DataMetricsOutputInfo.value,
                      "spacecraftId": self.spacecraftId,
                      "instruId": self.instruId,
                      "modeId": self.modeId,

@@ -14,7 +14,7 @@ import uuid
 import propcov
 from instrupy.util import Entity, EnumEntity, Constants
 import orbitpy.util
-from orbitpy.util import InfoType
+from orbitpy.util import OutputInfoUtility
 
 GridPoint = namedtuple("GridPoint", ["latitude", "longitude"])
 """Function returns a namedtuple class to store grid-points as (in general this shall be a list) latitudes and longitudes in degrees.
@@ -326,7 +326,7 @@ class GridOutputInfo(Entity):
         self.gridId = gridId if gridId is not None else None
         self.gridFile = str(gridFile) if gridFile is not None else None
 
-        super(GridOutputInfo, self).__init__(_id, InfoType.GridOutputInfo.value)
+        super(GridOutputInfo, self).__init__(_id, OutputInfoUtility.OutputInfoType.GridOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -357,7 +357,7 @@ class GridOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": InfoType.GridOutputInfo.value,
+        return dict({"@type": OutputInfoUtility.OutputInfoType.GridOutputInfo.value,
                      "gridId": self.gridId,
                      "gridFile": self.gridFile,
                      "@id": self._id})

@@ -64,7 +64,9 @@ class TestContactFinder(unittest.TestCase):
         out_info = ContactFinder.execute(self.spcA, self.gs1, self.out_dir, self.state_cart_file_sentinel1A, None, None, ContactFinder.OutType.INTERVAL, 0)
         out_file = self.out_dir + "/sentinel1A_to_gs1.csv"
 
-        self.assertEqual(out_info, ContactFinderOutputInfo.from_dict({"entityAId": self.spcA._id,
+        self.assertEqual(out_info, ContactFinderOutputInfo.from_dict({"entityAtype": "Spacecraft",
+                                                                      "entityAId": self.spcA._id,
+                                                                      "entityBtype": "GroundStation",
                                                                       "entityBId": self.gs1._id, # note that the entities are swapped
                                                                       "entityAStateCartFile": self.state_cart_file_sentinel1A,
                                                                       "entityBStateCartFile": None, # note here that modeId is None
@@ -93,7 +95,9 @@ class TestContactFinder(unittest.TestCase):
         ########### entityA = GroundStation, entityB = Spacecraft, DETAIL out_type, default output filename ###########
         out_info = ContactFinder.execute(self.gs2, self.spcB, self.out_dir, None, self.state_cart_file_sentinel1B, None, ContactFinder.OutType.DETAIL, None)
         out_file = self.out_dir + "/sentinel1B_to_gs2.csv"
-        self.assertEqual(out_info, ContactFinderOutputInfo.from_dict({"entityAId": self.spcB._id,
+        self.assertEqual(out_info, ContactFinderOutputInfo.from_dict({"entityAtype": "Spacecraft",
+                                                                      "entityAId": self.spcB._id,
+                                                                      "entityBtype": "GroundStation",
                                                                       "entityBId": self.gs2._id, # note that the entities are swapped
                                                                       "entityAStateCartFile": self.state_cart_file_sentinel1B,
                                                                       "entityBStateCartFile": None, # note here that modeId is None

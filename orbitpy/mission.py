@@ -13,17 +13,15 @@ from instrupy.base import Instrument
 import propcov
 
 import orbitpy.util
-from orbitpy.util import OrbitState
-from .util import Spacecraft, GroundStation, SpacecraftBus, InfoType, add_to_list
-from .constellation import ConstellationFactory
+from orbitpy.util import Spacecraft, GroundStation, SpacecraftBus, OutputInfoUtility, OrbitState
+from orbitpy.constellation import ConstellationFactory
 import orbitpy.propagator
 import orbitpy.grid
-from orbitpy import util
-from .propagator import PropagatorFactory, PropagatorOutputInfo
-from .coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
+from orbitpy.propagator import PropagatorFactory, PropagatorOutputInfo
+from orbitpy.coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
 from datametricscalculator import DataMetricsCalculator, AccessFileInfo
-from .contactfinder import ContactFinder
-from .grid import Grid
+from orbitpy.contactfinder import ContactFinder
+from orbitpy.grid import Grid
 
 class Settings(Entity):
     """ Data container of the mission settings.
@@ -260,14 +258,14 @@ class Mission(Entity):
                 grid.append(Grid.from_dict(gd))
         else:
             grid = None        
-
-        # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
+        
         outputInfo = [] # list of outputInfo objects
-        for indx, val in enumerate(grid):
-            if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
-                fp = settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
-                oi = grid[indx].write_to_file(fp)
-                outputInfo.append(oi)
+        if grid: # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
+            for indx, val in enumerate(grid):
+                if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
+                    fp = settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
+                    oi = grid[indx].write_to_file(fp)
+                    outputInfo.append(oi)
 
         # parse ground-station(s) 
         groundStation = orbitpy.util.dictionary_list_to_object_list(d.get("groundStation", None), GroundStation)
@@ -280,9 +278,10 @@ class Mission(Entity):
                 outputInfo_dict = [outputInfo_dict]
             # iterate over the list
             for oi_d in outputInfo_dict:
-                output_info_type = InfoType.get(oi_d.get('@type')) if oi_d.get('@type') else None
-                if output_info_type == InfoType.PropagatorOutputInfo:
+                output_info_type = OutputInfoUtility.OutputInfoType.get(oi_d.get('@type')) if oi_d.get('@type') else None
+                if output_info_type == OutputInfoUtility.OutputInfoType.PropagatorOutputInfo:
                     outputInfo.append(PropagatorOutputInfo.from_dict(oi_d)) # append to existing list of output-info objects
+                    
 
         return Mission(epoch = epoch, # 25 Feb 2021 0:0:0 default startDate
                        duration = d.get('duration') if d.get('duration') is not None else 1, # 1 day default
@@ -344,7 +343,7 @@ class Mission(Entity):
             :paramtype d: list, dict or dict
 
         """
-        gndstn_list = util.dictionary_list_to_object_list( d, GroundStation)
+        gndstn_list = orbitpy.util.dictionary_list_to_object_list( d, GroundStation)
         
         if isinstance(self.groundStation, GroundStation):
             self.groundStation = [self.groundStation] # make into list
@@ -437,52 +436,6 @@ class Mission(Entity):
         if opaque_atmos_height:
             self.settings.opaque_atmos_height = float(opaque_atmos_height)
 
-    def add_coverage_grid_from_dict(self, grid_dict):
-        """ Add coverage grid(s) from the input dictionary. Update the output-info instanace variable.
-
-            :param grid_dict: Dictionary with the grid specifications. Grid can be of type 'autoGrid' or 'customGrid'. 
-                                Refer to :class:`orbitpy.grid.Grid.from_autogrid_dict` and :class:`orbitpy.grid.Grid.from_customgrid_dict` for description 
-                                of the expected key/value pairs of the dictionary.
-            :paramtype grid_dict: dict or list, dict
-
-        """    
-        grid = []    
-        if grid_dict:
-            # make into list of dictionaries if not already list
-            if not isinstance(grid_dict, list):
-                grid_dict = [grid_dict]
-            # iterate through the list of grids            
-            for gd in grid_dict:
-                grid_type = Grid.Type.get(gd['@type'])
-                if ((grid_type==Grid.Type.AUTOGRID) and (gd.get('gridRes', None) is None)):
-                    # calculate grid resolution factor
-                    if self.spacecraft:
-                        gridRes = orbitpy.grid.compute_grid_res(self.spacecraft, self.settings.gridResFactor)
-                        print('Auto-calculated grid resolution is %f using a grid-resolution factor of %f.' %(gridRes, self.settings.gridResFactor))
-                    else:
-                        gridRes = 1 # 1 deg grid-resolution in case of no spacecraft.
-                    gd['gridRes'] = gridRes
-
-                grid.append(Grid.from_dict(gd))
-        
-        # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
-        out_info = []
-        for indx, val in enumerate(grid):
-            if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
-                fp = self.settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
-                oi = grid[indx].write_to_file(fp)
-                out_info.append(oi)
-        if out_info:
-            # add output-info to the instance variable
-            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)
-
-        if isinstance(self.grid, Grid):
-            self.grid = [self.grid] # make into list
-        if isinstance(self.grid, list):
-            self.grid.extend(grid)
-        else:
-            self.grid = grid
-
     def add_spacecraft_from_dict(self, d):
         """ Add one or more spacecrafts to the list of spacecrafts (instance variable ``spacecraft``).
 
@@ -490,7 +443,7 @@ class Mission(Entity):
             :paramtype d: list, dict or dict
 
         """
-        sc_list = util.dictionary_list_to_object_list( d, Spacecraft)
+        sc_list = orbitpy.util.dictionary_list_to_object_list( d, Spacecraft)
         
         if isinstance(self.spacecraft, Spacecraft):
             self.spacecraft = [self.spacecraft] # make into list
@@ -699,11 +652,55 @@ class Mission(Entity):
     
         return out_info
     
+    def add_coverage_grid_from_dict(self, grid_dict):
+        """ Add coverage grid(s) from the input dictionary. Update the output-info instanace variable.
+
+            :param grid_dict: Dictionary with the grid specifications. Grid can be of type 'autoGrid' or 'customGrid'. 
+                                Refer to :class:`orbitpy.grid.Grid.from_autogrid_dict` and :class:`orbitpy.grid.Grid.from_customgrid_dict` for description 
+                                of the expected key/value pairs of the dictionary.
+            :paramtype grid_dict: dict or list, dict
+
+        """    
+        grid = []    
+        if grid_dict:
+            # make into list of dictionaries if not already list
+            if not isinstance(grid_dict, list):
+                grid_dict = [grid_dict]
+            # iterate through the list of grids            
+            for gd in grid_dict:
+                grid_type = Grid.Type.get(gd['@type'])
+                if ((grid_type==Grid.Type.AUTOGRID) and (gd.get('gridRes', None) is None)):
+                    # calculate grid resolution factor
+                    if self.spacecraft:
+                        gridRes = orbitpy.grid.compute_grid_res(self.spacecraft, self.settings.gridResFactor)
+                        print('Auto-calculated grid resolution is %f using a grid-resolution factor of %f.' %(gridRes, self.settings.gridResFactor))
+                    else:
+                        gridRes = 1 # 1 deg grid-resolution in case of no spacecraft.
+                    gd['gridRes'] = gridRes
+
+                grid.append(Grid.from_dict(gd))
+        
+        # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
+        out_info = []
+        for indx, val in enumerate(grid):
+            if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
+                fp = self.settings.outDir + '/grid_id' + str(grid[indx]._id) # save the file with name according to the unique-id. TODO: check that there is no-conflict with an custom-grid file.
+                oi = grid[indx].write_to_file(fp)
+                out_info.append(oi)
+        if out_info: 
+            # add output-info to the instance variable TODO: Prevent duplicate entries, i.e. multiple output-info objects due to multiple executions.
+            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)
+
+        if isinstance(self.grid, Grid):
+            self.grid = [self.grid] # make into list
+        if isinstance(self.grid, list):
+            self.grid.extend(grid)
+        else:
+            self.grid = grid
+            
     def execute_propagation(self):
         """ Execute orbit propagation for all spacecrafts in the mission.
         """
-        out_info = [] # list to accululate info objects of the various executions        
-
         # execute orbit propagation for all satellites in the mission
         for spc_idx, spc in enumerate(self.spacecraft):
             
@@ -715,13 +712,71 @@ class Mission(Entity):
 
             state_cart_file = sat_dir + 'state_cartesian.csv'
             state_kep_file = sat_dir + 'state_keplerian.csv'
-            x = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
-            out_info.append(x)
+            out_info = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
+
+            # delete any output-info object associated with a previous propagation execution
+            self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                                spacecraft_id=spc._id) 
         
-        # add output-info to the instance variable
-        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)
+            # add output-info to the instance variable 
+            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)
 
         return out_info
+    
+    def execute_intersatellite_contact_finder(self):
+        """ Find contacts between spacecrafts in the mission. Orbit propagation for all spacecrafts should be 
+            executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
+            state files produced from orbit propagation.
+
+        """
+        # make folder to store the results
+        intersat_comm_dir = self.settings.outDir + '/comm/'
+        if os.path.exists(intersat_comm_dir):
+            shutil.rmtree(intersat_comm_dir)
+        os.makedirs(intersat_comm_dir)
+
+        # Iterate over all spacecrafts in the mission. If the state-file of a spacecraft cannot be located then the spacecraft is not considered.
+        for spc1_idx in range(0, len(self.spacecraft)):
+            spc1 = self.spacecraft[spc1_idx]
+            spc1_prop_out_info = orbitpy.util.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                spacecraft_id=spc1._id)
+            if spc1_prop_out_info is None:
+                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc1._id ))
+                continue # skip this spacecraft since propagation output is not available. 
+
+            spc1_state_cart_file = spc1_prop_out_info.stateCartFile
+            
+            # loop over the rest of the spacecrafts in the list (i.e. from the current spacecraft to the last spacecraft in the list)
+            for spc2_idx in range(spc1_idx+1, len(self.spacecraft)):
+                
+                spc2 = self.spacecraft[spc2_idx]
+                spc2_prop_out_info = orbitpy.util.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                    out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                    spacecraft_id=spc2._id)
+                if spc2_prop_out_info is None:
+                    print("Skipping spacecraft with id %s since propagation state output is not available."%(spc2._id ))
+                    continue # skip this spacecraft since propagation output is not available. 
+
+                spc2_state_cart_file = spc2_prop_out_info.stateCartFile
+                                
+                out_intersat_filename = 'sat'+str(spc1_idx)+'_to_sat'+str(spc2_idx)+'.csv'
+                out_info = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaque_atmos_height)
+                       
+                # delete any output-info object associated with a previous propagation execution
+                self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                                    out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                                    entityA_id=spc1._id, entityB_id=spc2._id) 
+
+                # add output-info to the instance variable
+                self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)
+
+        return out_info
+    
+    
+                
+
                     
 
                     

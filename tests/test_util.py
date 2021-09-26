@@ -1,12 +1,9 @@
 """Unit tests for orbitpy.util module.
 """
-
-import json
-import os
-import sys
 import unittest
 
 import numpy as np
+from numpy.core.numeric import tensordot
 from instrupy.util import Orientation
 from instrupy import Instrument
 from orbitpy.util import OrbitState, SpacecraftBus, Spacecraft
@@ -546,3 +543,11 @@ class TestUtilFunctions(unittest.TestCase):
 
     def test_initialize_object_list(self): #TODO
         pass
+
+    def test_add_to_list(self): #TODO
+        pass
+
+class TestOutputInfoUtility(unittest.TestCase): #TODO
+    pass
+
+

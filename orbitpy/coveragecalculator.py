@@ -14,8 +14,8 @@ import pandas as pd
 import propcov
 from instrupy.util import Entity
 from orbitpy.grid import Grid
+from orbitpy.util import Spacecraft, OutputInfoUtility
 import orbitpy.util
-from orbitpy.util import Spacecraft, InfoType
 from instrupy.util import ReferenceFrame, SphericalGeometry
 
 DAYS_PER_SEC = 1.1574074074074074074074074074074e-5
@@ -999,7 +999,7 @@ class CoverageOutputInfo(Entity):
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
-        super(CoverageOutputInfo, self).__init__(_id, InfoType.CoverageOutputInfo.value)
+        super(CoverageOutputInfo, self).__init__(_id, OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value)
     
     @staticmethod
     def from_dict(d):
@@ -1032,7 +1032,7 @@ class CoverageOutputInfo(Entity):
         :rtype: dict
         
         """
-        return dict({"@type": InfoType.CoverageOutputInfo.value,
+        return dict({"@type": OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value,
                      "coverageType": self.coverageType,
                      "spacecraftId": self.spacecraftId,
                      "instruId": self.instruId,

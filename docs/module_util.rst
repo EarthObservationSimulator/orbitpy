@@ -175,6 +175,7 @@ API
 
    orbitpy.util.StateType
    orbitpy.util.DateType
+   orbitpy.util.OutputInfoUtility
    orbitpy.util.OrbitState
    orbitpy.util.SpacecraftBus
    orbitpy.util.Spacecraft
@@ -193,3 +194,4 @@ API
    orbitpy.util.dictionary_list_to_object_list
    orbitpy.util.object_list_to_dictionary_list
    orbitpy.util.initialize_object_list
+   orbitpy.util.add_to_list
