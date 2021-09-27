@@ -423,8 +423,7 @@ class PropagatorOutputInfo(Entity):
 
         """
         if(isinstance(self, other.__class__)):
-            return (self.spacecraftId==other.spacecraftId) and (self.stateCartFile==other.stateCartFile) and \
-                    (self.stateKeplerianFile==other.stateKeplerianFile)
+            return (self.spacecraftId==other.spacecraftId)
                 
         else:
             return False

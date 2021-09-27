@@ -375,7 +375,7 @@ Description of the location, naming-convention and data-format of the results is
    :widths: 10,10,20,10
 
    Main output-directory, ``outDir`` key/value pair, ,
-   Auto-generated grid files, main output-directory, "*grid_N*, where *N* is the grid index", :ref:`input_grid_file_format` 
+   Auto-generated grid files, main output-directory, "*gridN*, where *N* is the grid index", :ref:`input_grid_file_format` 
    Satellite folder, main output-directory, "*satN*, where *N* is the index of the satellite",
    State files, respective satellite folder, *state_cartesian.csv* and *state_keplerian.csv*, :ref:`Propagated state file format<propagated_state_file_format>`
    Access files (results of the coverage calculations), respective satellite folder, "*access_instruN_modeM_gridK.csv*, where *N* is the instrument index, *M* is the mode index and *K* is the grid index", :ref:`Grid cov o/p file format<grid_coverage_output_file_format>` (or) :ref:`Pointing options o/p file format<pointing_options_coverage_output_file_format>` (or) :ref:`Pointing options with grid cov o/p file format<pointing_options_with_grid_coverage_output_file_format>`

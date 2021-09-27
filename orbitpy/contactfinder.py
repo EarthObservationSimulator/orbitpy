@@ -424,7 +424,7 @@ class ContactFinderOutputInfo(Entity):
         """
         if(isinstance(self, other.__class__)):
             return (self.entityAtype==other.entityAtype) and (self.entityAId==other.entityAId) and (self.entityBtype==other.entityBtype) and (self.entityBId==other.entityBId) \
-                    and  (self.outType==other.outType) and  (self.contactFile==other.contactFile) 
+                    and  (self.outType==other.outType)
                 
         else:
             return False

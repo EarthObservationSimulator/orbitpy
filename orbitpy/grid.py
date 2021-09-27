@@ -372,3 +372,16 @@ class GridOutputInfo(Entity):
                 
         else:
             return NotImplemented
+    
+    def check_loose_equality(self, other):
+        """ Check for equality with another ``GridOutputInfo`` object considering only some instance variables.
+
+            :param other: The other ``GridOutputInfo`` object with which the comparision shall be done.
+            :paramtype other: :class:`orbitpy.propagator.GridOutputInfo`
+
+        """
+        if(isinstance(self, other.__class__)):
+            return (self.gridId==other.gridId)
+                
+        else:
+            return False

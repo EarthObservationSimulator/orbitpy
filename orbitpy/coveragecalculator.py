@@ -1058,3 +1058,17 @@ class CoverageOutputInfo(Entity):
                 
         else:
             return NotImplemented
+    
+    def check_loose_equality(self, other):
+        """ Check for equality with another ``CoverageOutputInfo`` object considering only some instance variables.
+
+            :param other: The other ``CoverageOutputInfo`` object with which the comparision shall be done.
+            :paramtype other: :class:`orbitpy.propagator.PropagatorOutputInfo`
+
+        """
+        if(isinstance(self, other.__class__)):
+            return (self.coverageType==other.coverageType) and (self.spacecraftId==other.spacecraftId) and (self.instruId==other.instruId) and (self.modeId==other.modeId) and \
+                   (self.usedFieldOfRegard==other.usedFieldOfRegard) and (self.filterMidIntervalAccess == other.filterMidIntervalAccess) and (self.gridId==other.gridId)
+                
+        else:
+            return False
