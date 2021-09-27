@@ -18,10 +18,11 @@ from orbitpy.constellation import ConstellationFactory
 import orbitpy.propagator
 import orbitpy.grid
 from orbitpy.propagator import PropagatorFactory, PropagatorOutputInfo
-from orbitpy.coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
-from datametricscalculator import DataMetricsCalculator, AccessFileInfo
-from orbitpy.contactfinder import ContactFinder
-from orbitpy.grid import Grid
+from orbitpy.coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage, CoverageOutputInfo
+from datametricscalculator import DataMetricsCalculator, AccessFileInfo, DataMetricsOutputInfo
+from orbitpy.contactfinder import ContactFinder, ContactFinderOutputInfo
+from orbitpy.eclipsefinder import EclipseFinder, EclipseFinderOutputInfo
+from orbitpy.grid import Grid, GridOutputInfo
 
 class Settings(Entity):
     """ Data container of the mission settings.
@@ -281,7 +282,16 @@ class Mission(Entity):
                 output_info_type = OutputInfoUtility.OutputInfoType.get(oi_d.get('@type')) if oi_d.get('@type') else None
                 if output_info_type == OutputInfoUtility.OutputInfoType.PropagatorOutputInfo:
                     outputInfo.append(PropagatorOutputInfo.from_dict(oi_d)) # append to existing list of output-info objects
-                    
+                if output_info_type == OutputInfoUtility.OutputInfoType.ContactFinderOutputInfo:
+                    outputInfo.append(ContactFinderOutputInfo.from_dict(oi_d))
+                if output_info_type == OutputInfoUtility.OutputInfoType.CoverageOutputInfo:
+                    outputInfo.append(CoverageOutputInfo.from_dict(oi_d))     
+                if output_info_type == OutputInfoUtility.OutputInfoType.DataMetricsOutputInfo:
+                    outputInfo.append(DataMetricsOutputInfo.from_dict(oi_d))
+                if output_info_type == OutputInfoUtility.OutputInfoType.EclipseFinderOutputInfo:
+                    outputInfo.append(EclipseFinderOutputInfo.from_dict(oi_d))
+                if output_info_type == OutputInfoUtility.OutputInfoType.GridOutputInfo:
+                    outputInfo.append(GridOutputInfo.from_dict(oi_d))
 
         return Mission(epoch = epoch, # 25 Feb 2021 0:0:0 default startDate
                        duration = d.get('duration') if d.get('duration') is not None else 1, # 1 day default
@@ -715,9 +725,7 @@ class Mission(Entity):
             out_info = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
 
             # delete any output-info object associated with a previous propagation execution
-            self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
-                                                                                                spacecraft_id=spc._id) 
+            self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=out_info)
         
             # add output-info to the instance variable 
             self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)
@@ -739,7 +747,7 @@ class Mission(Entity):
         # Iterate over all spacecrafts in the mission. If the state-file of a spacecraft cannot be located then the spacecraft is not considered.
         for spc1_idx in range(0, len(self.spacecraft)):
             spc1 = self.spacecraft[spc1_idx]
-            spc1_prop_out_info = orbitpy.util.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+            spc1_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
                                                                                 out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
                                                                                 spacecraft_id=spc1._id)
             if spc1_prop_out_info is None:
@@ -752,7 +760,7 @@ class Mission(Entity):
             for spc2_idx in range(spc1_idx+1, len(self.spacecraft)):
                 
                 spc2 = self.spacecraft[spc2_idx]
-                spc2_prop_out_info = orbitpy.util.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                spc2_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
                                                                                     out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
                                                                                     spacecraft_id=spc2._id)
                 if spc2_prop_out_info is None:
@@ -765,9 +773,7 @@ class Mission(Entity):
                 out_info = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaque_atmos_height)
                        
                 # delete any output-info object associated with a previous propagation execution
-                self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                                    out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
-                                                                                                    entityA_id=spc1._id, entityB_id=spc2._id) 
+                self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=out_info)
 
                 # add output-info to the instance variable
                 self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, out_info)

@@ -829,25 +829,16 @@ class OutputInfoUtility:
         return result
 
     @staticmethod
-    def delete_output_info_object_in_list(out_info_list, out_info_type, **kwargs):
-        """ Locate an output-info object from list of output-info objects with parameters
-            as that given by the input arguments and remove from list. Return the reduced list.
+    def delete_output_info_object_in_list(out_info_list, other_out_info_object):
+        """ Remove an output-info object from list of output-info objects which has "loose"-equality with the other
+            output-info object. Loose equality requires only some of the instance variables of the two objects to match. 
+            Please see the ``check_loose_equality`` function of the respective output-info class to know which instance variables care compared.
 
             :param out_info_list: List of output-info objects.
             :paramtype: list, output-info objects
 
-            :param out_info_type: The *type* of the output-info object.
-            :paramtype out_info_type: :class:`orbitpy.util.OutputInfoUtility.OutputInfoType`
-
-            :param \**kwargs: Keyword arguments. Depending on the output-info type of interest, there are different keywords expected.
-                            
-                                .. csv-table:: Contact file INTERVAL data format
-                                    :header: Output-info type, Keyword(s), Description
-                                    :widths: 10,10
-
-                                    ``PropagatorOutputInfo``, ``spacecraft_id``, Spacecraft-identifier of the propagated spacecraft.
-                                    ``ContactFinderOutputInfo``, "``entityA_type``, ``entityA_id``, `entityB_type`` and ``entityB_id``", Identifiers of the two entities between which contacts have been calculated. Both the entities can be spacecrafts or a spacecraft and a ground-station.
-
+            :param other_out_info_object: Output-info object with which comparison for loose-equality shall be made.
+            :paramtype other_out_info_object: output-info object
             
             :return: (Potentially) reduced list of output-info objects with an deleted object. 
             :rtype: list, output-info objects
@@ -858,27 +849,10 @@ class OutputInfoUtility:
 
         if not isinstance(out_info_list, list):
             out_info_list = [out_info_list] # make into list
-        
-        # If the object to-be-found is of type 'PROPAGATOR OUTPUT INFO'        
-        if out_info_type == OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value:
-            inp_spc_id = kwargs.get('spacecraft_id') # spacecraft-id of interest
-            for indx, oi in enumerate(out_info_list):
-                if oi._type == OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value: # check object type
-                    if oi.spacecraftId == inp_spc_id: # check for matching spacecraft-id
-                        del out_info_list[indx] # delete the corresponding output-info object
-                        break
-        
-        # If the object to-be-found is of type 'CONTACT FINDER OUTPUT INFO'        
-        if out_info_type == OutputInfoUtility.OutputInfoType.ContactFinderOutputInfo.value:
-            inp_entityA_type = kwargs.get('entityA_type') # entity-A type of interest
-            inp_entityA_id = kwargs.get('entityA_id') # entity-A identifier of interest
-            inp_entityB_type = kwargs.get('entityB_type') # entity-B type of interest
-            inp_entityB_id = kwargs.get('entityB_id') # entity-B identifier of interest
-            for indx, oi in enumerate(out_info_list):
-                if oi._type == OutputInfoUtility.OutputInfoType.ContactFinderOutputInfo.value: # check object type
-                    if (oi.entityAtype == inp_entityA_type and oi.entityAId == inp_entityA_id and oi.entityBtype == inp_entityB_type and oi.entityBId == inp_entityB_id) or \
-                       (oi.entityAtype == inp_entityB_type and oi.entityAId == inp_entityB_id and oi.entityBtype == inp_entityA_type and oi.entityBId == inp_entityA_id): # check for matching entity A, B ids. The entities could be reversed.
-                        del out_info_list[indx] # delete the corresponding output-info object
-                        break
 
+        for indx, oi in enumerate(out_info_list):
+            if oi.check_loose_equality(other_out_info_object):
+                del out_info_list[indx] # delete the corresponding output-info object
+                break
+        
         return out_info_list

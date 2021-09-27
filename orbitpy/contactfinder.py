@@ -414,3 +414,17 @@ class ContactFinderOutputInfo(Entity):
                 
         else:
             return NotImplemented
+    
+    def check_loose_equality(self, other):
+        """ Check for equality with another ``ContactFinderOutputInfo`` object considering only some instance variables.
+
+            :param other: The other ``ContactFinderOutputInfo`` object with which the comparision shall be done.
+            :paramtype other: :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
+
+        """
+        if(isinstance(self, other.__class__)):
+            return (self.entityAtype==other.entityAtype) and (self.entityAId==other.entityAId) and (self.entityBtype==other.entityBtype) and (self.entityBId==other.entityBId) \
+                    and  (self.outType==other.outType) and  (self.contactFile==other.contactFile) 
+                
+        else:
+            return False

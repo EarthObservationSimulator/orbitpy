@@ -388,7 +388,7 @@ class PropagatorOutputInfo(Entity):
                                      _id  = d.get('@id', None))
 
     def to_dict(self):
-        """ Translate the PropagatorOutputInfo object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        """ Translate the ``PropagatorOutputInfo`` object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
         
         :return: ``PropagatorOutputInfo`` object as python dictionary
         :rtype: dict
@@ -414,3 +414,18 @@ class PropagatorOutputInfo(Entity):
                 
         else:
             return NotImplemented
+    
+    def check_loose_equality(self, other):
+        """ Check for equality with another ``PropagatorOutputInfo`` object considering only some instance variables.
+
+            :param other: The other ``PropagatorOutputInfo`` object with which the comparision shall be done.
+            :paramtype other: :class:`orbitpy.propagator.PropagatorOutputInfo`
+
+        """
+        if(isinstance(self, other.__class__)):
+            return (self.spacecraftId==other.spacecraftId) and (self.stateCartFile==other.stateCartFile) and \
+                    (self.stateKeplerianFile==other.stateKeplerianFile)
+                
+        else:
+            return False
+
