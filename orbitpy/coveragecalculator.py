@@ -1063,7 +1063,7 @@ class CoverageOutputInfo(Entity):
         """ Check for equality with another ``CoverageOutputInfo`` object considering only some instance variables.
 
             :param other: The other ``CoverageOutputInfo`` object with which the comparision shall be done.
-            :paramtype other: :class:`orbitpy.propagator.PropagatorOutputInfo`
+            :paramtype other: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
 
         """
         if(isinstance(self, other.__class__)):

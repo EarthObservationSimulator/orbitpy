@@ -804,6 +804,7 @@ class OutputInfoUtility:
                                     :widths: 10,10
 
                                     ``PropagatorOutputInfo``, ``spacecraft_id``, Spacecraft-identifier of the propagated spacecraft.
+                                    ``CoverageOutputInfo``, "``inp_cov_type``, ``spacecraft_id``, ``inp_instru_id``, ``inp_mode_id``, ``inp_grid_id``",  
 
             
             :return: The output-info object with parameters matched to the input arguments.
@@ -826,6 +827,20 @@ class OutputInfoUtility:
                         result = oi
                         break
         
+        # If the object to-be-found is of type 'COVERAGE OUTPUT INFO'        
+        if out_info_type == OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value:
+            inp_cov_type = kwargs.get('coverage_type') # coverage-type of interest
+            inp_spc_id = kwargs.get('spacecraft_id') # spacecraft-id of interest
+            inp_instru_id = kwargs.get('instru_id') # instrument-id of interest
+            inp_mode_id = kwargs.get('mode_id') # instrument mode-id of interest
+            inp_grid_id = kwargs.get('grid_id') # grid-id of interest
+            
+            for oi in out_info_list:
+                if oi._type == OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value: # check object type
+                    if ((oi.coverageType==inp_cov_type) and (oi.spacecraftId==inp_spc_id) and (oi.instruId==inp_instru_id) and (oi.modeId==inp_mode_id) and (oi.gridId==inp_grid_id)):
+                        result = oi
+                        break
+
         return result
 
     @staticmethod

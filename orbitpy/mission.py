@@ -894,12 +894,81 @@ class Mission(Entity):
                         # delete any output-info object associated with a previous execution
                         self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)            
                         # add output-info to the instance variable 
-                        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
-                
+                        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)       
 
                     
+    def execute_datametrics_calculator(self):
+        """ Execute datametrics calculation for all the spacecrafts in the mission. 
+            Orbit propagation and coverage calculation for all spacecrafts should be executed prior to this operation. 
+            The ``outputInfo`` instance variable shall be referred to locate the state and access files produced by orbit propagation and coverage calculations. 
+            The results are written in the same folder as that of the spacecraft-state files.
+            The output-info instance variable is updated.
 
+        """
+        # loop over all available spacecrafts
+        for spc_idx, spc in enumerate(self.spacecraft):
+
+            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                spacecraft_id=spc._id)
+            if spc_prop_out_info is None:
+                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id ))
+                continue # skip this spacecraft since propagation output is not available. 
+
+            spc_state_cart_file = spc_prop_out_info.stateCartFile
+            spc_dir = os.path.dirname(spc_state_cart_file) + '/' ## directory in which the state-file is written
+
+            # loop over all the instruments and modes (per instrument) and calculate the corresponding coverage, data-metrics
+            if spc.instrument:
+                for instru_idx, instru in enumerate(spc.instrument):
+
+                    for mode_idx, mode in enumerate(instru.mode): 
+
+                        oi = []
+                        if self.settings.coverageType == "GRID COVERAGE":         
+
+                            for grid_idx, grid in enumerate(self.grid):     
+
+                                cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
+                                                                                coverage_type= "GRID COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=grid._id)
+                                                                               
+
+                                dm_file = spc_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
+                                _oi = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id)   
+                                oi.append(_oi)      
+                                            
+                        elif self.settings.coverageType == "POINTING OPTIONS WITH GRID COVERAGE":
+
+                            for grid_idx, grid in enumerate(self.grid):     
+
+                                cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
+                                                                                coverage_type= "POINTING OPTIONS WITH GRID COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=grid._id)
+                                                                               
+
+                                dm_file = spc_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
+                                _oi = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id) 
+                                oi.append(_oi)
+
+                        elif self.settings.coverageType == "POINTING OPTIONS COVERAGE":
+
+                            cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
+                                                                                coverage_type= "POINTING OPTIONS COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=None)
+
+                            dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
+                            _oi = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id) 
+                            oi.append(_oi)
                     
+                        # store the output-info objects in the instance outputInfo variable
+                        for _oi in oi:
+                            # delete any output-info object associated with a previous execution
+                            self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=_oi)            
+                            # add output-info to the instance variable 
+                            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, _oi)            
 
 
 

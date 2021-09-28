@@ -372,3 +372,16 @@ class DataMetricsOutputInfo(Entity):
                 
         else:
             return NotImplemented
+    
+    def check_loose_equality(self, other):
+        """ Check for equality with another ``DataMetricsOutputInfo`` object considering only some instance variables.
+
+            :param other: The other ``DataMetricsOutputInfo`` object with which the comparision shall be done.
+            :paramtype other: :class:`orbitpy.datametricscalculator.DataMetricsOutputInfo`
+
+        """
+        if(isinstance(self, other.__class__)):
+            return (self.spacecraftId==other.spacecraftId) and (self.instruId==other.instruId) and (self.modeId==other.modeId) and (self.accessFile==other.accessFile)
+                
+        else:
+            return False
