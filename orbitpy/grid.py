@@ -377,7 +377,7 @@ class GridOutputInfo(Entity):
         """ Check for equality with another ``GridOutputInfo`` object considering only some instance variables.
 
             :param other: The other ``GridOutputInfo`` object with which the comparision shall be done.
-            :paramtype other: :class:`orbitpy.propagator.GridOutputInfo`
+            :paramtype other: :class:`orbitpy.grid.GridOutputInfo`
 
         """
         if(isinstance(self, other.__class__)):

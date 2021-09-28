@@ -251,3 +251,16 @@ class EclipseFinderOutputInfo(Entity):
                 
         else:
             return NotImplemented
+    
+    def check_loose_equality(self, other):
+        """ Check for equality with another ``EclipseFinderOutputInfo`` object considering only some instance variables.
+
+            :param other: The other ``EclipseFinderOutputInfo`` object with which the comparision shall be done.
+            :paramtype other: :class:`orbitpy.eclipsefinder.EclipseFinderOutputInfo`
+
+        """
+        if(isinstance(self, other.__class__)):
+            return (self.spacecraftId==other.spacecraftId)
+                
+        else:
+            return False
