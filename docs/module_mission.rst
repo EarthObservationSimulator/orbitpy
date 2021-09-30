@@ -391,7 +391,7 @@ For example if the mission involved propagation of a satellite, a :class:`orbitp
 Examples
 ^^^^^^^^^
 
-1. Example with a single spacecraft, and only propagation. Note that a random identifier is assigned to the spacecraft.
+1. Example with a single spacecraft. Only propagation and eclipses are found. Note that a random identifier is assigned to the spacecraft.
 
    .. code-block:: bash
 
@@ -412,9 +412,13 @@ Examples
       out_info = mission.execute()
       print(out_info)
 
-      >> [PropagatorOutputInfo.from_dict({'@type': 'Propagator Output Info', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
-                  'spacecraftId': '35252ff4-731d-4e6b-b0ab-419243e9450b', 'stateCartFile': 'temp//sat0/state_cartesian.csv', 
-                  'stateKeplerianFile': 'temp//sat0/state_keplerian.csv', 'startDate': 2459299.1292592594, 'duration': 0.1, '@id': None})]
+      >> [PropagatorOutputInfo.from_dict({'@type': 'PROPAGATOR OUTPUT INFO', 'propagatorType': 'J2 ANALYTICAL PROPAGATOR', 
+            'spacecraftId': '1bfa9331-7013-45bd-8991-de552f4837a2', 'stateCartFile': 'out1//sat0/state_cartesian.csv', 
+            'stateKeplerianFile': 'out1//sat0/state_keplerian.csv', 'startDate': 2459299.1292592594, 'duration': 0.1, '@id': None}), 
+          EclipseFinderOutputInfo.from_dict({'@type': 'ECLIPSE FINDER OUTPUT INFO', 'spacecraftId': '1bfa9331-7013-45bd-8991-de552f4837a2', 
+            'stateCartFile': 'out1//sat0/state_cartesian.csv', 'eclipseFile': 'out1//sat0/eclipses.csv', 'outType': 'INTERVAL', 
+            'startDate': 2459299.1292592594, 'duration': 0.1, '@id': None})]
+
       
       Output directory structure
       ---------------------------
@@ -423,8 +427,9 @@ Examples
          └───sat0
                state_cartesian.csv
                state_keplerian.csv
+               eclipses.csv
 
-2. Example with a constellation and ground-station. All the 8 spacecrafts are propagated, inter-satellite contact periods calculated and the ground-station
+2. Example with a constellation and ground-station. All the 8 spacecrafts are propagated, eclipses calculated, inter-satellite contact periods calculated and the ground-station
    contacts calculated.
    
 .. code-block:: bash
@@ -485,41 +490,49 @@ Examples
          │       sat6_to_sat7.csv
          │
          ├───sat0
+         │       eclipses.csv
          │       gndStn0_contacts.csv
          │       state_cartesian.csv
          │       state_keplerian.csv
          │
          ├───sat1
+         │       eclipses.csv
          │       gndStn0_contacts.csv
          │       state_cartesian.csv
          │       state_keplerian.csv
          │
          ├───sat2
+         │       eclipses.csv
          │       gndStn0_contacts.csv
          │       state_cartesian.csv
          │       state_keplerian.csv
          │
          ├───sat3
+         │       eclipses.csv
          │       gndStn0_contacts.csv
          │       state_cartesian.csv
          │       state_keplerian.csv
          │
          ├───sat4
+         │       eclipses.csv
          │       gndStn0_contacts.csv
          │       state_cartesian.csv
          │       state_keplerian.csv
          │
          ├───sat5
+         │       eclipses.csv
          │       gndStn0_contacts.csv
          │       state_cartesian.csv
          │       state_keplerian.csv
          │
          ├───sat6
+         │       eclipses.csv
          │       gndStn0_contacts.csv
          │       state_cartesian.csv
          │       state_keplerian.csv
          │
          └───sat7
+                  eclipses.csv
                   gndStn0_contacts.csv
                   state_cartesian.csv
                   state_keplerian.csv

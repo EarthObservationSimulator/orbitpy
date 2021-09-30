@@ -168,8 +168,8 @@ class Mission(Entity):
         else:
             self.outputInfo = None
 
-        super(Mission, self).__init__(_id, "Mission")        
- 
+        super(Mission, self).__init__(_id, "Mission")           
+
     @staticmethod
     def from_dict(d):
         """Parses an ``Mission`` object from a normalized JSON dictionary.
@@ -300,7 +300,7 @@ class Mission(Entity):
                        grid = grid,
                        groundStation = groundStation,
                        settings = settings,
-                       outputInfo = outputInfo if outputInfo else None, # make into None strictly, it could be [].
+                       outputInfo = outputInfo if outputInfo else None,
                        _id = d.get('@id', None)
                       ) 
     
@@ -509,6 +509,45 @@ class Mission(Entity):
 
         """
         self.duration = float(duration)  
+    
+    def add_coverage_grid_from_dict(self, grid_dict):
+        """ Add coverage grid(s) from the input dictionary. Update the output-info instanace variable. Auto-grids shall be generated in the ``execute_coverage_calculator`` function.
+
+            :param grid_dict: Dictionary with the grid specifications. Grid can be of type 'autoGrid' or 'customGrid'. 
+                                Refer to :class:`orbitpy.grid.Grid.from_autogrid_dict` and :class:`orbitpy.grid.Grid.from_customgrid_dict` for description 
+                                of the expected key/value pairs of the dictionary.
+            :paramtype grid_dict: dict or list, dict
+
+        """    
+        grid = []    
+        if grid_dict:
+            # make into list of dictionaries if not already list
+            if not isinstance(grid_dict, list):
+                grid_dict = [grid_dict]
+            # iterate through the list of grids            
+            for gd in grid_dict:
+                grid_type = Grid.Type.get(gd['@type'])
+                if ((grid_type==Grid.Type.AUTOGRID) and (gd.get('gridRes', None) is None)):
+                    # calculate grid resolution factor
+                    if self.spacecraft:
+                        gridRes = orbitpy.grid.compute_grid_res(self.spacecraft, self.settings.gridResFactor)
+                        print('Auto-calculated grid resolution is %f using a grid-resolution factor of %f.' %(gridRes, self.settings.gridResFactor))
+                    else:
+                        gridRes = 1 # 1 deg grid-resolution in case of no spacecraft.
+                    gd['gridRes'] = gridRes
+
+                grid.append(Grid.from_dict(gd))
+
+        if isinstance(self.grid, Grid):
+            self.grid = [self.grid] # make into list
+        if isinstance(self.grid, list):
+            self.grid.extend(grid)
+        else:
+            self.grid = grid
+        
+        self.save_auto_grid()
+        
+        return
 
     def to_dict(self):
         """ Translate the ``Mission`` object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
@@ -550,9 +589,384 @@ class Mission(Entity):
             :rtype: list, :class:`orbitpy.propagate.PropagatorOutputInfo`, :class:`orbitpy.coveragecalculator.CoverageOutputInfo`, :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
 
         """           
+        out_info = [] # list to accumulate info objects of the various executions        
+
+        # Save auto-grids to files
+        x = self.save_auto_grid()
+        if x:
+            out_info.extend(x)
+        print("Finished save auto grid")
+
+        # execute orbit propagation for all satellites in the mission
+        x = self.execute_propagation()
+        if x:
+            out_info.extend(x)
+        print("Finished orbit-propagation.")
+
+        # Execute coverage calculation for all the spacecrafts (and their instruments and modes) in the mission.
+        x = self.execute_coverage_calculator()
+        if x:
+            out_info.extend(x)
+        print("Finished coverage calculation.")
+
+        # execute datametrics calculation for all the spacecrafts (and their instruments and modes) in the mission.
+        x = self.execute_datametrics_calculator()
+        if x:
+            out_info.extend(x)
+        print("Finished datametrics calculation.")
+
+        # execute ground-station contact finder for all the spacecrafts
+        x = self.execute_groundstation_contact_finder()
+        if x:
+            out_info.extend(x)
+        print("Finished finding ground-station contacts.")
+
+        # find inter-satellite contacts between all the satellites in the mission
+        x = self.execute_intersatellite_contact_finder()
+        if x:
+            out_info.extend(x)
+        print("Finished finding inter-satellite contacts.")
+
+        # find eclipse times
+        x = self.execute_eclipse_finder()
+        if x:
+            out_info.extend(x)
+        print("Finished finding eclipse periods.")
+    
+        return out_info
+            
+    def save_auto_grid(self):
+        """ Save auto-grid data to file.
+        """
+        oi = [] # list of output-info objects associated with this execution
+
+        if self.grid:
+            # Save auto-grids to files
+            for grid_idx, grid in enumerate(self.grid):
+                if grid.filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
+                    fp = self.settings.outDir + '/grid' + str(grid_idx) # save the file with name according to the index.
+                    x = grid.write_to_file(fp)
+                    oi.append(x)
+
+            # delete any output-info object(s) associated with a previous execution
+            self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)            
+            # add output-info object(s) to the instance variable 
+            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
+
+        return oi
+
+    def execute_propagation(self):
+        """ Execute orbit propagation for all spacecrafts in the mission.
+            The list of output0info objects associated with this execution is returned.
+        """
+        oi = [] # list of output-info objects associated with this execution
+        # execute orbit propagation for all satellites in the mission
+        for spc_idx, spc in enumerate(self.spacecraft):
+            
+            # make satellite directory
+            sat_dir = self.settings.outDir + '/sat' + str(spc_idx) + '/'
+            if os.path.exists(sat_dir):
+                shutil.rmtree(sat_dir)
+            os.makedirs(sat_dir)
+
+            state_cart_file = sat_dir + 'state_cartesian.csv'
+            state_kep_file = sat_dir + 'state_keplerian.csv'
+            x = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
+            oi.append(x)
+
+        # delete any output-info object associated with a previous execution
+        self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)    
+        # add output-info to the instance variable 
+        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
+
+        return oi
+    
+    def execute_intersatellite_contact_finder(self):
+        """ Find contacts between spacecrafts in the mission. Orbit propagation for all spacecrafts should be 
+            executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
+            state files produced from orbit propagation. 
+            The list of output-info objects associated with this execution is returned.
+
+        """
+        oi = [] # list of output-info objects associated with this execution
+        # make folder to store the results
+        intersat_comm_dir = self.settings.outDir + '/comm/'
+        if os.path.exists(intersat_comm_dir):
+            shutil.rmtree(intersat_comm_dir)
+        os.makedirs(intersat_comm_dir)
+
+        # Iterate over all spacecrafts in the mission. If the state-file of a spacecraft cannot be located then the spacecraft is not considered.
+        for spc1_idx in range(0, len(self.spacecraft)):
+            spc1 = self.spacecraft[spc1_idx]
+            spc1_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                spacecraft_id=spc1._id)
+            if spc1_prop_out_info is None:
+                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc1._id ))
+                continue # skip this spacecraft since propagation output is not available. 
+
+            spc1_state_cart_file = spc1_prop_out_info.stateCartFile
+            
+            # loop over the rest of the spacecrafts in the list (i.e. from the current spacecraft to the last spacecraft in the list)
+            for spc2_idx in range(spc1_idx+1, len(self.spacecraft)):
+                
+                spc2 = self.spacecraft[spc2_idx]
+                spc2_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                    out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                    spacecraft_id=spc2._id)
+                if spc2_prop_out_info is None:
+                    print("Skipping spacecraft with id %s since propagation state output is not available."%(spc2._id ))
+                    continue # skip this spacecraft since propagation output is not available. 
+
+                spc2_state_cart_file = spc2_prop_out_info.stateCartFile
+                                
+                out_intersat_filename = 'sat'+str(spc1_idx)+'_to_sat'+str(spc2_idx)+'.csv'
+                x = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaque_atmos_height)
+                oi.append(x)
+
+        # delete any output-info object(s) associated with a previous execution
+        self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)
+        # add output-info object(s) to the instance variable
+        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
+
+        return oi
+    
+    def execute_groundstation_contact_finder(self):
+        """ Find contacts between spacecrafts and ground-stations in the mission. Orbit propagation for all spacecrafts should be 
+            executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
+            state files produced from orbit propagation. The results are written in the same folder as that of the spacecraft-state files.
+            The output-info instance variable is updated.
+            The list of output-info objects associated with this execution is returned.
+
+        """
+        oi = [] # list of output-info objects associated with this execution
+        # loop over all available spacecrafts
+        for spc_idx, spc in enumerate(self.spacecraft):
+
+            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                spacecraft_id=spc._id)
+            if spc_prop_out_info is None:
+                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id ))
+                continue # skip this spacecraft since propagation output is not available. 
+
+            spc_state_cart_file = spc_prop_out_info.stateCartFile
+            spc_dir = os.path.dirname(spc_state_cart_file) ## directory in which the state-file is written
+
+            # loop over all the ground-stations and calculate contacts
+            if self.groundStation:
+                for gnd_stn_idx, gnd_stn in enumerate(self.groundStation):
+                    
+                    out_gnd_stn_file = 'gndStn'+str(gnd_stn_idx)+'_contacts.csv'
+                    x = ContactFinder.execute(spc, gnd_stn, spc_dir, spc_state_cart_file, None, out_gnd_stn_file, ContactFinder.OutType.INTERVAL, 0)
+                    oi.append(x)
+
+        # delete any output-info object(s) associated with a previous execution
+        self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)
+        # add output-info object(s) to the instance variable
+        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
+                    
+        return oi
+    
+    def execute_eclipse_finder(self):
+        """ Find eclipse times for the spacecrafts in the mission. Orbit propagation for all spacecrafts should be 
+            executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
+            state files produced from orbit propagation. The results are written in the same folder as that of the spacecraft-state files.
+            The output-info instance variable is updated.
+            The list of output-info objects associated with this execution is returned.
+
+        """
+        oi = [] # list of output-info objects associated with this execution
+        # loop over all available spacecrafts
+        for spc_idx, spc in enumerate(self.spacecraft):
+
+            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                spacecraft_id=spc._id)
+            if spc_prop_out_info is None:
+                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id ))
+                continue # skip this spacecraft since propagation output is not available. 
+
+            spc_state_cart_file = spc_prop_out_info.stateCartFile
+            spc_dir = os.path.dirname(spc_state_cart_file) ## directory in which the state-file is written
+
+            out_eclipses_file = 'eclipses.csv'
+            x = EclipseFinder.execute(spc, spc_dir, spc_state_cart_file, out_eclipses_file, ContactFinder.OutType.INTERVAL)
+            oi.append(x)
+
+        # delete any output-info object associated with a previous execution
+        self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)
+        # add output-info to the instance variable
+        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
+                    
+        return oi
+
+    def execute_coverage_calculator(self):
+        """ Execute coverage calculation for all the spacecrafts in the mission. The coverage-calculation type is indicated in the ``settings`` instance variable.
+            Orbit propagation for all spacecrafts should be executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
+            state files produced from orbit propagation. The results are written in the same folder as that of the spacecraft-state files.
+            The output-info instance variable is updated.
+            The list of output-info objects associated with this execution is returned.
+
+        """
+        oi = [] # list of output-info objects associated with this execution
+        # loop over all available spacecrafts
+        for spc_idx, spc in enumerate(self.spacecraft):
+
+            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                spacecraft_id=spc._id)
+            if spc_prop_out_info is None:
+                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id))
+                continue # skip this spacecraft since propagation output is not available. 
+
+            spc_state_cart_file = spc_prop_out_info.stateCartFile
+            spc_dir = os.path.dirname(spc_state_cart_file) + '/' ## directory in which the state-file is written
+
+            # loop over all the instruments and modes (per instrument) and calculate the corresponding coverage, data-metrics
+            if spc.instrument:
+                for instru_idx, instru in enumerate(spc.instrument):
+
+                    for mode_idx, mode in enumerate(instru.mode):                                        
+                        
+                        if self.settings.coverageType == "GRID COVERAGE":
+                            if self.grid is None:
+                                warnings.warn('Grid not specified, skipping Grid Coverage calculations.')
+                                continue
+                            # iterate over multiple grids
+                            for grid_idx, grid in enumerate(self.grid):
+                                acc_fl = spc_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                cov_calc = GridCoverage(grid=grid, spacecraft=spc, state_cart_file=spc_state_cart_file)
+                                # For SAR instruments pick only the time-instants at the middle of access-intervals
+                                if instru._type == 'Synthetic Aperture Radar':
+                                    filter_mid_acc = True
+                                else:
+                                    filter_mid_acc = False
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl)
+                                oi.append(x) 
+
+                        elif self.settings.coverageType == "POINTING OPTIONS COVERAGE":
+                            acc_fl = spc_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '.csv'
+                            cov_calc = PointingOptionsCoverage(spacecraft=spc, state_cart_file=spc_state_cart_file)
+                            x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl)
+                            oi.append(x) 
+
+                        elif self.settings.coverageType == "POINTING OPTIONS WITH GRID COVERAGE":
+                            if self.grid is None:
+                                warnings.warn('Grid not specified, skipping Pointing Options With Grid Coverage calculations.')
+                                continue
+                            # iterate over multiple grids
+                            for grid_idx, grid in enumerate(self.grid):
+
+                                acc_fl = spc_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                cov_calc = PointingOptionsWithGridCoverage(grid=grid, spacecraft=spc, state_cart_file=spc_state_cart_file)
+
+                                # For SAR instruments pick only the time-instants at the middle of access-intervals
+                                if instru._type == 'Synthetic Aperture Radar':
+                                    filter_mid_acc = True
+                                else:
+                                    filter_mid_acc = False
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, filter_mid_acc=filter_mid_acc)
+                                oi.append(x) 
+                        
+        # delete any output-info object(s) associated with a previous execution
+        self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)            
+        # add output-info object(s) to the instance variable 
+        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)       
+
+        return oi
+
+                    
+    def execute_datametrics_calculator(self):
+        """ Execute datametrics calculation for all the spacecrafts in the mission. 
+            Orbit propagation and coverage calculation for all spacecrafts should be executed prior to this operation. 
+            The ``outputInfo`` instance variable shall be referred to locate the state and access files produced by orbit propagation and coverage calculations. 
+            The results are written in the same folder as that of the spacecraft-state files.
+            The output-info instance variable is updated.
+            The list of output-info objects associated with this execution is returned.
+
+        """
+        oi = [] # list of output-info objects associated with this execution
+        # loop over all available spacecrafts
+        for spc_idx, spc in enumerate(self.spacecraft):
+
+            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
+                                                                                spacecraft_id=spc._id)
+            if spc_prop_out_info is None:
+                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id ))
+                continue # skip this spacecraft since propagation output is not available. 
+
+            spc_state_cart_file = spc_prop_out_info.stateCartFile
+            spc_dir = os.path.dirname(spc_state_cart_file) + '/' ## directory in which the state-file is written
+
+            # loop over all the instruments and modes (per instrument) and calculate the corresponding coverage, data-metrics
+            if spc.instrument:
+                for instru_idx, instru in enumerate(spc.instrument):
+
+                    for mode_idx, mode in enumerate(instru.mode): 
+
+                        if self.settings.coverageType == "GRID COVERAGE":         
+
+                            for grid_idx, grid in enumerate(self.grid):     
+
+                                cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
+                                                                                coverage_type= "GRID COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=grid._id)
+                                                                               
+
+                                dm_file = spc_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
+                                x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id)   
+                                oi.append(x)      
+                                            
+                        elif self.settings.coverageType == "POINTING OPTIONS WITH GRID COVERAGE":
+
+                            for grid_idx, grid in enumerate(self.grid):     
+
+                                cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
+                                                                                coverage_type= "POINTING OPTIONS WITH GRID COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=grid._id)
+                                                                               
+
+                                dm_file = spc_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
+                                dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
+                                x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id) 
+                                oi.append(x)
+
+                        elif self.settings.coverageType == "POINTING OPTIONS COVERAGE":
+
+                            cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
+                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
+                                                                                coverage_type= "POINTING OPTIONS COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=None)
+
+                            dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
+                            x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id) 
+                            oi.append(x)
+                    
+        # delete any output-info object(s) associated with a previous execution
+        self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)            
+        # add output-info(s) to the instance variable 
+        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)    
+
+        return oi           
+
+    def execute_archived(self):
+        """ Execute a mission where all the spacecrafts are propagated, (field-of-regard) coverage calculated for all spacecraft-instrument-modes, 
+            ground-station contact-periods computed between all spacecraft-ground-station pairs and intersatellite contact-periods
+            computed for all possible spacecraft pairs.
+
+            .. note:: In case of *GRID COVERAGE* calculation, the field-of-regard is used (and not the scene-field-of-view). In case of SAR instruments and coverage calculations
+                        involving grid (i.e. *GRID COVERAGE* and *POINTING OPTIONS WITH GRID COVERAGE*), only the access at the middle of a continuous access interval is shown
+                        (see :ref:`correction_of_access_files`). 
+
+            :return: Mission output info as an heterogenous list of output info objects from propagation, coverage and contact calculations.
+            :rtype: list, :class:`orbitpy.propagate.PropagatorOutputInfo`, :class:`orbitpy.coveragecalculator.CoverageOutputInfo`, :class:`orbitpy.contactfinder.ContactFinderOutputInfo`
+
+        """           
         out_info = [] # list to accululate info objects of the various executions        
 
-        # Generate and save auto-girds to files
+        # Save auto-grids to files
         for grid_idx, grid in enumerate(self.grid):
             if grid[grid_idx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
                 fp = self.settings.outDir + '/grid' + str(grid_idx) # save the file with name according to the index. TODO: check that there is no-conflict with an custom-grid file.
@@ -668,339 +1082,6 @@ class Mission(Entity):
                 out_info.append(x)
     
         return out_info
-    
-    def add_coverage_grid_from_dict(self, grid_dict):
-        """ Add coverage grid(s) from the input dictionary. Update the output-info instanace variable. Auto-grids shall be generated in the ``execute_coverage_calculator`` function.
-
-            :param grid_dict: Dictionary with the grid specifications. Grid can be of type 'autoGrid' or 'customGrid'. 
-                                Refer to :class:`orbitpy.grid.Grid.from_autogrid_dict` and :class:`orbitpy.grid.Grid.from_customgrid_dict` for description 
-                                of the expected key/value pairs of the dictionary.
-            :paramtype grid_dict: dict or list, dict
-
-        """    
-        grid = []    
-        if grid_dict:
-            # make into list of dictionaries if not already list
-            if not isinstance(grid_dict, list):
-                grid_dict = [grid_dict]
-            # iterate through the list of grids            
-            for gd in grid_dict:
-                grid_type = Grid.Type.get(gd['@type'])
-                if ((grid_type==Grid.Type.AUTOGRID) and (gd.get('gridRes', None) is None)):
-                    # calculate grid resolution factor
-                    if self.spacecraft:
-                        gridRes = orbitpy.grid.compute_grid_res(self.spacecraft, self.settings.gridResFactor)
-                        print('Auto-calculated grid resolution is %f using a grid-resolution factor of %f.' %(gridRes, self.settings.gridResFactor))
-                    else:
-                        gridRes = 1 # 1 deg grid-resolution in case of no spacecraft.
-                    gd['gridRes'] = gridRes
-
-                grid.append(Grid.from_dict(gd))
-
-        if isinstance(self.grid, Grid):
-            self.grid = [self.grid] # make into list
-        if isinstance(self.grid, list):
-            self.grid.extend(grid)
-        else:
-            self.grid = grid
-        
-        self.save_auto_grid()
-        
-        return
-
-    def save_auto_grid(self):
-        """ Save auto-grid data to file.
-        """
-        # Save auto-girds to files
-        for grid_idx, grid in enumerate(self.grid):
-            if grid.filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
-                fp = self.settings.outDir + '/grid' + str(grid_idx) # save the file with name according to the index.
-                oi = grid.write_to_file(fp)
-                # delete any output-info object associated with a previous execution
-                self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)            
-                # add output-info to the instance variable 
-                self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
-            
-    def execute_propagation(self):
-        """ Execute orbit propagation for all spacecrafts in the mission.
-        """
-        # execute orbit propagation for all satellites in the mission
-        for spc_idx, spc in enumerate(self.spacecraft):
-            
-            # make satellite directory
-            sat_dir = self.settings.outDir + '/sat' + str(spc_idx) + '/'
-            if os.path.exists(sat_dir):
-                shutil.rmtree(sat_dir)
-            os.makedirs(sat_dir)
-
-            state_cart_file = sat_dir + 'state_cartesian.csv'
-            state_kep_file = sat_dir + 'state_keplerian.csv'
-            oi = self.propagator.execute(spc, self.epoch, state_cart_file, state_kep_file, self.duration)
-
-            # delete any output-info object associated with a previous execution
-            self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)
-        
-            # add output-info to the instance variable 
-            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
-
-        return
-    
-    def execute_intersatellite_contact_finder(self):
-        """ Find contacts between spacecrafts in the mission. Orbit propagation for all spacecrafts should be 
-            executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
-            state files produced from orbit propagation.
-
-        """
-        # make folder to store the results
-        intersat_comm_dir = self.settings.outDir + '/comm/'
-        if os.path.exists(intersat_comm_dir):
-            shutil.rmtree(intersat_comm_dir)
-        os.makedirs(intersat_comm_dir)
-
-        # Iterate over all spacecrafts in the mission. If the state-file of a spacecraft cannot be located then the spacecraft is not considered.
-        for spc1_idx in range(0, len(self.spacecraft)):
-            spc1 = self.spacecraft[spc1_idx]
-            spc1_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
-                                                                                spacecraft_id=spc1._id)
-            if spc1_prop_out_info is None:
-                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc1._id ))
-                continue # skip this spacecraft since propagation output is not available. 
-
-            spc1_state_cart_file = spc1_prop_out_info.stateCartFile
-            
-            # loop over the rest of the spacecrafts in the list (i.e. from the current spacecraft to the last spacecraft in the list)
-            for spc2_idx in range(spc1_idx+1, len(self.spacecraft)):
-                
-                spc2 = self.spacecraft[spc2_idx]
-                spc2_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                    out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
-                                                                                    spacecraft_id=spc2._id)
-                if spc2_prop_out_info is None:
-                    print("Skipping spacecraft with id %s since propagation state output is not available."%(spc2._id ))
-                    continue # skip this spacecraft since propagation output is not available. 
-
-                spc2_state_cart_file = spc2_prop_out_info.stateCartFile
-                                
-                out_intersat_filename = 'sat'+str(spc1_idx)+'_to_sat'+str(spc2_idx)+'.csv'
-                oi = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaque_atmos_height)
-                       
-                # delete any output-info object associated with a previous execution
-                self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)
-
-                # add output-info to the instance variable
-                self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
-
-        return
-    
-    def execute_groundstation_contact_finder(self):
-        """ Find contacts between spacecrafts and ground-stations in the mission. Orbit propagation for all spacecrafts should be 
-            executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
-            state files produced from orbit propagation. The results are written in the same folder as that of the spacecraft-state files.
-            The output-info instance variable is updated.
-
-        """
-        # loop over all available spacecrafts
-        for spc_idx, spc in enumerate(self.spacecraft):
-
-            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
-                                                                                spacecraft_id=spc._id)
-            if spc_prop_out_info is None:
-                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id ))
-                continue # skip this spacecraft since propagation output is not available. 
-
-            spc_state_cart_file = spc_prop_out_info.stateCartFile
-            spc_dir = os.path.dirname(spc_state_cart_file) ## directory in which the state-file is written
-
-            # loop over all the ground-stations and calculate contacts
-            if self.groundStation:
-                for gnd_stn_idx, gnd_stn in enumerate(self.groundStation):
-                    
-                    out_gnd_stn_file = 'gndStn'+str(gnd_stn_idx)+'_contacts.csv'
-                    oi = ContactFinder.execute(spc, gnd_stn, spc_dir, spc_state_cart_file, None, out_gnd_stn_file, ContactFinder.OutType.INTERVAL, 0)
-
-                    # delete any output-info object associated with a previous execution
-                    self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)
-
-                    # add output-info to the instance variable
-                    self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
-                    
-        return
-    
-    def execute_eclipse_finder(self):
-        """ Find eclipse times for the spacecrafts in the mission. Orbit propagation for all spacecrafts should be 
-            executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
-            state files produced from orbit propagation. The results are written in the same folder as that of the spacecraft-state files.
-            The output-info instance variable is updated.
-
-        """
-        # loop over all available spacecrafts
-        for spc_idx, spc in enumerate(self.spacecraft):
-
-            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
-                                                                                spacecraft_id=spc._id)
-            if spc_prop_out_info is None:
-                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id ))
-                continue # skip this spacecraft since propagation output is not available. 
-
-            spc_state_cart_file = spc_prop_out_info.stateCartFile
-            spc_dir = os.path.dirname(spc_state_cart_file) ## directory in which the state-file is written
-
-            out_eclipses_file = 'eclipses.csv'
-            oi = EclipseFinder.execute(spc, spc_dir, spc_state_cart_file, out_eclipses_file, ContactFinder.OutType.INTERVAL)
-
-            # delete any output-info object associated with a previous execution
-            self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)
-
-            # add output-info to the instance variable
-            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)
-                    
-        return
-
-    def execute_coverage_calculator(self):
-        """ Execute coverage calculation for all the spacecrafts in the mission. The coverage-calculation type is indicated in the ``settings`` instance variable.
-            Orbit propagation for all spacecrafts should be executed prior to this operation. The ``outputInfo`` instance variable shall be referred to locate the 
-            state files produced from orbit propagation. The results are written in the same folder as that of the spacecraft-state files.
-            The output-info instance variable is updated.
-
-        """
-        # loop over all available spacecrafts
-        for spc_idx, spc in enumerate(self.spacecraft):
-
-            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
-                                                                                spacecraft_id=spc._id)
-            if spc_prop_out_info is None:
-                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id ))
-                continue # skip this spacecraft since propagation output is not available. 
-
-            spc_state_cart_file = spc_prop_out_info.stateCartFile
-            spc_dir = os.path.dirname(spc_state_cart_file) + '/' ## directory in which the state-file is written
-
-            # loop over all the instruments and modes (per instrument) and calculate the corresponding coverage, data-metrics
-            if spc.instrument:
-                for instru_idx, instru in enumerate(spc.instrument):
-
-                    for mode_idx, mode in enumerate(instru.mode):                        
-                        
-                        if self.settings.coverageType == "GRID COVERAGE":
-                            if self.grid is None:
-                                warnings.warn('Grid not specified, skipping Grid Coverage calculations.')
-                                continue
-                            # iterate over multiple grids
-                            for grid_idx, grid in enumerate(self.grid):
-                                acc_fl = spc_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
-                                cov_calc = GridCoverage(grid=grid, spacecraft=spc, state_cart_file=spc_state_cart_file)
-                                # For SAR instruments pick only the time-instants at the middle of access-intervals
-                                if instru._type == 'Synthetic Aperture Radar':
-                                    filter_mid_acc = True
-                                else:
-                                    filter_mid_acc = False
-                                oi = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl)
-
-                        elif self.settings.coverageType == "POINTING OPTIONS COVERAGE":
-                            acc_fl = spc_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '.csv'
-                            cov_calc = PointingOptionsCoverage(spacecraft=spc, state_cart_file=spc_state_cart_file)
-                            oi = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl)
-
-                        elif self.settings.coverageType == "POINTING OPTIONS WITH GRID COVERAGE":
-                            if self.grid is None:
-                                warnings.warn('Grid not specified, skipping Pointing Options With Grid Coverage calculations.')
-                                continue
-                            # iterate over multiple grids
-                            for grid_idx, grid in enumerate(self.grid):
-
-                                acc_fl = spc_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
-                                cov_calc = PointingOptionsWithGridCoverage(grid=grid, spacecraft=spc, state_cart_file=spc_state_cart_file)
-
-                                # For SAR instruments pick only the time-instants at the middle of access-intervals
-                                if instru._type == 'Synthetic Aperture Radar':
-                                    filter_mid_acc = True
-                                else:
-                                    filter_mid_acc = False
-                                oi = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, filter_mid_acc=filter_mid_acc)
-                        
-                        # delete any output-info object associated with a previous execution
-                        self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=oi)            
-                        # add output-info to the instance variable 
-                        self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)       
-
-                    
-    def execute_datametrics_calculator(self):
-        """ Execute datametrics calculation for all the spacecrafts in the mission. 
-            Orbit propagation and coverage calculation for all spacecrafts should be executed prior to this operation. 
-            The ``outputInfo`` instance variable shall be referred to locate the state and access files produced by orbit propagation and coverage calculations. 
-            The results are written in the same folder as that of the spacecraft-state files.
-            The output-info instance variable is updated.
-
-        """
-        # loop over all available spacecrafts
-        for spc_idx, spc in enumerate(self.spacecraft):
-
-            spc_prop_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                out_info_type=OutputInfoUtility.OutputInfoType.PropagatorOutputInfo.value, 
-                                                                                spacecraft_id=spc._id)
-            if spc_prop_out_info is None:
-                print("Skipping spacecraft with id %s since propagation state output is not available."%(spc._id ))
-                continue # skip this spacecraft since propagation output is not available. 
-
-            spc_state_cart_file = spc_prop_out_info.stateCartFile
-            spc_dir = os.path.dirname(spc_state_cart_file) + '/' ## directory in which the state-file is written
-
-            # loop over all the instruments and modes (per instrument) and calculate the corresponding coverage, data-metrics
-            if spc.instrument:
-                for instru_idx, instru in enumerate(spc.instrument):
-
-                    for mode_idx, mode in enumerate(instru.mode): 
-
-                        oi = []
-                        if self.settings.coverageType == "GRID COVERAGE":         
-
-                            for grid_idx, grid in enumerate(self.grid):     
-
-                                cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
-                                                                                coverage_type= "GRID COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=grid._id)
-                                                                               
-
-                                dm_file = spc_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
-                                dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
-                                _oi = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id)   
-                                oi.append(_oi)      
-                                            
-                        elif self.settings.coverageType == "POINTING OPTIONS WITH GRID COVERAGE":
-
-                            for grid_idx, grid in enumerate(self.grid):     
-
-                                cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
-                                                                                coverage_type= "POINTING OPTIONS WITH GRID COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=grid._id)
-                                                                               
-
-                                dm_file = spc_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
-                                dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
-                                _oi = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id) 
-                                oi.append(_oi)
-
-                        elif self.settings.coverageType == "POINTING OPTIONS COVERAGE":
-
-                            cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
-                                                                                out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
-                                                                                coverage_type= "POINTING OPTIONS COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=None)
-
-                            dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
-                            _oi = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id) 
-                            oi.append(_oi)
-                    
-                        # store the output-info objects in the instance outputInfo variable
-                        for _oi in oi:
-                            # delete any output-info object associated with a previous execution
-                            self.outputInfo = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=self.outputInfo, other_out_info_object=_oi)            
-                            # add output-info to the instance variable 
-                            self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, _oi)            
-
 
 
 

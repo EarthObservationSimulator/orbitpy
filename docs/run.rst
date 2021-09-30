@@ -14,6 +14,7 @@ It performs the following functions:
 2. Calculate coverage for all the satellites in the mission.
 3. Calculate data metrics corresponding to each possible observation (from coverage calculations). 
 4. Calculate ground-station and inter-satellite contact intervals.
+5. Calculate eclipse periods for each satellite.
 
 The ``run_mission.py`` script simply invokes the :class:`orbitpy.mission` module. Please refer to :ref:`mission_module` for description
 of valid JSON key/value pairs which can be used in the mission specifications JSON file.

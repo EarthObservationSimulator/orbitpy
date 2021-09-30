@@ -16,16 +16,14 @@ def main(user_dir):
         mission_dict = json.load(mission_specs)
 
     if mission_dict.get("settings", None) is not None:
-        if mission_dict["settings"].get("outDir", None) is not None:
-            pass
-        else:
-            mission_dict["settings"]["outDir"] = user_dir
+        mission_dict["settings"]["outDir"] = user_dir # force change of user-dir
     else:
         mission_dict["settings"] = {}
         mission_dict["settings"]["outDir"] = user_dir
 
     mission = Mission.from_json(mission_dict)   
 
+    print("Start mission.")
     out_info = mission.execute()
 
     print(out_info)

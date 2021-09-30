@@ -852,8 +852,8 @@ class OutputInfoUtility:
             :param out_info_list: List of output-info objects.
             :paramtype: list, output-info objects
 
-            :param other_out_info_object: Output-info object with which comparison for loose-equality shall be made.
-            :paramtype other_out_info_object: output-info object
+            :param other_out_info_object: Output-info object(s) with which comparison for loose-equality shall be made. Can be a list.
+            :paramtype other_out_info_object: output-info object or list, output-info object
             
             :return: (Potentially) reduced list of output-info objects with an deleted object. 
             :rtype: list, output-info objects
@@ -865,9 +865,15 @@ class OutputInfoUtility:
         if not isinstance(out_info_list, list):
             out_info_list = [out_info_list] # make into list
 
-        for indx, oi in enumerate(out_info_list):
-            if oi.check_loose_equality(other_out_info_object):
-                del out_info_list[indx] # delete the corresponding output-info object
-                break
+        if other_out_info_object is None:
+            return out_info_list
+
+        if not isinstance(other_out_info_object, list):
+            other_out_info_object = [other_out_info_object]  # make into list
+
+        for ooi in other_out_info_object:
+            for indx, oi in enumerate(out_info_list):
+                if oi.check_loose_equality(ooi):
+                    del out_info_list[indx] # delete the corresponding output-info object
         
         return out_info_list
