@@ -644,7 +644,7 @@ class Mission(Entity):
             # Save auto-grids to files
             for grid_idx, grid in enumerate(self.grid):
                 if grid.filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
-                    fp = self.settings.outDir + '/grid' + str(grid_idx) # save the file with name according to the index.
+                    fp = self.settings.outDir + '/grid' + str(grid_idx) + '.csv' # save the file with name according to the index.
                     x = grid.write_to_file(fp)
                     oi.append(x)
 
