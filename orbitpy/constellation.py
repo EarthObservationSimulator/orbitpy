@@ -276,7 +276,7 @@ class WalkerDeltaConstellation(Entity):
         print("orb_id, sma, ecc, inc, raan, aop, ta")
         orbits = [] #  list of orbits
         for pl_i in range(0,num_planes):
-            raan = pl_i * 180.0/num_planes
+            raan = pl_i * 360.0/num_planes
             ta_ref = pl_i * rel_spc * 360.0/num_sats
             for sat_i in range(0,num_sats_pp):
                 if _id is not None:

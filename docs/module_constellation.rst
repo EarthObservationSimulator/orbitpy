@@ -32,7 +32,9 @@ Examples
          wd_model = factory.get_constellation_model(specs) # initialization
          print(wd_model.generate_orbits())
 
-         >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
+         >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -4858.713737315466, 'y': 3435.629431500001, 'z': 3435.6294315, 'vx': -5.388312480793739, 'vy': -3.8101122943213612, 'vz': -3.810112294321361}, '@id': 'abc_11'}), 
+             OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 4868.440891944725, 'y': -3442.5075685000006, 'z': -3442.5075685, 'vx': 5.377546621691256, 'vy': 3.8024996823446955, 'vz': 3.8024996823446946}, '@id': 'abc_12'})]
+
 
    .. code-block:: python
 
@@ -43,7 +45,9 @@ Examples
          wd_model = WalkerDeltaConstellation( date=date, numberSatellites=2, numberPlanes=1, relativeSpacing=1, alt=500, ecc=0.001, inc=45, aop=135, _id="abc")
          print(wd_model.generate_orbits())
 
-         >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2451545.0}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 7078.0, 'y': 0.0, 'z': 0.0, 'vx': -0.0, 'vy': 7.504359112788965, 'vz': 0.0}, '@id': 0})]     
+         >> [OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': -4858.713737315466, 'y': 3435.629431500001, 'z': 3435.6294315, 'vx': -5.388312480793739, 'vy': -3.8101122943213612, 'vz': -3.810112294321361}, '@id': 'abc_11'}), 
+             OrbitState.from_dict({'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}, 'state': {'@type': 'CARTESIAN_EARTH_CENTERED_INERTIAL', 'x': 4868.440891944725, 'y': -3442.5075685000006, 'z': -3442.5075685, 'vx': 5.377546621691256, 'vy': 3.8024996823446955, 'vz': 3.8024996823446946}, '@id': 'abc_12'})]
+
 
 2. Working with a custom constellation.
 

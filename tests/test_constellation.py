@@ -191,12 +191,12 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
         self.assertAlmostEqual(plane5_raan, orbit_dict[14]["raan"])
 
         # the raans are uniformly spaced
-        raan_spacing = 36
+        raan_spacing = 72
         self.assertAlmostEqual(plane2_raan-plane1_raan, raan_spacing)
         self.assertAlmostEqual(plane3_raan-plane2_raan, raan_spacing)
         self.assertAlmostEqual(plane4_raan-plane3_raan, raan_spacing)
         self.assertAlmostEqual(plane5_raan-plane4_raan, raan_spacing)
-        self.assertAlmostEqual(plane5_raan-plane1_raan, 180 - raan_spacing)
+        self.assertAlmostEqual(plane5_raan-plane1_raan, 360 - raan_spacing)
 
         # check inplane spacing between satellites
         in_plane_spc = 120
@@ -264,10 +264,10 @@ class TestWalkerDeltaConstellation(unittest.TestCase):
         self.assertAlmostEqual(plane3_raan, orbit_dict[5]["raan"])
 
         # the raans are uniformly spaced
-        raan_spacing = 60
+        raan_spacing = 120
         self.assertAlmostEqual(plane2_raan-plane1_raan, raan_spacing)
         self.assertAlmostEqual(plane3_raan-plane2_raan, raan_spacing)
-        self.assertAlmostEqual(plane3_raan-plane1_raan, 180 - raan_spacing)
+        self.assertAlmostEqual(plane3_raan-plane1_raan, 360 - raan_spacing)
 
         # check inplane spacing between satellites
         in_plane_spc = 180
