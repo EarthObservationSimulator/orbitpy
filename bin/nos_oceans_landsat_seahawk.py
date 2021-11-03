@@ -15,7 +15,7 @@ import orbitpy
 
 start_time = time.process_time()    
 
-wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/nos_oceans_demo/"
+wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/nos_oceans_landsat_seahawk/"
 
 # define mission epoch
 mission_epoch_dict = {"@type":"GREGORIAN_UTC", "year":2018, "month":7, "day":1, "hour":0, "minute":0, "second":0}
