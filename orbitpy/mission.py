@@ -252,6 +252,7 @@ class Mission(Entity):
                     # calculate grid resolution factor
                     if spacecraft:
                         gridRes = orbitpy.grid.compute_grid_res(spacecraft, settings.gridResFactor)
+                        print(gridRes)
                     else:
                         gridRes = 1 # 1 deg grid-resolution in case of no spacecraft.
                     gd['gridRes'] = gridRes
@@ -264,7 +265,7 @@ class Mission(Entity):
         if grid: # Save auto-grids to files. If custom-grid, then file already exists and is not re-written.
             for indx, val in enumerate(grid):
                 if grid[indx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
-                    fp = settings.outDir + '/grid' + str(indx) # save the file with name according to the index. TODO: check that there is no-conflict with an custom-grid file.
+                    fp = settings.outDir + '/grid' + str(indx)  + '.csv' # save the file with name according to the index. TODO: check that there is no-conflict with an custom-grid file.
                     oi = grid[indx].write_to_file(fp)
                     outputInfo.append(oi)
 
@@ -293,6 +294,7 @@ class Mission(Entity):
                 if output_info_type == OutputInfoUtility.OutputInfoType.GridOutputInfo:
                     outputInfo.append(GridOutputInfo.from_dict(oi_d))
 
+        
         return Mission(epoch = epoch, # 25 Feb 2021 0:0:0 default startDate
                        duration = d.get('duration') if d.get('duration') is not None else 1, # 1 day default
                        spacecraft = spacecraft,
@@ -875,7 +877,6 @@ class Mission(Entity):
         self.outputInfo = orbitpy.util.add_to_list(self.outputInfo, oi)       
 
         return oi
-
                     
     def execute_datametrics_calculator(self):
         """ Execute datametrics calculation for all the spacecrafts in the mission. 
@@ -908,6 +909,9 @@ class Mission(Entity):
 
                         if self.settings.coverageType == "GRID COVERAGE":         
 
+                            if self.grid is None:
+                                warnings.warn('Grid not specified, skipping Grid Coverage, Data metrics calculations.')
+                                continue
                             for grid_idx, grid in enumerate(self.grid):     
 
                                 cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
@@ -922,6 +926,9 @@ class Mission(Entity):
                                             
                         elif self.settings.coverageType == "POINTING OPTIONS WITH GRID COVERAGE":
 
+                            if self.grid is None:
+                                warnings.warn('Grid not specified, skipping Grid Coverage, Data metrics calculations.')
+                                continue
                             for grid_idx, grid in enumerate(self.grid):     
 
                                 cov_out_info = orbitpy.util.OutputInfoUtility.locate_output_info_object_in_list(out_info_list=self.outputInfo, 
@@ -940,6 +947,7 @@ class Mission(Entity):
                                                                                 out_info_type=OutputInfoUtility.OutputInfoType.CoverageOutputInfo.value, 
                                                                                 coverage_type= "POINTING OPTIONS COVERAGE", spacecraft_id=spc._id,  instru_id=instru._id, mode_id=mode._id, grid_id=None)
 
+                            dm_file = spc_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '.csv'
                             dm_calc = DataMetricsCalculator(spacecraft=spc, state_cart_file=spc_state_cart_file, access_file_info=AccessFileInfo(instru._id, mode._id, cov_out_info.accessFile))                    
                             x = dm_calc.execute(out_datametrics_fl=dm_file, instru_id=instru._id, mode_id=mode._id) 
                             oi.append(x)
@@ -969,7 +977,7 @@ class Mission(Entity):
         # Save auto-grids to files
         for grid_idx, grid in enumerate(self.grid):
             if grid[grid_idx].filepath is None: # must be an auto-grid configuration, so filepath instance variable is None
-                fp = self.settings.outDir + '/grid' + str(grid_idx) # save the file with name according to the index. TODO: check that there is no-conflict with an custom-grid file.
+                fp = self.settings.outDir + '/grid' + str(grid_idx)  # save the file with name according to the index. TODO: check that there is no-conflict with an custom-grid file.
                 oi = grid[grid_idx].write_to_file(fp)
                 # delete any output-info object associated with a previous execution
                 out_info = orbitpy.util.OutputInfoUtility.delete_output_info_object_in_list(out_info_list=out_info, other_out_info_object=oi)            

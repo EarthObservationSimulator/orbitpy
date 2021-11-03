@@ -1,0 +1,175 @@
+[
+    {
+        "@id": "landsat", "name": "Landsat-8",
+        "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":6, "day":30, "hour":18, "minute":44, "second":2.812704},
+        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7.080666116467540e+03, "ecc": 0.00012160, "inc": 98.2231, "raan": 251.6008, "aop": 92.0544, "ta": 268.0792}
+        },    
+        "instrument": [{
+            "@type": "Passive Optical Scanner", 
+            "@id": "tirs_b1",
+            "name": "Landsat 8 TIRS Band1",
+            "fieldOfViewGeometry": {
+                "shape": "RECTANGULAR",
+                "angleHeight": 0.0081,
+                "angleWidth": 15
+            },
+            "sceneFieldOfViewGeometry": {
+                "shape": "RECTANGULAR",
+                "angleHeight": 15,
+                "angleWidth": 15
+            },
+            "scanTechnique": "PUSHBROOM",
+            "orientation": {
+                "referenceFrame": "SC_BODY_FIXED",
+                "convention": "REF_FRAME_ALIGNED"
+            },
+            "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":0},
+            "numberDetectorRows": 1,
+            "numberDetectorCols": 1850,
+            "detectorWidth": 25e-6,
+            "focalLength": 0.178,
+            "operatingWavelength": 10.9e-6,
+            "bandwidth": 0.6e-6,
+            "quantumEff": 0.025,
+            "targetBlackBodyTemp": 290,
+            "bitsPerPixel": 12,
+            "opticsSysEff": 0.60 ,
+            "numOfReadOutE":  20,
+            "apertureDia":  0.1085366,
+            "Fnum":  1.64,
+            "maxDetectorExposureTime": 3.49e-3,
+            "atmosLossModel": "LOWTRAN7"             
+        },
+        {   "@type": "Passive Optical Scanner",
+            "id": "oli_blue",
+            "name": "Landsat 8 OLI Blue band",
+            "fieldOfViewGeometry": {
+                "shape": "RECTANGULAR",
+                "angleHeight": 0.00244080020725731,
+                "angleWidth": 15
+            },
+            "sceneFieldOfViewGeometry": {
+                "shape": "RECTANGULAR",
+                "angleHeight": 15,
+                "angleWidth": 15
+            },
+            "scanTechnique": "PUSHBROOM",
+            "orientation": {
+                "referenceFrame": "SC_BODY_FIXED",
+                "convention": "REF_FRAME_ALIGNED"
+            },
+            "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":0},
+            "dataRate":  384,
+            "numberDetectorRows": 1,
+            "numberDetectorCols": 6146,
+            "detectorWidth": 36e-6,
+            "focalLength": 845.1e-3,
+            "operatingWavelength": 482e-9,
+            "bandwidth": 65e-9,
+            "quantumEff":  0.85,
+            "targetBlackBodyTemp": 290,
+            "bitsPerPixel": 12,
+            "opticsSysEff": 0.90 ,
+            "numOfReadOutE":  20,
+            "apertureDia": 0.1320,
+            "Fnum":  6.4,
+            "maxDetectorExposureTime": 3.6e-3,
+            "atmosLossModel": "LOWTRAN7"
+        }    
+        ]     
+    },
+    {
+    "@id": "seahawk1", "name": "SeaHawk1",
+    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":6, "day":30, "hour":20, "minute":44, "second":47.875200},
+    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6.959294563882585e+03, "ecc": 0.00111610, "inc": 97.7390, "raan": 253.6366, "aop": 280.7821, "ta": 79.2143}
+    },    
+    "instrument": {
+        "@type": "Passive Optical Scanner",
+        "@id": "hawkeye_510nm",
+        "name": "HawkEye 510nm band",
+        "fieldOfViewGeometry": {
+            "shape": "RECTANGULAR",
+            "angleHeight":  0.012732395447352,
+            "angleWidth": 22.6
+        },
+        "sceneFieldOfViewGeometry": {
+            "shape": "RECTANGULAR",
+            "angleHeight":  15,
+            "angleWidth": 22.6
+        },
+        "scanTechnique": "PUSHBROOM",
+        "orientation": {
+            "referenceFrame": "SC_BODY_FIXED",
+            "convention": "REF_FRAME_ALIGNED"
+        },
+        "numberDetectorRows": 1,
+        "numberDetectorCols": 1800,
+        "detectorWidth": 10e-6,
+        "focalLength": 45e-3,
+        "operatingWavelength":  510e-9,
+        "bandwidth":  20e-9,
+        "quantumEff":  0.75,
+        "targetBlackBodyTemp": 290,
+        "bitsPerPixel": 12,
+        "opticsSysEff":  0.55,
+        "numOfReadOutE":   12,
+        "apertureDia":  9e-3,
+        "Fnum":  5,
+        "maxDetectorExposureTime": 16e-3,
+        "atmosLossModel": "LOWTRAN7",
+        "mode": [ {"@id":0, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":0}},
+            {"@id":1, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":22.6}},
+            {"@id":2, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":-22.6}},
+            {"@id":3, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":45.2}},
+            {"@id":4, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":-45.2}}
+        ]             
+    }
+    },
+    {
+    "@id": "seahawk2", "name": "SeaHawk2",
+    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":7, "day":1, "hour":3, "minute":10, "second":13.230048},
+    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6.959294563882585e+03, "ecc": 0.00111610, "inc": 97.7390, "raan": 253.6366, "aop": 280.7821, "ta": 259.2143}
+    },    
+    "instrument": {
+        "@type": "Passive Optical Scanner",
+        "@id": "hawkeye_510nm",
+        "name": "HawkEye 510nm band",
+        "fieldOfViewGeometry": {
+            "shape": "RECTANGULAR",
+            "angleHeight":  0.012732395447352,
+            "angleWidth": 22.6
+        },
+        "sceneFieldOfViewGeometry": {
+            "shape": "RECTANGULAR",
+            "angleHeight":  15,
+            "angleWidth": 22.6
+        },
+        "scanTechnique": "PUSHBROOM",
+        "orientation": {
+            "referenceFrame": "SC_BODY_FIXED",
+            "convention": "REF_FRAME_ALIGNED"
+        },
+        "numberDetectorRows": 1,
+        "numberDetectorCols": 1800,
+        "detectorWidth": 10e-6,
+        "focalLength": 45e-3,
+        "operatingWavelength":  510e-9,
+        "bandwidth":  20e-9,
+        "quantumEff":  0.75,
+        "targetBlackBodyTemp": 290,
+        "bitsPerPixel": 12,
+        "opticsSysEff":  0.55,
+        "numOfReadOutE":   12,
+        "apertureDia":  9e-3,
+        "Fnum":  5,
+        "maxDetectorExposureTime": 16e-3,
+        "atmosLossModel": "LOWTRAN7",
+        "mode": [ {"@id":0, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":0}},
+            {"@id":1, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":22.6}},
+            {"@id":2, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":-22.6}},
+            {"@id":3, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":45.2}},
+            {"@id":4, "pointingOption": {"referenceFrame": "NADIR_POINTING", "convention": "SIDE_LOOK", "sideLookAngle":-45.2}}
+        ]             
+    }
+}
+]

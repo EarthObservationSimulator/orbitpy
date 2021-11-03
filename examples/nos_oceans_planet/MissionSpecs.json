@@ -271,5 +271,5 @@
                     }  
         }
     ],
-    "settings": {"outDir": "temp/", "coverageType": "POINTING OPTIONS COVERAGE", "propTimeResFactor": 0.5}
+    "settings": {"coverageType": "POINTING OPTIONS COVERAGE", "propTimeResFactor": 0.5, "gridResFactor": 0.9}
 }
