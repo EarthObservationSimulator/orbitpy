@@ -14,7 +14,7 @@ add_subdirectory(extern/pybind11)
 add_subdirectory(extern/gmatutil)
 add_subdirectory(lib/propcov-cpp)
 
-include_directories(BEFORE extern/gmatutil/include/ extern/gmatutil/util/interpolator extern/gmatutil/util/matrixoperations)
+include_directories(BEFORE extern/gmatutil/include/ extern/gmatutil/util/interpolator extern/gmatutil/util/matrixoperations lib/propcov-cpp lib/propcov-cpp/polygon)
 
 pybind11_add_module(propcov MODULE src/main.cpp)
 

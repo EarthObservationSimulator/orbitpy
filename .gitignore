@@ -7,7 +7,7 @@
 *.exe
 core
 *.a
-
+*.d
 *.csv
 
 # compiled Python

@@ -1,7 +1,7 @@
 #ifndef GMATPolygon_hpp
 #define GMATPolygon_hpp
 
-#include "CustomSensor.hpp"
+#include "../CustomSensor.hpp"
 #include "SlicedPolygon.hpp"
 
 class GMATPolygon : public SlicedPolygon

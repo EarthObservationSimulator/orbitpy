@@ -12,6 +12,9 @@ https://pybind11.readthedocs.io/en/stable/basics.html
 
 The directory structure and build is based on the *cmake_example* git-repo available in https://github.com/pybind/cmake_example.
 
+THe file `src/main.cpp` contains the python bindings of the C++ classes which are used by OrbitPy. Note that not all the available C++
+classes are bound.
+
 ### Notes
 
 * `cmake`, `gcc` are primary requirements.
@@ -30,7 +33,9 @@ The directory structure and build is based on the *cmake_example* git-repo avail
 
 * When the `propcov` package is installed a `build` folder and `***.so` library file is created along with `***.egg-info`. These must be deleted in the un-installation process so as to allow for smooth re-installation.
 
-* The `Makefile` present in the `propcov` folder is to facilitate easy installation, cleanup of the `propcov` package. It is not associated with the `cmake` build process.
+* The `Makefile` present in the `propcov` folder is to facilitate easy installation, cleanup of the `propcov` package. 
+
+* The Makefiles in the `extern/gmatutil/`, `lib/propcov-cpp/` are to facilitate a separate build process (not associated with `cmake`). The builds are triggered when running the Makefile in the `tests/` folder.
 
 ## Installation
 
@@ -77,6 +82,13 @@ The `gmatutil` folder is a copy of the same folder from the GMAT2020a repository
 3. The CMakeLists.txt file was revised according to the changes 1,2 and additional removals (see the file for details).
 4. The CmakeLists.txt was modifed to output a static library with target-name `GmatUtil` with the flags `POSITION_INDEPENDENT_CODE ON`.
 
+## Tests
+
+The folder `tests/test-cpp/` contains C++ tests of the `propcov` C++ classes. GoogleTest (GTest) library is used and must be installed to run the tests. [This link](https://www.eriksmistad.no/getting-started-with-google-test-on-ubuntu/) provides good tutorial on installing GTest on Ubuntu.
+
+To run the tests navigate to `tests/` folder and run `make all` followed by `make runtest`.
+
+Running `make all` from the `tests` directory shall trigger clean-up and build of the sources in the `extern/gmatutil` folder and the `lib/propcov-cpp` folder. The test-files in the `tests/test-cpp` folder are built and the executables written in the `tests/build` folder. The executables can be run one after another using the `make runtest` command. 
 
 ## Known Issues
 
@@ -93,6 +105,17 @@ The `gmatutil` folder is a copy of the same folder from the GMAT2020a repository
     ```
 
     Also note that in order to make a deep-copy, we need to initialize a new object with the same object parameters as the original object as seen in the above example.
+## Credits and Acknowledgments
 
+This work has been funded by grants from the National Aeronautics and Space Administration (NASA) Earth Science Technology Office (ESTO) through the Advanced Information Systems Technology (AIST) Program.
 
+`propcov` uses:
 
+* GMAT2020a `gmatutil` source (https://sourceforge.net/p/gmat/git/ci/GMAT-R2020a/tree/src/gmatutil/)
+* Pybind11 version 2.6.2 (https://pybind11.readthedocs.io/en/stable/basics.html)
+* JSON for Modern C++ (https://github.com/nlohmann/json)
+* GoogleTest (https://github.com/google/googletest)
+
+## Questions?
+
+Please contact Vinay (vinay.ravindra@nasa.gov)

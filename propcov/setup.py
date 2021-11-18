@@ -104,9 +104,9 @@ class CMakeBuild(build_ext):
 setup(
     name="propcov",
     version="0.0.1",
-    author="Dean Moldovan",
-    author_email="dean0x7d@gmail.com",
-    description="A test project using pybind11 and CMake",
+    author="Vinay Ravindra",
+    author_email="vinay.ravindra@nasa.gov",
+    description="Bindings on the C++ classes providing orbit calculations related utilities.",
     long_description="",
     ext_modules=[CMakeExtension("propcov")],
     cmdclass={"build_ext": CMakeBuild},

@@ -31,8 +31,14 @@ Note that this installation also automatically installs the package `propcov` wh
 
 In order to uninstall run `make bare` in the terminal.
 
-TODO: Ask `make runtest` to also run the C++ tests (google tests) of the `propcov` library.
+Ask `make runtest` to also run the C++ tests (google tests) of the `propcov` library.
 
+---
+**NOTE**
+
+The `make runtest` does *not* run the tests of the `propcov` library. Please see the `README.MD` in the `propcov` folder on how to run it's tests.
+
+---
 ## Directory structure
 ```
 ├───docs (sphinx documentation)
@@ -73,6 +79,7 @@ OrbitPy uses:
 * GMAT2020a `gmatutil` source (https://sourceforge.net/p/gmat/git/ci/GMAT-R2020a/tree/src/gmatutil/)
 * Pybind11 (https://pybind11.readthedocs.io/en/stable/basics.html)
 * JSON for Modern C++ (https://github.com/nlohmann/json)
+* GoogleTest (https://github.com/google/googletest)
 
 ## Questions?
 

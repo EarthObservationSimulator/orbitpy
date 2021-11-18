@@ -1,7 +1,7 @@
 #ifndef SphericalSensor_hpp
 #define SphericalSensor_hpp
 
-#include "Sensor.hpp"
+#include "../Sensor.hpp"
 #include "SlicedPolygon.hpp"
 #include "SliceArray.hpp"
 

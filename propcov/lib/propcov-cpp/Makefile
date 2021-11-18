@@ -11,11 +11,13 @@ OPTIMIZATIONS = -O3 -funroll-loops
 
 # Define macros for the needed includes
 HEADERS =   -I. \
+-I./polygon \
 -I$(GMATUTIL_DIR)/base \
 -I$(GMATUTIL_DIR)/include \
 -I$(GMATUTIL_DIR)/util \
 -I$(GMATUTIL_DIR)/util/interpolator \
 -I$(GMATUTIL_DIR)/console \
+
 
 CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) -Wall -g -std=gnu++17
 CPP = g++
@@ -41,7 +43,15 @@ OBJECTS = \
     VisibilityReport.o \
     VisiblePOIReport.o \
     Projector.o \
-    DiscretizedSensor.o
+    DiscretizedSensor.o \
+    polygon/GMATPolygon.o \
+    polygon/PointInPolygon.o \
+    polygon/Polygon.o \
+    polygon/Preprocessor.o \
+    polygon/SliceArray.o \
+    polygon/SlicedPolygon.o \
+    polygon/SliceTree.o \
+    polygon/SphericalSensor.o \
 
 #
 # Default suffix rule
