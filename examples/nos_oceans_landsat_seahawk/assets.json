@@ -6,7 +6,7 @@
         },    
         "instrument": [{
             "@type": "Passive Optical Scanner", 
-            "@id": "tirs_b1",
+            "@id": "tirs",
             "name": "Landsat 8 TIRS Band1",
             "fieldOfViewGeometry": {
                 "shape": "RECTANGULAR",
@@ -41,7 +41,7 @@
             "atmosLossModel": "LOWTRAN7"             
         },
         {   "@type": "Passive Optical Scanner",
-            "id": "oli_blue",
+            "id": "oli",
             "name": "Landsat 8 OLI Blue band",
             "fieldOfViewGeometry": {
                 "shape": "RECTANGULAR",
@@ -85,7 +85,7 @@
     },    
     "instrument": {
         "@type": "Passive Optical Scanner",
-        "@id": "hawkeye_510nm",
+        "@id": "hawkeye",
         "name": "HawkEye 510nm band",
         "fieldOfViewGeometry": {
             "shape": "RECTANGULAR",
@@ -127,12 +127,12 @@
     },
     {
     "@id": "seahawk2", "name": "SeaHawk2",
-    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":7, "day":1, "hour":3, "minute":10, "second":13.230048},
+    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":6, "day":30, "hour":20, "minute":44, "second":47.875200},
     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6.959294563882585e+03, "ecc": 0.00111610, "inc": 97.7390, "raan": 253.6366, "aop": 280.7821, "ta": 259.2143}
     },    
     "instrument": {
         "@type": "Passive Optical Scanner",
-        "@id": "hawkeye_510nm",
+        "@id": "hawkeye",
         "name": "HawkEye 510nm band",
         "fieldOfViewGeometry": {
             "shape": "RECTANGULAR",
