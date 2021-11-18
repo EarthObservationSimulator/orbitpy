@@ -265,7 +265,7 @@ class DataMetricsCalculator(Entity):
                 sc_orbit_state["vz [km/s]"] = sat_state_df.loc[time_i]["vz [km/s]"] 
 
                 obsv_metrics = instru.calc_data_metrics(mode_id=mode_id, sc_orbit_state=sc_orbit_state, target_coords=target_coords) # calculate the data metrics specific to the instrument type
-                _v = dict({'time index':time_i, 'GP index': gp_i, 'pnt-opt index': pnt_opt_i, 'lat [deg]':target_coords["lat [deg]"], 'lon [deg]':target_coords["lon [deg]"]}, **obsv_metrics)
+                _v = dict({'time index':time_i, 'GP index': gp_i, 'pnt-opt index': pnt_opt_i, 'lat [deg]':round(target_coords["lat [deg]"],3), 'lon [deg]':round(target_coords["lon [deg]"],3)}, **obsv_metrics)
                 
                 if header_written_flag is False:
                     w.writerow(_v.keys())    

@@ -244,6 +244,7 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
             out_df = pd.DataFrame(data = data, columns = ['time index', 'GP index', 'lat [deg]', 'lon [deg]'])
             out_df = out_df.astype({"time index": int, "GP index": int, "lat [deg]": float, "lon [deg]": float})
         
+        out_df = out_df.round({'lat [deg]': 3, 'lon [deg]': 3}) # specify round-off
         out_df.sort_values(by=['time index'], inplace=True)
         out_df = out_df.reset_index(drop=True)
         
@@ -918,7 +919,7 @@ class PointingOptionsWithGridCoverage(Entity):
                 if len(points)>0: #If no ground-points are accessed at this time, skip writing the row altogether.
                     for pnt in points:
                         coords = self.grid.get_lat_lon_from_index(pnt)
-                        access_writer.writerow([time_index, pnt_opt_idx, pnt, coords.latitude, coords.longitude])
+                        access_writer.writerow([time_index, pnt_opt_idx, pnt, round(coords.latitude, 3), round(coords.longitude,3)])
 
         ##### Close file #####                
         if access_file:

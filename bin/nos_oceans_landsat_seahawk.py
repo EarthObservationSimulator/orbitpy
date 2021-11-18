@@ -1,7 +1,4 @@
 import os, shutil
-import numpy as np
-import pandas as pd
-import csv
 import time
 import json
 
@@ -9,7 +6,6 @@ from orbitpy.util import OrbitState, Spacecraft
 from orbitpy.propagator import J2AnalyticalPropagator
 from orbitpy.coveragecalculator import PointingOptionsWithGridCoverage
 from datametricscalculator import DataMetricsCalculator, AccessFileInfo
-from orbitpy.eclipsefinder import EclipseFinder
 from orbitpy.grid import Grid
 import orbitpy
 
@@ -23,7 +19,7 @@ mission_epoch = OrbitState.date_from_dict(mission_epoch_dict)
 mission_epoch_JDUt1 = mission_epoch.GetJulianDate()
 
 # define duration
-duration = 180
+duration = 31*5
 
 # load assets
 with open(wdir +'/assets.json', 'r') as asset_specs:
@@ -34,12 +30,13 @@ for _asset in assets:
     spacecraft.append(Spacecraft.from_dict(_asset))
 
 # define grid
-gridRes = orbitpy.grid.compute_grid_res(spacecraft, 0.5)
+gridRes = orbitpy.grid.compute_grid_res(spacecraft, 0.25)
 grid = Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":42, "latLower":35, "lonUpper":-70, "lonLower":-80, "gridRes": gridRes})
 grid.write_to_file(wdir + 'grid.csv' )
 
 # define propagator
-time_step = orbitpy.propagator.compute_time_step(spacecraft, 0.25)
+#time_step = orbitpy.propagator.compute_time_step(spacecraft, 0.25)
+time_step = 5
 propagator = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": time_step})
 
 # run coverage and datametrics calculations for each asset

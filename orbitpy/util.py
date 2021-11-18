@@ -585,12 +585,18 @@ def helper_extract_spacecraft_params(spacecraft):
     :paramtype spacecraft: list, :class:`orbitpy:util.Spacecraft`
 
     :return: Tuples with spacecraft id, instrument id, mode id, semi-major axis, sensor FOV height, FOV width, sceneFOV height, sceneFOV width, FOR height and FOR width.
-             of all input spacecrafts.
-    :rtype: list, namedtuple, <str/int, str/int, str/int, float, float, float, float, float, float, float>
+             of all input spacecrafts. None is returned if no spacecrafts are specified.
+    :rtype: list, namedtuple, <str/int, str/int, str/int, float, float, float, float, float, float, float> or None
 
     """
     _p = namedtuple("sc_params", ["sc_id", "instru_id", "mode_id", "sma", "fov_height", "fov_width", "scfov_height", "scfov_width", "for_height", "for_width"])
     params = []
+
+    if spacecraft:
+        if not isinstance(spacecraft, list): 
+            spacecraft = [spacecraft] # make into list
+    else:
+        return None
 
     for sc in spacecraft: # iterate over all satellites
         sc_id = sc.get_id()
