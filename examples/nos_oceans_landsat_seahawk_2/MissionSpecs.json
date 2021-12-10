@@ -1,6 +1,6 @@
 {
     "epoch":{"@type":"GREGORIAN_UTC", "year":2018, "month":7, "day":1, "hour":0, "minute":0, "second":0},
-    "duration": 1,
+    "duration": 60,
     "grid": [{"@type": "autogrid", "@id": 1, "latUpper":42, "latLower":35, "lonUpper":-70, "lonLower":-80}],
     "settings": {"coverageType": "POINTING OPTIONS WITH GRID COVERAGE", "propTimeResFactor": 0.5, "gridResFactor": 0.5},   
     "spacecraft":[

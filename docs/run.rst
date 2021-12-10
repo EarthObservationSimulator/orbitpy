@@ -7,7 +7,7 @@ There are two ways to access the functionalities provided by the OrbitPy package
 
 The simplest way to access the functionalities of the OrbitPy package is by defining a JSON file (to be named as ``MissionSpecs.json``) 
 with the mission specifications in a user-directory (accompanied with the necessary auxillary files such as grid-data).
-The ``run_mission.py`` script can be invoked with the argument as the user-directory. 
+The ``bin/run_mission.py`` script can be invoked with the argument as the user-directory. 
 It performs the following functions:
 
 1. Propagate all the satellites over the time-interval defined by the epoch and duration.
@@ -16,7 +16,7 @@ It performs the following functions:
 4. Calculate ground-station and inter-satellite contact intervals.
 5. Calculate eclipse periods for each satellite.
 
-The ``run_mission.py`` script simply invokes the :class:`orbitpy.mission` module. Please refer to :ref:`mission_module` for description
+The ``bin/run_mission.py`` script simply invokes the :class:`orbitpy.mission` module. Please refer to :ref:`mission_module` for description
 of valid JSON key/value pairs which can be used in the mission specifications JSON file.
 
 *Example*
@@ -54,7 +54,7 @@ the results (file locations, assigned unique identifiers, etc) is displayed.
         "settings": {"coverageType": "GRID COVERAGE"}
     }
 
-    >> python run_mission.py examples/mission_1/
+    >> python bin/run_mission.py examples/mission_1/
 
 **2. Execution by writing custom python script**
 
