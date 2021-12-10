@@ -75,7 +75,7 @@ runtest:
         $$test ; \
     done
 
-clean:
+clean: gmatutil_clean propcovcpp_clean
 	rm -rf $(T_BUILD_DIR)/*
 
 -include $(DEPS)

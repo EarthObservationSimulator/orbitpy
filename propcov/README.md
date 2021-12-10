@@ -67,6 +67,11 @@ C:.
 │   └───propcov-cpp  (cpp library which is wrapped)
 │       └───polygon
 ├───src
+│
+├───docs
+│   │
+│   └───tatc_docs (docs from the TAT-C project)
+│
 └───tests
     └───tests-cpp (cpp tests on the `propcov-cpp` library)
         ├───bin
@@ -89,6 +94,12 @@ The folder `tests/test-cpp/` contains C++ tests of the `propcov` C++ classes. Go
 To run the tests navigate to `tests/` folder and run `make all` followed by `make runtest`.
 
 Running `make all` from the `tests` directory shall trigger clean-up and build of the sources in the `extern/gmatutil` folder and the `lib/propcov-cpp` folder. The test-files in the `tests/test-cpp` folder are built and the executables written in the `tests/build` folder. The executables can be run one after another using the `make runtest` command. 
+
+## Documentation
+
+The `docs/propcov-cpp_description.doc` contains description of the `lib\propocov-cpp\` C++ classes.
+
+The `docs/tatc_docs` contains **old** (March 2019) documentation of most of the `lib\propocov-cpp\` C++ classes which was developed during the course of the TAT-C project. Note that some of the classes referred to in the documentation might have changed since the docs  was made.
 
 ## Known Issues
 
