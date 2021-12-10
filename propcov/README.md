@@ -12,7 +12,7 @@ https://pybind11.readthedocs.io/en/stable/basics.html
 
 The directory structure and build is based on the *cmake_example* git-repo available in https://github.com/pybind/cmake_example.
 
-THe file `src/main.cpp` contains the python bindings of the C++ classes which are used by OrbitPy. Note that not all the available C++
+The file `src/main.cpp` contains the python bindings of the C++ classes which are used by OrbitPy. Note that not all the available C++
 classes are bound.
 
 ### Notes

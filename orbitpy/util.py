@@ -805,12 +805,12 @@ class OutputInfoUtility:
 
             :param \**kwargs: Keyword arguments. Depending on the output-info type of interest, there are different keywords expected.
                             
-                                .. csv-table:: Contact file INTERVAL data format
+                                .. csv-table::
                                     :header: Output-info type, Keyword(s), Description
-                                    :widths: 10,10
+                                    :widths: 10,10,10
 
                                     ``PropagatorOutputInfo``, ``spacecraft_id``, Spacecraft-identifier of the propagated spacecraft.
-                                    ``CoverageOutputInfo``, "``inp_cov_type``, ``spacecraft_id``, ``inp_instru_id``, ``inp_mode_id``, ``inp_grid_id``",  
+                                    ``CoverageOutputInfo``, "``inp_cov_type``, ``spacecraft_id``, ``inp_instru_id``, ``inp_mode_id``, ``inp_grid_id``", "Coverage-type and identifiers of spacecraft, instrument, mode, grid."
 
             
             :return: The output-info object with parameters matched to the input arguments.
