@@ -227,7 +227,7 @@ TEST(GetPoleHeadings,45_45_2_2)
 
 // Test Pole directions to verify correct
 // cross product order.
-TEST(GetPoleHeadings,45_45_1_3)
+TEST(GetPoleHeadings,60_60_1_3)
 {
 	double tolerance = 0.00000000001;
 	DiscretizedSensor testSensor = DiscretizedSensor(pi/3.0,pi/3.0,1,3);

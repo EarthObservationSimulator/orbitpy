@@ -9,6 +9,7 @@ core
 *.a
 *.d
 *.csv
+*.out
 
 # compiled Python
 *.pyc

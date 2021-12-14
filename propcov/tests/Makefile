@@ -14,7 +14,7 @@ GMATUTIL_DIR = ./../extern/gmatutil
 T_SRCS := $(wildcard $(T_SRC_DIR)/*.cpp)
 T_OBJS := $(T_SRCS:$(T_SRC_DIR)/%.cpp=$(T_BUILD_DIR)/%.o)
 T_DEPS := $(T_OBJS:.o=.d)
-T_EXES = $(T_OBJS:.o=.exe)
+T_EXES = $(T_OBJS:.o=.out)
 
 # PROPCOV-CPP
 OBJS1 := $(PROPCOVCPP_DIR)/*.o \

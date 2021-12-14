@@ -21,7 +21,10 @@
 // Created: 2016.05.05
 //
 /**
- * Definition of the AbsoluteDate class.  This class represents an epoch.
+ * Definition of the AbsoluteDate class.  This class maintains a representation of date and time. 
+ * The time can be set or retrieved as either a Gregorian date (year, month, day, hours, minutes and seconds) or 
+ * a Julian date (days from a standard reference point), and it allows the date and time to be advanced by a number of seconds. 
+ * This number may be negative to indicate movement backwards in time.
  */
 //------------------------------------------------------------------------------
 #ifndef AbsoluteDate_hpp
@@ -51,7 +54,7 @@ public:
    virtual Real     GetJulianDate() const;
    /// Return the Gregorian date
    virtual Rvector6 GetGregorianDate();
-   /// Advance the time by stepInSec seconds
+   /// Advance the time by 'stepInSec' seconds
    virtual void     Advance(Real stepInSec);
    /// Clone the AbsoluteDate
    virtual AbsoluteDate* Clone() const;  
