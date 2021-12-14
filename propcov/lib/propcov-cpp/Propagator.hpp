@@ -21,7 +21,8 @@
 // Created: 2016.05.05
 //
 /**
- * Definition of the the propagator class.
+ * Definition of the the propagator class. 
+ * Propagates spacecraft state to a requested time.
  */
 //------------------------------------------------------------------------------
 #ifndef Propagator_hpp
@@ -94,7 +95,7 @@ protected:
    Real         INC;
    /// Orbital right ascention of the ascending node
    Real         RAAN;
-   /// Orbital sargument of periapsis
+   /// Orbital argument of periapsis
    Real         AOP;
    /// Orbital true anomaly
    Real         TA;

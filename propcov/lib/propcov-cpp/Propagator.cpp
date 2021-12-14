@@ -182,10 +182,9 @@ Propagator& Propagator::operator=(const Propagator &copy)
 //------------------------------------------------------------------------------
 Propagator::~Propagator()
 {
-   /* VInay: commented to make pybind11 work. 
    if (densityModel)
       delete densityModel;
-   */
+   
 }
 
 //------------------------------------------------------------------------------
@@ -332,7 +331,7 @@ void Propagator::SetOrbitState(OrbitState *orbState)
 {
    // Set orbit state given OrbitState object.
    
-   // Done at intialization for performance reasons.
+   // Done at initialization for performance reasons.
    Rvector6 kepElements = orbState->GetKeplerianState();
    SMA  = kepElements(0);
    ECC  = kepElements(1);
@@ -368,7 +367,7 @@ Real Propagator::ComputePeriapsisAltitude(Rvector6 orbElem, Real julianDate)
 		return sma * (1 - ecc) - eqRadius;
 	}
 
-	// Compute the eccentrity vector (vector pointing towards perigee)
+	// Compute the eccentricity vector (vector pointing towards perigee)
 	OrbitState orbState;
 	orbState.SetKeplerianState(orbElem[0],orbElem[1],orbElem[2],orbElem[3],
                               orbElem[4],orbElem[5]);
@@ -383,7 +382,7 @@ Real Propagator::ComputePeriapsisAltitude(Rvector6 orbElem, Real julianDate)
                        posVec - dotProd * velVec) / mu;
 	Rvector3 perVec = eVec.Normalize() * sma * (1 - ecc);
 
-	// Convert from intertial to ellipsoid at epoch
+	// Convert from inertial to ellipsoid at epoch
 	Earth CentralBody;
 	Rvector3 bodyFixedState = CentralBody.InertialToBodyFixed(perVec, julianDate,
                              "Ellipsoid");
