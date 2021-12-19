@@ -22,6 +22,13 @@
 //
 /**
  * Definition of the Earth class.  This class is a simple model of the Earth.
+ * The Earth class models the Body-fixed (Body=Earth) and vector conversions relating to this frame. It provides for the following functions:
+ *    * Compute rotation matrix, or to rotate a vector from inertial to Earth-fixed frame. 
+ *    * Convert Earth-fixed vectors between Cartesian, Spherical and Ellipsoid representations. 
+ *    * Geocentric to geodetic coordinate conversions.
+ *    * Calculation of sun-vector in body-fixed frame.
+ *    * Compute rotation matrix, or to rotate a vector from body-fixed to topocentric. 
+ * 
  */
 //------------------------------------------------------------------------------
 #ifndef Earth_hpp
@@ -47,12 +54,12 @@ public:
    
    /// Get the inertial-to-fixed rotation matrix
    virtual Rmatrix33        GetInertialToFixedRotation(Real jd);
-   /// Compute the Greenwich Mean Time
+   /// Compute the Greenwich Mean Time. Should be the Greenwhich Mean Sidereal Time (GMST)??
    virtual Real             ComputeGMT(Real jd);
    /// Get the body-fixed state
    virtual Rvector3         GetBodyFixedState(Rvector3 inertialState,
                                               Real      jd);
-   // Vinay: Get the body-fixed state (position and velocity)
+   // Get the body-fixed state (position and velocity) TODO: Velocity vector conersion must be revised.
    Rvector6 GetBodyFixedState(Rvector6 inertialState,
                                   Real      jd);
    /// Convert between body-fixed representations
@@ -64,7 +71,7 @@ public:
    virtual Rvector3         InertialToBodyFixed(const Rvector3 &inertialVector,
                                                 Real jd,
 	                                             const std::string &toType);
-   /// COnvert the input vecgor from body-fixed to topocentric
+   /// COnvert the input vector from body-fixed to topocentric
    virtual Rvector3         FixedToTopocentric(const Rvector3 &inertialVector,
                             const Real lat, const Real lon);
 
@@ -73,7 +80,7 @@ public:
                                            Real jd,
                                            const std::string &toType);
    
-   /// Compute the body-fixed-to-topocentric rotaiton matrix
+   /// Compute the body-fixed-to-topocentric rotation matrix
    virtual Rmatrix33        FixedToTopo(Real gdLat, Real gdLon);
    /// Convert geocentric latitude to geodetic latitude
    virtual Real             GeocentricToGeodeticLat(Real gcLat);

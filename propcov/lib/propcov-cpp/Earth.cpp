@@ -101,7 +101,7 @@ Earth& Earth::operator=(const Earth &copy)
 // ~Earth ()
 //------------------------------------------------------------------------------
 /**
- * Detructor
+ * Destructor
  */
 //------------------------------------------------------------------------------
 Earth::~Earth()
@@ -263,7 +263,7 @@ Rvector3 Earth::Convert(const Rvector3 &origValue, const std::string &fromType,
 * Conversion method between inertial and body fixed representations.
 * Valid values for &toType are "Cartesian", "Spherical", and "Ellipsoid"
 *
-* @param inertialVector  intertial Cartesian vector
+* @param inertialVector  inertial Cartesian vector
 * @param jd              Julian date associated with <inertialVector>
 * @param toType          representation to which to convert
 *

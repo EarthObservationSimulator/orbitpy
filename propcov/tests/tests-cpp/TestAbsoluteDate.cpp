@@ -3,13 +3,7 @@
 #include <ctime>
 #include <cmath>
 #include <tuple>
-#include "gmatdefs.hpp"
-#include "GmatConstants.hpp"
-#include "Rvector6.hpp"
-#include "RealUtilities.hpp"
-#include "MessageInterface.hpp"
 #include "AbsoluteDate.hpp"
-#include "TimeTypes.hpp"
 #include <gtest/gtest.h>
 
 // Parameterized tests for Gregorian to Julian Date conversion 
