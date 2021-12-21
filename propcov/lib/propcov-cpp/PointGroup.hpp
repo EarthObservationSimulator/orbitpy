@@ -21,9 +21,19 @@
 // Created: 2016.05.06
 //
 /**
- * Definition of the PointGroup class.  This class stores latitudes, 
+ * Definition of the PointGroup class. This class stores latitudes, 
  * longitudes, and coordinates for points that are either set on input or
- * computed in the class based on an input number or angle.
+ * computed in the class based on:
+ *       - Specified number of points within a region specified by lat/lon bounds
+ *       - Angle resolution within a region specified by lat/lon bounds
+ * 
+ * Note: Please specify latitudes in the range of -90 deg to +90 deg and longitudes 
+ *       in the range of -180 deg to +180 deg while inputing points. 
+ *       Do **NOT** specify the longitudes in range of 0 deg to 360 deg.
+ * TODO: Change above behaviour.
+ * TODO: IF points are added in a region according to a specified angular seperation, the actual angular seperation of the 
+ * generated points is different and deviates significantly for large input angular seperation values. See TestPointGroup.cpp.
+ * 
  */
 //------------------------------------------------------------------------------
 #ifndef PointGroup_hpp

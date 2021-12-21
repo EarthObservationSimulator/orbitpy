@@ -214,7 +214,7 @@ Rvector3 Earth::GetBodyFixedState(Rvector3 inertialState,
 Rvector6 Earth::GetBodyFixedState(Rvector6 inertialState,
                                   Real      jd)
 {
-   // Converts state from Earth interial to Earth fixed, adapted from CoverageChecker::GetEarthFixedSatState(....)
+   // Converts state from Earth inertial to Earth fixed, adapted from CoverageChecker::GetEarthFixedSatState(....)
    Rvector3 inertialPos   = inertialState.GetR();
    Rvector3 inertialVel   = inertialState.GetV();
    // TODO.  Handle differences in units of points and states.
