@@ -1,6 +1,6 @@
 /**
- * Tests for the Sensor (base) class. A ConicalSensor object is considered since the Sensor class is cannot be instantiated.
- * The tests are however aimed to the Sensor (base) class.
+ * Tests for the Sensor (base) class. A FakeSensor class which inherits from the Sensor class is considered since 
+ * the Sensor class is cannot be instantiated. The concrete methods of the Sensor class are tested.
  * TODO: Add tests for the coordinate conversion utilities. An issue is that they are protected members.
 */
 #include <iostream>
@@ -11,17 +11,23 @@
 #include <math.h>
 #include <vector>
 #include <numeric>
-#include "ConicalSensor.hpp"
+#include "Sensor.hpp"
 #include "Rmatrix33.hpp"
 #include <gtest/gtest.h>
 
 # define PI 3.14159265358979323846 /* pi */
 
+class FakeSensor : public Sensor
+{
+    public:
+        bool CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle) {return false;};
+};
+
 // Parameterized tests for the Spacecraft-body to Sensor rotation matrix.
 class ScBody2SensorRotationMatrixTestFixture: public testing::TestWithParam<std::tuple<double, double, double, double, double, double, std::vector<std::vector<double>>>>{
     public:
     protected:
-        ConicalSensor sen = ConicalSensor(25.0*PI/180); // a ConicalSensor object is considered since the virtual Sensor class cannot be instantiated.
+        FakeSensor sen; // = ConicalSensor(25.0*PI/180); // a ConicalSensor object is considered since the virtual Sensor class cannot be instantiated.
 };
 TEST_P(ScBody2SensorRotationMatrixTestFixture, ScBody2SensorRotationWorks){
     std::tuple<double, double, double, double, double, double, std::vector<std::vector<double>>> param = GetParam();
@@ -47,12 +53,9 @@ TEST_P(ScBody2SensorRotationMatrixTestFixture, ScBody2SensorRotationWorks){
     EXPECT_NEAR(testRotB2S.GetElement(2, 0), trueRotB2S[2][0], tolerance);
     EXPECT_NEAR(testRotB2S.GetElement(2, 1), trueRotB2S[2][1], tolerance);
     EXPECT_NEAR(testRotB2S.GetElement(2, 2), trueRotB2S[2][2], tolerance);
-
 }
 
-INSTANTIATE_TEST_CASE_P(ConeClocktoRADEC, ConeClocktoRADECTestFixture, testing::Values(
-    std::make_tuple(0, 0, 0, PI/2) // cone, clock, ra, dec (all in radians)
-    ));      
+     
 INSTANTIATE_TEST_CASE_P(ScBody2SensorRotMat, ScBody2SensorRotationMatrixTestFixture, testing::Values(
     std::make_tuple(1,2,3,0,0,0, std::vector<std::vector<double>> {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}), // seq1, seq2, seq3, angle1, angle2, angle3 (in degrees)
     // truth data from https://rip94550.wordpress.com/2010/08/30/rotations-from-one-euler-angle-sequence-to-another/

@@ -21,7 +21,10 @@
 // Created: 2016.05.03
 //
 /**
- * Definition of the Conical Sensor class.  This class models a conical sensor.
+ * Definition of the Conical Sensor class. This class models a conical sensor.
+ * This is a subclass of the Sensor class. 
+ * It can be used to evaluate the presence/absence of a point-location in a sensor FOV. 
+ * The target location must be expressed in the Sensor frame.
  */
 //------------------------------------------------------------------------------
 #ifndef ConicalSensor_hpp
@@ -47,7 +50,8 @@ public:
    virtual void  SetFieldOfView(Real fov);
    virtual Real  GetFieldOfView();
 
-   /// Check the target visibility given the input cone and clock angles:
+   /// Check the target visibility given the input cone and clock angles.
+   /// Target must be expressed in the Sensor frame.
    /// determines whether or not the point is in the sensor FOV.
    virtual bool  CheckTargetVisibility(Real viewConeAngle,
                                        Real viewClockAngle = 0.0);

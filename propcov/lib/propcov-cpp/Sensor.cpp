@@ -182,6 +182,7 @@ Rmatrix33 Sensor::GetBodyToSensorMatrix(Real forTime)
 //------------------------------------------------------------------------------
 /**
  * Checks if the target lies inside the max excursion angle
+ * TODO: Check that the range of the entered angle makes sense.
  *
  * @param viewConeAngle  the view cone angle (rad)
  *
