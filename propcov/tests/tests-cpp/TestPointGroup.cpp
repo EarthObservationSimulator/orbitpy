@@ -1,3 +1,10 @@
+/**
+ * Tests for the PointGroup class.
+ * TODO:
+ * Add tests to validate the set of generated points.
+ *      
+ */
+
 #include <iostream>
 #include <string>
 #include <ctime>

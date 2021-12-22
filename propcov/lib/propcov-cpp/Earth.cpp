@@ -199,7 +199,7 @@ Rvector3 Earth::GetBodyFixedState(Rvector3 inertialState,
 //                             Real      jd)
 //------------------------------------------------------------------------------
 /**
- * Returns the body-fixed state given the inertial stat and the time.
+ * Returns the body-fixed state given the inertial state and the time.
  * Author: Vinay
  * Adapted from adapted from CoverageChecker::GetEarthFixedSatState(....)
  * Note that the velocity state conversion needs to be revised.

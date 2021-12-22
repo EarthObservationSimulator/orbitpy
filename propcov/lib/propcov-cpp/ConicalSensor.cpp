@@ -135,8 +135,8 @@ Real ConicalSensor::GetFieldOfView()
 /**
  * Determines whether or not the point is in the sensor FOV
  *
- * @param viewConeAngle   the view cone angle
- * @param viewClockAngle  the view clock angle <unused for this class>
+ * @param viewConeAngle   the view cone angle (rad)
+ * @param viewClockAngle  the view clock angle <unused for this class> (rad)
  *
  * @return true if the point is in the sensor FOV; false otherwise
  */

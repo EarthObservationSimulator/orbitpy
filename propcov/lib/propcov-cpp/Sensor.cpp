@@ -154,7 +154,7 @@ void Sensor::SetSensorBodyOffsetAngles(
    eulerSeq2     = seq2;
    eulerSeq3     = seq3;
    
-   ComputeBodyToSensorMatrix();
+   ComputeBodyToSensorMatrix(); // sets the R_SB instance variable
 }
 
 
@@ -183,7 +183,7 @@ Rmatrix33 Sensor::GetBodyToSensorMatrix(Real forTime)
 /**
  * Checks if the target lies inside the max excursion angle
  *
- * @param viewConeAngle  the view cone angle
+ * @param viewConeAngle  the view cone angle (rad)
  *
  * @return true if the point lies inside the max excursion angle; 
  *         false otherwise
@@ -218,12 +218,13 @@ void Sensor::ComputeBodyToSensorMatrix()
 //------------------------------------------------------------------------------
 // void ConeClocktoRADEC(Real coneAngle, Real clockAngle, Real &RA, Real &dec);
 //------------------------------------------------------------------------------
-/* converts cone and clock angles to right ascension and declination
+/* converts cone and clock angles to right ascension and declination.
+ * Cone angle is defined about the z-axis (boresight).
  *
- * @param coneAngle  [in] cone angle to be converted
- * @param clockAngle [in] clock angle to be converted
- * @param RA         [out] computed right ascension
- * @param dec        [out] computed declilnation
+ * @param coneAngle  [in] (rad) cone angle to be converted
+ * @param clockAngle [in] (rad) clock angle to be converted
+ * @param RA         [out] (rad) computed right ascension
+ * @param dec        [out] (rad) computed declination
  */
 //------------------------------------------------------------------------------
 void Sensor::ConeClocktoRADEC(Real coneAngle, Real clockAngle,

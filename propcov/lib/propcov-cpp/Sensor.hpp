@@ -21,7 +21,31 @@
 // Created: 2017.03.21
 //
 /**
- * Definition of the base Sensor class.  This class models a sensor.
+ * Definition of the base Sensor class. This class models a sensor.
+ * The Sensor class maintains knowledge of the sensors orientation relative to the spacecraft body, 
+ * and has a virtual-function (which must be defined in the child classes) to determines if a point is within the sensor field of view. 
+ * It also defines a max-excursion angle which is the maximum cone angle corresponding to the sensor FOV (FOV could be of any shape).
+ * 
+ * There are three subclasses of Sensor. A conical sensor’s FOV is defined by a constant cone angle; 
+ * <a rectangular sensor’s FOV is defined by angular width and angular height - INACTIVE>, both of which are symmetric around the boresight; 
+ * and a custom sensor’s FOV is defined by an arbitrary set of points that are defined by cone and clock angle around the sensor frame’s +z axis. 
+ * 
+ * For nadir pointing instruments the boresight axis is aligned with the spacecraft +z axis, 
+ * and the body to sensor rotation is generally defined as the 3x3 identity matrix or an 
+ * equivalent representation (e.g., quaternion or Euler angles). 
+ * The rotation is to be specified by means of Euler angles and sequence.
+ * The rotation matrix rotates the coordinate system (See https://mathworld.wolfram.com/RotationMatrix.html). I.e. by performing
+ * R_SB * vec_ScBody, the representation of the vector in the sensor body frame is found. (R_SB is the rotation matrix from the spacecraft-body
+ * frame to the sensor frame and vec_ScBody is the vector in the spacecraft-body frame.)
+ * 
+ * The Sensor class provides a CheckTargetVisibility() method which is implemented by each of the subclasses. 
+ * This function determines if a vector (which must be rotated into the sensor frame to make this test valid) 
+ * is inside the field of view or not. For cone <and rectangular INACTIVE> sensors these involve simple inequality tests, 
+ * for the custom sensor a sophisticated line crossing algorithm is used.
+ * 
+ * The class also includes utilities to convert coordinates between different coordinate-representations 
+ * (cone/clock, right-ascension/ declination, unit-vector, stereographic).
+ *
  */
 //------------------------------------------------------------------------------
 #ifndef Sensor_hpp
@@ -44,7 +68,7 @@ public:
    
    virtual ~Sensor();
    
-   /// Set the sensor-to-body offset angles
+   /// Set the sensor-to-body offset angles (in degrees)
    virtual void  SetSensorBodyOffsetAngles(
                         Real angle1 = 0.0, Real angle2 = 0.0, Real angle3 = 0.0,
                         Integer seq1 = 1, Integer seq2 = 2,   Integer seq3 = 3);
@@ -58,8 +82,8 @@ public:
     * Check the target visibility given the input cone and clock angles:
     * determines whether or not the point is in the sensor FOV.
     *
-    * @param viewConeAngle  cone angle
-    * @param viewClockAngle clock angle
+    * @param viewConeAngle  cone angle (rad)
+    * @param viewClockAngle clock angle (rad)
     *
     * @return true if point is in the sensor FOV; false otherwise
     *
@@ -75,7 +99,8 @@ protected:
    /// The maximum excursion angle
    Real          maxExcursionAngle;
    
-   /// Offset angles
+   /// Offset angles and the euler sequence both define the rotation with respect to spacecraft body-frame. 
+   /// Offset angles (degrees)
    Real          offsetAngle1;
    Real          offsetAngle2;
    Real          offsetAngle3;
@@ -85,7 +110,7 @@ protected:
    Integer       eulerSeq2;
    Integer       eulerSeq3;
    
-   /// The rotation matrix from the body frame to the sensor frame
+   /// The rotation matrix from the spacecraft body frame to the sensor frame
    Rmatrix33     R_SB;
    
    /// Check the target maximum excursion angle
