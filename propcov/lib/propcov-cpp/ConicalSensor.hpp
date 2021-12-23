@@ -23,7 +23,7 @@
 /**
  * Definition of the Conical Sensor class. This class models a conical sensor.
  * This is a subclass of the Sensor class. 
- * It can be used to evaluate the presence/absence of a point-location in a sensor FOV. 
+ * It can be used to evaluate the presence/absence of a point-location in a sensor FOV (conical shape). 
  * The target location must be expressed in the Sensor frame.
  */
 //------------------------------------------------------------------------------

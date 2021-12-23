@@ -62,16 +62,17 @@ using namespace GmatMathUtil;
  *
  * coneAngleVec and clockAngleVec contain pairs of angles that describe the 
  * sensor FOV.  coneAngleVec[0] is paired with clockAngleVec[0], 
- * coneAngleVec[1] is paired with clockAngleVec[1] and so on.  The last 
+ * coneAngleVec[1] is paired with clockAngleVec[1] and so on. < VINAY: Is this neccesary?: The last 
  * point in each arrays should be the same as the first point to ensure
- * FOV closure.
- * @param coneAngleVec array of cone angles measured from +Z sensor axis (rad)
+ * FOV closure.>
+ * 
+ * @param coneAngleVec array of cone angles measured from +Z sensor axis (radians)
  *        if xP,yP,zP is a UNIT vector describing a FOV point, then the 
  *        cone angle for the point is pi/2 - asin(zP);
- * @param clockAngleVec array of clock angles (right ascencions) rad
+ * @param clockAngleVec array of clock angles (right ascensions) (radians)
  *        measured clockwise from the + X-axis.  if xP,yP,zP is a UNIT vector
  *        describing a FOV point, then the clock angle for the point
- *        is atan2(y,x);
+ *        is atan2(yP,xP);
  */
 //------------------------------------------------------------------------------
 CustomSensor::CustomSensor (const Rvector &coneAngleVecIn,
