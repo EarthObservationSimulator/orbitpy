@@ -19,6 +19,7 @@
 //
 // Author: Wendy Shoan, NASA/GSFC
 // Created: 2018.08.01
+// Updated by Vinay, 2019
 //
 /**
  * Implementation of the base NadirPointingAttitude class
@@ -124,41 +125,69 @@ Attitude* NadirPointingAttitude::Clone() const
 // Rmatrix33 InertialToReference(const Rvector6& centralBodyState)
 //------------------------------------------------------------------------------
 /**
- * This method computes the matrix that converts from inertial to the reference
- * frame, given the input central body state
- *
- * @param centralBodyState  central body state
- *
- * @return matrix from body to inertial
- *
- * Vinay: Error, Should be NadirPointingAttitude::BodyFixedtoReference(const Rvector6& centralBodyState)?
+ * This method computes the matrix that converts from inertial to the Nadir-pointing coordinate
+ * frame, given the input central body state (in inertial frame). 
+ * This method can be used to produce the ECI to Nadir-pointing rotation matrix by inputing 
+ * the spacecraft-state in ECI frame.
  * 
+ * See https://mathworld.wolfram.com/RotationMatrix.html for details on construction of rotation matrix
+ * to rotate coordinate-frames (which can then be used to express vectors in different coordinate frames).
+ *
+ * @param centralBodyState  central body state in inertial frame
+ *
+ * @return matrix from inertial to nadir-pointing
+ *
  */
 //------------------------------------------------------------------------------
 Rmatrix33 NadirPointingAttitude::InertialToReference(const Rvector6& centralBodyState)
 {
-   centralBodyFixedPos.Set(centralBodyState[0],
+   Rvector3      zHat;
+   Rvector3      xHat;
+   Rvector3      yHat;
+
+   centralInertialPos.Set(centralBodyState[0],
                            centralBodyState[1],
                            centralBodyState[2]);
-   centralBodyFixedVel.Set(centralBodyState[3],
+   centralInertialVel.Set(centralBodyState[3],
                            centralBodyState[4],
                            centralBodyState[5]);
-   zHat = -centralBodyFixedPos;
+   zHat = -centralInertialPos;
    zHat.Normalize();
-   xHat = Cross(zHat, centralBodyFixedVel);
+   xHat = Cross(zHat, centralInertialVel);
    xHat = -xHat.Normalize();
    yHat = Cross(zHat, xHat);
    
-   R_fixed_to_nadir.Set(xHat[0], yHat[0], zHat[0],
+   R_inertial_to_nadir_transposed.Set(xHat[0], yHat[0], zHat[0],
                         xHat[1], yHat[1], zHat[1],
                         xHat[2], yHat[2], zHat[2]);
-   R_fixed_to_nadir_transposed = R_fixed_to_nadir.Transpose();
-   return R_fixed_to_nadir_transposed; // Vinay: Error? Should be R_fixed_to_nadir, where Fixed is EarthFixed.
+   R_inertial_to_nadir = R_fixed_to_nadir_transposed.Transpose();
+   return R_inertial_to_nadir;
 }
 
-// Author: Vinay, adapted from NadirPointingAttitude::BodyFixedtoReference(const Rvector6& centralBodyState)
+//------------------------------------------------------------------------------
+// Rmatrix33 BodyFixedToReference(const Rvector6& centralBodyState)
+//------------------------------------------------------------------------------
+/**
+ * This method computes the matrix that converts from body-fixed to the Nadir-pointing coordinate
+ * frame, given the input central body state (in body-fixed frame).
+ * This method can be used to produce the Earth-Fixed to Nadir-pointing rotation matrix by inputing 
+ * the spacecraft-state in Earth-fixed frame.
+ * 
+ * See https://mathworld.wolfram.com/RotationMatrix.html for details on construction of rotation matrix
+ * to coordinate-frames (which can then be used to express vectors in different coordinate frames).
+ *
+ * @param centralBodyState  central body state in body-fixed frame
+ *
+ * @return matrix from body-fixed to nadir-pointing
+ *
+ */
+//------------------------------------------------------------------------------
 Rmatrix33 NadirPointingAttitude::BodyFixedToReference(const Rvector6& centralBodyState)
 {
+   Rvector3      zHat;
+   Rvector3      xHat;
+   Rvector3      yHat;
+
    centralBodyFixedPos.Set(centralBodyState[0],
                            centralBodyState[1],
                            centralBodyState[2]);

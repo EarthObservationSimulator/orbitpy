@@ -19,10 +19,13 @@
 //
 // Author: Wendy Shoan, NASA/GSFC
 // Created: 2018.07.30
+// Updated by Vinay, 2019
 //
 /**
- * Definition of the NadirPointingAttitude class.  This class models the
- * spacecraft attitude state.
+ * Definition of the NadirPointingAttitude class. NadirPointingAttitude is a subclass of Attitude 
+ * that models the Nadir-pointing coordinate frame. 
+ * The main responsibility of this class is to compute the rotation from an inertial/body-fixed frame 
+ * to the nadir pointing coordinate frame using the input (spacecraft) state-vector (position and velocity).
  */
 //------------------------------------------------------------------------------
 #ifndef NadirPointingAttitude_hpp
@@ -46,10 +49,10 @@ public:
    /// Clone the Attitude
    virtual Attitude* Clone() const;
    
-   /// Converts the inertial-to-reference matrix @todo is this misnamed?
+   /// Produces the inertial-to-reference rotation matrix
    virtual Rmatrix33   InertialToReference(const Rvector6& centralBodyState);
 
-   /// /// Author: Vinay, adapted from NadirPointingAttitude::BodyFixedtoReference(const Rvector6& centralBodyState)
+   /// Produces the body-fixed-to-reference rotation matrix 
    virtual Rmatrix33   BodyFixedToReference(const Rvector6& centralBodyState);
    
    
@@ -58,11 +61,13 @@ protected:
    /// Local class data for performance
    Rvector3      centralBodyFixedPos;
    Rvector3      centralBodyFixedVel;
-   Rvector3      zHat;
-   Rvector3      xHat;
-   Rvector3      yHat;
    Rmatrix33     R_fixed_to_nadir;
    Rmatrix33     R_fixed_to_nadir_transposed;
+
+   Rvector3      centralInertialPos;
+   Rvector3      centralInertialVel;
+   Rmatrix33     R_inertial_to_nadir;
+   Rmatrix33     R_inertial_to_nadir_transposed;  
    
 };
 #endif // NadirPointingAttitude_hpp

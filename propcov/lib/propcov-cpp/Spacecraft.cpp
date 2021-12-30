@@ -544,7 +544,7 @@ Rmatrix33 Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) // Vinay: 
 /// Author: Vinay, Adapted from Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) 
 Rmatrix33 Spacecraft::GetBodyFixedToReference(const Rvector6 &bfState) 
 {
-   return attitude->BodyFixedToReference(bfState); // misnamed??
+   return attitude->BodyFixedToReference(bfState);
 }
 
 //------------------------------------------------------------------------------

@@ -65,13 +65,13 @@ $(T_OBJS): $(T_BUILD_DIR)/%.o: $(T_SRC_DIR)/%.cpp
 	$(CXX) $(CPPFLAGS) -c $< -o $@
 
 # Link step for C++ tests
-$(T_EXES): $(T_BUILD_DIR)/%.exe : $(T_BUILD_DIR)/%.o $(OBJS)
+$(T_EXES): $(T_BUILD_DIR)/%.out : $(T_BUILD_DIR)/%.o $(OBJS)
 	$(CXX) $(OBJS1) $(OBJS2) $< -o $@ $(TESTFLAGS)
 
 .PHONY: all clean runtest
 
 runtest:
-	for test in $(T_BUILD_DIR)/*.exe ; do \
+	for test in $(T_BUILD_DIR)/*.out ; do \
         $$test ; \
     done
 

@@ -19,10 +19,11 @@
 //
 // Author: Wendy Shoan, NASA/GSFC
 // Created: 2018.07.30
+// Updated by Vinay, 2021.12.31
 //
 /**
- * Definition of the Attitude class.  This base class models the
- * spacecraft attitude state.
+ * Definition of the Attitude class. This base class is used to model the spacecraft attitude state. 
+ * It relies on the child-classes to implement the calculation of rotation matrices to rotate coordinate systems.
  */
 //------------------------------------------------------------------------------
 #ifndef Attitude_hpp
@@ -46,11 +47,13 @@ public:
    
    virtual ~Attitude();
    
-   /// Converts the inertial-to-reference matrix @todo is this misnamed?
-   virtual Rmatrix33   InertialToReference(const Rvector6& centralBodyState);
+   /// Produces the inertial-to-reference rotation matrix
+   //  @note This method is pure virtual and MUST be implemented in child classes
+   virtual Rmatrix33   InertialToReference(const Rvector6& centralBodyState) = 0;
 
-   /// Author: Vinay, adapted from Attitude::InertialToReference(const Rvector6& centralBodyState)
-   virtual Rmatrix33 BodyFixedToReference(const Rvector6& centralBodyState);
+   /// Produces the body-fixed-to-reference rotation matrix
+   //  @note This method is pure virtual and MUST be implemented in child classes
+   virtual Rmatrix33 BodyFixedToReference(const Rvector6& centralBodyState) = 0;
    
    
 protected:

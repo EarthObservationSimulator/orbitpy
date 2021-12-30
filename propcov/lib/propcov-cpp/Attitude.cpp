@@ -19,6 +19,7 @@
 //
 // Author: Wendy Shoan, NASA/GSFC
 // Created: 2018.08.01
+// Updated by Vinay, 2021.12.31
 //
 /**
  * Implementation of the base Attitude class
@@ -97,32 +98,4 @@ Attitude& Attitude::operator=(const Attitude &copy)
 //---------------------------------------------------------------------------
 Attitude::~Attitude()
 {
-}
-
-//------------------------------------------------------------------------------
-// Rmatrix33 InertialToReference(const Rvector6& centralBodyState)
-//------------------------------------------------------------------------------
-/**
- * This method computes the matrix that converts from inertial to the reference 
- * frame, given the input central body state
- *
- * @param centralBodyState  central body state
- *
- * @return matrix from inertial to reference
- *
- * @note This method is expected to be implemented in child classes.
- *
- */
-//---------------------------------------------------------------------------
-Rmatrix33 Attitude::InertialToReference(const Rvector6& centralBodyState)
-{
-   Rmatrix33 I; // identity by default
-   return I;
-}
-
-/// Author: Vinay, adapted from Attitude::InertialToReference(const Rvector6& centralBodyState)
-Rmatrix33 Attitude::BodyFixedToReference(const Rvector6& centralBodyState)
-{
-   Rmatrix33 I; // identity by default
-   return I;
 }
