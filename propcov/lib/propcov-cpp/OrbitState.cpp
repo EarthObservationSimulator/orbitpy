@@ -102,6 +102,7 @@ OrbitState& OrbitState::operator=(const OrbitState &copy)
 //------------------------------------------------------------------------------
 /**
  * @return true if cartesian state is equal
+ * @todo Need to loosen comparision.
  */
 //------------------------------------------------------------------------------
 bool OrbitState::operator==(const OrbitState &s) const
@@ -134,12 +135,12 @@ OrbitState::~OrbitState()
 /**
  * Sets the keplerian state, element by element.
  * 
- * @param SMA  semimajor axis
+ * @param SMA  semimajor axis (in km to be consistent with the default Earth gravitational-parameter)
  * @param ECC  eccentricity
- * @param INC  inclination
- * @param RAAN right ascension of the ascending node
- * @param AOP  argument of periapsis
- * @param TA   true anomaly
+ * @param INC  inclination in rad
+ * @param RAAN right ascension of the ascending node in rad
+ * @param AOP  argument of periapsis in rad
+ * @param TA   true anomaly in rad
  *
  */
 //------------------------------------------------------------------------------

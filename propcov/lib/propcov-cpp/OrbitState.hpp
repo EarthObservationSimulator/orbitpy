@@ -21,8 +21,9 @@
 // Created: 2016.05.04
 //
 /**
- * Definition of the OrbitState class.  This class computes and converts
- * Cartesian and Keplerian states.
+ * OrbitState contains the spacecraft position and velocity 
+ * (in Inertial coordinate frame), which can be set and retrieved 
+ * as either Keplerian or Cartesian elements.
  */
 //------------------------------------------------------------------------------
 #ifndef OrbitState_hpp
@@ -42,12 +43,12 @@ public:
    bool operator==(const OrbitState &v)const;
    
    virtual ~OrbitState();
-   
+
    /// Set the Keplerian State elements
    virtual void     SetKeplerianState(Real SMA, Real ECC,
                                       Real INC, Real RAAN,
                                       Real AOP, Real TA);
-   /// Set the Kerlerian state vector
+   /// Set the Keplerian state vector
    virtual void     SetKeplerianVectorState(const Rvector6 &kepl);
    /// Set the Cartesian state
    virtual void     SetCartesianState(const Rvector6 &cart);
