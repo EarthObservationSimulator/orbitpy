@@ -160,7 +160,7 @@ Rmatrix33 NadirPointingAttitude::InertialToReference(const Rvector6& centralBody
    R_inertial_to_nadir_transposed.Set(xHat[0], yHat[0], zHat[0],
                         xHat[1], yHat[1], zHat[1],
                         xHat[2], yHat[2], zHat[2]);
-   R_inertial_to_nadir = R_fixed_to_nadir_transposed.Transpose();
+   R_inertial_to_nadir = R_inertial_to_nadir_transposed.Transpose();
    return R_inertial_to_nadir;
 }
 
