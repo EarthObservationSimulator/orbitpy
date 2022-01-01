@@ -217,6 +217,12 @@ void Propagator::SetPhysicalConstants(Real bodyMu, Real bodyJ2,
  *
  * @param toDate     date to which to propagate
  * 
+ * @note The `refJd` instance variable stores the last date until which the drag-effects have been considered.
+ *       Note that when the drag is disabled, the refJd term is not updated and remains at the initial epoch at 
+ *       which the propagator was initialized.
+ * 
+ * @todo When drag is considered, the mean-motion, orbit-rates too need to be updated.
+ * 
  */
 //------------------------------------------------------------------------------
 Rvector6 Propagator::Propagate(const AbsoluteDate &toDate)
@@ -245,6 +251,7 @@ Rvector6 Propagator::Propagate(const AbsoluteDate &toDate)
 	   ECC        = ECC + deltaECCPerRev * numRevs;
 	   orbElem(0) = SMA;
 	   orbElem(1) = ECC;
+      // TODO: VINAY: Seems there is error here since the mean-motion and orbit-rates are not being updated according to the updated SMA, ECC.
       #ifdef DEBUG_DRAG
 	      MessageInterface::ShowMessage("OrbitPeriod %12.10f \n", orbitPeriod);
 	      MessageInterface::ShowMessage(

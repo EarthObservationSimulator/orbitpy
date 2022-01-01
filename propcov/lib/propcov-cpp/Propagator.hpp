@@ -21,8 +21,12 @@
 // Created: 2016.05.05
 //
 /**
- * Definition of the the propagator class. 
- * Propagates spacecraft state to a requested time.
+ * Propagates spacecraft state to a requested time using a J2 Analytical propagator. 
+ * The default physical constants are set to that of spacecraft orbiting Earth. 
+ * A Propagator object is to be initialized with a pointer to a spacecraft, from which the orbit-state is read & modified. 
+ * 
+ * @todo Drag effects can be optionally considered by setting a flag, but this part is erroneous and needs revision. 
+ *       (See the Propagator::Propagate(const AbsoluteDate &toDate) function.)
  */
 //------------------------------------------------------------------------------
 #ifndef Propagator_hpp
@@ -46,7 +50,7 @@ public:
    
    virtual ~Propagator();
    
-   /// Set the body physical constants on teh propagator
+   /// Set the body physical constants on the propagator
    virtual void      SetPhysicalConstants(Real bodyMu, Real bodyJ2,
                                           Real bodyRadius);
    /// Propagate the spacecraft
@@ -75,7 +79,11 @@ protected:
    /// Flag to turn on/off drag modeling.
    bool         applyDrag;
    
-   /// Julian date of the reference orbital elements
+   /** Julian date of the reference orbital elements. The `refJd` instance variable stores the last date until 
+    *  which the drag-effects have been considered.
+    *  Note that when the drag is disabled, the refJd term is not updated and remains at the initial epoch at 
+    *  which the propagator was initialized.
+   */
    Real         refJd;
    /// The epoch at which the propagation started
    AbsoluteDate propStart;
@@ -87,6 +95,7 @@ protected:
    /// The orbital period
    Real         orbitPeriod;
 
+   /// The below orbital-elements at any point in time are at sync with the spacecraft orbit-state
    /// Orbital semi-major axis
    Real         SMA;
    /// Orbital eccentricity
