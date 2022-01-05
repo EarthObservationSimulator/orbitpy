@@ -237,11 +237,10 @@ PYBIND11_MODULE(propcov, m)
         .def("GetKeplerianState", &Spacecraft::GetKeplerianState)
         .def("AddSensor", &Spacecraft::AddSensor)
         .def("SetAttitude", &Spacecraft::SetAttitude)
-        .def("GetBodyFixedToInertial", &Spacecraft::GetBodyFixedToInertial)
         .def("GetBodyFixedToReference", &Spacecraft::GetBodyFixedToReference)
         .def("GetNadirToBodyMatrix", &Spacecraft::GetNadirToBodyMatrix)
         .def("SetBodyNadirOffsetAngles", &Spacecraft::SetBodyNadirOffsetAngles, py::arg("angle1"), py::arg("angle2"), py::arg("angle3"), py::arg("seq1"), py::arg("seq2"), py::arg("seq3"))
-        .def("SetOrbitStateCartesian", &Spacecraft::SetOrbitStateCartesian, py::arg("t"), py::arg("cart"))
+        .def("SetOrbitEpochOrbitStateCartesian", &Spacecraft::SetOrbitEpochOrbitStateCartesian, py::arg("t"), py::arg("cart"))
         .def("HasSensors", &Spacecraft::HasSensors)
 
         /// @todo write __repr__

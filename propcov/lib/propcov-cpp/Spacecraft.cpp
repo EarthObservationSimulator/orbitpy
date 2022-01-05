@@ -82,7 +82,7 @@ Spacecraft::Spacecraft(AbsoluteDate *epoch, OrbitState *state, Attitude *att,
    interpolator     (interp)
 {
    // sensorList is empty at start
-   // R_BN is identity at start
+   // R_Nadir2ScBody is identity if default angles are used
    
    offsetAngle1 = angle1;
    offsetAngle2 = angle2;
@@ -110,8 +110,8 @@ Spacecraft::Spacecraft(const Spacecraft &copy) :
    dragCoefficient  (copy.dragCoefficient),
    dragArea         (copy.dragArea),
    totalMass        (copy.totalMass),
-   orbitState       ((copy.orbitState)->Clone()),
-   orbitEpoch       ((copy.orbitEpoch)->Clone()),
+   orbitState       ((copy.orbitState)->Clone()), // TODO: Clone this?
+   orbitEpoch       ((copy.orbitEpoch)->Clone()), // TODO: Clone this?
    numSensors       (copy.numSensors),
    offsetAngle1     (copy.offsetAngle1),
    offsetAngle2     (copy.offsetAngle2),
@@ -119,7 +119,7 @@ Spacecraft::Spacecraft(const Spacecraft &copy) :
    eulerSeq1        (copy.eulerSeq1),
    eulerSeq2        (copy.eulerSeq2),
    eulerSeq3        (copy.eulerSeq3),
-   R_BN             (copy.R_BN)
+   R_Nadir2ScBody   (copy.R_Nadir2ScBody)
 {
    if (copy.numSensors > 0)
    {
@@ -133,7 +133,7 @@ Spacecraft::Spacecraft(const Spacecraft &copy) :
    }
    if (copy.attitude)
    {
-      attitude = (Attitude*) (copy.attitude)->Clone();
+      attitude = (Attitude*) (copy.attitude)->Clone(); // TODO: Clone this?
    }
 }
 
@@ -155,8 +155,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
    dragCoefficient  = copy.dragCoefficient;
    dragArea         = copy.dragArea;
    totalMass        = copy.totalMass;
-   orbitState       = (copy.orbitState)->Clone();  // Clone these?
-   orbitEpoch       = (copy.orbitEpoch)->Clone();  // Clone these?
+   orbitState       = (copy.orbitState)->Clone();  // TODO: Clone this?
+   orbitEpoch       = (copy.orbitEpoch)->Clone();  // TODO: Clone this?
    numSensors       = copy.numSensors;
 
    offsetAngle1     = copy.offsetAngle1;
@@ -165,7 +165,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
    eulerSeq1        = copy.eulerSeq1;
    eulerSeq2        = copy.eulerSeq2;
    eulerSeq3        = copy.eulerSeq3;
-   R_BN             = copy.R_BN;
+   R_Nadir2ScBody   = copy.R_Nadir2ScBody;
    
    sensorList.clear();
    for (Integer ii = 0; ii < copy.numSensors; ii++)
@@ -173,11 +173,11 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
    
    if (copy.interpolator)
    {
-      interpolator = (LagrangeInterpolator*) (copy.interpolator)->Clone();
+      interpolator = (LagrangeInterpolator*) (copy.interpolator)->Clone(); // TODO: Clone this? // TODO: Clone this?
    }
    if (copy.attitude)
    {
-      attitude = (Attitude*) (copy.attitude)->Clone();
+      attitude = (Attitude*) (copy.attitude)->Clone(); // TODO: Clone this?
    }
 
    return *this;
@@ -193,8 +193,12 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
 //------------------------------------------------------------------------------
 Spacecraft::~Spacecraft()
 {
-   // VInay: commented out to make it work with pybind11
-   /*
+   /** @todo: Vinay - I think that objects should be deleted outside and not by this class (since this class doesn't create the objects).
+      Hence am commenting the originally written delete operations. Also having the delete operations creates problems with pybind11.    
+
+      However when the copy operation is used, the objects are created by the Spacecraft class itself, in which case the deletion becomes 
+      the responsibility of the Spacecraft class.            
+   
    if (orbitState)
       delete orbitState;
    if (orbitEpoch)
@@ -204,7 +208,7 @@ Spacecraft::~Spacecraft()
       delete interpolator;
    if (attitude)
       delete attitude;
-   */
+   */   
 }
 
 //------------------------------------------------------------------------------
@@ -287,9 +291,8 @@ Rvector6 Spacecraft::GetCartesianState()
 //  Rvector6 GetKeplerianState()
 //------------------------------------------------------------------------------
 /**
- * Returns the Spacecraft's cartesian state. Author: Vinay.
- * 
- * @return  Spacecraft's cartesian state
+ * Returns the Spacecraft's Keplerian state.
+ * @return  Spacecraft's Keplerian state
  * 
  */
 //------------------------------------------------------------------------------
@@ -441,7 +444,7 @@ Real Spacecraft::GetTotalMass()
 //  Rvector6 GetCartesianStateAtEpoch(const AbsoluteDate &atDate)
 //------------------------------------------------------------------------------
 /**
- * Gets the Spacecraft's cartesian state (Earth MJ2000Eq) at the input time
+ * Gets the Spacecraft's cartesian state (Inertial) at the input time
  *
  * @param atDate  the date for which to get the cartesian state
  *
@@ -461,10 +464,10 @@ Rvector6 Spacecraft::GetCartesianStateAtEpoch(const AbsoluteDate &atDate)
 //                             Integer sensorNumber)
 //------------------------------------------------------------------------------
 /**
- * Returns a flag indicating whether or not the point is within the
+ * Returns a flag indicating whether or not the point is within the sensor FOV.
  * 
- * @param   targetConeAngle  the cone angle
- * @param   targetClockAngle the clock angle
+ * @param   targetConeAngle  the cone angle (evaluated in the Sensor frame)
+ * @param   targetClockAngle the clock angle (evaluated in the Sensor frame)
  * @param   sensorNumber     sensor for which to check target visibility
  *
  * @return  true if point is visible, false otherwise
@@ -497,10 +500,11 @@ bool Spacecraft::CheckTargetVisibility(Real    targetConeAngle,
 //------------------------------------------------------------------------------
 /**
  * Returns a flag indicating whether or not the point is within the
- * visible to the sensor at the given time, given the satToTargetVec.
+ * sensor FOV at the given time, given the satToTargetVec. THe function first expresses the satellite-to-target
+ * vector in the Sensor frame and then invokes the function to evaluate the targets presence/absence in sensor FOV.
  *
  * @param   bodyFixedState  input body fixed state
- * @param   satToTargetVec  spacecraft-to-target vector
+ * @param   satToTargetVec  spacecraft-to-target vector (vector expressed in body(Earth)-fixed frame)
  * @param   atTime          time for which to check the target visibility
  * @param   sensorNumber    sensor for which to check target visibility
  *
@@ -513,61 +517,54 @@ bool Spacecraft::CheckTargetVisibility(const Rvector6 &bodyFixedState,
                                        Real            atTime,
                                        Integer         sensorNumber)
 {
-   // VINAY: Error? R_NI here may actually be the rotation matrix from Earth-Fixed to Nadir. Correspondingly GetBodyFixedToInertial() must be named as `GetBodyFixedToReference`?
-   // where BodyFixed refers to EarthFixed and Reference refers to Nadir.
-   Rmatrix33 R_NI = GetBodyFixedToInertial(bodyFixedState); 
-   Rvector3  satToTarget_Sensor = // Vinay: satToTarget_Sensor is vector in Sensor frame
+
+   Rmatrix33 R_EF2Nadir = GetBodyFixedToReference(bodyFixedState); 
+   Rvector3  satToTarget_Sensor = // satToTarget_Sensor is vector expressed in Sensor frame
              sensorList.at(sensorNumber)->GetBodyToSensorMatrix(atTime) *
-             (R_BN * (R_NI * satToTargetVec));
+             (R_Nadir2ScBody * (R_EF2Nadir * satToTargetVec));
    Real cone, clock;
-   InertialToConeClock(satToTarget_Sensor, cone, clock);
+   VectorToConeClock(satToTarget_Sensor, cone, clock);
    return CheckTargetVisibility(cone, clock, sensorNumber);
 }
 
 //------------------------------------------------------------------------------
-//  Rmatrix33 GetBodyFixedToInertial(const Rvector6 &bfState)
+//  Rmatrix33 GetBodyFixedToReference(const Rvector6 &bfState)
 //------------------------------------------------------------------------------
 /**
- * Returns the bodyfixed-to-inertial matrix, given the input state
+ * Returns the body-fixed-to-reference (Earth-fixed to Nadir) rotation matrix, given the input state in body(Earth)-fixed frame.
  *
  * @param bfState  body-fixed state
  *
- * @return  bodyfixed-to-inertial matrix
+ * @return  bodyfixed-to-reference matrix
  *
  */
-//------------------------------------------------------------------------------
-Rmatrix33 Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) // Vinay: Error? Should be GetBodyFixedtoReference, where BodyFixed in EarthFixed and Reference would become Nadir.
-{
-   return attitude->InertialToReference(bfState); // misnamed??
-}
-
-/// Author: Vinay, Adapted from Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) 
 Rmatrix33 Spacecraft::GetBodyFixedToReference(const Rvector6 &bfState) 
 {
    return attitude->BodyFixedToReference(bfState);
 }
 
 //------------------------------------------------------------------------------
-//  bool SetOrbitState(const AbsoluteDate &t,
+//  bool SetOrbitEpochOrbitStateKeplerian(const AbsoluteDate &t,
 //                     const Rvector6     &kepl)
 //------------------------------------------------------------------------------
-/**
- * Sets the orbit state on the Spacecraft
+/*
+ * Sets the orbit state and corresponding epoch on the Spacecraft.
  *
  * @param t      input time
- * @param kepl   input keplerian elements
+ * @param kepl   input keplerian elements (SMA[km], ECC, INC[rad], RAAN[rad], AOP[rad], TA[rad])
  *
  * @return  true if set; false otherwise
  *
  */
 //------------------------------------------------------------------------------ @TODO: Vinay: Set date also?
-bool Spacecraft::SetOrbitState(const AbsoluteDate &t,
+bool Spacecraft::SetOrbitEpochOrbitStateKeplerian(const AbsoluteDate &t,
                                const Rvector6     &kepl)
 {
    if (!interpolator)
       throw TATCException(
             "Cannot interpolate - no interpolator set on spacecraft\n");
-   // Set the state on the Spacecraft's orbitState parameter
+   // Set the Spacecraft's orbitEpoch and orbitState parameters
+   orbitEpoch->SetJulianDate(t.GetJulianDate()); 
    orbitState->SetKeplerianVectorState(kepl);
    
    // pass data to the interpolator, in Cartesian state
@@ -587,15 +584,28 @@ bool Spacecraft::SetOrbitState(const AbsoluteDate &t,
    return true;
 }
 
-// Author: Vinay: Similar to the SetOrbitState(.) function, except that date is also set.
-bool  Spacecraft::SetOrbitStateCartesian(const AbsoluteDate &t,
+
+//------------------------------------------------------------------------------
+//  bool SetOrbitEpochOrbitStateCartesian(const AbsoluteDate &t,
+//                     const Rvector6     &kepl)
+//------------------------------------------------------------------------------
+/**
+ * Sets the orbit state (along with corresponding epoch) on the Spacecraft
+ *
+ * @param t      input time
+ * @param kepl   input Cartesian (Inertial frame) elements (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s])
+ *
+ * @return  true if set; false otherwise
+ *
+ */
+bool  Spacecraft::SetOrbitEpochOrbitStateCartesian(const AbsoluteDate &t,
                                          const Rvector6 &cart)
 {
    if (!interpolator)
       throw TATCException(
             "Cannot interpolate - no interpolator set on spacecraft\n");
-   // Set the state on the Spacecraft's orbitState parameter
-   orbitEpoch->SetJulianDate(t.GetJulianDate()); // Vinay: Added by me
+   // Set the Spacecraft's orbitEpoch and orbitState parameters
+   orbitEpoch->SetJulianDate(t.GetJulianDate()); 
    orbitState->SetCartesianState(cart);
    
    #ifdef DEBUG_STATES
@@ -626,9 +636,9 @@ bool  Spacecraft::SetOrbitStateCartesian(const AbsoluteDate &t,
  * @param angle1      euler angle 1 (degrees)
  * @param angle2      euler angle 2 (degrees)
  * @param angle3      euler angle 3 (degrees)
- * @param seq1        euler msequence 1
- * @param seq2        euler msequence 2
- * @param seq3        euler msequence 3
+ * @param seq1        euler sequence 1
+ * @param seq2        euler sequence 2
+ * @param seq3        euler sequence 3
  *
  */
 //------------------------------------------------------------------------------
@@ -761,11 +771,11 @@ Rvector6 Spacecraft::Interpolate(Real toTime)
 
 
 //------------------------------------------------------------------------------
-//  void InertialToConeClock(const Rvector3 &viewVec,
+//  void VectorToConeClock(const Rvector3 &viewVec,
 //                           Real &cone, Real &clock)
 //------------------------------------------------------------------------------
 /**
- * Computes the rotation matrix from the body frame to the sensor frame.
+ * Computes the cone, clock angles of a given input vector.
  *
  * @param viewVec      [in]  input view vector
  * @param cone         [out] cone angle
@@ -773,7 +783,7 @@ Rvector6 Spacecraft::Interpolate(Real toTime)
  *
  */
 //------------------------------------------------------------------------------
-void Spacecraft::InertialToConeClock(const Rvector3 &viewVec,
+void Spacecraft::VectorToConeClock(const Rvector3 &viewVec,
                                      Real &cone,
                                      Real &clock)
 {
@@ -784,10 +794,10 @@ void Spacecraft::InertialToConeClock(const Rvector3 &viewVec,
 
 
 //------------------------------------------------------------------------------
-//  void ComputeBodyToSensorMatrix()
+//  void ComputeNadirToBodyMatrix()
 //------------------------------------------------------------------------------
 /**
- * Computes the rotation matrix from the body frame to the sensor frame.
+ * Computes the rotation matrix from the Nadir pointing frame to Spacecraft body frame.
  */
 //---------------------------------------------------------------------------
 void Spacecraft::ComputeNadirToBodyMatrix()
@@ -795,10 +805,10 @@ void Spacecraft::ComputeNadirToBodyMatrix()
    Rvector3 angles(offsetAngle1 * GmatMathConstants::RAD_PER_DEG,
                    offsetAngle2 * GmatMathConstants::RAD_PER_DEG,
                    offsetAngle3 * GmatMathConstants::RAD_PER_DEG);
-   R_BN = AttitudeConversionUtility::ToCosineMatrix(angles, eulerSeq1,
+   R_Nadir2ScBody = AttitudeConversionUtility::ToCosineMatrix(angles, eulerSeq1,
                                                     eulerSeq2, eulerSeq3);
 }
 
 Rmatrix33 Spacecraft::GetNadirToBodyMatrix(){
-   return R_BN;
+   return R_Nadir2ScBody;
 }

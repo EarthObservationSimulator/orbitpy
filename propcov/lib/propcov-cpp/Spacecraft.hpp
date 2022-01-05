@@ -19,10 +19,25 @@
 //
 // Author: Wendy Shoan, NASA/GSFC
 // Created: 2016.05.02
+// Modified: 2022.01.04 by Vinay
 //
 /**
- * Definition of the Spacecraft class.  This class contains data and
- * methods for a simple Spacecraft.
+ * Definition of the Spacecraft class.
+ *  
+ * The Spacecraft class is a container for objects related to the spacecraft, including abstractions 
+ * such as orbit and attitude, algorithms such as the LaGrange interpolator, or models of objects such as sensors.
+ * 
+ * The spacecraft class provides operations to access the state of its contained objects, and to do computations 
+ * based on that state. Note that some of the containments are pointers to objects (e.g., orbitState, orbitEpoch), 
+ * the objects which can be modified outside the Spacecraft object.
+ * 
+ * A key part of this spacecraft state that is maintained is the rotation matrix from the Nadir pointing reference frame 
+ * to the body frame. This matrix is computed from user-set Euler angles & Euler sequence.
+ * 
+ * Another example is that  the CoverageChecker calls Spacecraft’s CheckTargetVisibility operator, 
+ * which rotates an input target-vector to the sensor frame and then calls the sensor to check whether the input target is in the field of view. 
+ * 
+ * The current implementation of the Spacecraft class has been verified with maximum of one sensor attachment.
  */
 //------------------------------------------------------------------------------
 #ifndef Spacecraft_hpp
@@ -45,7 +60,7 @@ public:
    Spacecraft(AbsoluteDate *epoch, OrbitState *state, Attitude *att,
               LagrangeInterpolator *interp,
               Real angle1 = 0.0, Real angle2 = 0.0, Real angle3 = 0.0,
-              Integer seq1 = 1, Integer seq2 = 2, Integer seq3 = 3);
+              Integer seq1 = 1, Integer seq2 = 2, Integer seq3 = 3); // angles in degrees
    Spacecraft( const Spacecraft &copy);
    Spacecraft& operator=(const Spacecraft &copy);
    
@@ -99,18 +114,14 @@ public:
                                                 Real            atTime,
                                                 Integer         sensorNumber);
 
-   /// Get the body-fixed-to-inertial rotation matrix
-   virtual Rmatrix33      GetBodyFixedToInertial(const Rvector6 &bfState);
-
-   /// Author: Vinay, Adapted from Spacecraft::GetBodyFixedToInertial(const Rvector6 &bfState) 
+   /// Get the body-fixed-to-reference (Earth-fixed to Nadir) rotation matrix
    virtual Rmatrix33 GetBodyFixedToReference(const Rvector6 &bfState);
    
-   /// Add an orbit state (Keplerian elements) for the spacecraft at the input
-   /// time t
-   virtual bool           SetOrbitState(const AbsoluteDate &t,
+   /// Set orbit state (Keplerian elements) for the spacecraft at the input time t
+   virtual bool           SetOrbitEpochOrbitStateKeplerian(const AbsoluteDate &t,
                                         const Rvector6 &kepl);
-
-   virtual bool           SetOrbitStateCartesian(const AbsoluteDate &t,
+   /// Set orbit state (Cartesian elements) for the spacecraft at the input time t
+   virtual bool           SetOrbitEpochOrbitStateCartesian(const AbsoluteDate &t,
                                         const Rvector6 &cart); 
 
    /// Set the body nadir offset angles for the spacecraft
@@ -130,7 +141,7 @@ public:
    /// Interpolate the data to the input toTime
    virtual Rvector6       Interpolate(Real toTime);
 
-   // Author: Vinay
+   // Get the rotation matrix from Nadir pointing frame to Spacecraft body frame.
    Rmatrix33 GetNadirToBodyMatrix();
    
 protected:
@@ -141,17 +152,17 @@ protected:
 	Real                 dragArea;
     /// Total Mass in kg
 	Real                 totalMass;
-	/// Orbit State
+	/// Pointer to the Orbit State object
 	OrbitState           *orbitState;
-	/// Orbit Epoch
+	/// Pointer to the Orbit Epoch object
 	AbsoluteDate         *orbitEpoch;
 	/// Number of attached sensors
 	Integer              numSensors;
-	/// Vector of attached sensor objects
+	/// Vector of pointers to sensor objects (sensors regarded as attached to the spacecraft)
 	std::vector<Sensor*> sensorList;
    /// Pointer to the Attitude object
    Attitude             *attitude;
-   /// The interpolator to use (for Hermite only, currently)
+   /// Pointer to the interpolator to use (for Hermite only, currently)
    LagrangeInterpolator *interpolator;
    /// Offset angles
    Real                 offsetAngle1;
@@ -163,17 +174,16 @@ protected:
    Integer              eulerSeq2;
    Integer              eulerSeq3;
    
-   /// The rotation matrix from the nadir frame to the body frame
-   Rmatrix33            R_BN;
-   
+   /// The rotation matrix from the nadir-pointing frame to the spacecraft-body frame
+   Rmatrix33            R_Nadir2ScBody;   
    
    /// @todo - do we need to buffer states here as well??
    
-   /// Convert inertial view vector to cone and clock angles
-   virtual void  InertialToConeClock(const Rvector3 &viewVec,
+   /// Convert view vector to cone and clock angles
+   virtual void  VectorToConeClock(const Rvector3 &viewVec,
                                      Real &cone,
                                      Real &clock);
-   /// Compute the nadir-to-body-matrix
+   /// Compute the nadir-pointing-to-spacecraft-body-matrix
    virtual void  ComputeNadirToBodyMatrix();
 
 };

@@ -458,7 +458,7 @@ class GridCoverage(Entity):
                 date.SetJulianDate(jd_date)
                 
                 cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
-                spc.SetOrbitStateCartesian(date, propcov.Rvector6(cart_state))
+                spc.SetOrbitEpochOrbitStateCartesian(date, propcov.Rvector6(cart_state))
                 
                 # compute coverage
                 points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
@@ -912,7 +912,7 @@ class PointingOptionsWithGridCoverage(Entity):
                 date.SetJulianDate(jd_date)
                 
                 cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
-                spc.SetOrbitStateCartesian(date, propcov.Rvector6(cart_state))
+                spc.SetOrbitEpochOrbitStateCartesian(date, propcov.Rvector6(cart_state))
                 
                 # compute coverage
                 points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned

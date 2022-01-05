@@ -182,9 +182,9 @@ Propagator& Propagator::operator=(const Propagator &copy)
 //------------------------------------------------------------------------------
 Propagator::~Propagator()
 {
+   // TODO: This may create problems with pybind11. Verify.
    if (densityModel)
       delete densityModel;
-   
 }
 
 //------------------------------------------------------------------------------
@@ -261,7 +261,7 @@ Rvector6 Propagator::Propagate(const AbsoluteDate &toDate)
       #endif
    }
 
-   sc->SetOrbitState(toDate, orbElem);
+   sc->SetOrbitEpochOrbitStateKeplerian(toDate, orbElem);
    
    // Save the initial prop time
    if (propStart.GetJulianDate() == GmatTimeConstants::JD_OF_J2000)
