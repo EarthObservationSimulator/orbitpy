@@ -40,8 +40,6 @@
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
-// @todo DON'T hard-code body radius
-const Real CoverageChecker::BODY_RADIUS = 6378.1363;
 
 //------------------------------------------------------------------------------
 // public methods
@@ -60,32 +58,17 @@ const Real CoverageChecker::BODY_RADIUS = 6378.1363;
 CoverageChecker::CoverageChecker(PointGroup *ptGroup, Spacecraft *sat) :
    pointGroup        (ptGroup),
    sc                (sat),
-   centralBody       (NULL),
-   timeIdx           (-1) ,
-   coverageStart     (0.0),
-   coverageEnd       (0.0)
+   centralBody       (NULL)
 {
-   timeSeriesData.clear();
-   
-   dateData.clear();
-   numEventsPerPoint.clear();
    pointArray.clear();
    feasibilityTest.clear();
-   computePOIGeometryData = false;
 
    centralBody    = new Earth();
+   centralBodyRadius = centralBody->GetRadius();
+
    Integer numPts = pointGroup->GetNumPoints();
-   IntegerArray emptyIntArray;  // empty array
-   VisiblePOIReport emtpyReport;
-   discreteEventData.resize(numPts);
    for (Integer ii = 0; ii < numPts; ii++)
-   {
-      timeSeriesData.push_back(emptyIntArray);
-      std::vector < VisiblePOIReport > emptyPOIVector;
-      discreteEventData[ii].push_back(emtpyReport);
-//      dateData.push_back(noDate); // want to accumulate these as we go along
-      numEventsPerPoint.push_back(0);
-      
+   {     
       /// @TODO This should not be set here - we should store both
       /// positions and unitized positions in the PointGroup and
       /// then access those arrays when needed <<<<<<<<<<<<<<
@@ -108,31 +91,15 @@ CoverageChecker::CoverageChecker(PointGroup *ptGroup, Spacecraft *sat) :
  *
  * @param copy  the object to copy
  * 
+ * @todo: Cloning required of the pointGroup, sc, centralBody objects? 
+ * 
  */
 //------------------------------------------------------------------------------
 CoverageChecker::CoverageChecker(const CoverageChecker &copy) :
    pointGroup        (copy.pointGroup),
    sc                (copy.sc),
-   centralBody       (copy.centralBody),
-   timeIdx           (copy.timeIdx),
-   coverageStart     (copy.coverageStart),  // or 0.0?
-   coverageEnd       (copy.coverageEnd)     // or 0.0?
-{
-   timeSeriesData.clear();
-   for (Integer ii = 0; ii < copy.timeSeriesData.size(); ii++)
-   {
-      IntegerArray ia = copy.timeSeriesData.at(ii);
-      timeSeriesData.push_back(ia);
-   }
-
-   dateData.clear();
-   for (Integer dd = 0; dd < copy.dateData.size(); dd++)
-      dateData.push_back(copy.dateData.at(dd));
-   
-   numEventsPerPoint.clear();
-   for (Integer nn = 0; nn < copy.numEventsPerPoint.size(); nn++)
-      numEventsPerPoint.push_back(copy.numEventsPerPoint.at(nn));
-
+   centralBody       (copy.centralBody)
+{  
    for (Integer ii = 0; ii < pointArray.size(); ii++)
       delete pointArray.at(ii);
    pointArray.clear();
@@ -145,9 +112,6 @@ CoverageChecker::CoverageChecker(const CoverageChecker &copy) :
    feasibilityTest.clear();
    for (Integer ff = 0; ff < copy.feasibilityTest.size(); ff++)
       feasibilityTest.push_back(copy.feasibilityTest.at(ff));
-
-   computePOIGeometryData = copy.computePOIGeometryData;
-
 }
 
 //------------------------------------------------------------------------------
@@ -157,6 +121,8 @@ CoverageChecker::CoverageChecker(const CoverageChecker &copy) :
  * The operator= for the CoverageChecker object
  *
  * @param copy  the object to copy
+ * 
+ * @todo: Cloning required of the pointGroup, sc, centralBody objects? 
  * 
  */
 //------------------------------------------------------------------------------
@@ -168,24 +134,6 @@ CoverageChecker& CoverageChecker::operator=(const CoverageChecker &copy)
    pointGroup        = copy.pointGroup;
    sc                = copy.sc;
    centralBody       = copy.centralBody;
-   timeIdx           = copy.timeIdx;
-   coverageStart     = copy.coverageStart;
-   coverageEnd       = copy.coverageEnd;
-
-   timeSeriesData.clear();
-   for (Integer ii = 0; ii < copy.timeSeriesData.size(); ii++)
-   {
-      IntegerArray ia = copy.timeSeriesData.at(ii);
-      timeSeriesData.push_back(ia);
-   }
-
-   dateData.clear();
-   for (Integer dd = 0; dd < copy.dateData.size(); dd++)
-      dateData.push_back(copy.dateData.at(dd));
-   
-   numEventsPerPoint.clear();
-   for (Integer nn = 0; nn < copy.numEventsPerPoint.size(); nn++)
-      numEventsPerPoint.push_back(copy.numEventsPerPoint.at(nn));
 
    for (Integer ii = 0; ii < pointArray.size(); ii++)
       delete pointArray.at(ii);
@@ -199,8 +147,6 @@ CoverageChecker& CoverageChecker::operator=(const CoverageChecker &copy)
    feasibilityTest.clear();
    for (Integer ff = 0; ff < copy.feasibilityTest.size(); ff++)
       feasibilityTest.push_back(copy.feasibilityTest.at(ff));
-
-   computePOIGeometryData = copy.computePOIGeometryData;
 
    return *this;
 }
@@ -222,10 +168,25 @@ CoverageChecker::~CoverageChecker()
    }
 }
 
-
-IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
+//------------------------------------------------------------------------------
+//  IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
+//                                                   Real           theTime, 
+//                                                   const Rvector6 &cartState) 
+//------------------------------------------------------------------------------
+/**
+ * Coverage calculation done for all points in PointGroup object
+ * 
+ * @param   centralBodyFixedState    central body fixed state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s]))
+ * @param   theTime     time corresponding to the state of spacecraft (JDUT1)
+ * @param   centralBodyInertialState   inertial state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s])) (UNUSED)
+ *
+ * @return  Array of point-indices (starting from 0) which are in-view of sensor/spacecraft
+ *
+ */
+//------------------------------------------------------------------------------
+IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &centralBodyFixedState,
                                                  Real           theTime, 
-                                                 const Rvector6 &cartState)   
+                                                 const Rvector6 &centralBodyInertialState)   
 {
    const Integer numPts = pointGroup->GetNumPoints();
    IntegerArray PointIndices;
@@ -233,23 +194,28 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
    {
       PointIndices.push_back(i);
    }
-   return CoverageChecker::CheckPointCoverage(theState, theTime, cartState, PointIndices);
+   return CoverageChecker::CheckPointCoverage(centralBodyFixedState, theTime, centralBodyInertialState, PointIndices);
 }
 //------------------------------------------------------------------------------
-// IntegerArray CheckPointCoverage(const Rvector6 &theState,
-//                                 Real           theTime,
-//                                 const Rvector6 &cartState)
+//  IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
+//                                                   Real           theTime, 
+//                                                   const Rvector6 &cartState) 
 //------------------------------------------------------------------------------
 /**
- * Checks the point coverage.
- *
- * @return  array of indexes 
+ * Coverage calculation done select points in PointGroup object
  * 
+ * @param   centralBodyFixedState  central body fixed state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s]))
+ * @param   theTime                time corresponding to the state of spacecraft (JDUT1)
+ * @param   centralBodyInertialState              inertial state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s])) (UNUSED)
+ * @param   PointIndices           indices of points which are to be checked for coverage
+ *
+ * @return  Array of point-indices (starting from 0) which are in-view of sensor/spacecraft
+ *
  */
 //------------------------------------------------------------------------------
-IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
+IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &centralBodyFixedState,
                                                  Real           theTime, 
-                                                 const Rvector6 &cartState,
+                                                 const Rvector6 &centralBodyInertialState,
                                                  const IntegerArray &PointIndices)   
 {
    #ifdef DEBUG_COV_CHECK
@@ -262,7 +228,6 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
    AbsoluteDate  aDate;
    aDate.SetJulianDate(theTime);
    
-   Rvector6      centralBodyFixedState = theState;
    Integer       covCount              = 0;
    Rvector3      centralBodyFixedPos(centralBodyFixedState[0],
                                      centralBodyFixedState[1],
@@ -280,24 +245,24 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
       MessageInterface::ShowMessage(" --- Checking Feasibility ...\n");
    #endif
    
-   CheckGridFeasibility(centralBodyFixedPos);
+   CheckGridFeasibility(centralBodyFixedPos); // line of sight test for each point, the `feasibilityTest` instance variable is updated 
    for ( Integer k = 0; k < numPts; k++)
    {
-      // Simple line of site test for each point
-//      if (CheckGridFeasibility(pointIdx, centralBodyFixedPos)) // this is slower
+      // Simple line of sight test for each point
+      // if (CheckGridFeasibility(pointIdx, centralBodyFixedPos)) // this is slower
       if (feasibilityTest.at(PointIndices[k])) //  > 0)
       {
          #ifdef DEBUG_COV_CHECK
             MessageInterface::ShowMessage(
-                              " --- feasibilty at point %d is TRUE!\n",
+                              " --- feasibility at point %d is TRUE!\n",
                               PointIndices[k]);
          #endif
 
-         Integer  sensorNum = 0; // 1; // Currently only works for one sensor!!
+         Integer  sensorNum = 0; // 1; // Currently only works for one sensor, hence hardcoded!!
 
          bool     inView    = false;
          Rvector3 pointLocation = (*pointArray.at(PointIndices[k])) *
-                                   centralBody->GetRadius();
+                                   centralBodyRadius;
          Rvector3 satToTargetVec = pointLocation - centralBodyFixedPos;
 
 //         Rmatrix33 R_fixed_to_nadir =
@@ -310,7 +275,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
             // Then the sc computes the R_NI, R_BN, and calls the sensor for
             // the R_SB to detmine the visibility
 //            inView = sc->CheckTargetVisibility(viewVector, sensorNum);
-            inView = sc->CheckTargetVisibility(theState, satToTargetVec,
+            inView = sc->CheckTargetVisibility(centralBodyFixedState, satToTargetVec,
                                                theTime,  sensorNum);                 
          }
          else
@@ -324,7 +289,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
                                        rangeMag / bodyFixedMag;
             Real offNadirAngle       = GmatMathUtil::ACos(cosineOffNadirAngle);
             if ((offNadirAngle < (GmatMathConstants::PI_OVER_TWO -
-                                  GmatMathUtil::ACos(BODY_RADIUS/bodyFixedMag)))
+                                  GmatMathUtil::ACos(centralBodyRadius/bodyFixedMag)))
                                   && rangeVector(2) > 0.0)
                inView = true;
             else
@@ -337,147 +302,18 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
                             centralBodyFixedState.ToString(12).c_str());
          #endif
          
-         #ifdef DEBUG_COV_CHECK_FOV
-            MessageInterface::ShowMessage(
-                      " --- In CheckPointCoverage, pointArray = %s\n",
-                      (pointArray.at(pointIdx))->ToString(12).c_str());
-            MessageInterface::ShowMessage(
-                      " --- In CheckPointCoverage, centralBodyFixedState = %s\n",
-                      centralBodyFixedState.ToString(12).c_str());
-            MessageInterface::ShowMessage(
-                      " --- In CheckPointCoverage, rangeVector = %s\n",
-                      rangeVector.ToString(12).c_str());
-//            MessageInterface::ShowMessage(
-//                      " --- In CheckPointCoverage, offNadirAngle =  %12.10f\n",
-//                      offNadirAngle);
-         #endif
          if (inView)
          {
             result.push_back(PointIndices[k]);   // covCount'th entry
             covCount++;
-            numEventsPerPoint.at(PointIndices[k]) = numEventsPerPoint.at(PointIndices[k]) + 1;
-            timeSeriesData.at(PointIndices[k]).push_back(timeIdx);
-            if (computePOIGeometryData)
-            {
-
-               // Compute Azimuth Angle, Zenith Angle, Range of the spacecraft
-               // w/r/t coverage point
-               Real lat;
-               Real lon;
-               pointGroup->GetLatAndLon(PointIndices[k],lat,lon);
-               Rvector3 topoRangeVec =
-                     centralBody->FixedToTopocentric(-satToTargetVec, lat, lon);
-               Real xLocal = topoRangeVec[0];
-               Real yLocal = topoRangeVec[1];
-               Real zLocal = topoRangeVec[2];
-               // theta is the angle of the range vector, measured in the
-               // xy plane, from the x-axis
-               // obsAzimuthAngle is the angle of the range vector,
-               // measured in the xy-plane,
-               // from the minus x-axis, measured counter clockwise
-               Real theta = GmatMathUtil::Mod(
-                            GmatMathUtil::ATan2(yLocal, xLocal), 2 *
-                            GmatMathConstants::PI);
-               Real obsAzimuthAngle = GmatMathUtil::Mod(
-                                      GmatMathConstants::PI - theta, 2 *
-                                      GmatMathConstants::PI);
-               Real obsRange = topoRangeVec.GetMagnitude();
-               Real obsZenithAngle = GmatMathUtil::ASin(GmatMathUtil::Sqrt(
-                                    xLocal*xLocal + yLocal*yLocal) / obsRange);
-
-               // Compute Azimuth Angle, Zenith Angle of the sun w/r/t coverage point
-               Rvector3 sunVecFixed = centralBody->GetSunPositionInBodyCoords(
-                                                   theTime, "Cartesian");
-               Rvector3 sunVecTopo = centralBody->FixedToTopocentric(sunVecFixed, lat, lon);
-               Real xSunTopo = sunVecTopo[0];
-               Real ySunTopo = sunVecTopo[1];
-               Real sunRange = sunVecTopo.GetMagnitude();
-               Real suntheta = GmatMathUtil::Mod(GmatMathUtil::ATan2(
-                               ySunTopo, xSunTopo), 2 * GmatMathConstants::PI);
-               Real sunAz = GmatMathUtil::Mod(GmatMathConstants::PI - suntheta,
-                                              2 * GmatMathConstants::PI);
-               Real sunZenithAngle = GmatMathUtil::ASin(GmatMathUtil::Sqrt(
-                                     xSunTopo*xSunTopo + ySunTopo*ySunTopo) /
-                                     sunRange);
-
-               // create VisiblePOIReport object and set the data
-               VisiblePOIReport visReport;
-               visReport.SetEndDate(aDate);
-               visReport.SetStartDate(aDate);
-               visReport.SetPOIIndex(PointIndices[k]);
-               visReport.SetObsRange(obsRange);
-               visReport.SetObsAzimuth(obsAzimuthAngle );
-               visReport.SetObsZenith(obsZenithAngle);
-               visReport.SetSunAzimuth(sunAz);
-               visReport.SetSunZenith(sunZenithAngle);
-               Rvector3 inertialPos   = cartState.GetR();
-               Rvector3 inertialVel   = cartState.GetV();
-               visReport.SetObsPosInertial(inertialPos);
-               visReport.SetObsVelInertial(inertialVel);
-               discreteEventData[PointIndices[k]].push_back(visReport);
-            }
-            #ifdef DEBUG_COV_CHECK
-               MessageInterface::ShowMessage(
-                                    " --- In CheckPointCoverage, setting "
-                                    "numEventsPerPoint (%d) to %d\n",
-                                    pointIdx, numEventsPerPoint.at(pointIdx));
-               MessageInterface::ShowMessage(
-                                " --- Added timeIdx %d to timeSeriesData(%d)\n",
-                                timeIdx, pointIdx);
-            #endif
          }
       }
    }
-   #ifdef DEBUG_COV_CHECK
-      for (Integer ii = 0; ii < pointGroup->GetNumPoints(); ii++)
-         MessageInterface::ShowMessage(" --- numEventsPerPoint(%d) = %d\n",
-                                       ii, numEventsPerPoint.at(ii));
-   #endif
 
    return result;
 }
 
-//------------------------------------------------------------------------------
-// IntegerArray AccumulateCoverageData()
-//------------------------------------------------------------------------------
-/**
- * Accumulates the coverage data after the propagation update
- *
- * @return  array of indexes
- *
- */
-//------------------------------------------------------------------------------
-IntegerArray CoverageChecker::AccumulateCoverageData()
-{
-   // Accumulates coverage data after propagation update
-   // Get the state and date here
-   Real     theDate   = sc->GetJulianDate();
-   Rvector6 cartState = sc->GetCartesianState();
-   Rvector6 theState  = GetEarthFixedSatState(theDate, cartState);
-   dateData.push_back(theDate);
-   timeIdx++;
-   return CheckPointCoverage(theState, theDate, cartState);
-}
 
-//------------------------------------------------------------------------------
-// IntegerArray AccumulateCoverageDataAtPreviousTimeIndex()
-//------------------------------------------------------------------------------
-/**
- * Accumulates the coverage data, but do not update the corresponding time index
- * TODO: Not tested thoroughly
- * @return  array of indexes
- *
- */
-//------------------------------------------------------------------------------
-IntegerArray CoverageChecker::AccumulateCoverageDataAtPreviousTimeIndex()
-{
-   // Accumulates coverage data after propagation update
-   // Get the state and date here
-   Real     theDate   = sc->GetJulianDate();
-   Rvector6 cartState = sc->GetCartesianState();
-   Rvector6 theState  = GetEarthFixedSatState(theDate, cartState);;
-   return CheckPointCoverage(theState, theDate, cartState);
-}
 
 //------------------------------------------------------------------------------
 // IntegerArray AccumulateCoverageData()
@@ -524,31 +360,6 @@ IntegerArray CoverageChecker::CheckPointCoverage()
    return CoverageChecker::CheckPointCoverage(PointIndices);
 }
 
-//------------------------------------------------------------------------------
-// IntegerArray AccumulateCoverageData(Real atTime)
-//------------------------------------------------------------------------------
-/**
- * Accumulates the coverage data after the propagation update
- *
- * @return  array of indexes
- *
- */
-//------------------------------------------------------------------------------
-IntegerArray CoverageChecker::AccumulateCoverageData(Real atTime)
-{
-#ifdef DEBUG_COV_CHECK
-   MessageInterface::ShowMessage(
-            " --- In AccumulateCoverageData, atTime = %12.10f:\n",
-            atTime);
-#endif
-   // Accumulates coverage data after propagation update
-   // Get the state here
-   Rvector6 cartState = sc->Interpolate(atTime);
-   Rvector6 theState  = GetEarthFixedSatState(atTime, cartState);
-   dateData.push_back(atTime);
-   timeIdx++;
-   return CheckPointCoverage(theState, atTime, cartState);
-}
 
 //------------------------------------------------------------------------------
 // Rvector6 GetEarthFixedSatState(Real jd, const Rvector6& scCartState)
@@ -583,140 +394,6 @@ Rvector6 CoverageChecker::GetEarthFixedSatState(Real jd,
 }
 
 //------------------------------------------------------------------------------
-// std::vector<VisiblePOIReport> ProcessCoverageData()
-//------------------------------------------------------------------------------
-/**
- * Returns an array of reports of coverage
- * 
- * @return  array of reports of coverage
- * 
- */
-//------------------------------------------------------------------------------
-std::vector<IntervalEventReport> CoverageChecker::ProcessCoverageData()
-{
-   #ifdef DEBUG_COV_CHECK
-      MessageInterface::ShowMessage(
-                        " --- In ProcessCoverageData, feasibilityTest:\n");
-      for (Integer ii = 0; ii < feasibilityTest.size(); ii++)
-         MessageInterface::ShowMessage(" ... %d ...    %s\n",
-                           ii, (feasibilityTest.at(ii)? "TRUE" : "false"));
-   #endif
-   std::vector<IntervalEventReport> reports;
-   
-   Integer numCoverageEvents = 0;
-   Integer numPts            = pointGroup->GetNumPoints();
-   Integer numEvents         = 0;
-   Real    startTime;
-   Real    endTime;
-   
-   #ifdef DEBUG_COV_CHECK
-      MessageInterface::ShowMessage(
-                        " --- In ProcessCoverageData, numPts = %d\n",
-                        numPts);
-   #endif
-   for (Integer pointIdx = 0; pointIdx < numPts; pointIdx++)
-   {
-
-      // Only perform if there are interval events (2 or more events)
-       bool isEnd = false;
-       numEvents  = numEventsPerPoint.at(pointIdx);
-       std::vector<VisiblePOIReport> discreteEvents;
-       #ifdef DEBUG_COV_CHECK
-          MessageInterface::ShowMessage(
-                           " --- In ProcessCoverageData, numEvents (%d) = %d\n",
-                           pointIdx, numEvents);
-       #endif
-
-       if (numEvents >= 2)
-       {
-           startTime = dateData.at((timeSeriesData.at(pointIdx)).at(0));
-          
-           for (Integer dateIdx = 1; dateIdx < numEvents; dateIdx++)
-           {
-              //Accumlate discrete event for this point
-              discreteEvents.push_back(discreteEventData[pointIdx][dateIdx]);
-
-              // Test for end of an interval
-              Integer atIdx     = (timeSeriesData.at(pointIdx)).at(dateIdx);
-              Integer atPrevIdx = (timeSeriesData.at(pointIdx)).at(dateIdx-1);
-              if ((atIdx - atPrevIdx) != 1)
-              {
-                  endTime = dateData.at(atPrevIdx);
-                  isEnd = true;
-              }
-              // Test for the last event for this point
-               else if (dateIdx == (numEvents-1))
-               {
-                   endTime = dateData.at(atIdx);
-                   isEnd = true;
-               }
-              // otherwise, endTime is not set!
-               if (isEnd)
-               {
-                   IntervalEventReport poiReport = CreateNewPOIReport(startTime,
-                                                   endTime,pointIdx);
-                   numCoverageEvents++;
-                   poiReport.SetAllPOIEvents(discreteEvents);
-                   reports.push_back(poiReport);
-                   startTime = dateData.at(atIdx);
-                   isEnd = false;
-                   // Clear discrete events for the pass
-                   discreteEvents.clear();
-               }
-           }
-       }
-   }
-   return reports;
-}
-
-//------------------------------------------------------------------------------
-// void SetComputePOIGeometryData(bool flag)
-//------------------------------------------------------------------------------
-/**
- * Sets the flag indficating whether or not to compute the POI Geometry data
- *
- * @param flag compute the POI geometry data?
- *
- */
-//------------------------------------------------------------------------------
-void CoverageChecker::SetComputePOIGeometryData(bool flag)
-{
-    computePOIGeometryData = flag;
-    return;
-}
-
-
-//------------------------------------------------------------------------------
-// VisiblePOIReport CreateNewPOIReport(Real startJd, Real endJd, Integer poiIdx)
-//------------------------------------------------------------------------------
-/**
- * Creates a new report of coverage data.
- * 
- * @param startJd  start Julian date for the reportSetComputePOIGeometryData
- * @param endJd    end Julian date for the report
- * @param poiIndex POI index for the created report
- * 
- * @return  report of coverage
- * 
- */
-//------------------------------------------------------------------------------
-IntervalEventReport CoverageChecker::CreateNewPOIReport(Real startJd, Real endJd,
-                                                        Integer poiIdx)
-{
-   // Creates VisiblePOIReport given point indeces and start/end dates
-   IntervalEventReport poiReport;
-   AbsoluteDate        startEpoch;
-   AbsoluteDate        endEpoch;
-   
-   poiReport.SetPOIIndex(poiIdx);
-   startEpoch.SetJulianDate(startJd);
-   endEpoch.SetJulianDate(endJd);
-   poiReport.SetStartDate(startEpoch);
-   poiReport.SetEndDate(endEpoch);
-   return poiReport;
-}
-
-//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 
@@ -745,7 +422,7 @@ bool CoverageChecker::CheckGridFeasibility(Integer         ptIdx,
    bool     isFeasible = false;
 //   Rvector3 rangeVec;  // defaults to all zeroes
    
-   bfState  = bodyFixedState/BODY_RADIUS;
+   bfState  = bodyFixedState/centralBodyRadius;
    bodyUnit = bfState.GetUnitVector();
 
    ptPos    = *(pointArray.at(ptIdx));
@@ -777,7 +454,7 @@ void CoverageChecker::CheckGridFeasibility(const Rvector3& bodyFixedState)
    MessageInterface::ShowMessage("CheckGridFeasibility: bodyFixedState = %s\n",
                                  bodyFixedState.ToString(12).c_str());
 #endif
-   bfState  = bodyFixedState/BODY_RADIUS;
+   bfState  = bodyFixedState/centralBodyRadius;
    bodyUnit = bfState.GetUnitVector();
    
    for (Integer ii = 0; ii < pointArray.size(); ii++)

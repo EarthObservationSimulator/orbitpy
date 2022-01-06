@@ -19,22 +19,10 @@
 //
 // Author: Wendy Shoan, NASA/GSFC
 // Created: 2016.05.09
-// Modified: 2022.01.05 by Vinay
 //
 /**
  * Definition of the CoverageChecker class.  This class checks for point
- * coverage. The class is a reduced version of 'CoverageCheckerLegacy'. While the
- * legacy version includes functionality to generate reports, this class only checks for 
- * point-coverage.
- * 
- * The CoverageChecker is instantiated with pointers to PointGroup object and a Spacecraft object.
- * The point-group contains list of points which are to be checked for coverage calculations. 
- * The spacecraft may contain sensor, in which case coverage is evaluated for the sensor FOV or if no sensor
- * the coverage is evaluated for the spacecraft (complete horizon is considered). There is room to expand to multiple sensors
- * per spacecraft, but currently only 1 sensor per spacecraft is allowed.
- * 
- * THe primary functions utilized are the overloaded functions CheckPointCoverage(.). 
- * 
+ * coverage and generates reports.
  */
 //------------------------------------------------------------------------------
 #ifndef CoverageChecker_hpp
@@ -47,6 +35,8 @@
 #include "Earth.hpp"
 #include "Rvector.hpp"
 #include "Rvector3.hpp"
+#include "VisiblePOIReport.hpp"
+#include "IntervalEventReport.hpp"
 
 class CoverageChecker
 {
@@ -62,14 +52,29 @@ public:
    /// Check the point coverage and return the resulting index array
    virtual IntegerArray      CheckPointCoverage(IntegerArray PointIndices);
    virtual IntegerArray      CheckPointCoverage();
-   virtual IntegerArray      CheckPointCoverage(const Rvector6 &centralBodyFixedState,
+   virtual IntegerArray      CheckPointCoverage(const Rvector6 &theState,
                                                 Real           theTime,
-                                                const Rvector6 &centralBodyInertialState,
+                                                const Rvector6 &cartState,
                                                 const IntegerArray &PointIndices);
-   virtual IntegerArray      CheckPointCoverage(const Rvector6 &centralBodyFixedState,
+   virtual IntegerArray      CheckPointCoverage(const Rvector6 &theState,
                                                 Real           theTime,
-                                                const Rvector6 &centralBodyInertialState);
+                                                const Rvector6 &cartState);
+   /// Accumulate the coverage data at the current propagated time
+   virtual IntegerArray      AccumulateCoverageData();
+   /// Accumulate the coverage data at the previous time index
+   virtual IntegerArray      AccumulateCoverageDataAtPreviousTimeIndex();
+   /// Accumulate the coverage data at the input time
+   virtual IntegerArray      AccumulateCoverageData(Real atTime);
+   /// Process the coverate data, create reports
+   virtual std::vector<IntervalEventReport>
+                             ProcessCoverageData();
+   /// Create a new POI report
+   virtual IntervalEventReport
+                             CreateNewPOIReport(Real startJd, Real endJd,
+                                                Integer poiIdx);
 
+   /// Set the flag indicating whether or not to compute POI geometry data
+   virtual void              SetComputePOIGeometryData(bool flag);
    
 protected:
    
@@ -79,24 +84,39 @@ protected:
    Spacecraft                 *sc;
    /// the central body; the model of Earth's properties & rotation
    Earth                      *centralBody;
-   /// central body radius
-   Real centralBodyRadius;
-
-   /// array of all points (unit-vectors) @todo: Move this to the PointGroup class.
+   /// the number of accumulated propagation data points // ???
+   Integer                    timeIdx;
+   /// times when points are visible
+   std::vector<IntegerArray>  timeSeriesData; 
+   /// discrete event data
+   std::vector <std::vector<VisiblePOIReport> > discreteEventData;
+   /// the date of each propagation point
+   RealArray                  dateData;
+   /// the number of propagation times when each point was visible
+   IntegerArray               numEventsPerPoint;
+   /// array of all points
    std::vector<Rvector3*>     pointArray;
    /// feasibility values for each point
    std::vector<bool>          feasibilityTest;
+   /// flag indicating if observer and sun geometry should be computed
+   bool                       computePOIGeometryData;
+   /// Start time of the coverage
+   Real                       coverageStart;
+   /// End time of the coverage
+   Real                       coverageEnd;
    
+   /// <static const> body radius
+   static const Real BODY_RADIUS;
    /// Get the Earth Fixed state at the input time for the input cartesian state
    virtual Rvector6          GetEarthFixedSatState(Real jd,
                                                    const Rvector6& scCartState);
-   /// Check the grid feasibility for the input point with the input body fixed state
+   /// Check the grid feasibility for the input point with the input body
+   /// fixed state
    virtual bool              CheckGridFeasibility(Integer ptIdx,
                                   const Rvector3& bodyFixedState);
    /// Check the grid feasibility for all points for the input body fixed state
    virtual void              CheckGridFeasibility(
                                   const Rvector3& bodyFixedState);
-
    
    /// local Rvectors used for Grid Feasibility calculations
    /// (for performance)
@@ -104,6 +124,7 @@ protected:
    Rvector3 bfState;
    Rvector3 bodyUnit;
    Rvector3 ptPos;
+
 };
 #endif // CoverageChecker_hpp
 

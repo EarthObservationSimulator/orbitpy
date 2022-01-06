@@ -306,9 +306,9 @@ PYBIND11_MODULE(propcov, m)
         .def(py::init<PointGroup*, Spacecraft*>(), py::arg("ptGroup"), py::arg("sat"))
         .def("CheckPointCoverage", py::overload_cast<>(&CoverageChecker::CheckPointCoverage))
         .def("CheckPointCoverage", py::overload_cast<IntegerArray>(&CoverageChecker::CheckPointCoverage), py::arg("PointIndices"))
-        .def("AccumulateCoverageData", py::overload_cast<>(&CoverageChecker::AccumulateCoverageData))
-        .def("AccumulateCoverageData", py::overload_cast<Real>(&CoverageChecker::AccumulateCoverageData), py::arg("atTime"))
-        .def("AccumulateCoverageDataAtPreviousTimeIndex", &CoverageChecker::AccumulateCoverageDataAtPreviousTimeIndex)
+        //.def("AccumulateCoverageData", py::overload_cast<>(&CoverageChecker::AccumulateCoverageData))
+        //.def("AccumulateCoverageData", py::overload_cast<Real>(&CoverageChecker::AccumulateCoverageData), py::arg("atTime"))
+        //.def("AccumulateCoverageDataAtPreviousTimeIndex", &CoverageChecker::AccumulateCoverageDataAtPreviousTimeIndex)
         ;
 
     
