@@ -169,6 +169,50 @@ CoverageChecker::~CoverageChecker()
 }
 
 //------------------------------------------------------------------------------
+// IntegerArray CheckPointCoverage()
+//------------------------------------------------------------------------------
+/**
+ * Check point coverage for all points in the pointGroup object, at the current date and spacecraft state.
+ *
+ * @return  array of indexes
+ *
+ */
+//------------------------------------------------------------------------------
+IntegerArray CoverageChecker::CheckPointCoverage()
+{
+   const Integer numPts = pointGroup->GetNumPoints();
+   IntegerArray PointIndices;
+   for(int i=0; i < numPts; i++) // Coverage calculation done for all points in pointGroup object
+   {
+      PointIndices.push_back(i);
+   }
+   return CoverageChecker::CheckPointCoverage(PointIndices);
+}
+
+//------------------------------------------------------------------------------
+// IntegerArray CheckPointCoverage(IntegerArray PointIndices)
+//------------------------------------------------------------------------------
+/**
+ * Check point coverage at the current date and spacecraft state.
+ *
+ * @param PointIndices: Indices of the points (of the respective PointGroup object)
+ *                      to be considered for coverage.
+ * 
+ * @return  array of indexes
+ *
+ */
+//------------------------------------------------------------------------------
+IntegerArray CoverageChecker::CheckPointCoverage(IntegerArray PointIndices)
+{
+   // Get the state and date here
+   Real     theDate   = sc->GetJulianDate();
+   Rvector6 centralBodyInertialState = sc->GetCartesianState();
+   Rvector6 centralBodyFixedState  = GetEarthFixedSatState(theDate, centralBodyInertialState);
+   return CheckPointCoverage(centralBodyFixedState, theDate, centralBodyInertialState, PointIndices);
+
+}
+
+//------------------------------------------------------------------------------
 //  IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &theState,
 //                                                   Real           theTime, 
 //                                                   const Rvector6 &cartState) 
@@ -202,12 +246,12 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &centralBodyFixe
 //                                                   const Rvector6 &cartState) 
 //------------------------------------------------------------------------------
 /**
- * Coverage calculation done select points in PointGroup object
+ * Coverage calculation done for select points in PointGroup object
  * 
- * @param   centralBodyFixedState  central body fixed state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s]))
- * @param   theTime                time corresponding to the state of spacecraft (JDUT1)
- * @param   centralBodyInertialState              inertial state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s])) (UNUSED)
- * @param   PointIndices           indices of points which are to be checked for coverage
+ * @param   centralBodyFixedState      central body fixed state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s]))
+ * @param   theTime                    time corresponding to the state of spacecraft (JDUT1)
+ * @param   centralBodyInertialState   inertial state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s])) (UNUSED)
+ * @param   PointIndices               indices of points which are to be checked for coverage
  *
  * @return  Array of point-indices (starting from 0) which are in-view of sensor/spacecraft
  *
@@ -265,23 +309,16 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &centralBodyFixe
                                    centralBodyRadius;
          Rvector3 satToTargetVec = pointLocation - centralBodyFixedPos;
 
-//         Rmatrix33 R_fixed_to_nadir =
-//                   sc->GetBodyToInertialMatrix(centralBodyFixedState);
-//         Rvector3  viewVector = R_fixed_to_nadir * satToTargetVec;
-
          if (sc->HasSensors())
          {
-            // NOTE - should be sc->ChTV(satToTargetVec, state, sensorNum);
-            // Then the sc computes the R_NI, R_BN, and calls the sensor for
-            // the R_SB to detmine the visibility
-//            inView = sc->CheckTargetVisibility(viewVector, sensorNum);
+            // The CheckTargetVisibility function first expresses the satToTargetVec in sensor frame and then 
+            // evaluates its presence/absence in sensor FOV 
             inView = sc->CheckTargetVisibility(centralBodyFixedState, satToTargetVec,
                                                theTime,  sensorNum);                 
          }
          else
          {
             // No sensor, just perform horizon test
-            // Vinay: Doubtful of the below code. 
             rangeVector              = -satToTargetVec;
             Real rangeMag            = rangeVector.GetMagnitude();
             Real bodyFixedMag        = centralBodyFixedPos.GetMagnitude(); // Vinay: previously => centralBodyFixedState.GetMagnitude();
@@ -289,11 +326,21 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &centralBodyFixe
                                        rangeMag / bodyFixedMag;
             Real offNadirAngle       = GmatMathUtil::ACos(cosineOffNadirAngle);
             if ((offNadirAngle < (GmatMathConstants::PI_OVER_TWO -
-                                  GmatMathUtil::ACos(centralBodyRadius/bodyFixedMag)))
-                                  && rangeVector(2) > 0.0)
+                                  GmatMathUtil::ACos(centralBodyRadius/bodyFixedMag))))
+                                 // && rangeVector(2) > 0.0) // Vinay: previously was there, but have commented it out. Don't think it is right
+            {   
                inView = true;
+               
+            }
             else
+            {
                inView = false;
+            }
+         }
+         if(inView)
+         {
+            result.push_back(PointIndices[k]);   // covCount'th entry
+            covCount++;
          }
 
          #ifdef DEBUG_COV_CHECK
@@ -301,65 +348,12 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &centralBodyFixe
                             " --- In CheckPointCoverage, centralBodyFixedState = %s\n",
                             centralBodyFixedState.ToString(12).c_str());
          #endif
-         
-         if (inView)
-         {
-            result.push_back(PointIndices[k]);   // covCount'th entry
-            covCount++;
-         }
+
       }
    }
 
    return result;
 }
-
-
-
-//------------------------------------------------------------------------------
-// IntegerArray AccumulateCoverageData()
-//------------------------------------------------------------------------------
-/**
- * Check point coverage at the current date and spacecraft state. Author: Vinay
- *
- * @param PointIndices: Indices of the points (of the respective PointGroup object)
- *                      to be considered for coverage.
- * 
- * @return  array of indexes
- *
- */
-//------------------------------------------------------------------------------
-IntegerArray CoverageChecker::CheckPointCoverage(IntegerArray PointIndices)
-{
-   // Accumulates coverage data after propagation update
-   // Get the state and date here
-   Real     theDate   = sc->GetJulianDate();
-   Rvector6 cartState = sc->GetCartesianState();
-   Rvector6 theState  = GetEarthFixedSatState(theDate, cartState);
-   return CheckPointCoverage(theState, theDate, cartState, PointIndices);
-
-}
-
-//------------------------------------------------------------------------------
-// IntegerArray AccumulateCoverageData()
-//------------------------------------------------------------------------------
-/**
- * Check point coverage at the current date and spacecraft state.
- *
- * @return  array of indexes
- *
- */
-//------------------------------------------------------------------------------
-IntegerArray CoverageChecker::CheckPointCoverage()
-{
-   const Integer numPts = pointGroup->GetNumPoints();
-   IntegerArray PointIndices;
-   for(int i=0; i < numPts; i++) // Coverage calculation done for all points in PointGroup object
-   {
-      PointIndices.push_back(i);
-   }
-   return CoverageChecker::CheckPointCoverage(PointIndices);
-}
-
 
 //------------------------------------------------------------------------------
 // Rvector6 GetEarthFixedSatState(Real jd, const Rvector6& scCartState)
