@@ -110,8 +110,8 @@ Spacecraft::Spacecraft(const Spacecraft &copy) :
    dragCoefficient  (copy.dragCoefficient),
    dragArea         (copy.dragArea),
    totalMass        (copy.totalMass),
-   orbitState       ((copy.orbitState)->Clone()), // TODO: Clone this?
-   orbitEpoch       ((copy.orbitEpoch)->Clone()), // TODO: Clone this?
+   orbitState       ((copy.orbitState)->Clone()), // TODO: Clone this? Probably yes because the object can be changed by the Spacecraft class.
+   orbitEpoch       ((copy.orbitEpoch)->Clone()), // TODO: Clone this? Probably yes because the object can be changed by the Spacecraft class.
    numSensors       (copy.numSensors),
    offsetAngle1     (copy.offsetAngle1),
    offsetAngle2     (copy.offsetAngle2),
@@ -129,11 +129,11 @@ Spacecraft::Spacecraft(const Spacecraft &copy) :
    }
    if (copy.interpolator)
    {
-      interpolator = (LagrangeInterpolator*) (copy.interpolator)->Clone();
+      interpolator = (LagrangeInterpolator*) (copy.interpolator)->Clone(); // TODO: Clone this? Probably yes because the object can be changed by the Spacecraft class.
    }
    if (copy.attitude)
    {
-      attitude = (Attitude*) (copy.attitude)->Clone(); // TODO: Clone this?
+      attitude = (Attitude*) (copy.attitude)->Clone(); // TODO: Clone this? Probably yes because the object can be changed by the Spacecraft class.
    }
 }
 
@@ -155,8 +155,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
    dragCoefficient  = copy.dragCoefficient;
    dragArea         = copy.dragArea;
    totalMass        = copy.totalMass;
-   orbitState       = (copy.orbitState)->Clone();  // TODO: Clone this?
-   orbitEpoch       = (copy.orbitEpoch)->Clone();  // TODO: Clone this?
+   orbitState       = (copy.orbitState)->Clone();  // TODO: Clone this? Probably yes because the object can be changed by the Spacecraft class.
+   orbitEpoch       = (copy.orbitEpoch)->Clone();  // TODO: Clone this? Probably yes because the object can be changed by the Spacecraft class.
    numSensors       = copy.numSensors;
 
    offsetAngle1     = copy.offsetAngle1;
@@ -173,11 +173,11 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &copy)
    
    if (copy.interpolator)
    {
-      interpolator = (LagrangeInterpolator*) (copy.interpolator)->Clone(); // TODO: Clone this? // TODO: Clone this?
+      interpolator = (LagrangeInterpolator*) (copy.interpolator)->Clone(); // TODO: Clone this? Probably yes because the object can be changed by the Spacecraft class.
    }
    if (copy.attitude)
    {
-      attitude = (Attitude*) (copy.attitude)->Clone(); // TODO: Clone this?
+      attitude = (Attitude*) (copy.attitude)->Clone(); // TODO: Clone this? Probably yes because the object can be changed by the Spacecraft class.
    }
 
    return *this;
