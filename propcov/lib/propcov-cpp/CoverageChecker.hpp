@@ -62,13 +62,13 @@ public:
    /// Check the point coverage and return the resulting index array
    virtual IntegerArray      CheckPointCoverage(IntegerArray PointIndices);
    virtual IntegerArray      CheckPointCoverage();
-   virtual IntegerArray      CheckPointCoverage(const Rvector6 &centralBodyFixedState,
+   virtual IntegerArray      CheckPointCoverage(const Rvector6 &bodyFixedState,
                                                 Real           theTime,
-                                                const Rvector6 &centralBodyInertialState,
+                                                const Rvector6 &scCartState,
                                                 const IntegerArray &PointIndices);
-   virtual IntegerArray      CheckPointCoverage(const Rvector6 &centralBodyFixedState,
+   virtual IntegerArray      CheckPointCoverage(const Rvector6 &bodyFixedState,
                                                 Real           theTime,
-                                                const Rvector6 &centralBodyInertialState);
+                                                const Rvector6 &scCartState);
 
    
 protected:
@@ -87,9 +87,8 @@ protected:
    /// feasibility values for each point
    std::vector<bool>          feasibilityTest;
    
-   /// Get the Earth Fixed state at the input time for the input cartesian state
-   virtual Rvector6          GetEarthFixedSatState(Real jd,
-                                                   const Rvector6& scCartState);
+   /// Get the central body fixed state at the input time for the input cartesian state
+   virtual Rvector6          GetCentralBodyFixedState(Real jd, const Rvector6& scCartState);
    /// Check the grid feasibility for the input point with the input body fixed state
    virtual bool              CheckGridFeasibility(Integer ptIdx,
                                   const Rvector3& bodyFixedState);
