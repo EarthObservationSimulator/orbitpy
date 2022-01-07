@@ -289,10 +289,9 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
       MessageInterface::ShowMessage(" --- Checking Feasibility ...\n");
    #endif
    
-   CheckGridFeasibility(centralBodyFixedPos); // line of sight test for each point, the `feasibilityTest` instance variable is updated 
+   CheckGridFeasibility(centralBodyFixedPos); // line of sight followed by horizon test for each point, the `feasibilityTest` instance variable is updated 
    for ( Integer k = 0; k < numPts; k++)
    {
-      // Simple line of sight test for each point
       // if (CheckGridFeasibility(pointIdx, centralBodyFixedPos)) // this is slower
       if (feasibilityTest.at(PointIndices[k])) //  > 0)
       {
@@ -304,38 +303,22 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
 
          Integer  sensorNum = 0; // 1; // Currently only works for one sensor, hence hardcoded!!
 
-         bool     inView    = false;
-         Rvector3 pointLocation = (*pointArray.at(PointIndices[k])) *
-                                   centralBodyRadius;
-         Rvector3 satToTargetVec = pointLocation - centralBodyFixedPos;
+         bool     inView    = false;         
 
          if (sc->HasSensors())
          {
             // The CheckTargetVisibility function first expresses the satToTargetVec in sensor frame and then 
-            // evaluates its presence/absence in sensor FOV 
+            // evaluates its presence/absence in sensor FOV
+            Rvector3 pointLocation = (*pointArray.at(PointIndices[k])) *
+                                   centralBodyRadius;
+            Rvector3 satToTargetVec = pointLocation - centralBodyFixedPos;
             inView = sc->CheckTargetVisibility(bodyFixedState, satToTargetVec,
                                                theTime,  sensorNum);                 
          }
          else
          {
-            // No sensor, just perform horizon test
-            rangeVector              = -satToTargetVec;
-            Real rangeMag            = rangeVector.GetMagnitude();
-            Real bodyFixedMag        = centralBodyFixedPos.GetMagnitude(); // Vinay: previously => bodyFixedState.GetMagnitude();
-            Real cosineOffNadirAngle = rangeVector * centralBodyFixedPos /
-                                       rangeMag / bodyFixedMag;
-            Real offNadirAngle       = GmatMathUtil::ACos(cosineOffNadirAngle);
-            if ((offNadirAngle < (GmatMathConstants::PI_OVER_TWO -
-                                  GmatMathUtil::ACos(centralBodyRadius/bodyFixedMag))))
-                                 // && rangeVector(2) > 0.0) // Vinay: previously was there, but have commented it out. Don't think it is right
-            {   
-               inView = true;
-               
-            }
-            else
-            {
-               inView = false;
-            }
+            // No sensor, just report the results of the horizon test (done in the CheckGridFeasibility(.) function)
+            inView = true;
          }
          if(inView)
          {
@@ -396,10 +379,13 @@ Rvector6 CoverageChecker::GetCentralBodyFixedState(Real jd,
 //                           const Rvector3& bodyFixedState)
 //------------------------------------------------------------------------------
 /**
- * Checks the grid feasibility
+ * Checks the grid feasibility for a (single) select point.
+ * First it is checked if the spacecraft and the ground-point are on the same hemispheres
+ * (where the hemisphere is formed by the plane defined by the unit-normal along the ground-point position-vector).
+ * If so, a horizon test is performed, i.e. to check if the ground-point is within the horizon seen by the spacecraft.
  *
  * @param   ptIdx             point index
- * @param   bodyFixedState    central body fixed state of spacecraft
+ * @param   bodyFixedState    central body fixed state (position) of spacecraft
  *
  * @return   output feasibility flag
  *
@@ -408,26 +394,33 @@ Rvector6 CoverageChecker::GetCentralBodyFixedState(Real jd,
 bool CoverageChecker::CheckGridFeasibility(Integer         ptIdx,
                                            const Rvector3& bodyFixedState)
 {
-#ifdef DEBUG_GRID
-   MessageInterface::ShowMessage(
-                     "CheckGridFeasibility: ptIDx = %d, bodyFixedState = %s\n",
-                     ptIdx, bodyFixedState.ToString(12).c_str());
-#endif
-   bool     isFeasible = false;
-//   Rvector3 rangeVec;  // defaults to all zeroes
-   
-   bfState  = bodyFixedState/centralBodyRadius;
-   bodyUnit = bfState.GetUnitVector();
+   #ifdef DEBUG_GRID
+      MessageInterface::ShowMessage(
+                        "CheckGridFeasibility: ptIDx = %d, bodyFixedState = %s\n",
+                        ptIdx, bodyFixedState.ToString(12).c_str());
+   #endif
 
-   ptPos    = *(pointArray.at(ptIdx));
-   Real  feasibilityReal = ptPos * bodyUnit;
+   bool     isFeasible = false;   
+   bodyUnit = bodyFixedState.GetUnitVector();
+
+   unitPtPos    = *(pointArray.at(ptIdx)); // is normalized
+   Real  feasibilityReal = unitPtPos * bodyUnit; // gives the cosine of the angle b/w the spacecraft and point
    
-   if (feasibilityReal > 0.0)
+   if (feasibilityReal > 0.0) // i.e. check if the point and satellite are on the same hemisphere
    {
-      rangeVec  = bfState - ptPos;
-      Real dot  = rangeVec * ptPos;
+      // do horizon test           
+      /* This code is  slower. Next snippet is the faster.
+      ptPos  = unitPtPos*centralBodyRadius;
+      rangeVec  = bodyFixedState - ptPos;
+      unitRangeVec   = rangeVec.GetUnitVector(); 
+      Real dot  = unitRangeVec * unitPtPos;
       if (dot > 0.0)
          isFeasible = true;
+      */      
+      Real dot  = bodyUnit * unitPtPos;
+      if (dot > 0.0)
+         isFeasible = true;    
+      
    }
    return isFeasible;
 }
@@ -436,7 +429,7 @@ bool CoverageChecker::CheckGridFeasibility(Integer         ptIdx,
 // void CheckGridFeasibility(const Rvector3& bodyFixedState)
 //------------------------------------------------------------------------------
 /**
- * Checks the grid feasibility
+ * Checks the grid feasibility for all the points. The `feasibilityTest` instance variable is updated.
  *
  * @param   bodyFixedState    central body fixed state of spacecraft
  *
@@ -444,26 +437,13 @@ bool CoverageChecker::CheckGridFeasibility(Integer         ptIdx,
 //------------------------------------------------------------------------------
 void CoverageChecker::CheckGridFeasibility(const Rvector3& bodyFixedState)
 {
-#ifdef DEBUG_GRID
-   MessageInterface::ShowMessage("CheckGridFeasibility: bodyFixedState = %s\n",
-                                 bodyFixedState.ToString(12).c_str());
-#endif
-   bfState  = bodyFixedState/centralBodyRadius;
-   bodyUnit = bfState.GetUnitVector();
+   #ifdef DEBUG_GRID
+      MessageInterface::ShowMessage("CheckGridFeasibility: bodyFixedState = %s\n",
+                                    bodyFixedState.ToString(12).c_str());
+   #endif
    
-   for (Integer ii = 0; ii < pointArray.size(); ii++)
+   for (Integer ptIdx = 0; ptIdx < pointArray.size(); ptIdx++)
    {
-      ptPos = *(pointArray.at(ii));
-      if ((ptPos * bodyUnit) > 0.0)
-      {
-         rangeVec = bfState - ptPos;
-         Real     dot   = rangeVec * ptPos;
-         if (dot > 0.0)
-            feasibilityTest.at(ii) = true;
-         else
-            feasibilityTest.at(ii) = false;
-      }
+      feasibilityTest.at(ptIdx) = CheckGridFeasibility(ptIdx, bodyFixedState);
    }
 }
-
-

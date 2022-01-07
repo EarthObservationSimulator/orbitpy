@@ -30,10 +30,12 @@
  * The CoverageChecker is instantiated with pointers to PointGroup object and a Spacecraft object.
  * The point-group contains list of points which are to be checked for coverage calculations. 
  * The spacecraft may contain sensor, in which case coverage is evaluated for the sensor FOV or if no sensor
- * the coverage is evaluated for the spacecraft (complete horizon is considered). There is room to expand to multiple sensors
+ * the coverage is evaluated for the spacecraft (horizon-test is performed). There is room to expand to multiple sensors
  * per spacecraft, but currently only 1 sensor per spacecraft is allowed.
  * 
- * THe primary functions utilized are the overloaded functions CheckPointCoverage(.). 
+ * THe primary functions utilized are the overloaded functions CheckPointCoverage(.). First the CheckGridFeasibility(.) function is invoked
+ * to (1) determine if spacecraft and point are on the same hemisphere (2) if 1 is true, horizon check is performed. 
+ * The above tests check the feasibility of point being covered. If feasible, the point is evaluated to be within/out of the sensor FOV.
  * 
  */
 //------------------------------------------------------------------------------
@@ -69,7 +71,6 @@ public:
    virtual IntegerArray      CheckPointCoverage(const Rvector6 &bodyFixedState,
                                                 Real           theTime,
                                                 const Rvector6 &scCartState);
-
    
 protected:
    
@@ -82,7 +83,7 @@ protected:
    /// central body radius
    Real centralBodyRadius;
 
-   /// array of all points (unit-vectors) @todo: Move this to the PointGroup class.
+   /// array of all unit position vectors of points @todo: Move this to the PointGroup class.
    std::vector<Rvector3*>     pointArray;
    /// feasibility values for each point
    std::vector<bool>          feasibilityTest;
@@ -95,13 +96,13 @@ protected:
    /// Check the grid feasibility for all points for the input body fixed state
    virtual void              CheckGridFeasibility(
                                   const Rvector3& bodyFixedState);
-
    
    /// local Rvectors used for Grid Feasibility calculations
    /// (for performance)
-   Rvector3 rangeVec;   
-   Rvector3 bfState;
+   Rvector3 rangeVec;
+   Rvector3 unitRangeVec;  
    Rvector3 bodyUnit;
+   Rvector3 unitPtPos;
    Rvector3 ptPos;
 };
 #endif // CoverageChecker_hpp
