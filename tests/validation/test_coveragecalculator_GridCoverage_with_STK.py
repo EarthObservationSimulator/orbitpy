@@ -156,7 +156,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         metric1 = TestOrbitPropCovGrid.percentDifference(STKSumAccesses,OPSumAccesses)
         print('Metric 1 = ' + str(metric1))
         
-        # Metric 2: The percent difference in total ammount of access time,
+        # Metric 2: The percent difference in total amount of access time,
         # across all points, should be less than +-5%
         
         STKSumTime = sum(STKCov.timeAccessed)
@@ -194,34 +194,9 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         print('Metric 4 = ' + str(metric4))
         
         return metric1,metric2,metric3,metric4
-    
-    @staticmethod
-    def getClockAngles(atFOV,ctFOV):
-        """Get clock angles from along track, cross track FOV in degrees."""
-        
-        alongTrackFieldOfView = np.deg2rad(atFOV)
-
-        crossTrackFieldOfView = np.deg2rad(ctFOV)
-
-        cosCone = np.cos(alongTrackFieldOfView/2.0)*np.cos(crossTrackFieldOfView/2.0)
-        
-        cone = np.arccos(cosCone)
-
-        sinClock =  np.sin(alongTrackFieldOfView/2.0) / np.sin(cone)
-
-        clock = np.arcsin(sinClock)
-        
-        cone_deg = str(np.rad2deg(cone))
-        clock_deg = np.rad2deg(clock)
-        
-        
-        coneAngles_deg = cone_deg + ',' + cone_deg + ',' + cone_deg + ',' + cone_deg
-        clockAngles_deg = str(clock_deg) + ',' +str(180.0-clock_deg)+ ',' + str(180.0+clock_deg) + ',' + str(-clock_deg)
-        
-        return clockAngles_deg,coneAngles_deg
         
     def test_run_1(self):
-        """Test an equatorial orbit on a global grid with a 5 degree conical sensor.                
+        """Test an equatorial orbit on a global grid with a 20 degree diameter conical sensor.                
         """ 
         print('running test_run_1')
         # Prepare the output directory
@@ -255,7 +230,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
         
     def test_run_2(self):
-        """Test an equatorial orbit on a global grid with a 15 deg AT, 10 deg CT sensor."""
+        """Test an equatorial orbit on a global grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_2')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/02/')
@@ -294,7 +269,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
        
     def test_run_3(self):
-        """Test a near-equatorial orbit on a global grid with a 5 deg conical sensor."""
+        """Test a near-equatorial orbit on a global grid with a 20 degree diameter conical sensor."""
         print('running test_run_3')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/03/')
@@ -335,7 +310,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
         
     def test_run_4(self):
-        """Test a polar orbit on a US grid with a 15 deg AT, 10 deg CT sensor."""
+        """Test a polar orbit on a US grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_4')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/04/')
@@ -382,7 +357,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
         
     def test_run_5(self):
-        """Test an inclined orbit on a US grid with a 5 degree conical sensor."""
+        """Test an inclined orbit on a US grid with a 20 degree diameter conical sensor."""
         print('running test_run_5')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/05/')
@@ -426,7 +401,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
         
     def test_run_6(self):
-        """Test an inclined orbit on a US grid with a 15 deg AT, 10 deg CT sensor."""
+        """Test an inclined orbit on a US grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_6')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/06/')
@@ -475,7 +450,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
       
     def test_run_7(self):
-        """Test a sun-sync orbit on an equatorial grid with a 5 deg conical sensor."""
+        """Test a sun-sync orbit on an equatorial grid with a 20 degree diameter conical sensor."""
         print('running test_run_7')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/07/')
@@ -517,7 +492,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
     #@unittest.skip("Pointed tests are broken and must be fixed.")
     def test_run_8(self):
-        """Test a sun-sync orbit on an equatorial grid with a 5 deg pointed conical sensor."""
+        """Test a sun-sync orbit on an equatorial grid with a 20 degree diameter pointed conical sensor."""
         print('running test_run_8')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/08/')
@@ -568,7 +543,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
     
     #@unittest.skip("Pointed tests are broken and must be fixed.")
     def test_run_9(self):
-        """Test a sun-sync orbit on an equatorial grid with a 10 deg AT, 15 deg CT pointed sensor."""
+        """Test a sun-sync orbit on an equatorial grid with a 20 deg AT, 30 deg CT pointed sensor."""
         print('running test_run_9')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/09/')
@@ -621,7 +596,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
         
     def test_run_10(self):
-        """Test a sun-sync orbit on a US grid with a 15 deg AT, 10 deg CT sensor."""
+        """Test a sun-sync orbit on a US grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_10')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/10/')
@@ -668,7 +643,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
     
     #@unittest.skip("Pointed tests are broken and must be fixed.")
     def test_run_11(self):
-        """Test a sun-sync orbit on a US grid with a 10 deg AT, 15 deg CT pointed sensor."""
+        """Test a sun-sync orbit on a US grid with a 20 deg AT, 30 deg CT pointed sensor."""
         print('running test_run_11')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/11/')
@@ -724,7 +699,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
     
     #@unittest.skip("Pointed tests are broken and must be fixed.")    
     def test_run_12(self):
-        """Test a sun-sync orbit on a US grid with a 15 deg AT, 10 deg CT pointed sensor."""
+        """Test a sun-sync orbit on a US grid with a 30 deg AT, 20 deg CT pointed sensor."""
         print('running test_run_12')
         # Prepare the output directory
         out_dir = os.path.join(self.dir_path,'temp/test_coveragecalculator_GridCoverage_with_STK/12/')

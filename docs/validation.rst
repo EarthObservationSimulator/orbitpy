@@ -325,9 +325,12 @@ The 12 test cases were generated using combinations of the following inputs.
 
 **Sensors:**
 
-1.  A 10 degree (fullcone angle) conical sensor.
-2.  A 10 degree along track, 15 degree across track rectangular sensor.
-3.  A 15 degree along track, 10 degree across track rectangular sensor.
+1.  A 20 degree (diameter) conical sensor.
+2.  A 20 degree along track, 30 degree across track rectangular sensor.
+3.  A 30 degree along track, 20 degree across track rectangular sensor.
+
+*Note:* STK considers sensor specifications through *half-angles*. Hence the STK validation files are named for example as `Rect_15_10_P3.sn3`, which would
+correspond to a rectangular sensor with angle-height 30 deg and angle-width 20deg.
 
 **Orientations:**
 213 (order = first Y, then X, then Z) Euler (instrinsic) rotations in degrees. 
