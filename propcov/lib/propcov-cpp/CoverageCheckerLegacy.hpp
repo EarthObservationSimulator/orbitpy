@@ -25,8 +25,8 @@
  * coverage and generates reports.
  */
 //------------------------------------------------------------------------------
-#ifndef CoverageChecker_hpp
-#define CoverageChecker_hpp
+#ifndef CoverageCheckerLegacy_hpp
+#define CoverageCheckerLegacy_hpp
 
 #include "gmatdefs.hpp"
 #include "AbsoluteDate.hpp"
@@ -126,7 +126,7 @@ protected:
    Rvector3 ptPos;
 
 };
-#endif // CoverageChecker_hpp
+#endif // CoverageCheckerLegacy_hpp
 
 
 

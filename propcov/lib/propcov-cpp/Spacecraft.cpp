@@ -271,12 +271,11 @@ Attitude* Spacecraft::GetAttitude()
    return attitude;
 }
 
-
 //------------------------------------------------------------------------------
 //  Rvector6 GetCartesianState()
 //------------------------------------------------------------------------------
 /**
- * Returns the Spacecraft's cartesian state.
+ * Returns the Spacecraft's cartesian state (Inertial frame).
  *
  * @return  Spacecraft's cartesian state
  * 

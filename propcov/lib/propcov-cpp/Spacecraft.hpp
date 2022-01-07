@@ -74,9 +74,9 @@ public:
    virtual Real           GetJulianDate();
    /// Get the spacecraft attitude
    virtual Attitude*      GetAttitude();
-   /// Get the current cartesian state
+   /// Get the current cartesian state (Inertial frame)
    virtual Rvector6       GetCartesianState();
-   /// Get the current Keplerian state  Author: Vinay
+   /// Get the current Keplerian state
    virtual Rvector6 GetKeplerianState();
    /// Add a sensor to the spacecraft
    virtual void           AddSensor(Sensor* sensor);
@@ -97,7 +97,7 @@ public:
    /// Get the toal mass
    virtual Real           GetTotalMass();
    
-   /// This method returns the interpolated MJ2000 Cartesian state
+   /// This method returns the interpolated MJ2000 Cartesian state at the input date
    virtual Rvector6       GetCartesianStateAtEpoch(const AbsoluteDate &atDate);
    
    /// Check the target visibility given the input cone and clock angles for
