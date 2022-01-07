@@ -416,8 +416,9 @@ bool CoverageChecker::CheckGridFeasibility(Integer         ptIdx,
       Real dot  = unitRangeVec * unitPtPos;
       if (dot > 0.0)
          isFeasible = true;
-      */      
-      Real dot  = bodyUnit * unitPtPos;
+      */
+      rangeVec  = bodyFixedState/centralBodyRadius - unitPtPos; // scaled version of the actual range vector
+      Real dot  = rangeVec * unitPtPos;
       if (dot > 0.0)
          isFeasible = true;    
       
@@ -430,6 +431,9 @@ bool CoverageChecker::CheckGridFeasibility(Integer         ptIdx,
 //------------------------------------------------------------------------------
 /**
  * Checks the grid feasibility for all the points. The `feasibilityTest` instance variable is updated.
+ * First it is checked if the spacecraft and the ground-point are on the same hemispheres
+ * (where the hemisphere is formed by the plane defined by the unit-normal along the ground-point position-vector).
+ * If so, a horizon test is performed, i.e. to check if the ground-point is within the horizon seen by the spacecraft.
  *
  * @param   bodyFixedState    central body fixed state of spacecraft
  *
@@ -441,9 +445,34 @@ void CoverageChecker::CheckGridFeasibility(const Rvector3& bodyFixedState)
       MessageInterface::ShowMessage("CheckGridFeasibility: bodyFixedState = %s\n",
                                     bodyFixedState.ToString(12).c_str());
    #endif
+
+   bodyUnit = bodyFixedState.GetUnitVector();
    
    for (Integer ptIdx = 0; ptIdx < pointArray.size(); ptIdx++)
    {
-      feasibilityTest.at(ptIdx) = CheckGridFeasibility(ptIdx, bodyFixedState);
+      // feasibilityTest.at(ptIdx) = CheckGridFeasibility(ptIdx, bodyFixedState); // this makes it slow because unit body vector is calculated repeatedly
+
+      unitPtPos    = *(pointArray.at(ptIdx)); // is normalized
+      //Real  feasibilityReal = unitPtPos * bodyUnit; // gives the cosine of the angle b/w the spacecraft and point
+      
+      if ((unitPtPos * bodyUnit) > 0.0) // i.e. check if the point and satellite are on the same hemisphere
+      {
+         // do horizon test           
+         /* This code is  slower. Next snippet is the faster.
+         ptPos  = unitPtPos*centralBodyRadius;
+         rangeVec  = bodyFixedState - ptPos;
+         unitRangeVec   = rangeVec.GetUnitVector(); 
+         Real dot  = unitRangeVec * unitPtPos;
+         if (dot > 0.0)
+            isFeasible = true;
+         */      
+         rangeVec  = bodyFixedState/centralBodyRadius - unitPtPos; // scaled version of the actual range vector
+         if ((rangeVec * unitPtPos) > 0.0)
+            feasibilityTest.at(ptIdx) = true;
+         else
+            feasibilityTest.at(ptIdx) = false;
+         
+      }
+
    }
 }
