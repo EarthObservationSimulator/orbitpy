@@ -18,6 +18,7 @@
 #include "../lib/propcov-cpp/Sensor.hpp"
 #include "../lib/propcov-cpp/ConicalSensor.hpp"
 #include "../lib/propcov-cpp/CustomSensor.hpp"
+#include "../lib/propcov-cpp/polygon/SphericalSensor.hpp"
 #include "../lib/propcov-cpp/Propagator.hpp"
 #include "../lib/propcov-cpp/CoverageChecker.hpp"
 #include "../lib/propcov-cpp/PointGroup.hpp"
@@ -281,6 +282,11 @@ PYBIND11_MODULE(propcov, m)
             )
         ;
 
+    py::class_<SphericalSensor, Sensor>(m, "SphericalSensor")
+        .def(py::init<Rvector&, Rvector&, AnglePair>(), py::arg("coneAngleVecIn"), py::arg("clockAngleVecIn"), py::arg("contained"), "Initialize Custom Sensor with cone, clock angles in radians. A point known to be 'contained' within the sensor FOV (in the Sensor frame) is also to be provided.")
+
+        ;
+
     py::class_<Propagator>(m, "Propagator")
         .def(py::init<Spacecraft*>(),py::arg("spacecraft"))
         .def("Propagate", &Propagator::Propagate)
@@ -310,6 +316,7 @@ PYBIND11_MODULE(propcov, m)
         //.def("AccumulateCoverageData", py::overload_cast<Real>(&CoverageChecker::AccumulateCoverageData), py::arg("atTime"))
         //.def("AccumulateCoverageDataAtPreviousTimeIndex", &CoverageChecker::AccumulateCoverageDataAtPreviousTimeIndex)
         ;
+
 
     
 

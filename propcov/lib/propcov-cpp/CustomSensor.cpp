@@ -55,7 +55,7 @@ using namespace GmatMathUtil;
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CustomSensor(Rvector coneAngleVecIn, clockAngleVecIn)
+// CustomSensor(Rvector coneAngleVecIn, Rvector clockAngleVecIn)
 //------------------------------------------------------------------------------
 /**
  * Constructor

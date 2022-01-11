@@ -88,7 +88,7 @@ AnglePair util::cartesianToSpherical(const Rvector3 &cart)
 	return spherical;
 }
 
-// Transform from spherical to cartesian coordinates
+// Transform from spherical to cartesian coordinates (cone/clock to Cartesian unit-vector)
 Rvector3 util::sphericalToCartesian(const AnglePair &spherical)
 {
 	Real x,y,z;

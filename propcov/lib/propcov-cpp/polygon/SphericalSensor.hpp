@@ -9,7 +9,7 @@ class SphericalSensor : public Sensor
 {
     public:
     
-        // Class construction/destruction 
+        /// class construction/destruction
         SphericalSensor(const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn, AnglePair contained);
         ~SphericalSensor();
 
