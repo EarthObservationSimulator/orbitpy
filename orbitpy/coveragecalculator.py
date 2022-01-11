@@ -335,7 +335,7 @@ class GridCoverage(Entity):
     def __repr__(self):
         return "GridCoverage.from_dict({})".format(self.to_dict())
 
-    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, filter_mid_acc=False, method="SphericalSensor2022"):
+    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, filter_mid_acc=False, method="DirectSphericalPolygonClassification"):
         """ Perform orbit coverage calculation for a specific instrument and mode of the instrument in the object instance. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
             same as the time resolution at which the spacecraft states are available. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV)
@@ -433,7 +433,7 @@ class GridCoverage(Entity):
             if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
             elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
-                if method=="SphericalSensor2022":
+                if method=="DirectSphericalPolygonClassification":
                     sen_sph_geom.cone_angle_vec.extend([sen_sph_geom.cone_angle_vec[0]])
                     sen_sph_geom.clock_angle_vec.extend([sen_sph_geom.clock_angle_vec[0]])
                     sensor = propcov.SphericalSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
@@ -441,7 +441,7 @@ class GridCoverage(Entity):
                                                 contained = [0.0,0.0]  
                                                 )
                 
-                elif method=="GMATCustomSensor":
+                elif method=="ProjectedSphericalPolygonClassification":
                     sensor = propcov.CustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
                                                 )
@@ -812,7 +812,7 @@ class PointingOptionsWithGridCoverage(Entity):
     def __repr__(self):
         return "PointingOptionsWithGridCoverage.from_dict({})".format(self.to_dict())
 
-    def execute(self, instru_id=None, mode_id=None, out_file_access=None, filter_mid_acc=False, method="SphericalSensor2022"):
+    def execute(self, instru_id=None, mode_id=None, out_file_access=None, filter_mid_acc=False, method="DirectSphericalPolygonClassification"):
         """ Perform orbit coverage calculation for a specific instrument and mode. 
             The scene-field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
             Coverage is calculated for the period over which the input spacecraft propagated states are available. 
@@ -899,7 +899,7 @@ class PointingOptionsWithGridCoverage(Entity):
             if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
             elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
-                if method=="SphericalSensor2022":
+                if method=="DirectSphericalPolygonClassification":
                     sen_sph_geom.cone_angle_vec.extend([sen_sph_geom.cone_angle_vec[0]])
                     sen_sph_geom.clock_angle_vec.extend([sen_sph_geom.clock_angle_vec[0]])
                     sensor = propcov.SphericalSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
@@ -907,7 +907,7 @@ class PointingOptionsWithGridCoverage(Entity):
                                                 contained = [0.0,0.0]  
                                                 )
                 
-                elif method=="GMATCustomSensor":
+                elif method=="ProjectedSphericalPolygonClassification":
                     sensor = propcov.CustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
                                                 )         
