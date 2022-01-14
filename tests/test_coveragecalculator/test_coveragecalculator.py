@@ -1,14 +1,4 @@
 """Unit tests for orbitpy.coveragecalculator module.
-
-``TestGridCoverage`` class:
-
-* ``test_execute_0``: Test format of output access files.
-* ``test_execute_1``: Roll Circular sensor tests
-* ``test_execute_2``: Yaw Circular sensor tests
-* ``test_execute_3``: Pitch Circular sensor tests
-* ``test_execute_1``: Roll Rectangular sensor tests
-* ``test_execute_3``: Pitch Rectangular sensor tests
-
 """
 import os, shutil
 import sys

@@ -253,7 +253,7 @@ class TestDataMetricCalculator(unittest.TestCase):
         out_file_dm = self.out_dir+'/test_dm.csv'
 
         # run the PointingOptionsCoverage calculator
-        self.pnt_opt_calc.execute(instru_id=None, mode_id=None, out_file_access=out_file_access)
+        self.pnt_opt_with_grid_calc.execute(instru_id=None, mode_id=None, out_file_access=out_file_access)
 
         dm_calc = DataMetricsCalculator.from_dict({"spacecraft": self.spc1.to_dict(), 
                                                    "cartesianStateFilePath": self.state_cart_file, 

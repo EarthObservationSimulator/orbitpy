@@ -1,5 +1,8 @@
 """Unit tests for orbitpy.coveragecalculator.gridcoverage class.
 
+In case of rectangular sensors, both the methods to evaluate point in spherical polygon: 
+(1) 'ProjectedSphericalPointInPolygon' and (2) 'DirectSphericalPointInPolygon' are evaluated.
+
 ``TestGridCoverage`` class:
 
 * ``test_execute_0``: Test format of output access files.
@@ -33,7 +36,10 @@ sys.path.append('../')
 from util.spacecrafts import spc1_json, spc4_json, spc5_json
 
 RE = 6378.137 # radius of Earth in kilometers
-    
+
+# method used in coverage calculation involving rectangular sensors. Tests are carried out for each method seperately.
+method_list = ['ProjectedSphericalPointInPolygon', 'DirectSphericalPointInPolygon']
+
 class TestGridCoverage(unittest.TestCase):
 
     @classmethod
@@ -64,6 +70,7 @@ class TestGridCoverage(unittest.TestCase):
     def test_to_dict(self): #TODO
         pass
 
+    #@unittest.skip
     def test_execute_0(self):
         """ Check the produced access file format.
         """        
@@ -126,6 +133,7 @@ class TestGridCoverage(unittest.TestCase):
         else:
             warnings.warn('No data was generated in test_execute_0(.). Run the test again.')
 
+    #@unittest.skip
     def test_execute_1(self):
         """ Orient the sensor with roll, and an equatorial orbit and check that the ground-points captured are on either
             side of hemisphere only. (Conical Sensor)
@@ -194,6 +202,7 @@ class TestGridCoverage(unittest.TestCase):
         else:
             warnings.warn('No data was generated in test_execute_1(.) negative roll test. Run the test again.')
         
+    #@unittest.skip
     def test_execute_2(self):
         """ Orient the sensor with varying yaw but same pitch and roll, and test that the captured ground-points remain the same
             (Conical Sensor). 
@@ -279,6 +288,7 @@ class TestGridCoverage(unittest.TestCase):
         else:
             warnings.warn('No data was generated in test_execute_2(.). Run the test again.')
     
+    #@unittest.skip
     def test_execute_3(self):
         """ Orient the sensor with pitch and test that the times the ground-points are captured lag or lead (depending on direction of pitch)
             as compared to the coverage from a zero pitch sensor. (Conical Sensor) 
@@ -360,6 +370,7 @@ class TestGridCoverage(unittest.TestCase):
         self.assertEqual(access_data2["GP index"][34], 1436)
         self.assertEqual(access_data2["time index"][34], 123)
     
+    #@unittest.skip
     def test_execute_4(self):
         """ Orient the sensor with roll, and an equatorial orbit and check that the ground-points captured are on either
             side of hemisphere only. (Rectangular Sensor)
@@ -377,7 +388,7 @@ class TestGridCoverage(unittest.TestCase):
 
         ############ positive roll ############
         # setup spacecraft with some parameters setup randomly   
-        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle":12.5}, 
+        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle":12.6}, 
                                            "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 }, 
                                            "@id":"bs1", "@type":"Basic Sensor"}
         sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
@@ -386,36 +397,42 @@ class TestGridCoverage(unittest.TestCase):
         self.j2_prop.execute(spacecraft=sat, out_file_cart=state_cart_file, duration=duration)   
         # set output file path
         out_file_access = self.out_dir+'/test_cov_accessX.csv'
-        # run the coverage calculator
+        # make and run the coverage calculator
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
-        cov.execute(out_file_access=out_file_access)     
-        # check the outputs
-        access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
-        
-        if not access_data.empty:
-            (lat, lon) = grid.get_lat_lon_from_index(access_data['GP index'].tolist())
-            self.assertTrue(all(x > 0 for x in lat))
-        else:
-            warnings.warn('No data was generated in test_execute_1(.) positive roll test. Run the test again.')
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=out_file_access, method=method)
+                # check the outputs
+                access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
+                
+                if not access_data.empty:
+                    (lat, lon) = grid.get_lat_lon_from_index(access_data['GP index'].tolist())
+                    self.assertTrue(all(x > 0 for x in lat))
+                else:
+                    warnings.warn('No data was generated in test_execute_1(.) positive roll test. Run the test again.')
         
         ############ negative roll ############
-        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle":-12.5}, 
-                                           "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter": 25 }, 
+        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "SIDE_LOOK", "sideLookAngle":-12.6}, 
+                                           "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 }, 
                                            "@id":"bs1", "@type":"Basic Sensor"}
         sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
         # no need to rerun propagator, since propagation does not depend on sensor
         # set output file path
         out_file_access = self.out_dir+'/test_cov_accessY.csv'
-        # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access)   
-        # check the outputs
-        access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
-        if not access_data.empty:
-            (lat, lon) = grid.get_lat_lon_from_index(access_data['GP index'].tolist())
-            self.assertTrue(all(x < 0 for x in lat))
-        else:
-            warnings.warn('No data was generated in test_execute_1(.) negative roll test. Run the test again.')        
+
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                # run the coverage calculator
+                GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, method=method)   
+                # check the outputs
+                access_data = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
+                if not access_data.empty:
+                    (lat, lon) = grid.get_lat_lon_from_index(access_data['GP index'].tolist())
+                    self.assertTrue(all(x < 0 for x in lat))
+                else:
+                    warnings.warn('No data was generated in test_execute_1(.) negative roll test. Run the test again.')        
     
+    #@unittest.skip
     def test_execute_5(self):
         """ Orient the sensor with pitch and test that the times the ground-points are captured lag or lead (depending on direction of pitch)
             as compared to the coverage from a zero pitch sensor. (Rectangular Sensor) 
@@ -432,74 +449,83 @@ class TestGridCoverage(unittest.TestCase):
         # generate grid object
         grid = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":90, "latLower":-90, "lonUpper":180, "lonLower":-180, "gridRes": 5})
         grid.write_to_file(self.out_dir+'/grid.csv')
-        ######## Simulation 1 #######
-        pitch = 0
-        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": 0, "zRotation": 0}, 
-                                           "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 },   
-                                           "@id":"bs1", "@type":"Basic Sensor"}
-
-        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
-
-        state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
-        # execute propagator
-        #factory = PropagatorFactory()
-        #prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": 1})
-        #prop.execute(spacecraft=sat, start_date=None, out_file_cart=state_cart_file, duration=duration)
-        self.j2_prop.execute(spacecraft=sat, start_date=None, out_file_cart=state_cart_file, duration=duration)
-
-        # set output file path
-        out_file_access = self.out_dir+'/test_cov_access1.csv'
-        # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(out_file_access=out_file_access) 
         
-        access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+        # run for both the coverage methods
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
 
-        
-        ######## Simulation 2 #######
-        pitch = 25
-        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": 0, "zRotation": 0}, 
-                                           "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 },  
-                                           "@id":"bs1", "@type":"Basic Sensor"}
+                ######## Simulation 1 #######
+                pitch = 0
+                instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": 0, "zRotation": 0}, 
+                                                "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 },   
+                                                "@id":"bs1", "@type":"Basic Sensor"}
 
-        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
+                sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
 
-        state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
-        # no need to rerun propagator, since propagation does not depend on sensor
-        # set output file path
-        out_file_access = self.out_dir+'/test_cov_access2.csv'
-        # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, out_file_access=out_file_access) 
-        
-        access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+                state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
+                # execute propagator
+                #factory = PropagatorFactory()
+                #prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": 1})
+                #prop.execute(spacecraft=sat, start_date=None, out_file_cart=state_cart_file, duration=duration)
+                self.j2_prop.execute(spacecraft=sat, start_date=None, out_file_cart=state_cart_file, duration=duration)
 
-        ######## Simulation 3 #######
-        pitch = -25
-        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": 0, "zRotation": 0}, 
-                                           "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 },  
-                                           "@id":"bs1", "@type":"Basic Sensor"}
+                # set output file path
+                out_file_access = self.out_dir+'/test_cov_access1.csv'
+                # run the coverage calculator
+                GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(out_file_access=out_file_access, method=method) 
+                
+                access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
-        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
+                
+                ######## Simulation 2 #######
+                pitch = 25
+                instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": 0, "zRotation": 0}, 
+                                                "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 },  
+                                                "@id":"bs1", "@type":"Basic Sensor"}
 
-        state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
-        # no need to rerun propagator, since propagation does not depend on sensor
-        # set output file path
-        out_file_access = self.out_dir+'/test_cov_access3.csv'
-        # run the coverage calculator
-        GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(mode_id=None, out_file_access=out_file_access) 
-        
-        access_data3 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+                sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
 
-        ######## compare the results of both the simulations ########   
-        # the first gpi in pitch forward pitch case is detected earlier than in the zero pitch case and (both) earlier than the pitch backward case
-        self.assertEqual(access_data3["GP index"][0], 1436)
-        self.assertEqual(access_data3["time index"][0], 58)
+                state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
+                # no need to rerun propagator, since propagation does not depend on sensor
+                # set output file path
+                out_file_access = self.out_dir+'/test_cov_access2.csv'
+                # run the coverage calculator
+                GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id=None, out_file_access=out_file_access, method=method) 
+                
+                access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
-        self.assertEqual(access_data1["GP index"][0], 1436)
-        self.assertEqual(access_data1["time index"][0], 96)
+                ######## Simulation 3 #######
+                pitch = -25
+                instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": 0, "zRotation": 0}, 
+                                                "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 },  
+                                                "@id":"bs1", "@type":"Basic Sensor"}
 
-        self.assertEqual(access_data2["GP index"][25], 1436)
-        self.assertEqual(access_data2["time index"][25], 129)
+                sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict})
+
+                state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
+                # no need to rerun propagator, since propagation does not depend on sensor
+                # set output file path
+                out_file_access = self.out_dir+'/test_cov_access3.csv'
+                # run the coverage calculator
+                GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(mode_id=None, out_file_access=out_file_access, method=method) 
+                
+                access_data3 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+
+                ######## compare the results of both the simulations ########   
+                # the first gpi in pitch forward pitch case is detected earlier than in the zero pitch case and (both) earlier than the pitch backward case
+                self.assertEqual(access_data3["GP index"][0], 1436)
+                self.assertEqual(access_data3["time index"][0], 58)
+
+                self.assertEqual(access_data1["GP index"][0], 1436)
+                self.assertEqual(access_data1["time index"][0], 96)
+
+                self.assertEqual(access_data2["GP index"][25], 1436)
+                if method=='ProjectedSphericalPointInPolygon':
+                    self.assertEqual(access_data2["time index"][25], 129)
+                elif method=='DirectSphericalPointInPolygon':
+                    self.assertEqual(access_data2["time index"][25], 128)
     
+    #@unittest.skip
     def test_execute_6(self):
         """ Check that (1) simulation with orienting spacecraft-body (bus) w.r.t NADIR_POINTING frame and sensor aligned to spacecraft-body yields the same results as 
             (2) simulation with orienting sensor w.r.t spacecraft-body and spacecraft-body aligned to NADIR_POINTING frame.
@@ -517,48 +543,51 @@ class TestGridCoverage(unittest.TestCase):
         pitch = 12
         roll = -6
         yaw = 240
+        # run for both the coverage methods
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                ############ simulation with orienting spacecraft w.r.t NADIR_POINTING frame and sensor aligned to spacecraft body ############        
+                spacecraftBus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation": pitch, "yRotation": roll, "zRotation": yaw}}
+                instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": 0, "yRotation": 0, "zRotation": 0}, 
+                                                "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 }, "@id":"bs1", "@type":"Basic Sensor"}
+                sat = Spacecraft.from_dict({"orbitState":orbit_dict, "spacecraftBus": spacecraftBus_dict, "instrument": instrument_dict})
+                state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
+                # execute propagator
+                self.j2_prop.execute(spacecraft=sat, out_file_cart=state_cart_file, duration=duration)   
+                # set output file path
+                out_file_access = self.out_dir+'/test_cov_access1.csv'
+                # run the coverage calculator
+                cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
+                cov.execute(instru_id='bs1', out_file_access=out_file_access, method=method)     
+                # check the outputs
+                access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
+                
+                ############ simulation with orienting sensor w.r.t spacecraft and spacecraft aligned to NADIR_POINTING frame ############        
+                spacecraftBus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation": 0, "yRotation": 0, "zRotation": 0}}
+                instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": roll, "zRotation": yaw}, 
+                                                "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 }, "@id":"bs1", "@type":"Basic Sensor"}
+                sat = Spacecraft.from_dict({"orbitState":orbit_dict, "spacecraftBus": spacecraftBus_dict, "instrument": instrument_dict})
+                state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
+                # execute propagator
+                self.j2_prop.execute(spacecraft=sat, out_file_cart=state_cart_file, duration=duration)   
+                # set output file path
+                out_file_access = self.out_dir+'/test_cov_access2.csv'
+                # run the coverage calculator
+                cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
+                cov.execute(instru_id='bs1', out_file_access=out_file_access, method=method)     
+                # check the outputs
+                access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data    
 
-        ############ simulation with orienting spacecraft w.r.t NADIR_POINTING frame and sensor aligned to spacecraft body ############        
-        spacecraftBus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation": pitch, "yRotation": roll, "zRotation": yaw}}
-        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": 0, "yRotation": 0, "zRotation": 0}, 
-                                           "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 }, "@id":"bs1", "@type":"Basic Sensor"}
-        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "spacecraftBus": spacecraftBus_dict, "instrument": instrument_dict})
-        state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
-        # execute propagator
-        self.j2_prop.execute(spacecraft=sat, out_file_cart=state_cart_file, duration=duration)   
-        # set output file path
-        out_file_access = self.out_dir+'/test_cov_access1.csv'
-        # run the coverage calculator
-        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
-        cov.execute(instru_id='bs1', out_file_access=out_file_access)     
-        # check the outputs
-        access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data        
-        
-        ############ simulation with orienting sensor w.r.t spacecraft and spacecraft aligned to NADIR_POINTING frame ############        
-        spacecraftBus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation": 0, "yRotation": 0, "zRotation": 0}}
-        instrument_dict = {"orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation": pitch, "yRotation": roll, "zRotation": yaw}, 
-                                           "fieldOfViewGeometry": {"shape": "rectangular", "angleHeight": 15, "angleWidth": 25 }, "@id":"bs1", "@type":"Basic Sensor"}
-        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "spacecraftBus": spacecraftBus_dict, "instrument": instrument_dict})
-        state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
-        # execute propagator
-        self.j2_prop.execute(spacecraft=sat, out_file_cart=state_cart_file, duration=duration)   
-        # set output file path
-        out_file_access = self.out_dir+'/test_cov_access2.csv'
-        # run the coverage calculator
-        cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
-        cov.execute(instru_id='bs1', out_file_access=out_file_access)     
-        # check the outputs
-        access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data    
-
-        ############ compare both outputs ############
-        if not access_data1.empty:
-            self.assertTrue(access_data1.equals(access_data2))
-        else:
-            warnings.warn('No data was generated in test_execute_6(.). Run the test again.')
+                ############ compare both outputs ############
+                if not access_data1.empty:
+                    self.assertTrue(access_data1.equals(access_data2))
+                else:
+                    warnings.warn('No data was generated in test_execute_6(.). Run the test again.')
     
+    #@unittest.skip
     def test_execute_7(self):
         """ Test spacecraft with multiple sensors. spc4 spacecraft is on equatorial orbit and has 3 instruments with 
-            progressively larger FOVs. The third instrument has 3 modes with roll =0, 25, -25. 
+            progressively larger CIRCULAR FOVs. The third instrument has 3 modes with roll =0, 25, -25. 
 
             * Test the coverage of the smaller FOVs is a subset of the coverage from bigger FOVs.
             * Test mode_id specification works by checking sign of latitudes in coverage data when the instrument with roll is simulated.
@@ -615,6 +644,7 @@ class TestGridCoverage(unittest.TestCase):
         else:
             warnings.warn('No data was generated in test_execute_7(.) negative roll test. Run the test again.')
     
+    #@unittest.skip
     def test_execute_8(self):
         """ Test FOV vs FOR coverage. Coverage of FOR >= Coverage of FOV. Use spc1 spacecraft (defined by util.spc1_json). 
             Test the coverage of the FOV is a subset of the coverage from FOR.
@@ -650,11 +680,12 @@ class TestGridCoverage(unittest.TestCase):
         else:
             warnings.warn('No data was generated in test_execute_8(.). Run the test again.')
 
+    #@unittest.skip
     def test_execute_9(self):
-        """ Test coverage with DOUBLE_ROLL_ONLY maneuver will which result in 2 ``ViewGeometry`` objects for the 
+        """ Test coverage with DOUBLE_ROLL_ONLY maneuver which will result in 2 ``ViewGeometry`` objects for the 
             field-of-regard.
             Use Spacecraft spc5. 
-            Compare results of 3 simulations (1) SINGLE_ROLL_ONLY manuever (positive) (2) SINGLE_ROLL_ONLY manuever (positive) 
+            Compare results of 3 simulations (1) SINGLE_ROLL_ONLY manuever (positive) (2) SINGLE_ROLL_ONLY manuever (negative) 
             and (3) DOUBLE_ROLL_ONLY maneuver. The results of (3) should be the union of the results of (1) and (2). Note 
             that the coverage from (1) does not intersect the coverage from (2) due to the way the maneuver is configured in spacecraft spc5.
 
@@ -671,26 +702,29 @@ class TestGridCoverage(unittest.TestCase):
         # form the coverage calculator object
         cov = GridCoverage(grid=grid, spacecraft=spc5, state_cart_file=state_cart_file)
 
-        # run mode with SINGLE_ROLL_ONLY manuever (positive)
-        out_file_access = self.out_dir+'/test_cov_access1.csv'
-        cov.execute(instru_id="sen1", mode_id=0, use_field_of_regard=True, out_file_access=out_file_access)
-        access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+        # run for both the coverage methods
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                # run mode with SINGLE_ROLL_ONLY manuever (positive)
+                out_file_access = self.out_dir+'/test_cov_access1.csv'
+                cov.execute(instru_id="sen1", mode_id=0, use_field_of_regard=True, out_file_access=out_file_access, method=method)
+                access_data1 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
-        # run mode with SINGLE_ROLL_ONLY manuever (negative)
-        out_file_access = self.out_dir+'/test_cov_access2.csv'
-        cov.execute(instru_id="sen1", mode_id=1, use_field_of_regard=True, out_file_access=out_file_access)
-        access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+                # run mode with SINGLE_ROLL_ONLY manuever (negative)
+                out_file_access = self.out_dir+'/test_cov_access2.csv'
+                cov.execute(instru_id="sen1", mode_id=1, use_field_of_regard=True, out_file_access=out_file_access, method=method)
+                access_data2 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
-        # run mode with DOUBLE_ROLL_ONLY manuever
-        out_file_access = self.out_dir+'/test_cov_access3.csv'
-        cov.execute(instru_id="sen1", mode_id=2, use_field_of_regard=True, out_file_access=out_file_access)
-        access_data3 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
+                # run mode with DOUBLE_ROLL_ONLY manuever
+                out_file_access = self.out_dir+'/test_cov_access3.csv'
+                cov.execute(instru_id="sen1", mode_id=2, use_field_of_regard=True, out_file_access=out_file_access, method=method)
+                access_data3 = pd.read_csv(out_file_access, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
 
-        # compare the results from the different simulations
-        # join access_data1, access_data_2
-        dfs = [access_data1, access_data2]
-        df = pd.concat( dfs,axis=0,ignore_index=True)
-        self.assertTrue(access_data3.equals(df))
+                # compare the results from the different simulations
+                # join access_data1, access_data_2
+                dfs = [access_data1, access_data2]
+                df = pd.concat( dfs,axis=0,ignore_index=True)
+                self.assertTrue(access_data3.equals(df))
 
 
 

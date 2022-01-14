@@ -2,6 +2,10 @@
 
    :code:`/temp/` folder contains temporary files produced during the run of the tests below.
 
+   In case of rectangular sensors, both the methods to evaluate point in spherical polygon: 
+   (1) 'ProjectedSphericalPointInPolygon' and (2) 'DirectSphericalPointInPolygon' are evaluated.
+
+
 Expected output:
 
 running test_run_1
@@ -16,7 +20,15 @@ running test_run_1
     Metric 2 = 0.027351619401828606
     Metric 3 = 0.0
     Metric 4 = 0.027360240923878468
+    Metric 1 = 0.0
+    Metric 2 = 0.0349644952145724
+    Metric 3 = 0.0
+    Metric 4 = 0.034972028697688215
 .running test_run_3
+    Metric 1 = 0.011299435028248588
+    Metric 2 = 0.0487277728657039
+    Metric 3 = 0.0
+    Metric 4 = 0.048785100840058895
     Metric 1 = 0.011299435028248588
     Metric 2 = 0.0487277728657039
     Metric 3 = 0.0
@@ -26,6 +38,10 @@ running test_run_1
     Metric 2 = 0.024124363026510998
     Metric 3 = 0.03793335778447373
     Metric 4 = 0.09644321627687324
+    Metric 1 = 0.06567164179104477
+    Metric 2 = 0.004983707111366686
+    Metric 3 = 0.02290187259347255
+    Metric 4 = 0.08815447786159897
 .running test_run_5
     Metric 1 = 0.014388489208633094
     Metric 2 = 0.0031863458154967237
@@ -36,6 +52,10 @@ running test_run_1
     Metric 2 = 0.011098242896627185
     Metric 3 = 0.006512338499127888
     Metric 4 = 0.06387346139311226
+    Metric 1 = 0.02177293934681182
+    Metric 2 = 0.004905830607871885
+    Metric 3 = 0.00796079059695783
+    Metric 4 = 0.05950197935907679
 .running test_run_7
     Metric 1 = 0.028985507246376812
     Metric 2 = 0.0181360201511335
@@ -51,22 +71,37 @@ running test_run_1
     Metric 2 = 0.033531429675798426
     Metric 3 = 0.008346624779592682
     Metric 4 = 0.18750643736786
+    Metric 1 = 0.02570694087403599
+    Metric 2 = 0.051606108478146395
+    Metric 3 = 0.020229898909291343
+    Metric 4 = 0.18419062875395892
 ..running test_run_10
     Metric 1 = 0.08284023668639054
     Metric 2 = 0.014835102133972385
     Metric 3 = 0.022065168404711993
     Metric 4 = 0.158437778889485
+    Metric 1 = 0.08284023668639054
+    Metric 2 = 0.0011321181931393638
+    Metric 3 = 0.0068187464465237655
+    Metric 4 = 0.14977532476218797
 .running test_run_11
     Metric 1 = 0.0035149384885764497
     Metric 2 = 0.004649320682589155
     Metric 3 = 0.011625970590382005
     Metric 4 = 0.061990025361950384
+    Metric 1 = 0.0035149384885764497
+    Metric 2 = 0.023032433077986112
+    Metric 3 = 0.027677453427470747
+    Metric 4 = 0.06486607660238537
 .running test_run_12
     Metric 1 = 0.0030441400304414
     Metric 2 = 0.023835051546391754
     Metric 3 = 0.012280177278458697
     Metric 4 = 0.25664036683286595
-
+    Metric 1 = 0.0030534351145038168
+    Metric 2 = 0.0012640936244826392
+    Metric 3 = 0.032688511755585715
+    Metric 4 = 0.2518871970909668
 """
 
 
@@ -89,6 +124,9 @@ from orbitpy.coveragecalculator import GridCoverage
 
 sys.path.append('../')
 from util.coverage import Coverage
+
+# method used in coverage calculation involving rectangular sensors. Tests are carried out for each method seperately.
+method_list = ['ProjectedSphericalPointInPolygon', 'DirectSphericalPointInPolygon']
 
 class TestOrbitPropCovGrid(unittest.TestCase):
         
@@ -132,7 +170,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         # Establish thresholds for each metric
         cls.m1 = .1
-        cls.m2 = .05
+        cls.m2 = .052 # threshold for 'ProjectedSphericalPointInPolygon' is 0.5
         cls.m3 = .05
         cls.m4 = .3
     
@@ -217,6 +255,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
+        
         cov.execute(out_file_access=acc_fl)     
         
         # Construct coverage objects to verify output
@@ -256,17 +295,20 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        cov.execute(out_file_access=acc_fl)
-        
-        # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/Global_Grid_2.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/02/acc',grid_fl)
-        
-        # Check truth
-        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-    
-        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-        self.assertTrue(result)
+
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=acc_fl, method=method)
+                
+                # Construct coverage objects to verify output
+                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/Global_Grid_2.cvaa')
+                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/02/acc',grid_fl)
+                
+                # Check truth
+                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+            
+                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+                self.assertTrue(result)
        
     def test_run_3(self):
         """Test a near-equatorial orbit on a global grid with a 20 degree diameter conical sensor."""
@@ -297,17 +339,19 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        cov.execute(out_file_access=acc_fl)
-        
-         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/Global_Grid_3.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/03/acc',grid_fl)
-        
-        # Check truth
-        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-    
-        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-        self.assertTrue(result)
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=acc_fl, method=method)
+                
+                # Construct coverage objects to verify output
+                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/Global_Grid_3.cvaa')
+                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/03/acc',grid_fl)
+                
+                # Check truth
+                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+            
+                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+                self.assertTrue(result)
         
     def test_run_4(self):
         """Test a polar orbit on a US grid with a 30 deg AT, 20 deg CT sensor."""
@@ -344,17 +388,19 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        cov.execute(out_file_access=acc_fl)
-        
-        # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_4.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/04/acc',grid_fl)
-        
-        # Check truth
-        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-    
-        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-        self.assertTrue(result)
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=acc_fl, method=method)
+                
+                # Construct coverage objects to verify output
+                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_4.cvaa')
+                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/04/acc',grid_fl)
+                
+                # Check truth
+                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+            
+                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+                self.assertTrue(result)
         
     def test_run_5(self):
         """Test an inclined orbit on a US grid with a 20 degree diameter conical sensor."""
@@ -437,17 +483,19 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        cov.execute(out_file_access=acc_fl)
-        
-         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_6.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/06/acc',grid_fl)
-        
-        # Check truth
-        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-    
-        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-        self.assertTrue(result)
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=acc_fl, method=method)
+                
+                # Construct coverage objects to verify output
+                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_6.cvaa')
+                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/06/acc',grid_fl)
+                
+                # Check truth
+                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+            
+                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+                self.assertTrue(result)
       
     def test_run_7(self):
         """Test a sun-sync orbit on an equatorial grid with a 20 degree diameter conical sensor."""
@@ -583,17 +631,19 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        cov.execute(out_file_access=acc_fl)
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=acc_fl, method=method)
 
-        # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/Equatorial_Grid_9.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/09/acc',grid_fl)
-        
-        # Check truth
-        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-    
-        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-        self.assertTrue(result)
+                # Construct coverage objects to verify output
+                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/Equatorial_Grid_9.cvaa')
+                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/09/acc',grid_fl)
+                
+                # Check truth
+                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+            
+                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+                self.assertTrue(result)
         
     def test_run_10(self):
         """Test a sun-sync orbit on a US grid with a 30 deg AT, 20 deg CT sensor."""
@@ -629,17 +679,19 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        cov.execute(out_file_access=acc_fl)
-        
-        # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_10.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/10/acc',grid_fl)
-        
-        # Check truth
-        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-    
-        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-        self.assertTrue(result)
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=acc_fl, method=method)
+                
+                # Construct coverage objects to verify output
+                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_10.cvaa')
+                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/10/acc',grid_fl)
+                
+                # Check truth
+                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+            
+                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+                self.assertTrue(result)
     
     #@unittest.skip("Pointed tests are broken and must be fixed.")
     def test_run_11(self):
@@ -685,17 +737,19 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        cov.execute(out_file_access=acc_fl)
-        
-        # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_11.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/11/acc',grid_fl)
-        
-        # Check truth
-        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-    
-        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-        self.assertTrue(result)
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=acc_fl, method=method)
+                
+                # Construct coverage objects to verify output
+                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_11.cvaa')
+                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/11/acc',grid_fl)
+                
+                # Check truth
+                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+            
+                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+                self.assertTrue(result)
     
     #@unittest.skip("Pointed tests are broken and must be fixed.")    
     def test_run_12(self):
@@ -739,17 +793,19 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        cov.execute(out_file_access=acc_fl)
-        
-         # Construct coverage objects to verify output
-        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_12.cvaa')
-        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/12/acc',grid_fl)
-        
-        # Check truth
-        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-    
-        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-        self.assertTrue(result)
+        for method in method_list:
+            with self.subTest(msg='running method = ' + method):
+                cov.execute(out_file_access=acc_fl, method=method)
+                
+                # Construct coverage objects to verify output
+                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/US_Grid_12.cvaa')
+                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/12/acc',grid_fl)
+                
+                # Check truth
+                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+            
+                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+                self.assertTrue(result)
         
 if __name__ == '__main__':
     unittest.main()

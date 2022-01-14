@@ -249,11 +249,18 @@ The difference in the semi-major axis, eccentricity, and inclination are plotted
 	:align: center
 
 STK Coverage Tests: Model
-^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ground point access capabilities of OrbitPy's :class:`orbitpy.orbitpropcov.OrbitPropCovGrid` class were also verified against STK results. The orbit propagation settings for these tests remain identical to the settings used for the propagation tests. In order to make these tests as modular as possible, most of the orbits used were previously tested in the propagation tests.
+The ground point access capabilities of OrbitPy's :class:`orbitpy.orbitpropcov.OrbitPropCovGrid` class were also verified against STK results.
+There are two methods which can be specified for coverage calculations involving Rectangular sensors: *ProjectedSphericalPointInPolygon* and *DirectSphericalPointInPolygon*.
+Verification of both the methods were done.
+The orbit propagation settings for these tests remain identical to the settings used for the propagation tests. 
+In order to make these tests as modular as possible, most of the orbits used were previously tested in the propagation tests.
 
-STK settings were matched to OrbitPy wherever possible. STK uses a variable time step for access calculations, so OrbitPy's one second time step wasn't matched exactly. Rather than reporting a binary access value for each grid point at each timestep, like OrbitPy does, STK simply outputs the access intervals for each grid point; the STK output was converted to OrbitPy's format for comparison.
+
+STK settings were matched to OrbitPy wherever possible. STK uses a variable time step for access calculations, so OrbitPy's one second time step wasn't matched exactly. 
+Rather than reporting a binary access value for each grid point at each timestep, like OrbitPy does, STK simply outputs the access intervals for each grid point; 
+the STK output was converted to OrbitPy's format for comparison.
 
 STK uses a different default coordinate frame definition for its sensors. Like in OrbitPy, the Z axis can be set to nadir alligned with the ECF velocity constraint. 
 However, the X axis is alligned with the satellite's velocity vector, wherease in OrbitPy, the Y axis takes this position. 
@@ -412,10 +419,12 @@ correspond to a rectangular sensor with angle-height 30 deg and angle-width 20de
      
 Each of the test functions can be found in :code:`tests/validation/test_STK_coverage_OrbitPropCovGrid`. The columns correspond to the test function names (i.e the inputs in column 1 are tested in :code:`test_run_1`).
 
-STK Coverage Tests: Analysis
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+STK Coverage Tests: Analysis 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The results of all of the test cases across each metric is shown in the table below.
+The results of all of the test cases across each metric is shown in the table below. In case of rectangular sensors the results from both the DirectSphericalPointInPolygon
+and ProjectedSphericalPointInPolygon methods are given in the format X/Y, where X is the result from the DirectSphericalPointInPolygon method and 
+Y is the result from the ProjectedSphericalPointInPolygon method.
 
 .. list-table:: **Test Results**
    :header-rows: 1
@@ -436,59 +445,60 @@ The results of all of the test cases across each metric is shown in the table be
      - 12
    * - Metric 1 [%]
      - 0
-     - 0
-     - 1.13
-     - 6.57
+     - 0/0
+     - 1.13/1.13
+     - 6.57/6.57
      - 1.43
-     - 2.79
+     - 2.79/2.22
      - 2.90
      - 1.82
-     - 2.57
-     - 8.28
-     - .351
-     - .304
+     - 2.57/2.57
+     - 8.28/8.28
+     - .352/.352
+     - .304/.305
    * - Metric 2 [%]
      - 3.26
-     - 2.73
-     - 4.82
-     - 2.41
+     - 2.73/2.73
+     - 4.83/4.83
+     - 2.41/.498
      - .327
-     - 1.11
+     - 1.11/.491
      - 1.71
      - 1.96
-     - 3.38
-     - 1.47
-     - .448
-     - 2.38
+     - 3.35/5.20
+     - 1.48/.113
+     - .465/2.30
+     - 2.38/2.52
    * - Metric 3 [%]
      - 0
-     - 0
-     - 0
-     - 3.79
+     - 0/0
+     - 0/0
+     - 3.79/2.29
      - .0135
-     - .651
+     - .651/.796
      - .733
      - .873
-     - .863
-     - 2.20
-     - 1.15
-     - 1.23
+     - .863/2.02
+     - 2.21/.682
+     - 1.16/2.77
+     - 1.23/3.27
    * - Metric 4 [%]
      - 3.26
-     - 2.73
-     - 4.83
-     - 9.66
+     - 2.73/3.50
+     - 4.88/4.88
+     - 9.64/8.82
      - 7.58
-     - 6.38
+     - 6.39/5.95
      - 16.9
      - 3.51
-     - 18.7
-     - 15.8
-     - 6.24
-     - 25.6
+     - 18.75/18.41
+     - 15.84/14.98
+     - 6.20/6.49
+     - 25.7/25.2
 
 
 Visual inspection of the test case results shows excellent agreement between OrbitPy and STK coverage. In this section, the most divergent results (highest percent difference) across each metric will be analyzed.
+(The results from the *ProjectedSphericalPointInPolygon* method are considered in case of coverage with rectangular sensors.)
 
 For metric 1 (total number of grid points accessed), test case 10 showed the highest percent difference at 8.28 percent. Test case 10 propagated a sun-synchronous orbit over a continental US grid, with a nadir-pointing rectangular sensor. The STK and OrbitPy results are shown below.
 
