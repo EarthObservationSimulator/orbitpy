@@ -97,7 +97,7 @@ Please contact Vinay (vinay.ravindra@nasa.gov)
 ## Developer Tasks
 
 ### OrbitPy
-- [ ] Incorporate artificial image synthesis involving the propcov classes `DiscretizedSensor`, `Projector` and the orbitpy `SensorPixelProjection` module. Add Gtests, python-tests.
+- [ ] Incorporate artificial image synthesis involving the propcov classes `DiscretizedSensor`, `Projector` and the orbitpy `SensorPixelProjection` module. Add python-tests.
 - [ ] Search for ‘Vinay’ and ‘TODO’ over all the files
 
 
@@ -107,6 +107,6 @@ Please contact Vinay (vinay.ravindra@nasa.gov)
 - [ ] Make a SystemTestDriver
 - [ ] Add unconventional sensor FOV geometry shapes GTests for `GMATCustomSensor` and `DSPIPCustomSensor` class.
 - [ ] Rename `TATCException` to `PropcovCppException`
-- [ ] Add GTests for `Spacecraft`, `CoverageChecker`, `NadirPointingAttitude`, `Propagator`, `DiscretizedSensor` and other classes. (There are in total 24 propcov-cpp active classes, of which currently there are GTests ofr 14 of these classes.)
+- [ ] Add GTests for `Spacecraft`, `CoverageChecker`, `NadirPointingAttitude` and other classes. (There are in total 25 propcov-cpp active classes, of which currently there are GTests ofr 14 of these classes. Some tests in the `tests/tests-cpp/old` folder can be rewritten into the GTest format.)
 - [ ] Consider avoiding virtual functions since it has runtime costs associated with it.
 
