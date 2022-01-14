@@ -18,7 +18,7 @@
 #include "../lib/propcov-cpp/Sensor.hpp"
 #include "../lib/propcov-cpp/ConicalSensor.hpp"
 #include "../lib/propcov-cpp/CustomSensor.hpp"
-#include "../lib/propcov-cpp/polygon/SphericalSensor.hpp"
+#include "../lib/propcov-cpp/polygon/DSPIPCustomSensor.hpp"
 #include "../lib/propcov-cpp/Propagator.hpp"
 #include "../lib/propcov-cpp/CoverageChecker.hpp"
 #include "../lib/propcov-cpp/PointGroup.hpp"
@@ -282,7 +282,7 @@ PYBIND11_MODULE(propcov, m)
             )
         ;
 
-    py::class_<SphericalSensor, Sensor>(m, "SphericalSensor")
+    py::class_<DSPIPCustomSensor, Sensor>(m, "DSPIPCustomSensor")
         .def(py::init<Rvector&, Rvector&, AnglePair>(), py::arg("coneAngleVecIn"), py::arg("clockAngleVecIn"), py::arg("contained"), "Initialize Custom Sensor with cone, clock angles in radians. A point known to be 'contained' within the sensor FOV (in the Sensor frame) is also to be provided.")
 
         ;

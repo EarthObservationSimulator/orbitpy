@@ -30,7 +30,7 @@ OBJECTS = \
 	SliceArray.o \
 	SliceTree.o \
 	PointInPolygon.o \
-	SphericalSensor.o
+	DSPIPCustomSensor.o
 
 #
 # Default suffix rule

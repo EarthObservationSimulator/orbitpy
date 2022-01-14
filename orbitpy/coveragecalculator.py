@@ -384,7 +384,7 @@ class GridCoverage(Entity):
                         Only entries `DirectSphericalPointInPolygon` or `ProjectedSphericalPointInPolygon` are allowed. 
                         Default method is `DirectSphericalPointInPolygon`.
 
-                        The `DirectSphericalPointInPolygon` method corresponds to implementation of the `propcov.SphericalSensor` class, while
+                        The `DirectSphericalPointInPolygon` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
                         the `ProjectedSphericalPointInPolygon` corresponds to the implementation of the `propcov.CustomSensor` class.                        
                         
                         For details on the `DirectSphericalPointInPolygon` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
@@ -392,7 +392,7 @@ class GridCoverage(Entity):
                         
                         In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
                         point-in-polygon algorithm implemented in the `propcov.CustomSensor` class. 
-                        Compared to the `propcov.CustomSensor` class, the `propcov.SphericalSensor` has been shown to yield improvement in runtime 
+                        Compared to the `propcov.CustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
                         and also to be more accurate.
  
         :paramtype method: str
@@ -451,9 +451,7 @@ class GridCoverage(Entity):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
             elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
                 if method=='DirectSphericalPointInPolygon':
-                    sen_sph_geom.cone_angle_vec.extend([sen_sph_geom.cone_angle_vec[0]])
-                    sen_sph_geom.clock_angle_vec.extend([sen_sph_geom.clock_angle_vec[0]])
-                    sensor = propcov.SphericalSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                    sensor = propcov.DSPIPCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   ),
                                                 contained = [0.0,0.0]  
                                                 )
@@ -917,9 +915,7 @@ class PointingOptionsWithGridCoverage(Entity):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
             elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
                 if method=="DirectSphericalPointInPolygon":
-                    sen_sph_geom.cone_angle_vec.extend([sen_sph_geom.cone_angle_vec[0]])
-                    sen_sph_geom.clock_angle_vec.extend([sen_sph_geom.clock_angle_vec[0]])
-                    sensor = propcov.SphericalSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                    sensor = propcov.DSPIPCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   ),
                                                 contained = [0.0,0.0]  
                                                 )

@@ -1,11 +1,11 @@
-#include "SphericalSensor.hpp"
+#include "DSPIPCustomSensor.hpp"
 
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphericalSensor(const Rvector& coneAngleVecIn, const Rvector& clockAngleVecIn, AnglePair contained)
+// DSPIPCustomSensor(const Rvector& coneAngleVecIn, const Rvector& clockAngleVecIn, AnglePair contained)
 //------------------------------------------------------------------------------
 /**
  * Constructor
@@ -24,7 +24,7 @@
  *        known to be contained in the sensor FOV.
  */
 //------------------------------------------------------------------------------
-SphericalSensor::SphericalSensor(const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn, AnglePair contained) :
+DSPIPCustomSensor::DSPIPCustomSensor(const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn, AnglePair contained) :
 Sensor()
 {
     std::vector<AnglePair> vertices(coneAngleVecIn.GetSize());
@@ -40,12 +40,12 @@ Sensor()
     poly->addPreprocessor(prep);
 }
 
-SphericalSensor::~SphericalSensor()
+DSPIPCustomSensor::~DSPIPCustomSensor()
 {
     delete(poly);
 }
 
-bool SphericalSensor::CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle)
+bool DSPIPCustomSensor::CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle)
 {
     AnglePair query = {viewConeAngle,viewClockAngle};
     return poly->contains(query);

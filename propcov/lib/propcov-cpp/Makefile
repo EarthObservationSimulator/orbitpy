@@ -51,7 +51,7 @@ OBJECTS = \
     polygon/SliceArray.o \
     polygon/SlicedPolygon.o \
     polygon/SliceTree.o \
-    polygon/SphericalSensor.o \
+    polygon/DSPIPCustomSensor.o \
 
 #
 # Default suffix rule

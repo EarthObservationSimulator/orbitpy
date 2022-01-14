@@ -1,17 +1,17 @@
-#ifndef SphericalSensor_hpp
-#define SphericalSensor_hpp
+#ifndef DSPIPCustomSensor_hpp
+#define DSPIPCustomSensor_hpp
 
 #include "../Sensor.hpp"
 #include "SlicedPolygon.hpp"
 #include "SliceArray.hpp"
 
-class SphericalSensor : public Sensor
+class DSPIPCustomSensor : public Sensor
 {
     public:
     
         /// class construction/destruction
-        SphericalSensor(const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn, AnglePair contained);
-        ~SphericalSensor();
+        DSPIPCustomSensor(const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn, AnglePair contained);
+        ~DSPIPCustomSensor();
 
 
         virtual bool CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle);
@@ -21,4 +21,4 @@ class SphericalSensor : public Sensor
         SlicedPolygon* poly;
 };
 
-#endif /* SphericalSensor_hpp */
+#endif /* DSPIPCustomSensor_hpp */
