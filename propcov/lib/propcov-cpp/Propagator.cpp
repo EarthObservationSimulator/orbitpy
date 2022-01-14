@@ -221,7 +221,7 @@ void Propagator::SetPhysicalConstants(Real bodyMu, Real bodyJ2,
  *       Note that when the drag is disabled, the refJd term is not updated and remains at the initial epoch at 
  *       which the propagator was initialized.
  * 
- * @todo When drag is considered, the mean-motion, orbit-rates too need to be updated.
+ * @todo When drag is considered, the orbit-rates too need to be updated.
  * 
  */
 //------------------------------------------------------------------------------

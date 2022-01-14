@@ -33,7 +33,7 @@
  * the coverage is evaluated for the spacecraft (horizon-test is performed). There is room to expand to multiple sensors
  * per spacecraft, but currently only 1 sensor per spacecraft is allowed.
  * 
- * THe primary functions utilized are the overloaded functions CheckPointCoverage(.). First the CheckGridFeasibility(.) function is invoked
+ * The primary functions utilized are the overloaded functions CheckPointCoverage(.). First the CheckGridFeasibility(.) function is invoked
  * to (1) determine if spacecraft and point are on the same hemisphere (2) if 1 is true, horizon check is performed. 
  * The above tests check the feasibility of point being covered. If feasible, the point is evaluated to be within/out of the sensor FOV.
  * 

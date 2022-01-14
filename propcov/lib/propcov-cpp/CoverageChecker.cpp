@@ -91,7 +91,7 @@ CoverageChecker::CoverageChecker(PointGroup *ptGroup, Spacecraft *sat) :
  *
  * @param copy  the object to copy
  * 
- * @todo: Cloning required of the pointGroup, sc, centralBody objects? 
+ * @todo: Cloning required of the pointGroup, sc, centralBody, pointArray objects? 
  * 
  */
 //------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ CoverageChecker::CoverageChecker(const CoverageChecker &copy) :
  *
  * @param copy  the object to copy
  * 
- * @todo: Cloning required of the pointGroup, sc, centralBody objects? 
+ * @todo: Cloning required of the pointGroup, sc, centralBody, pointArray objects? 
  * 
  */
 //------------------------------------------------------------------------------
