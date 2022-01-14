@@ -42,6 +42,7 @@ SET(PROPCOVCPP_SRCS
     polygon/Preprocessor.cpp
     polygon/SliceArray.cpp
     polygon/SlicedPolygon.cpp
+    polygon/Edge.cpp
     polygon/SliceTree.cpp
     polygon/DSPIPCustomSensor.cpp
     testclass.cpp

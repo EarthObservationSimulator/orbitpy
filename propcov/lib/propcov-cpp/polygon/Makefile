@@ -25,6 +25,7 @@ CPP = g++
 OBJECTS = \
     GMATPolygon.o \
 	Polygon.o \
+	Edge.o \
 	SlicedPolygon.o \
 	Preprocessor.o \
 	SliceArray.o \

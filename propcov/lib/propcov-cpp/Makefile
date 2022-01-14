@@ -50,6 +50,7 @@ OBJECTS = \
     polygon/Preprocessor.o \
     polygon/SliceArray.o \
     polygon/SlicedPolygon.o \
+    polygon/Edge.o \
     polygon/SliceTree.o \
     polygon/DSPIPCustomSensor.o \
 
