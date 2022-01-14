@@ -385,14 +385,14 @@ class GridCoverage(Entity):
                         Default method is `DirectSphericalPointInPolygon`.
 
                         The `DirectSphericalPointInPolygon` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
-                        the `ProjectedSphericalPointInPolygon` corresponds to the implementation of the `propcov.CustomSensor` class.                        
+                        the `ProjectedSphericalPointInPolygon` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
                         
                         For details on the `DirectSphericalPointInPolygon` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
                         'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.
                         
                         In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
-                        point-in-polygon algorithm implemented in the `propcov.CustomSensor` class. 
-                        Compared to the `propcov.CustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
+                        point-in-polygon algorithm implemented in the `propcov.GMATCustomSensor` class. 
+                        Compared to the `propcov.GMATCustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
                         and also to be more accurate.
  
         :paramtype method: str
@@ -457,7 +457,7 @@ class GridCoverage(Entity):
                                                 )
                 
                 elif method=='ProjectedSphericalPointInPolygon':
-                    sensor = propcov.CustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                    sensor = propcov.GMATCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
                                                 )
                 else:
@@ -921,7 +921,7 @@ class PointingOptionsWithGridCoverage(Entity):
                                                 )
                 
                 elif method=="ProjectedSphericalPointInPolygon":
-                    sensor = propcov.CustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                    sensor = propcov.GMATCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
                                                 )         
             else:

@@ -27,7 +27,7 @@ OBJECTS = \
     Attitude.o \
     ConicalSensor.o \
     CoverageChecker.o \
-    CustomSensor.o \
+    GMATCustomSensor.o \
     Earth.o \
     IntervalEventReport.o \
     KeyValueStatistics.o \

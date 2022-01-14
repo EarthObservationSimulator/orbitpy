@@ -19,7 +19,7 @@ SET(PROPCOVCPP_SRCS
     Attitude.cpp
     ConicalSensor.cpp
     CoverageChecker.cpp
-    CustomSensor.cpp
+    GMATCustomSensor.cpp
     Earth.cpp
     IntervalEventReport.cpp
     KeyValueStatistics.cpp

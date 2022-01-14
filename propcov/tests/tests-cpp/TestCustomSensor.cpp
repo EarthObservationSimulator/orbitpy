@@ -1,12 +1,12 @@
 /**
- * Tests for the CustomSensor class.
+ * Tests for the GMATCustomSensor class.
  * TODO: Add tests for the protected/ private auxillary functions.
 */
 
 #include <tuple>
 #include <math.h>
 #include <vector>
-#include "CustomSensor.hpp"
+#include "GMATCustomSensor.hpp"
 #include "Rvector.hpp"
 #include <gtest/gtest.h>
 
@@ -16,7 +16,7 @@
 class CheckTargetVisibilityTestFixture: public testing::TestWithParam<std::tuple<Rvector, Rvector, double, double, bool>>{
     public:
     protected:
-        CustomSensor *sen;
+        GMATCustomSensor *sen;
 };
 TEST_P(CheckTargetVisibilityTestFixture, CheckTargetVisibilityWorks){
     std::tuple<Rvector, Rvector, double, double, bool> param = GetParam();
@@ -26,7 +26,7 @@ TEST_P(CheckTargetVisibilityTestFixture, CheckTargetVisibilityWorks){
     double targetClock  = std::get<3>(param);
     bool trueVisibility  = std::get<4>(param);
 
-    sen = new CustomSensor(fovCone, fovClock);
+    sen = new GMATCustomSensor(fovCone, fovClock);
     bool testVisibility = sen->CheckTargetVisibility(targetCone, targetClock);
 
     ASSERT_TRUE(trueVisibility==testVisibility);

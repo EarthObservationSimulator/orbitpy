@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                           CustomSensor
+//                           GMATCustomSensor
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
@@ -21,14 +21,14 @@
 // Created: 2017.04.03
 //
 /**
- * Implementation of the CustomSensor class
+ * Implementation of the GMATCustomSensor class
  */
 //------------------------------------------------------------------------------
 
 #include <list>
 #include <iostream> // for messages, **REPLACE** with appropriate calls *****
 
-#include "CustomSensor.hpp"
+#include "GMATCustomSensor.hpp"
 #include "MessageInterface.hpp"
 #include "BaseException.hpp" 
 #include "TATCException.hpp"
@@ -55,7 +55,7 @@ using namespace GmatMathUtil;
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CustomSensor(Rvector coneAngleVecIn, Rvector clockAngleVecIn)
+// GMATCustomSensor(Rvector coneAngleVecIn, Rvector clockAngleVecIn)
 //------------------------------------------------------------------------------
 /**
  * Constructor
@@ -75,14 +75,14 @@ using namespace GmatMathUtil;
  *        is atan2(yP,xP);
  */
 //------------------------------------------------------------------------------
-CustomSensor::CustomSensor (const Rvector &coneAngleVecIn,
+GMATCustomSensor::GMATCustomSensor (const Rvector &coneAngleVecIn,
                             const Rvector &clockAngleVecIn) :
    Sensor()
 {
    
    #ifdef DEBUG_CUSTOM_SENSOR
       MessageInterface::ShowMessage(
-                           "DEBUG: Entering CustomSensor constructor\n");
+                           "DEBUG: Entering GMATCustomSensor constructor\n");
    #endif
       
    numFOVPoints = coneAngleVecIn.GetSize();
@@ -91,7 +91,7 @@ CustomSensor::CustomSensor (const Rvector &coneAngleVecIn,
    if (numFOVPoints != clockAngleVecIn.GetSize())
    {
       MessageInterface::ShowMessage(
-         "CustomSensor: Cone & Clock angle vectors must be the same length\n");
+         "GMATCustomSensor: Cone & Clock angle vectors must be the same length\n");
       throw TATCException(
             "ERROR: Cone and clock angle vectors must be the same length\n");
    }
@@ -99,7 +99,7 @@ CustomSensor::CustomSensor (const Rvector &coneAngleVecIn,
    else if (numFOVPoints <= 2)
    {
       MessageInterface::ShowMessage(
-            "CustomSensor: must have at least 3 points to form valid FOV\n");
+            "GMATCustomSensor: must have at least 3 points to form valid FOV\n");
       throw TATCException("ERROR: must have 3 points to form valid FOV\n");
    }
    
@@ -111,7 +111,7 @@ CustomSensor::CustomSensor (const Rvector &coneAngleVecIn,
          if (coneAngleVecIn(i) > PI - 100 * REAL_TOL)
          {
             MessageInterface::ShowMessage(
-              "CustomSensor: must have cone angle < Pi to avoid singularity\n");
+              "GMATCustomSensor: must have cone angle < Pi to avoid singularity\n");
             throw TATCException(
                   "ERROR: must have cone angle < Pi to avoid singularity");
          }
@@ -157,13 +157,13 @@ CustomSensor::CustomSensor (const Rvector &coneAngleVecIn,
    ComputeExternalPoints();
    #ifdef DEBUG_CUSTOM_SENSOR
       MessageInterface::ShowMessage(
-                        "DEBUG: Exiting CustomSensor constructor\n\n");
+                        "DEBUG: Exiting GMATCustomSensor constructor\n\n");
    #endif
        
 } // constructor
 
 //------------------------------------------------------------------------------
-// CustomSensor(const CustomSensor &copy)
+// GMATCustomSensor(const GMATCustomSensor &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor 
@@ -171,7 +171,7 @@ CustomSensor::CustomSensor (const Rvector &coneAngleVecIn,
  * @param copy object to copy
  */
 //------------------------------------------------------------------------------
-CustomSensor::CustomSensor(const CustomSensor &copy) :
+GMATCustomSensor::GMATCustomSensor(const GMATCustomSensor &copy) :
    Sensor(copy)
 {
    numFOVPoints            = copy.numFOVPoints;
@@ -190,16 +190,16 @@ CustomSensor::CustomSensor(const CustomSensor &copy) :
 }
    
 //------------------------------------------------------------------------------
-// CustomSensor& operator= (const CustomSensor &copy)
+// GMATCustomSensor& operator= (const GMATCustomSensor &copy)
 //------------------------------------------------------------------------------
 /**
- * operator= for CustomSensor
+ * operator= for GMATCustomSensor
  *
  * @param copy object to copy
  *
  */
 //------------------------------------------------------------------------------
-CustomSensor& CustomSensor::operator= (const CustomSensor &copy)
+GMATCustomSensor& GMATCustomSensor::operator= (const GMATCustomSensor &copy)
 {
    Sensor::operator=(copy);
    
@@ -223,19 +223,19 @@ CustomSensor& CustomSensor::operator= (const CustomSensor &copy)
 }
 
 //------------------------------------------------------------------------------
-// ~CustomSensor ()
+// ~GMATCustomSensor ()
 //------------------------------------------------------------------------------
 //   Destructor
 //------------------------------------------------------------------------------
-CustomSensor::~CustomSensor()
+GMATCustomSensor::~GMATCustomSensor()
 {
 }
 
-Rvector CustomSensor::GetConeAngleVector(){
+Rvector GMATCustomSensor::GetConeAngleVector(){
    return coneAngleVec;
 }
 
-Rvector CustomSensor::GetClockAngleVector(){
+Rvector GMATCustomSensor::GetClockAngleVector(){
    return clockAngleVec;
 }
 
@@ -256,12 +256,12 @@ Rvector CustomSensor::GetClockAngleVector(){
  *
  */
 //------------------------------------------------------------------------------
-bool CustomSensor::CheckTargetVisibility(Real viewConeAngle,
+bool GMATCustomSensor::CheckTargetVisibility(Real viewConeAngle,
                                          Real viewClockAngle)
 {
    #ifdef DEBUG_CHECK_TARGET
       MessageInterface::ShowMessage(
-                        "In CustomSensor::CheckTargetVisibility:\n");
+                        "In GMATCustomSensor::CheckTargetVisibility:\n");
       MessageInterface::ShowMessage(
                         "   viewConeAngle  = %12.10f\n", viewConeAngle);
       MessageInterface::ShowMessage(
@@ -367,7 +367,7 @@ bool CustomSensor::CheckTargetVisibility(Real viewConeAngle,
    
    #ifdef DEBUG_CHECK_TARGET
       MessageInterface::ShowMessage(
-                        "LEAVING CustomSensor::CheckTargetVisibility, "
+                        "LEAVING GMATCustomSensor::CheckTargetVisibility, "
                         "inView = %s\n", (inView? "true" : "false"));
    #endif
    return inView;
@@ -388,7 +388,7 @@ bool CustomSensor::CheckTargetVisibility(Real viewConeAngle,
  *
  */
 //------------------------------------------------------------------------------
-bool CustomSensor::CheckRegionVisibility(const Rvector &coneAngleVec,
+bool GMATCustomSensor::CheckRegionVisibility(const Rvector &coneAngleVec,
                                          const Rvector &clockAngleVec)
 {
    #ifdef DEBUG_CUSTOM_SENSOR
@@ -481,7 +481,7 @@ bool CustomSensor::CheckRegionVisibility(const Rvector &coneAngleVec,
  * @param yCoord y coordinate for point being tested
  */
 //------------------------------------------------------------------------------
-bool CustomSensor::CheckTargetMaxExcursionCoordinates(Real xCoord, Real yCoord)
+bool GMATCustomSensor::CheckTargetMaxExcursionCoordinates(Real xCoord, Real yCoord)
 {
    // first assume point is in bounding box
    bool possiblyInView =  true;
@@ -517,7 +517,7 @@ bool CustomSensor::CheckTargetMaxExcursionCoordinates(Real xCoord, Real yCoord)
  *          successive points to form a closed region.
  */
 //------------------------------------------------------------------------------
-Rmatrix CustomSensor::PointsToSegments(const Rvector &xCoords,
+Rmatrix GMATCustomSensor::PointsToSegments(const Rvector &xCoords,
                                        const Rvector &yCoords)
 {
    Integer size = xCoords.GetSize();
@@ -552,7 +552,7 @@ Rmatrix CustomSensor::PointsToSegments(const Rvector &xCoords,
  * Computes points external to FOV to use in visibility tests
  */
 //------------------------------------------------------------------------------
-void CustomSensor::ComputeExternalPoints()
+void GMATCustomSensor::ComputeExternalPoints()
 {
    #ifdef DEBUG_CUSTOM_SENSOR
       MessageInterface::ShowMessage(
@@ -692,7 +692,7 @@ void CustomSensor::ComputeExternalPoints()
  *                      false otherwise
  */
 //------------------------------------------------------------------------------
-bool CustomSensor::RegionIsFullyContained(std::vector<IntegerArray> &adjacency)
+bool GMATCustomSensor::RegionIsFullyContained(std::vector<IntegerArray> &adjacency)
 {
    //assume no intersecting lines, then look to see if there are any
    bool isFullyContained = true;
@@ -754,7 +754,7 @@ bool CustomSensor::RegionIsFullyContained(std::vector<IntegerArray> &adjacency)
  *
  */
 //------------------------------------------------------------------------------
-void CustomSensor::Sort(Rvector &v, bool ascending)
+void GMATCustomSensor::Sort(Rvector &v, bool ascending)
 {
    // load list with Rvector & sort it
    Integer size = v.GetSize();
@@ -792,7 +792,7 @@ void CustomSensor::Sort(Rvector &v, bool ascending)
  *
  */
 //------------------------------------------------------------------------------
-void CustomSensor::Sort(Rvector &v, IntegerArray &indices, bool ascending)
+void GMATCustomSensor::Sort(Rvector &v, IntegerArray &indices, bool ascending)
 {
    Integer size = v.GetSize();
    indices.resize(size);
@@ -844,7 +844,7 @@ void CustomSensor::Sort(Rvector &v, IntegerArray &indices, bool ascending)
  * @return  maximum value contained in vector
  */
 //------------------------------------------------------------------------------
-Real CustomSensor::Max(const Rvector &v)
+Real GMATCustomSensor::Max(const Rvector &v)
 {
    Real maxval = v[0];
    Integer N = v.GetSize();
@@ -864,7 +864,7 @@ Real CustomSensor::Max(const Rvector &v)
  * @return  minimum value contained in vector
  */
 //------------------------------------------------------------------------------
-Real CustomSensor::Min(const Rvector &v)
+Real GMATCustomSensor::Min(const Rvector &v)
 {
    Real minval = v[0];
    Integer N = v.GetSize();

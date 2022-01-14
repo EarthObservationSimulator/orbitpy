@@ -1,7 +1,7 @@
 #ifndef GMATPolygon_hpp
 #define GMATPolygon_hpp
 
-#include "../CustomSensor.hpp"
+#include "../GMATCustomSensor.hpp"
 #include "SlicedPolygon.hpp"
 
 class GMATPolygon : public SlicedPolygon
@@ -17,7 +17,7 @@ class GMATPolygon : public SlicedPolygon
 
     protected:
 
-        CustomSensor* sensor;
+        GMATCustomSensor* sensor;
 };
 
 #endif /* GMATPolygon_hpp */

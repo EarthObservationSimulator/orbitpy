@@ -11,7 +11,7 @@ void GMATPolygon::genCustomSensor()
     Rvector coneArray = getLatArray();
     Rvector clockArray = getLonArray();
 
-    sensor = new CustomSensor(coneArray,clockArray);
+    sensor = new GMATCustomSensor(coneArray,clockArray);
 }
 
 std::vector<int> GMATPolygon::contains(std::vector<AnglePair> queries)

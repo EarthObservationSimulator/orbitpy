@@ -17,7 +17,7 @@
 #include "../lib/propcov-cpp/Spacecraft.hpp"
 #include "../lib/propcov-cpp/Sensor.hpp"
 #include "../lib/propcov-cpp/ConicalSensor.hpp"
-#include "../lib/propcov-cpp/CustomSensor.hpp"
+#include "../lib/propcov-cpp/GMATCustomSensor.hpp"
 #include "../lib/propcov-cpp/polygon/DSPIPCustomSensor.hpp"
 #include "../lib/propcov-cpp/Propagator.hpp"
 #include "../lib/propcov-cpp/CoverageChecker.hpp"
@@ -265,15 +265,15 @@ PYBIND11_MODULE(propcov, m)
             )
         ;
     
-    py::class_<CustomSensor, Sensor>(m, "CustomSensor")
+    py::class_<GMATCustomSensor, Sensor>(m, "GMATCustomSensor")
         .def(py::init<Rvector&, Rvector&>(), py::arg("coneAngleVecIn"), py::arg("clockAngleVecIn"), "Initialize Custom Sensor with cone, clock angles in radians.")
-        .def("GetConeAngleVector", &CustomSensor::GetConeAngleVector)
-        .def("GetClockAngleVector", &CustomSensor::GetClockAngleVector)
+        .def("GetConeAngleVector", &GMATCustomSensor::GetConeAngleVector)
+        .def("GetClockAngleVector", &GMATCustomSensor::GetClockAngleVector)
         .def("__repr__",
-              [](CustomSensor &x){ 
+              [](GMATCustomSensor &x){ 
                   Rvector coneAngleVec = x.GetConeAngleVector();
                   Rvector clockAngleVec = x.GetClockAngleVector();
-                  std::string r("CustomSensor(Rvector(");
+                  std::string r("GMATCustomSensor(Rvector(");
                   r += vector_to_string(coneAngleVec.GetRealArray()) + "),Rvector(" ;
                   r += vector_to_string(clockAngleVec.GetRealArray());
                   r += "))";

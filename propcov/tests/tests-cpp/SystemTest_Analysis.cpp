@@ -32,7 +32,7 @@
 #include "Propagator.hpp"
 #include "ConicalSensor.hpp"
 #include "RectangularSensor.hpp"
-#include "CustomSensor.hpp"
+#include "GMATCustomSensor.hpp"
 #include "CoverageChecker.hpp"
 #include "NadirPointingAttitude.hpp"
 #include "LagrangeInterpolator.hpp"
@@ -142,8 +142,8 @@ int main(int argc, char *argv[])
       Propagator               *prop;
       CoverageChecker          *covChecker;
 	   Earth                    *earth;
-      CustomSensor             *customSensor;
-      CustomSensor             *tropicsSensor;
+      GMATCustomSensor             *customSensor;
+      GMATCustomSensor             *tropicsSensor;
       NadirPointingAttitude    *attitude;
       /// Create the interpolator and the PointGroup once!
       /// (i.e. not in the loop)
@@ -412,7 +412,7 @@ int main(int argc, char *argv[])
                          6.2133721370998,6.2308254296198,6.2482787221397,
                          6.2657320146596,6.2831853071796,
                          2*PI);
-         customSensor = new CustomSensor(coneAngleVec,clockAngleVec);
+         customSensor = new GMATCustomSensor(coneAngleVec,clockAngleVec);
          
          // Create a rectangular sensor (TBD)
          RectangularSensor *rectangularSensor =
@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
                                      tropicsConeAngle);
          Rvector tropicsClockAngleVec(5, 0.02181442636896036, 3.119778227220833, 3.163407079958754,
              -0.02181442636896036, 0.02181442636896036);
-         tropicsSensor = new CustomSensor(tropicsConeAngleVec,
+         tropicsSensor = new GMATCustomSensor(tropicsConeAngleVec,
                                           tropicsClockAngleVec);
          #ifdef DEBUG_A_LOT
             MessageInterface::ShowMessage("**** sensors OK **************\n");

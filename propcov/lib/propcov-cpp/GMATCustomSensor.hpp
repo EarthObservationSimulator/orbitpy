@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//                           CustomSensor
+//                           GMATCustomSensor
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
@@ -21,7 +21,7 @@
 // Created: 2016.04.03
 //
 /**
- * Implementation of the CustomSensor class
+ * Implementation of the GMATCustomSensor class
  */
 //------------------------------------------------------------------------------
 #ifndef CustomSensor_hpp
@@ -33,15 +33,15 @@
 #include "Rvector3.hpp"
 #include "Rmatrix.hpp"
 
-class CustomSensor: public Sensor
+class GMATCustomSensor: public Sensor
 {
 public:
  
    /// class construction/destruction
-   CustomSensor (const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn);
-   CustomSensor (const CustomSensor &copy);
-   CustomSensor& operator= (const CustomSensor & copy);
-   virtual ~CustomSensor();
+   GMATCustomSensor (const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn);
+   GMATCustomSensor (const GMATCustomSensor &copy);
+   GMATCustomSensor& operator= (const GMATCustomSensor & copy);
+   virtual ~GMATCustomSensor();
    
    Rvector GetConeAngleVector();
    Rvector GetClockAngleVector();

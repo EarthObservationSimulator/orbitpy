@@ -10,7 +10,7 @@ cone_sen = p.ConicalSensor(1)
 print(cone_sen)
 print(cone_sen.GetFieldOfView())
 
-custom_sen = p.CustomSensor(p.Rvector([1,2,3]), p.Rvector([1,2,3])) 
+custom_sen = p.GMATCustomSensor(p.Rvector([1,2,3]), p.Rvector([1,2,3])) 
 print(custom_sen)
 
 prop = p.Propagator(sc)
