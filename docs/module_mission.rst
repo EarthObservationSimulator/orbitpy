@@ -33,6 +33,8 @@ Each of the acceptable json objects in the mission specifications is described b
          the corresponding OrbitPy objects using the ``from_dict`` or ``from_json`` function. E.g. the key/value pair expected for the :ref:`groundstation_json_object` is the same
          as the key/value pairs expected in obtaining a :class:`orbitpy.util.GroundStation` object using the :class:`orbitpy.util.GroundStation.from_dict` function.
 
+.. note:: In case of coverage calculations for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV) the default ``DirectSphericalPointInPolygon`` method is used.
+
 .. _date_json_object:
 
 ``date`` json object

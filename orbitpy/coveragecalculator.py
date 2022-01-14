@@ -380,7 +380,7 @@ class GridCoverage(Entity):
                                 Default value is ``False``.
         :paramtype filter_mid_acc: bool
 
-        :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by polygon vertices (including Rectangular FOV)).
+        :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
                         Only entries `DirectSphericalPointInPolygon` or `ProjectedSphericalPointInPolygon` are allowed. 
                         Default method is `DirectSphericalPointInPolygon`.
 
