@@ -38,6 +38,14 @@ Sensor()
     Preprocessor* prep = new SliceArray(poly->getLonArray(),poly->getEdgeArray());
     prep->preprocess();
     poly->addPreprocessor(prep);
+
+    //maxExcursionAngle = Max(coneAngleVecIn); // in superclass Sensor
+    Real maxval = coneAngleVecIn[0];
+    Integer N = coneAngleVecIn.GetSize();
+    for (int i = 0; i < N; i++)
+        if (coneAngleVecIn[i] > maxval)
+            maxval = coneAngleVecIn[i];
+    maxExcursionAngle = maxval;
 }
 
 DSPIPCustomSensor::~DSPIPCustomSensor()
@@ -47,6 +55,18 @@ DSPIPCustomSensor::~DSPIPCustomSensor()
 
 bool DSPIPCustomSensor::CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle)
 {
-    AnglePair query = {viewConeAngle,viewClockAngle};
-    return poly->contains(query);
+   bool possiblyInView = true;
+   // first check if in view cone, if so check stereographic box
+   if (!CheckTargetMaxExcursionAngle(viewConeAngle))
+        possiblyInView = false;
+   
+   // we've executed the quick tests, if point is possibly in the FOV
+   // then run a line intersection test to determine if it is or not
+   if (!possiblyInView)
+        return false;
+   else
+   {    
+        AnglePair query = {viewConeAngle,viewClockAngle};
+        return poly->contains(query);
+   }
 }
