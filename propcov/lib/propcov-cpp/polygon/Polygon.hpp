@@ -8,6 +8,7 @@
 #include "GmatConstants.hpp"
 #include <iostream>
 #include <fstream>
+#include <array>
 
 typedef std::array<Real,2> AnglePair;
 
