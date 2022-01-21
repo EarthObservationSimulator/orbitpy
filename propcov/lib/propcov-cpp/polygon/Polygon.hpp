@@ -29,7 +29,7 @@ class Polygon
 {
 	public:
 		// Virtual function to define interface
-		virtual std::vector<int> contains(std::vector<AnglePair>) = 0;
+		virtual std::vector<int> contains(std::vector<AnglePair>, const std::string frame="Initial") = 0;
 };
 
 #endif /* Polygon_hpp */

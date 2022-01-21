@@ -1,5 +1,6 @@
 /**
  * Tests for the DSPIPCustomSensor class.
+ * Note that the target points have to be in the Query frame before checking for target visibility.
 */
 
 #include <tuple>
@@ -27,7 +28,13 @@ TEST_P(CheckTargetVisibilityTestFixture, CheckTargetVisibilityWorks){
     bool trueVisibility  = std::get<5>(param);
 
     sen = new DSPIPCustomSensor(fovCone, fovClock, contained);
-    bool testVisibility = sen->CheckTargetVisibility(targetCone, targetClock);
+    
+    AnglePair targetI{targetCone, targetClock}; // target in initial frame
+    Rmatrix33 QI = sen->getQI();
+    AnglePair targetQ; 
+    targetQ = SlicedPolygon::toQueryFrame(QI, targetI); // target in query frame   
+    
+    bool testVisibility = sen->CheckTargetVisibility(targetQ[0], targetQ[1]);
 
     ASSERT_TRUE(trueVisibility==testVisibility);
 
@@ -41,6 +48,7 @@ Rvector conical_sensor_clk(20, 0, 0.330693963535768, 0.661387927071536, 0.992081
           1.65346981767884, 1.98416378121461, 2.31485774475038, 2.64555170828614, 2.97624567182191,
           3.30693963535768, 3.63763359889345, 3.96832756242922, 4.29902152596499, 4.62971548950075,
           4.96040945303652, 5.29110341657229, 5.62179738010806, 5.95249134364382, 0);
+// *********** rectangular sensor 30deg X 10 deg ***********
 Rvector rect_sensor_cone(5, 15.79322415135941*PI/180, 15.79322415135941*PI/180, 15.79322415135941*PI/180, 15.79322415135941*PI/180, 15.79322415135941*PI/180);
 Rvector rect_sensor_clock(5, 71.98186515628623*PI/180, 108.01813484371377*PI/180, 251.98186515628623*PI/180, 288.01813484371377*PI/180, 71.98186515628623*PI/180);
 

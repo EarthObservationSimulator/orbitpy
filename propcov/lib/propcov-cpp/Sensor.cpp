@@ -24,13 +24,14 @@
  * Implementation of the Sensor class
  */
 //------------------------------------------------------------------------------
-
+#include <iostream>
 #include "gmatdefs.hpp"
 #include "Sensor.hpp"
 #include "GmatConstants.hpp"
 #include "AttitudeConversionUtility.hpp"
 #include "GmatConstants.hpp"
 
+//#define DEBUG_SENSOR
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -169,6 +170,9 @@ void Sensor::SetSensorBodyOffsetAngles(
 //------------------------------------------------------------------------------
 Rmatrix33 Sensor::GetBodyToSensorMatrix(Real forTime)
 {
+   #ifdef DEBUG_SENSOR
+      std::cout<<"Sensor::GetBodyToSensorMatrix function has been called \n";
+   #endif
    return R_SB;
 }
 

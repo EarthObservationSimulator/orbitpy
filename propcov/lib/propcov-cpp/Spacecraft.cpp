@@ -36,7 +36,7 @@
 
 //#define DEBUG_STATES
 //#define DEBUG_CAN_INTERPOLATE
-
+//#define DEBUG_CHECKTARGETVISIBILITY
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -502,7 +502,7 @@ bool Spacecraft::CheckTargetVisibility(Real    targetConeAngle,
  * sensor FOV at the given time, given the satToTargetVec. THe function first expresses the satellite-to-target
  * vector in the Sensor frame and then invokes the function to evaluate the targets presence/absence in sensor FOV.
  *
- * @param   bodyFixedState  input body fixed state
+ * @param   bodyFixedState  input body fixed state (Earth-fixed frame)
  * @param   satToTargetVec  spacecraft-to-target vector (vector expressed in body(Earth)-fixed frame)
  * @param   atTime          time for which to check the target visibility
  * @param   sensorNumber    sensor for which to check target visibility
@@ -520,7 +520,11 @@ bool Spacecraft::CheckTargetVisibility(const Rvector6 &bodyFixedState,
    Rmatrix33 R_EF2Nadir = GetBodyFixedToReference(bodyFixedState); 
    Rvector3  satToTarget_Sensor = // satToTarget_Sensor is vector expressed in Sensor frame
              sensorList.at(sensorNumber)->GetBodyToSensorMatrix(atTime) *
-             (R_Nadir2ScBody * (R_EF2Nadir * satToTargetVec));
+             (R_Nadir2ScBody * (R_EF2Nadir * satToTargetVec));   
+   #ifdef DEBUG_CHECKTARGETVISIBILITY
+      Rmatrix33 x=sensorList.at(sensorNumber)->GetBodyToSensorMatrix(atTime);
+      std::cout<<"sensorList.at(sensorNumber)->GetBodyToSensorMatrix(atTime):\n" << x << "\n"; 
+   #endif
    Real cone, clock;
    VectorToConeClock(satToTarget_Sensor, cone, clock);
    return CheckTargetVisibility(cone, clock, sensorNumber);
@@ -775,7 +779,8 @@ Rvector6 Spacecraft::Interpolate(Real toTime)
 //------------------------------------------------------------------------------
 /**
  * Computes the cone, clock angles of a given input vector.
- *
+ * TODO: Move to a util file.
+ * 
  * @param viewVec      [in]  input view vector
  * @param cone         [out] cone angle
  * @param clock        [out] clock angle
@@ -789,6 +794,10 @@ void Spacecraft::VectorToConeClock(const Rvector3 &viewVec,
    Real targetDEC = GmatMathUtil::ASin(viewVec(2) / viewVec.GetMagnitude());
    cone   = GmatMathConstants::PI_OVER_TWO - targetDEC;
    clock  = GmatMathUtil::ATan2(viewVec(1), viewVec(0));
+   while (clock < 0)
+	{
+		clock += 2*M_PI;
+	}
 }
 
 

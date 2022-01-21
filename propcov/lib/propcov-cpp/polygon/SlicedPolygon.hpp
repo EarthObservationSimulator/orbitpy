@@ -4,6 +4,7 @@
 #include "Polygon.hpp"
 #include "Preprocessor.hpp"
 #include "Edge.hpp"
+#include "Rmatrix33.hpp"
 #include <limits>
 
 class SlicedPolygon : public Polygon
@@ -11,10 +12,10 @@ class SlicedPolygon : public Polygon
 	public:
 
 		// Constructors
-		SlicedPolygon(std::vector<Rvector3> &poly, Rvector3 contained);
-		SlicedPolygon(std::vector<AnglePair> &poly, AnglePair contained);
+		SlicedPolygon(std::vector<Rvector3>& verticesIn, Rvector3 interior);
+		SlicedPolygon(std::vector<AnglePair>& verticesIn, AnglePair interior);
 		// Init function for constructors 
-		void init(std::vector<Rvector3> &poly, Rvector3 contained);
+		void init(std::vector<Rvector3>& verticesIn, Rvector3 interior);
 		// Function to generate array of Edge objects used by constructor
 		std::vector<Edge> generateEdgeArray();
 
@@ -27,18 +28,18 @@ class SlicedPolygon : public Polygon
 		std::vector<int> getSubset(AnglePair query);
 
 		// Core query method for a single query point
-		int contains(AnglePair query);
+		int contains(AnglePair query, const std::string frame="Initial");
 		// Core query method for a vector of queries
-		std::vector<int> contains(std::vector<AnglePair> queries);
+		std::vector<int> contains(std::vector<AnglePair> queries, const std::string frame="Initial");
 
-		// Counts number of crossings for the arc PQ for a single query point
-		int numCrossings(AnglePair query);
-		// Counts number of crossings for the arc PQ for a vector of queries
-		std::vector<int> numCrossings(std::vector<AnglePair> queries);
+		// Counts number of crossings for the arc PQ for a single query point. The frame in which the query point is available must be specified as 'Initial' or 'Query'. 
+		int numCrossings(AnglePair query, const std::string frame="Initial");
+		// Counts number of crossings for the arc PQ for a vector of queries. The frame in which the query point is available must be specified as 'Initial' or 'Query'. 
+		std::vector<int> numCrossings(std::vector<AnglePair> queries, const std::string frame="Initial");
 		
 		// Coordinate Transformation
 		Rmatrix33 generateQI();
-		AnglePair toQueryFrame(AnglePair query);
+		AnglePair toQueryFrame(const AnglePair);
 
 		// Getters
 		std::vector<Edge> getEdgeArray();
@@ -52,7 +53,7 @@ class SlicedPolygon : public Polygon
 	protected:
 
 		bool processed;
-		Rvector3 contained;
+		Rvector3 interior;
 		Preprocessor* preprocessor;
 		std::vector<Edge> edgeArray;
 		std::vector<int> indexArray;

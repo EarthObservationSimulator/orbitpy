@@ -3,15 +3,30 @@
 #include <iostream>
 
 // Sliced Polygon Class
-
-// Constructor using cartesian vectors
-SlicedPolygon::SlicedPolygon(std::vector<Rvector3> &verticesIn, Rvector3 containedIn)
+//------------------------------------------------------------------------------
+/**
+ * Constructor using cartesian vectors.
+ *
+ * @param verticesIn  polygon vertices (Cartesian)
+ * @param interiorIn  known interior point (Cartesian)
+ * 
+ */
+//------------------------------------------------------------------------------
+SlicedPolygon::SlicedPolygon(std::vector<Rvector3> &verticesIn, Rvector3 interiorIn)
 {
-	init(verticesIn,containedIn);
+	init(verticesIn,interiorIn);
 }
 
-// Constructor using spherical coordinates
-SlicedPolygon::SlicedPolygon(std::vector<AnglePair> &verticesIn, AnglePair containedIn)
+//------------------------------------------------------------------------------
+/**
+ * Constructor using spherical vectors.
+ *
+ * @param verticesIn  polygon vertices (cone, clock in radians)
+ * @param interiorIn  known interior point (cone, clock in radians)
+ * 
+ */
+//------------------------------------------------------------------------------
+SlicedPolygon::SlicedPolygon(std::vector<AnglePair> &verticesIn, AnglePair interiorIn)
 {
 	// Convert vertices to cartesian coordinates
 	std::vector<Rvector3> cartVertices(verticesIn.size());
@@ -19,19 +34,20 @@ SlicedPolygon::SlicedPolygon(std::vector<AnglePair> &verticesIn, AnglePair conta
 	{
 		cartVertices[i] = util::sphericalToCartesian(verticesIn[i]);
 	}	
-	Rvector3 cartContained = util::sphericalToCartesian(containedIn);
-
-	init(cartVertices,cartContained);
+	Rvector3 cartInterior;
+    cartInterior = util::sphericalToCartesian(interiorIn);
+	init(cartVertices,cartInterior);
 }
 
 // Common initializer for constructors
-void SlicedPolygon::init(std::vector<Rvector3> &verticesIn, Rvector3 containedIn)
+void SlicedPolygon::init(std::vector<Rvector3> &verticesIn, Rvector3 interiorIn)
 {
 	vertices = verticesIn;
 	processed = false;
-	contained = containedIn;
-	QI = generateQI();
-	edgeArray = generateEdgeArray();
+	interior = interiorIn;
+	QI = generateQI(); // vertices, interiorIn must be in 'Initial' frame
+
+	edgeArray = generateEdgeArray(); // instance members vertices is modified to be in Query frame in this function
 }
 
 // Destructor
@@ -41,15 +57,16 @@ SlicedPolygon::~SlicedPolygon()
 		delete(preprocessor);
 }
 
-// Spherical coordinate transformation from initial frame to the query frame.
-AnglePair SlicedPolygon::toQueryFrame(AnglePair query)
+// (non-static version) Spherical coordinate transformation from initial frame to the query frame.
+AnglePair SlicedPolygon::toQueryFrame(const AnglePair coords)
 {
-	Rvector3 cartQueryI = util::sphericalToCartesian(query);
+	Rvector3 cartQueryI = util::sphericalToCartesian(coords);
 	Rvector3 cartQueryQ = this->QI * cartQueryI;
 	AnglePair sphericalQueryQ = util::cartesianToSpherical(cartQueryQ);
 
 	return sphericalQueryQ;
 }
+
 
 // Adds a preprocessor to the sliced polygon
 void SlicedPolygon::addPreprocessor(Preprocessor* speedy)
@@ -69,15 +86,23 @@ std::vector<int> SlicedPolygon::getSubset(AnglePair query)
 
 // Counts number of crossings for the arc PQ for a single query point
 // Returns -1 for number of crossings if the query point lies on the boundary
-int SlicedPolygon::numCrossings(AnglePair query)
+// @param frame	Frame in which the vertices and interior point coordinates are given. Can be either "Initial" or "Query".
+int SlicedPolygon::numCrossings(AnglePair query, const std::string frame)
 {
 	int numCrossings = 0;
+	Rvector3 cartQueryT;
+	AnglePair sphericalQueryT;
 
-	// Query point assumed to be in initial frame I
-	Rvector3 cartQueryI = util::sphericalToCartesian(query);
+	if(frame.compare("Initial")==0){
+		Rvector3 cartQueryI = util::sphericalToCartesian(query);
 
-	Rvector3 cartQueryT = QI*cartQueryI;
-	AnglePair sphericalQueryT = util::cartesianToSpherical(cartQueryT);
+		cartQueryT = QI*cartQueryI;
+		sphericalQueryT = util::cartesianToSpherical(cartQueryT);
+	}
+	else{
+		sphericalQueryT = query;
+		cartQueryT = util::sphericalToCartesian(sphericalQueryT);
+	}
 	
 	std::vector<int> indices = getSubset(sphericalQueryT);
 
@@ -97,13 +122,13 @@ int SlicedPolygon::numCrossings(AnglePair query)
 
 // Counts number of crossings for the arc PQ for a vector of queries
 // Returns -1 for number of crossings if the query point lies on the boundary
-std::vector<int> SlicedPolygon::numCrossings(std::vector<AnglePair> queries)
+std::vector<int> SlicedPolygon::numCrossings(std::vector<AnglePair> queries, const std::string frame)
 {
 	std::vector<int> results(queries.size());
 
 	for (int i = 0; i < queries.size(); i++)
 	{
-		results[i] = numCrossings(queries[i]);
+		results[i] = numCrossings(queries[i], frame);
 	}
 
 	return results;
@@ -111,9 +136,9 @@ std::vector<int> SlicedPolygon::numCrossings(std::vector<AnglePair> queries)
 
 // Core query method for a single query point
 // Returns 1 if contained, 0 if not contained, -1 if on boundary
-int SlicedPolygon::contains(AnglePair query)
+int SlicedPolygon::contains(AnglePair query, const std::string frame)
 {
-	int num = numCrossings(query);
+	int num = numCrossings(query, frame);
 
 	if (num == -1)
 		return -1;
@@ -123,14 +148,14 @@ int SlicedPolygon::contains(AnglePair query)
 
 // Core query method for a vector of queries
 // Returns 1 if contained, 0 if not contained, -1 if on boundary
-std::vector<int> SlicedPolygon::contains(std::vector<AnglePair> queries)
+std::vector<int> SlicedPolygon::contains(std::vector<AnglePair> queries, const std::string frame)
 {
 	int num;
 	std::vector<int> results(queries.size());
 
 	for (int i = 0; i < queries.size(); i++)
 	{
-		num = numCrossings(queries[i]);
+		num = numCrossings(queries[i], frame);
 
 		if (num == -1)
 			results[i] = -1;
@@ -145,7 +170,7 @@ std::vector<int> SlicedPolygon::contains(std::vector<AnglePair> queries)
 Rmatrix33 SlicedPolygon::generateQI()
 {
 	// Z axis of coordinate system is known point given as input
-	Rvector3 z = contained;
+	Rvector3 z = interior;
 	z.Normalize();
 	// Y axis is cross of Z and the first node
 	Rvector3 y = Cross(z,vertices[0]);
@@ -159,10 +184,9 @@ Rmatrix33 SlicedPolygon::generateQI()
 
 	return QI;
 }
-
 // Generates the vector of edge objects in the query frame
 std::vector<Edge> SlicedPolygon::generateEdgeArray()
-{
+{	
 	for (int i = 0;i < vertices.size();i++)
 		vertices[i] = QI * vertices[i];
 		
@@ -176,7 +200,7 @@ std::vector<Edge> SlicedPolygon::generateEdgeArray()
 		edgeArray[i] = Edge(vertices[i],vertices[i+1]);
 		indexArray[i] = i;
 	}
-	
+
 	return edgeArray;
 }
 
@@ -226,8 +250,6 @@ Rmatrix33 SlicedPolygon::getQI()
 // Override function to print a SlicedPolygon
 std::ostream& operator<<(std::ostream& os, const SlicedPolygon& poly)
 {
-	int i = 0;
-
 	os << "----------------\n";
 	os << "DCM Description\n";
 	os << "----------------\n";
@@ -237,8 +259,24 @@ std::ostream& operator<<(std::ostream& os, const SlicedPolygon& poly)
 	os << "----------------\n";
 
 	os << "----------------\n";
+	os <<"Vertices\n";
+	os << "----------------\n";
+	for (int i = 0; i < poly.vertices.size(); i++)
+	{        
+		std::cout<< "(" << poly.vertices[i][0] << ", " << poly.vertices[i][1] << ", " << poly.vertices[i][2] << ") ";
+	}
+    os << "\n----------------\n";
+
+	os << "----------------\n";
+	os <<"Interior\n";
+	os << "----------------\n";
+	std::cout<< "(" << poly.interior[0] << ", " << poly.interior[1] << ", " << poly.interior[2] << ") ";
+    os << "\n----------------\n";
+
+	os << "----------------\n";
 	os << "Edge Description\n";
 	os << "----------------\n";
+	int i = 0;
 	for (Edge edge : poly.edgeArray)
 	{
     	os << "Edge " << i << ":\n" << edge;

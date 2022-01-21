@@ -72,7 +72,7 @@ public:
    virtual void  SetSensorBodyOffsetAngles(
                         Real angle1 = 0.0, Real angle2 = 0.0, Real angle3 = 0.0,
                         Integer seq1 = 1, Integer seq2 = 2,   Integer seq3 = 3);
-   /// Get the body-to-sensor matrix
+   /// Get the spacecraft-body-to-sensor matrix
    virtual Rmatrix33 GetBodyToSensorMatrix(Real forTime);
    
    //------------------------------------------------------------------------------
