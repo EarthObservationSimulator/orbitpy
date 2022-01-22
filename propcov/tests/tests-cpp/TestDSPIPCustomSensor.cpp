@@ -29,10 +29,12 @@ TEST_P(CheckTargetVisibilityTestFixture, CheckTargetVisibilityWorks){
 
     sen = new DSPIPCustomSensor(fovCone, fovClock, contained);
     
+    // transform target point to Query frame from Initial (sensor body fixed) frame
     AnglePair targetI{targetCone, targetClock}; // target in initial frame
     Rmatrix33 QI = sen->getQI();
-    AnglePair targetQ; 
-    targetQ = SlicedPolygon::toQueryFrame(QI, targetI); // target in query frame   
+    Rvector3 cartTargetI = util::sphericalToCartesian(targetI);
+    Rvector3 cartTargetQ = QI * cartTargetI;
+    AnglePair targetQ = util::cartesianToSpherical(cartTargetQ);
     
     bool testVisibility = sen->CheckTargetVisibility(targetQ[0], targetQ[1]);
 

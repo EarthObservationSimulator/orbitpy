@@ -29,10 +29,6 @@ running test_run_1
     Metric 2 = 0.0487277728657039
     Metric 3 = 0.0
     Metric 4 = 0.048785100840058895
-    Metric 1 = 0.011299435028248588
-    Metric 2 = 0.0487277728657039
-    Metric 3 = 0.0
-    Metric 4 = 0.048785100840058895
 .running test_run_4
     Metric 1 = 0.06567164179104477
     Metric 2 = 0.024124363026510998
@@ -233,6 +229,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         return metric1,metric2,metric3,metric4
         
+    #@unittest.skip("skip test_run_1")
     def test_run_1(self):
         """Test an equatorial orbit on a global grid with a 20 degree diameter conical sensor.                
         """ 
@@ -267,7 +264,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
     
         result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
         self.assertTrue(result)
-        
+    #@unittest.skip("skip test_run_1")    
     def test_run_2(self):
         """Test an equatorial orbit on a global grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_2')
@@ -310,6 +307,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                 result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
                 self.assertTrue(result)
        
+    #@unittest.skip("skip test_run_3")
     def test_run_3(self):
         """Test a near-equatorial orbit on a global grid with a 20 degree diameter conical sensor."""
         print('running test_run_3')
@@ -339,20 +337,19 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         # Execute propagation and coverage
         self.j2_prop.execute(sat, None,state_fl, None)
         cov = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_fl)
-        for method in method_list:
-            with self.subTest(msg='running method = ' + method):
-                cov.execute(out_file_access=acc_fl, method=method)
-                
-                # Construct coverage objects to verify output
-                STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/Global_Grid_3.cvaa')
-                OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/03/acc',grid_fl)
-                
-                # Check truth
-                m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
-            
-                result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
-                self.assertTrue(result)
+        cov.execute(out_file_access=acc_fl)
         
+        # Construct coverage objects to verify output
+        STKCoverage = Coverage.STKCoverage(self.dir_path + '/STK/test_coveragecalculator_GridCoverage_with_STK/Accesses/Global_Grid_3.cvaa')
+        OrbitPyCoverage = Coverage.OrbitPyCoverage(self.dir_path + '/temp/test_coveragecalculator_GridCoverage_with_STK/03/acc',grid_fl)
+        
+        # Check truth
+        m1,m2,m3,m4 = TestOrbitPropCovGrid.generateMetrics(STKCoverage,OrbitPyCoverage)
+    
+        result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
+        self.assertTrue(result)
+        
+    #@unittest.skip("skip test_run_4")
     def test_run_4(self):
         """Test a polar orbit on a US grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_4')
@@ -402,6 +399,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                 result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
                 self.assertTrue(result)
         
+    #@unittest.skip("skip test_run_5")
     def test_run_5(self):
         """Test an inclined orbit on a US grid with a 20 degree diameter conical sensor."""
         print('running test_run_5')
@@ -446,6 +444,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
         self.assertTrue(result)
         
+    #@unittest.skip("skip test_run_6")
     def test_run_6(self):
         """Test an inclined orbit on a US grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_6')
@@ -497,6 +496,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                 result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
                 self.assertTrue(result)
       
+    #@unittest.skip("skip test_run_7")
     def test_run_7(self):
         """Test a sun-sync orbit on an equatorial grid with a 20 degree diameter conical sensor."""
         print('running test_run_7')
@@ -539,6 +539,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
         
     #@unittest.skip("Pointed tests are broken and must be fixed.")
+    #@unittest.skip("skip test_run_8")
     def test_run_8(self):
         """Test a sun-sync orbit on an equatorial grid with a 20 degree diameter pointed conical sensor."""
         print('running test_run_8')
@@ -590,6 +591,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         self.assertTrue(result)
     
     #@unittest.skip("Pointed tests are broken and must be fixed.")
+    #@unittest.skip("skip test_run_9")
     def test_run_9(self):
         """Test a sun-sync orbit on an equatorial grid with a 20 deg AT, 30 deg CT pointed sensor."""
         print('running test_run_9')
@@ -645,6 +647,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                 result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
                 self.assertTrue(result)
         
+    #@unittest.skip("skip test_run_10")
     def test_run_10(self):
         """Test a sun-sync orbit on a US grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_10')
@@ -694,6 +697,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                 self.assertTrue(result)
     
     #@unittest.skip("Pointed tests are broken and must be fixed.")
+    #@unittest.skip("skip test_run_11")
     def test_run_11(self):
         """Test a sun-sync orbit on a US grid with a 20 deg AT, 30 deg CT pointed sensor."""
         print('running test_run_11')
@@ -752,6 +756,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
                 self.assertTrue(result)
     
     #@unittest.skip("Pointed tests are broken and must be fixed.")    
+    #@unittest.skip("skip test_run_12")
     def test_run_12(self):
         """Test a sun-sync orbit on a US grid with a 30 deg AT, 20 deg CT pointed sensor."""
         print('running test_run_12')

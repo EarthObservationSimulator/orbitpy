@@ -40,6 +40,8 @@ class DSPIPCustomSensor : public Sensor
         /// Get the spacecraft-body-to-sensor (Query frame) matrix.
         Rmatrix33 GetBodyToSensorMatrix(Real forTime) override;
 
+        Rmatrix33 getQI();
+
     protected:
 
         SlicedPolygon* poly;

@@ -1,7 +1,6 @@
 #include "DSPIPCustomSensor.hpp"
 
 //#define DEBUG_DSPIP
-//#define DEBUG_GETBODYTOSENSORMATRIX
 
 //------------------------------------------------------------------------------
 // public methods
@@ -136,4 +135,10 @@ void DSPIPCustomSensor::SetSensorBodyOffsetAngles(
 Rmatrix33 DSPIPCustomSensor::GetBodyToSensorMatrix(Real forTime)
 {
     return Rot_ScBody2SensorQuery;
+}
+
+// Returns transformation matrix from initial to query frame
+Rmatrix33 DSPIPCustomSensor::getQI()
+{
+	return QI;
 }
