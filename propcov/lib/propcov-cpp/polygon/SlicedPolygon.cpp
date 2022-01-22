@@ -87,13 +87,12 @@ std::vector<int> SlicedPolygon::getSubset(AnglePair query)
 // Counts number of crossings for the arc PQ for a single query point
 // Returns -1 for number of crossings if the query point lies on the boundary
 // @param frame	Frame in which the vertices and interior point coordinates are given. Can be either "Initial" or "Query".
-int SlicedPolygon::numCrossings(AnglePair query, const std::string frame)
+int SlicedPolygon::numCrossings(AnglePair query, frametype frame)
 {
 	int numCrossings = 0;
 	Rvector3 cartQueryT;
 	AnglePair sphericalQueryT;
-
-	if(frame.compare("Initial")==0){
+	if(frame==INITIAL){
 		Rvector3 cartQueryI = util::sphericalToCartesian(query);
 
 		cartQueryT = QI*cartQueryI;
@@ -122,7 +121,7 @@ int SlicedPolygon::numCrossings(AnglePair query, const std::string frame)
 
 // Counts number of crossings for the arc PQ for a vector of queries
 // Returns -1 for number of crossings if the query point lies on the boundary
-std::vector<int> SlicedPolygon::numCrossings(std::vector<AnglePair> queries, const std::string frame)
+std::vector<int> SlicedPolygon::numCrossings(std::vector<AnglePair> queries, frametype frame)
 {
 	std::vector<int> results(queries.size());
 
@@ -136,7 +135,7 @@ std::vector<int> SlicedPolygon::numCrossings(std::vector<AnglePair> queries, con
 
 // Core query method for a single query point
 // Returns 1 if contained, 0 if not contained, -1 if on boundary
-int SlicedPolygon::contains(AnglePair query, const std::string frame)
+int SlicedPolygon::contains(AnglePair query, frametype frame)
 {
 	int num = numCrossings(query, frame);
 
@@ -148,7 +147,7 @@ int SlicedPolygon::contains(AnglePair query, const std::string frame)
 
 // Core query method for a vector of queries
 // Returns 1 if contained, 0 if not contained, -1 if on boundary
-std::vector<int> SlicedPolygon::contains(std::vector<AnglePair> queries, const std::string frame)
+std::vector<int> SlicedPolygon::contains(std::vector<AnglePair> queries, frametype frame)
 {
 	int num;
 	std::vector<int> results(queries.size());

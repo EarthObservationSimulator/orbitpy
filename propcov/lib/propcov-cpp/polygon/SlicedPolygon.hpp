@@ -5,6 +5,7 @@
 #include "Preprocessor.hpp"
 #include "Edge.hpp"
 #include "Rmatrix33.hpp"
+#include "frame.hpp"
 #include <limits>
 
 class SlicedPolygon : public Polygon
@@ -28,14 +29,14 @@ class SlicedPolygon : public Polygon
 		std::vector<int> getSubset(AnglePair query);
 
 		// Core query method for a single query point
-		int contains(AnglePair query, const std::string frame="Initial");
+		int contains(AnglePair query, const frametype frame=INITIAL);
 		// Core query method for a vector of queries
-		std::vector<int> contains(std::vector<AnglePair> queries, const std::string frame="Initial");
+		std::vector<int> contains(std::vector<AnglePair> queries, const frametype frame=INITIAL);
 
 		// Counts number of crossings for the arc PQ for a single query point. The frame in which the query point is available must be specified as 'Initial' or 'Query'. 
-		int numCrossings(AnglePair query, const std::string frame="Initial");
+		int numCrossings(AnglePair query, const frametype frame=INITIAL);
 		// Counts number of crossings for the arc PQ for a vector of queries. The frame in which the query point is available must be specified as 'Initial' or 'Query'. 
-		std::vector<int> numCrossings(std::vector<AnglePair> queries, const std::string frame="Initial");
+		std::vector<int> numCrossings(std::vector<AnglePair> queries, const frametype frame=INITIAL);
 		
 		// Coordinate Transformation
 		Rmatrix33 generateQI();

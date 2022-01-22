@@ -90,7 +90,7 @@ bool DSPIPCustomSensor::CheckTargetVisibility(Real viewConeAngle, Real viewClock
    else
    {    
         AnglePair query = {viewConeAngle,viewClockAngle};
-        return poly->contains(query, "Query");
+        return poly->contains(query, QUERY);
    }
 }
 

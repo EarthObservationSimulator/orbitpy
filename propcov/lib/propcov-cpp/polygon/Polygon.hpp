@@ -6,6 +6,7 @@
 #include "gmatdefs.hpp"
 #include "RealUtilities.hpp"
 #include "GmatConstants.hpp"
+#include "frame.hpp"
 #include <iostream>
 #include <fstream>
 #include <array>
@@ -29,7 +30,7 @@ class Polygon
 {
 	public:
 		// Virtual function to define interface
-		virtual std::vector<int> contains(std::vector<AnglePair>, const std::string frame="Initial") = 0;
+		virtual std::vector<int> contains(std::vector<AnglePair>, const frametype frame=INITIAL) = 0;
 };
 
 #endif /* Polygon_hpp */

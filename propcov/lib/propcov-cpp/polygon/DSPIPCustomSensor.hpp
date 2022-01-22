@@ -21,6 +21,7 @@
 #include "../Sensor.hpp"
 #include "SlicedPolygon.hpp"
 #include "SliceArray.hpp"
+#include "frame.hpp"
 
 class DSPIPCustomSensor : public Sensor
 {
