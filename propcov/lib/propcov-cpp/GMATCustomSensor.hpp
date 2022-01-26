@@ -88,21 +88,9 @@ public:
    /// helper methods for checkRegionVisibility()
    bool RegionIsFullyContained(std::vector<IntegerArray> &adjacency);
    
-   ///  rVector utilities
-   void Sort(Rvector &v, bool ascending = true);
-   void Sort(Rvector &v, IntegerArray &indices, bool ascending=true);
-   Real Max(const Rvector &v);
-   Real Min(const Rvector &v);
+   
    
 };
 
-/// data type and comparison method used in Sort(Rvector,IntegerArray,bool)
-/// to mimic Matlab sort of both values and indices of original array
-struct SensorElement
-{
-   Real value;
-   Integer index;
-};
-bool CompareSensorElements(const SensorElement &e1, const SensorElement &e2);
 
 #endif /* CustomSensor_hpp */
