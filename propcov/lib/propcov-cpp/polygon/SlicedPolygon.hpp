@@ -30,8 +30,10 @@ class SlicedPolygon : public Polygon
 
 		// Core query method for a single query point
 		int contains(AnglePair query, const frametype frame=INITIAL);
+		int contains_efficient(AnglePair query);
 		// Core query method for a vector of queries
 		std::vector<int> contains(std::vector<AnglePair> queries, const frametype frame=INITIAL);
+		
 
 		// Counts number of crossings for the arc PQ for a single query point. The frame in which the query point is available must be specified as 'Initial' or 'Query'. 
 		int numCrossings(AnglePair query, const frametype frame=INITIAL);

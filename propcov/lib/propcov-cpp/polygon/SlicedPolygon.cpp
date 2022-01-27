@@ -145,6 +145,38 @@ int SlicedPolygon::contains(AnglePair query, frametype frame)
 	return ((num % 2) == false);
 }
 
+// query method for a single query point
+// Returns 1 if contained, 0 if not contained, -1 if on boundary
+// efficient version of the SlicedPolygon::contains(AnglePair query, frametype frame) function which:
+//		* accepts query points only in the Query frame (so no check performed)
+//		* copy-paste of the contents of SlicedPolygon::numCrossings(AnglePair query, frametype frame) function.
+//
+int SlicedPolygon::contains_efficient(AnglePair sphericalQueryT)
+{
+	int numCrossings = 0;
+	Rvector3 cartQueryT;
+
+	cartQueryT = util::sphericalToCartesian(sphericalQueryT);
+	
+	std::vector<int> indices = getSubset(sphericalQueryT);
+
+	for (int index : indices)
+	{
+		Edge edge = this->edgeArray[index];
+		int contained = edge.contains(cartQueryT,sphericalQueryT[1]);
+
+		if (contained == -1)
+			return -1;
+
+		numCrossings += edge.contains(cartQueryT,sphericalQueryT[1]);
+	}
+
+	if (numCrossings == -1)
+		return -1;
+
+	return ((numCrossings % 2) == false);
+}
+
 // Core query method for a vector of queries
 // Returns 1 if contained, 0 if not contained, -1 if on boundary
 std::vector<int> SlicedPolygon::contains(std::vector<AnglePair> queries, frametype frame)
