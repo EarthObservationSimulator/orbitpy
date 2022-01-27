@@ -22,7 +22,6 @@
 #include "SlicedPolygon.hpp"
 #include "SliceArray.hpp"
 #include "frame.hpp"
-
 class DSPIPCustomSensor : public Sensor
 {
     public:
@@ -31,11 +30,11 @@ class DSPIPCustomSensor : public Sensor
         DSPIPCustomSensor(const Rvector& coneAngleVecIn, const Rvector& clockAngleVecIn, AnglePair interiorIn);
         ~DSPIPCustomSensor();
 
-        virtual bool CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle);
+        bool CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle) override;
 
         /// Override function in Sensor parent class
         /// Set the sensor-to-body offset angles (in degrees)
-        virtual void  SetSensorBodyOffsetAngles(
+        void  SetSensorBodyOffsetAngles(
                         Real angle1 = 0.0, Real angle2 = 0.0, Real angle3 = 0.0,
                         Integer seq1 = 1, Integer seq2 = 2,   Integer seq3 = 3) override;
         /// Get the spacecraft-body-to-sensor (Query frame) matrix.
@@ -48,6 +47,15 @@ class DSPIPCustomSensor : public Sensor
         SlicedPolygon* poly;
         Rmatrix33 QI; // rotation matrix from Initial frame to Query frame
         Rmatrix33 Rot_ScBody2SensorQuery; // rotation matrix from spacecraft body to Sensor Query frame 
+
+        /// stereographic projection of the polygon vertices for creation of the bounding box
+        Rvector xProjectionCoordArray;   // numFOVpoints x values
+        Rvector yProjectionCoordArray;   // numFOVpoints y values
+        Real maxXExcursion;
+        Real minXExcursion;
+        Real maxYExcursion;
+        Real minYExcursion;
+        bool CheckTargetMaxExcursionCoordinates(Real xCoord, Real yCoord);
 };
 
 #endif /* DSPIPCustomSensor_hpp */

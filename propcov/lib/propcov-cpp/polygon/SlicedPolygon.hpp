@@ -6,6 +6,8 @@
 #include "Edge.hpp"
 #include "Rmatrix33.hpp"
 #include "frame.hpp"
+#include "../TATCException.hpp"
+#include "GmatConstants.hpp"
 #include <limits>
 
 class SlicedPolygon : public Polygon
@@ -48,6 +50,7 @@ class SlicedPolygon : public Polygon
 		std::vector<Edge> getEdgeArray();
 		std::vector<Real> getLonArray();
 		std::vector<Real> getLatArray();
+		void getVerticesConeClock(Rvector& coneAngleInQ, Rvector& clockAngleInQ);
 		Rmatrix33 getQI();
 
 		// Overide print function 

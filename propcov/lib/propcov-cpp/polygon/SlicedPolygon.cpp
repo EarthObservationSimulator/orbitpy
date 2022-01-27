@@ -272,6 +272,20 @@ std::vector<Real> SlicedPolygon::getLatArray()
 	return latArray;
 }
 
+// Get the cone, clock angles of the vertices (in Query frame)
+void SlicedPolygon::getVerticesConeClock(Rvector& coneAngleInQ, Rvector& clockAngleInQ){
+	AnglePair latLon;
+	for (int i = 0; i < vertices.size(); i++)
+	{
+		latLon = util::cartesianToSpherical(vertices[i]);
+		if(latLon[0] >=0)
+			coneAngleInQ[i] = GmatMathConstants::PI/2 - latLon[0];
+		else
+			throw TATCException("cone angle exceeds 90 deg.\n");
+		clockAngleInQ[i] = latLon[1];
+	}
+
+}
 // Returns transformation matrix from initial to query frame
 Rmatrix33 SlicedPolygon::getQI()
 {

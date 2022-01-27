@@ -1,6 +1,8 @@
 #include "DSPIPCustomSensor.hpp"
-
+#include "../GMATCustomSensor.hpp"
+#include <iostream>
 //#define DEBUG_DSPIP
+//#define ENABLE_STEREOGRAPHIC_BOUNDING_BOX // enabling this shall add a stereographic (projected) bounding-box filtering step
 
 //------------------------------------------------------------------------------
 // public methods
@@ -30,7 +32,8 @@
 DSPIPCustomSensor::DSPIPCustomSensor(const Rvector &coneAngleVecIn, const Rvector &clockAngleVecIn, AnglePair interiorIn) :
 Sensor()
 {
-    std::vector<AnglePair> verticesIn(coneAngleVecIn.GetSize());
+    int numFOVPoints = coneAngleVecIn.GetSize();
+    std::vector<AnglePair> verticesIn(numFOVPoints);
     for (int i = 0; i < coneAngleVecIn.GetSize(); i++)
     {        
         verticesIn[i][0] = coneAngleVecIn[i];
@@ -54,7 +57,28 @@ Sensor()
 
     // Make the rotation matrix from spacecraft body to Sensor Query frame
     QI = poly->getQI();
-    Rot_ScBody2SensorQuery = QI*R_SB; 
+    Rot_ScBody2SensorQuery = QI*R_SB;
+
+   #ifdef ENABLE_STEREOGRAPHIC_BOUNDING_BOX
+   // make a stereographic bounding box (adapted from the GMATCustomSensor class)
+   // set size of arrays for computed stereographic projections
+   Rvector coneAngleQ(numFOVPoints); // the vertices cone, clock angles in the Query frame
+   Rvector clockAngleQ(numFOVPoints);
+   poly->getVerticesConeClock(coneAngleQ, clockAngleQ);
+   xProjectionCoordArray.SetSize(numFOVPoints);
+   yProjectionCoordArray.SetSize(numFOVPoints); 
+   //initialize the projection of the FOV arrays
+   ConeClockArraysToStereographic (coneAngleQ, clockAngleQ,
+                                   xProjectionCoordArray,
+                                   yProjectionCoordArray);
+   //create bounding box for first test of whether points are in FOV
+   maxXExcursion = Max(xProjectionCoordArray);
+   minXExcursion = Min(xProjectionCoordArray);
+   maxYExcursion = Max(yProjectionCoordArray);
+   minYExcursion = Min(yProjectionCoordArray);
+   std::cout<<"maxXExcursion "<< maxXExcursion << " minXExcursion "<< minXExcursion << "\n"; 
+   std::cout<<"maxYExcursion "<< maxXExcursion << " minYExcursion "<< minXExcursion << "\n";
+   #endif
 
 }
 
@@ -79,9 +103,16 @@ DSPIPCustomSensor::~DSPIPCustomSensor()
 bool DSPIPCustomSensor::CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle)
 {
    bool possiblyInView = true;
-   // first check if in view cone, if so check stereographic box
+   // first check if in view cone, if so check the point falls inside the stereographic box
+   Real xCoord, yCoord;
+   ConeClockToStereographic (viewConeAngle,viewClockAngle,xCoord,yCoord);
    if (!CheckTargetMaxExcursionAngle(viewConeAngle))
-        possiblyInView = false;
+      possiblyInView = false;
+
+   #ifdef ENABLE_STEREOGRAPHIC_BOUNDING_BOX
+   if (!CheckTargetMaxExcursionCoordinates(xCoord,yCoord))
+      possiblyInView = false;
+   #endif
    
    // we've executed the quick tests, if point is possibly in the FOV
    // then run a line intersection test to determine if it is or not
@@ -90,7 +121,7 @@ bool DSPIPCustomSensor::CheckTargetVisibility(Real viewConeAngle, Real viewClock
    else
    {    
         AnglePair query = {viewConeAngle,viewClockAngle};
-        return poly->contains(query, QUERY);
+        return poly->contains_efficient(query);
    }
 }
 
@@ -141,4 +172,34 @@ Rmatrix33 DSPIPCustomSensor::GetBodyToSensorMatrix(Real forTime)
 Rmatrix33 DSPIPCustomSensor::getQI()
 {
 	return QI;
+}
+
+//------------------------------------------------------------------------------
+// bool CheckTargetMaxExcursionCoordinates(Real xCoord, Real yCoord)
+//------------------------------------------------------------------------------
+/*
+ * Adapted from GMATCUstomSensor class.
+ * returns true if coordinates (stereographic projections) are in box defined by min and max
+ * excursion in the x, y directions. false if point is outside that box.
+ *
+ * @param xCoord x coordinate for point being tested
+ * @param yCoord y coordinate for point being tested
+ */
+//------------------------------------------------------------------------------
+bool DSPIPCustomSensor::CheckTargetMaxExcursionCoordinates(Real xCoord, Real yCoord)
+{
+   // first assume point is in bounding box
+   bool possiblyInView =  true;
+   
+   // apply falsifying logic
+   if (xCoord > maxXExcursion)
+      possiblyInView = false;
+   else if (xCoord < minXExcursion)
+      possiblyInView = false;
+   else if (yCoord > maxYExcursion)
+      possiblyInView = false;
+   else if (yCoord < minYExcursion)
+      possiblyInView = false;
+   
+   return possiblyInView;
 }
