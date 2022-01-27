@@ -19,6 +19,8 @@
 //
 // Author: Mike Stark, NASA/GSFC
 // Created: 2017.04.03
+// Modified: 2021.00.00 Ryan
+// Modifed: 2022.02.26 Vinay
 //
 /**
  * Implementation of the RectangularSensor class
@@ -27,6 +29,7 @@
 
 #include "RectangularSensor.hpp"
 #include "RealUtilities.hpp"
+#include <iostream>
 
 using namespace GmatMathUtil; // for trig functions, and
                               // temporarily square root fn
@@ -61,7 +64,7 @@ RectangularSensor::RectangularSensor(Real angleWidthIn, Real angleHeightIn) :
    // length great circle from origin (0,0) to (angleHeight,angleWidth)
    // angular equivalent of length of hypotenuse of triangle for computing
    // length of a rectangle's diagonal from origin to (height, width)
-   maxExcursionAngle = ACos( Cos(angleHeight)*Cos(angleWidth) );
+   maxExcursionAngle = ACos( Cos(angleHeight/2)*Cos(angleWidth/2) ); // this is also the cone angle of all the vertices of the spherical-rectangle
    std::vector<Real> clocks = getClockAngles();
    std::vector<Rvector3> corners = getCornerHeadings(clocks);
    poles = getPoleHeadings(corners);
@@ -130,19 +133,27 @@ RectangularSensor::~RectangularSensor()
 bool RectangularSensor::CheckTargetVisibility(Real viewConeAngle,
                                               Real viewClockAngle)
 {
-   if(viewConeAngle >= PI/2.0)
-   	return false;
-   	
-   Real viewDec = PI/2.0 - viewConeAngle;
-   Rvector3 viewVector = RADECtoUnitVec(viewClockAngle,viewDec);
-   
-   if( poles[0]*viewVector < 0.0 && poles[1]*viewVector < 0.0 && 
-       poles[2]*viewVector < 0.0 && poles[3]*viewVector < 0.0 )
-   {
-   	return true;
+   //if(viewConeAngle >= PI/2.0)
+   //	return false;
+   bool possiblyInView=true;
+   if (!CheckTargetMaxExcursionAngle(viewConeAngle))
+      possiblyInView = false;
+
+   bool inView=false;
+   if (!possiblyInView)
+        inView = false;
+   else{
+      Real viewDec = PI/2.0 - viewConeAngle;
+      Rvector3 viewVector = RADECtoUnitVec(viewClockAngle,viewDec);
+      
+      if( poles[0]*viewVector > 0.0 && poles[1]*viewVector > 0.0 && 
+         poles[2]*viewVector > 0.0 && poles[3]*viewVector > 0.0 )
+      {
+         inView = true;
+      }
    }
    
-   return false;     
+   return inView;     
 }
 
 //------------------------------------------------------------------------------
@@ -204,12 +215,7 @@ Real RectangularSensor::GetAngleHeight()
 std::vector<Real> RectangularSensor::getClockAngles()
 {
 	std::vector<Real> clocks(4);
-	
-	Real a = angleWidth/2.0;
-	Real b = angleHeight/2.0;
-	Real Lb = atan(tan(b)*cos(a));
-	
-	Real clock = ASin(Sin(Lb)/Sin(maxExcursionAngle));
+   Real clock = ASin(Sin(angleHeight/2)/Sin(maxExcursionAngle));
 	clocks[0] = clock;
 	clocks[1] = PI - clock;
 	clocks[2] = PI + clock;

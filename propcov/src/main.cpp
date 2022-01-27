@@ -18,6 +18,7 @@
 #include "../lib/propcov-cpp/Sensor.hpp"
 #include "../lib/propcov-cpp/ConicalSensor.hpp"
 #include "../lib/propcov-cpp/GMATCustomSensor.hpp"
+#include "../lib/propcov-cpp/RectangularSensor.hpp"
 #include "../lib/propcov-cpp/polygon/DSPIPCustomSensor.hpp"
 #include "../lib/propcov-cpp/Propagator.hpp"
 #include "../lib/propcov-cpp/CoverageChecker.hpp"
@@ -284,6 +285,11 @@ PYBIND11_MODULE(propcov, m)
 
     py::class_<DSPIPCustomSensor, Sensor>(m, "DSPIPCustomSensor")
         .def(py::init<Rvector&, Rvector&, AnglePair>(), py::arg("coneAngleVecIn"), py::arg("clockAngleVecIn"), py::arg("contained"), "Initialize Custom Sensor with cone, clock angles in radians. A point known to be 'contained' within the sensor FOV (in the Sensor frame) is also to be provided.")
+
+        ;
+    
+    py::class_<RectangularSensor, Sensor>(m, "RectangularSensor")
+        .def(py::init<Real, Real>(), py::arg("angleWidthIn"), py::arg("angleHeightIn"), "Initialize Rectangular Sensor with width and height angles in radians.")
 
         ;
 

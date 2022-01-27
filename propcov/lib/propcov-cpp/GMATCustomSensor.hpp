@@ -21,7 +21,7 @@
 // Created: 2016.04.03
 //
 /**
- * Implementation of the GMATCustomSensor class
+ * Definition of the GMATCustomSensor class
  */
 //------------------------------------------------------------------------------
 #ifndef CustomSensor_hpp

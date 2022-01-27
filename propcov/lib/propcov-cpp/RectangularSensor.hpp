@@ -19,9 +19,20 @@
 //
 // Author: Wendy Shoan, NASA/GSFC
 // Created: 2016.05.03
+// Modified: 2021.00.00 Ryan
+// Modifed: 2022.02.26 Vinay
 //
 /**
- * Definition of the Conical Sensor class.  This class models a conical sensor.
+ * Definition of the RectangularSensor class.  This class models a rectangular FOV.
+ * This is a subclass of the Sensor class. 
+ * It can be used to evaluate the presence/absence of a point-location in a sensor FOV (conical shape). 
+ * The target location must be expressed in the Sensor frame.
+ * 
+ * The class evaluates the dot product between the target point and the normal of the hemispherical-planes
+ * formed by the 4 edges of the rectangle shape. The corners of the rectangle are arranged in 
+ * anti-clockwise manner about the center on the spherical surface,
+ * if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by 
+ * the edges of the rectangle, then the target falls within the sensor FOV.  
  */
 //------------------------------------------------------------------------------
 #ifndef RectangularSensor_hpp
