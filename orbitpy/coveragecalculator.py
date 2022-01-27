@@ -381,7 +381,7 @@ class GridCoverage(Entity):
         :paramtype filter_mid_acc: bool
 
         :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
-                        Only entries `DirectSphericalPointInPolygon` or `ProjectedSphericalPointInPolygon` are allowed. 
+                        Only entries `DirectSphericalPointInPolygon` or `ProjectedSphericalPointInPolygon` or `DirectPointInRectangularPolygon` are allowed. 
                         Default method is `DirectSphericalPointInPolygon`.
 
                         The `DirectSphericalPointInPolygon` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
@@ -394,6 +394,12 @@ class GridCoverage(Entity):
                         point-in-polygon algorithm implemented in the `propcov.GMATCustomSensor` class. 
                         Compared to the `propcov.GMATCustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
                         and also to be more accurate.
+
+                        `DirectPointInRectangularPolygon` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
+                        `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
+                         formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
+                         if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
+                         within the sensor FOV.  
  
         :paramtype method: str
 
@@ -460,6 +466,11 @@ class GridCoverage(Entity):
                     sensor = propcov.GMATCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
                                                 )
+                elif method=='DirectPointInRectangularPolygon':
+                    [angleHeightIn, angleWidthIn] = sen_sph_geom.get_fov_height_and_width()
+                    sensor = propcov.RectangularSensor( angleWidthIn    =   np.deg2rad( angleWidthIn ) ,  # input angle in radians  
+                                                        angleHeightIn   =   np.deg2rad( angleHeightIn )   
+                                                        )
                 else:
                     raise Exception("Please specify a valid coverage method.")         
             else:
@@ -871,6 +882,27 @@ class PointingOptionsWithGridCoverage(Entity):
                                 Default value is ``False``.
         :paramtype filter_mid_acc: bool
 
+        :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
+                        Only entries `DirectSphericalPointInPolygon` or `ProjectedSphericalPointInPolygon` or `DirectPointInRectangularPolygon` are allowed. 
+                        Default method is `DirectSphericalPointInPolygon`.
+
+                        The `DirectSphericalPointInPolygon` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
+                        the `ProjectedSphericalPointInPolygon` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
+                        
+                        For details on the `DirectSphericalPointInPolygon` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
+                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.
+                        
+                        In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
+                        point-in-polygon algorithm implemented in the `propcov.GMATCustomSensor` class. 
+                        Compared to the `propcov.GMATCustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
+                        and also to be more accurate.
+
+                        `DirectPointInRectangularPolygon` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
+                        `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
+                         formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
+                         if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
+                         within the sensor FOV.
+
         :return: Coverage output info.
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
 
@@ -923,7 +955,12 @@ class PointingOptionsWithGridCoverage(Entity):
                 elif method=="ProjectedSphericalPointInPolygon":
                     sensor = propcov.GMATCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
-                                                )         
+                                                )
+                elif method=='DirectPointInRectangularPolygon':
+                    [angleHeightIn, angleWidthIn] = sen_sph_geom.get_fov_height_and_width()
+                    sensor = propcov.RectangularSensor( angleWidthIn    =   np.deg2rad( angleWidthIn ) ,  # input angle in radians  
+                                                        angleHeightIn   =   np.deg2rad( angleHeightIn )   
+                                                        )         
             else:
                 raise Exception("please input valid sensor spherical geometry shape.")
             # orient sensor according to the pointing-option
