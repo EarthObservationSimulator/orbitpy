@@ -51,11 +51,11 @@ Real PI = GmatMathConstants::PI;
 /**
  * Constructor
  *
- * @param angleWidthIn   angle width
  * @param angleHeightIn  angle height
+ * @param angleWidthIn   angle width
  */
 //------------------------------------------------------------------------------
-RectangularSensor::RectangularSensor(Real angleWidthIn, Real angleHeightIn) :
+RectangularSensor::RectangularSensor(Real angleHeightIn, Real angleWidthIn) :
    Sensor()
 {
    angleWidth  = angleWidthIn;
@@ -157,34 +157,6 @@ bool RectangularSensor::CheckTargetVisibility(Real viewConeAngle,
 }
 
 //------------------------------------------------------------------------------
-//  void SetAngleWidth(Real angleWidthIn)
-//------------------------------------------------------------------------------
-/**
- * Sets the angle width for the RectangularSensor
- *
- * @param angleWidthIn angle width
- */
-//------------------------------------------------------------------------------
-void  RectangularSensor::SetAngleWidth(Real angleWidthIn)
-{
-   angleWidth = angleWidthIn;
-}
-
-//------------------------------------------------------------------------------
-//  Real GetAngleWidth()
-//------------------------------------------------------------------------------
-/**
- * Returns the angle width for the RectangularSensor
- *
- * @return the angle width
- */
-//------------------------------------------------------------------------------
-Real RectangularSensor::GetAngleWidth()
-{
-   return angleWidth;
-}
-
-//------------------------------------------------------------------------------
 //  void SetAngleHeight(Real angleHeightIn)
 //------------------------------------------------------------------------------
 /**
@@ -210,6 +182,34 @@ void  RectangularSensor::SetAngleHeight(Real angleHeightIn)
 Real RectangularSensor::GetAngleHeight()
 {
    return angleHeight;
+}
+
+//------------------------------------------------------------------------------
+//  void SetAngleWidth(Real angleWidthIn)
+//------------------------------------------------------------------------------
+/**
+ * Sets the angle width for the RectangularSensor
+ *
+ * @param angleWidthIn angle width
+ */
+//------------------------------------------------------------------------------
+void  RectangularSensor::SetAngleWidth(Real angleWidthIn)
+{
+   angleWidth = angleWidthIn;
+}
+
+//------------------------------------------------------------------------------
+//  Real GetAngleWidth()
+//------------------------------------------------------------------------------
+/**
+ * Returns the angle width for the RectangularSensor
+ *
+ * @return the angle width
+ */
+//------------------------------------------------------------------------------
+Real RectangularSensor::GetAngleWidth()
+{
+   return angleWidth;
 }
 
 std::vector<Real> RectangularSensor::getClockAngles()

@@ -289,7 +289,7 @@ PYBIND11_MODULE(propcov, m)
         ;
     
     py::class_<RectangularSensor, Sensor>(m, "RectangularSensor")
-        .def(py::init<Real, Real>(), py::arg("angleWidthIn"), py::arg("angleHeightIn"), "Initialize Rectangular Sensor with width and height angles in radians.")
+        .def(py::init<Real, Real>(), py::arg("angleHeightIn"), py::arg("angleWidthIn"), "Initialize Rectangular Sensor with width and height angles in radians.")
 
         ;
 

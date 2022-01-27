@@ -468,8 +468,8 @@ class GridCoverage(Entity):
                                                 )
                 elif method=='DirectPointInRectangularPolygon':
                     [angleHeightIn, angleWidthIn] = sen_sph_geom.get_fov_height_and_width()
-                    sensor = propcov.RectangularSensor( angleWidthIn    =   np.deg2rad( angleWidthIn ) ,  # input angle in radians  
-                                                        angleHeightIn   =   np.deg2rad( angleHeightIn )   
+                    sensor = propcov.RectangularSensor( angleHeightIn    =   np.deg2rad( angleHeightIn ) ,  # input angle in radians  
+                                                        angleWidthIn   =   np.deg2rad( angleWidthIn )   
                                                         )
                 else:
                     raise Exception("Please specify a valid coverage method.")         
@@ -958,9 +958,9 @@ class PointingOptionsWithGridCoverage(Entity):
                                                 )
                 elif method=='DirectPointInRectangularPolygon':
                     [angleHeightIn, angleWidthIn] = sen_sph_geom.get_fov_height_and_width()
-                    sensor = propcov.RectangularSensor( angleWidthIn    =   np.deg2rad( angleWidthIn ) ,  # input angle in radians  
-                                                        angleHeightIn   =   np.deg2rad( angleHeightIn )   
-                                                        )         
+                    sensor = propcov.RectangularSensor( angleHeightIn    =   np.deg2rad( angleHeightIn ) ,  # input angle in radians  
+                                                        angleWidthIn   =   np.deg2rad( angleWidthIn )   
+                                                        )        
             else:
                 raise Exception("please input valid sensor spherical geometry shape.")
             # orient sensor according to the pointing-option

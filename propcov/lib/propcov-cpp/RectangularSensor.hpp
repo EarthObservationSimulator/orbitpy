@@ -46,7 +46,7 @@ class RectangularSensor : public Sensor
 public:
    
    /// class construction/destruction
-   RectangularSensor(Real angleWidthIn, Real angleHeightIn);
+   RectangularSensor(Real angleHeightIn, Real angleWidthIn);
    RectangularSensor( const RectangularSensor &copy);
    RectangularSensor& operator=(const RectangularSensor &copy);
    
@@ -57,13 +57,14 @@ public:
    virtual bool  CheckTargetVisibility(Real viewConeAngle,
                                        Real viewClockAngle);
    
-   /// Set/Get angle width
-   virtual void  SetAngleWidth(Real angleWidthIn);
-   virtual Real  GetAngleWidth();
-   
    /// Set/Get angle height
    virtual void  SetAngleHeight(Real angleHeightIn);
    virtual Real  GetAngleHeight();
+
+   /// Set/Get angle width
+   virtual void  SetAngleWidth(Real angleWidthIn);
+   virtual Real  GetAngleWidth();  
+   
    
    /// New Functions
    std::vector<Real> getClockAngles();
@@ -72,10 +73,11 @@ public:
 
 protected:
    
-   ///  Angle width
-   Real    angleWidth;
    /// Angle height
    Real    angleHeight;
+   ///  Angle width
+   Real    angleWidth;
+   
    
    std::vector<Rvector3> poles;
 };
