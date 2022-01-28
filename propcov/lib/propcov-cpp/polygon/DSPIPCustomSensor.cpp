@@ -76,8 +76,8 @@ Sensor()
    minXExcursion = Min(xProjectionCoordArray);
    maxYExcursion = Max(yProjectionCoordArray);
    minYExcursion = Min(yProjectionCoordArray);
-   std::cout<<"maxXExcursion "<< maxXExcursion << " minXExcursion "<< minXExcursion << "\n"; 
-   std::cout<<"maxYExcursion "<< maxXExcursion << " minYExcursion "<< minXExcursion << "\n";
+   //std::cout<<"maxXExcursion "<< maxXExcursion << " minXExcursion "<< minXExcursion << "\n"; 
+   //std::cout<<"maxYExcursion "<< maxXExcursion << " minYExcursion "<< minXExcursion << "\n";
    #endif
 
 }
@@ -103,13 +103,14 @@ DSPIPCustomSensor::~DSPIPCustomSensor()
 bool DSPIPCustomSensor::CheckTargetVisibility(Real viewConeAngle, Real viewClockAngle)
 {
    bool possiblyInView = true;
-   // first check if in view cone, if so check the point falls inside the stereographic box
-   Real xCoord, yCoord;
-   ConeClockToStereographic (viewConeAngle,viewClockAngle,xCoord,yCoord);
+   
    if (!CheckTargetMaxExcursionAngle(viewConeAngle))
       possiblyInView = false;
 
+   // if so check the point falls inside the stereographic box
    #ifdef ENABLE_STEREOGRAPHIC_BOUNDING_BOX
+   Real xCoord, yCoord;
+   ConeClockToStereographic (viewConeAngle,viewClockAngle,xCoord,yCoord);
    if (!CheckTargetMaxExcursionCoordinates(xCoord,yCoord))
       possiblyInView = false;
    #endif

@@ -24,6 +24,10 @@ running test_run_1
     Metric 2 = 0.0349644952145724
     Metric 3 = 0.0
     Metric 4 = 0.034972028697688215
+    Metric 1 = 0.0
+    Metric 2 = 0.0349644952145724
+    Metric 3 = 0.0
+    Metric 4 = 0.034972028697688215
 .running test_run_3
     Metric 1 = 0.011299435028248588
     Metric 2 = 0.0487277728657039
@@ -38,6 +42,10 @@ running test_run_1
     Metric 2 = 0.004983707111366686
     Metric 3 = 0.02290187259347255
     Metric 4 = 0.08815447786159897
+    Metric 1 = 0.06567164179104477
+    Metric 2 = 0.004983707111366686
+    Metric 3 = 0.02290187259347255
+    Metric 4 = 0.08815447786159897
 .running test_run_5
     Metric 1 = 0.014388489208633094
     Metric 2 = 0.0031863458154967237
@@ -48,6 +56,10 @@ running test_run_1
     Metric 2 = 0.011098242896627185
     Metric 3 = 0.006512338499127888
     Metric 4 = 0.06387346139311226
+    Metric 1 = 0.02177293934681182
+    Metric 2 = 0.004905830607871885
+    Metric 3 = 0.00796079059695783
+    Metric 4 = 0.05950197935907679
     Metric 1 = 0.02177293934681182
     Metric 2 = 0.004905830607871885
     Metric 3 = 0.00796079059695783
@@ -71,11 +83,19 @@ running test_run_1
     Metric 2 = 0.051606108478146395
     Metric 3 = 0.020229898909291343
     Metric 4 = 0.18419062875395892
+    Metric 1 = 0.02570694087403599
+    Metric 2 = 0.051606108478146395
+    Metric 3 = 0.020229898909291343
+    Metric 4 = 0.18419062875395892
 ..running test_run_10
     Metric 1 = 0.08284023668639054
     Metric 2 = 0.014835102133972385
     Metric 3 = 0.022065168404711993
     Metric 4 = 0.158437778889485
+    Metric 1 = 0.08284023668639054
+    Metric 2 = 0.0011321181931393638
+    Metric 3 = 0.0068187464465237655
+    Metric 4 = 0.14977532476218797
     Metric 1 = 0.08284023668639054
     Metric 2 = 0.0011321181931393638
     Metric 3 = 0.0068187464465237655
@@ -89,11 +109,19 @@ running test_run_1
     Metric 2 = 0.023032433077986112
     Metric 3 = 0.027677453427470747
     Metric 4 = 0.06486607660238537
+    Metric 1 = 0.0035149384885764497
+    Metric 2 = 0.023032433077986112
+    Metric 3 = 0.027677453427470747
+    Metric 4 = 0.06486607660238537
 .running test_run_12
     Metric 1 = 0.0030441400304414
     Metric 2 = 0.023835051546391754
     Metric 3 = 0.012280177278458697
     Metric 4 = 0.25664036683286595
+    Metric 1 = 0.0030534351145038168
+    Metric 2 = 0.0012640936244826392
+    Metric 3 = 0.032688511755585715
+    Metric 4 = 0.2518871970909668
     Metric 1 = 0.0030534351145038168
     Metric 2 = 0.0012640936244826392
     Metric 3 = 0.032688511755585715
@@ -122,8 +150,7 @@ sys.path.append('../')
 from util.coverage import Coverage
 
 # method used in coverage calculation involving rectangular sensors. Tests are carried out for each method seperately.
-method_list = ['ProjectedSphericalPointInPolygon', 'DirectSphericalPointInPolygon']
-
+method_list = ['ProjectedSphericalPointInPolygon', 'DirectSphericalPointInPolygon','DirectPointInRectangularPolygon']
 class TestOrbitPropCovGrid(unittest.TestCase):
         
     @classmethod

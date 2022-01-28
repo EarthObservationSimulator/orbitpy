@@ -107,8 +107,8 @@ Please contact Vinay (vinay.ravindra@nasa.gov)
 - [ ] Make a SystemTestDriver
 - [ ] Add unconventional sensor FOV geometry shapes GTests for `GMATCustomSensor` and `DSPIPCustomSensor` class.
 - [ ] Rename `TATCException` to `PropcovCppException`
-- [ ] Add GTests for `Spacecraft`, `CoverageChecker`, `NadirPointingAttitude` and other classes. (There are in total 25 propcov-cpp active classes, of which currently there are GTests ofr 14 of these classes. Some tests in the `tests/tests-cpp/old` folder can be rewritten into the GTest format.)
-- [ ] Consider avoiding virtual functions since it has runtime costs associated with it.
+- [ ] Add GTests for `Spacecraft`, `CoverageChecker`, `NadirPointingAttitude` and other classes. (There are in total 26 propcov-cpp active classes, of which currently there are GTests ofr 15 of these classes. Some tests in the `tests/tests-cpp/old` folder can be rewritten into the GTest format.)
+- [ ] Consider avoiding virtual functions since it has runtime costs associated with it??
 
 ### Tips
 Errors in the propcov-cpp classes are sometime not visible (i.e. not displayed) when the propcov package is installed. The package installation can happen, but import will not work. In such cases run `make` from propcov-cpp -> tests, and debug any errors.

@@ -38,7 +38,7 @@ from util.spacecrafts import spc1_json, spc4_json, spc5_json
 RE = 6378.137 # radius of Earth in kilometers
 
 # method used in coverage calculation involving rectangular sensors. Tests are carried out for each method seperately.
-method_list = ['ProjectedSphericalPointInPolygon', 'DirectSphericalPointInPolygon']
+method_list = ['ProjectedSphericalPointInPolygon', 'DirectSphericalPointInPolygon', 'DirectPointInRectangularPolygon']
 
 class TestGridCoverage(unittest.TestCase):
 
@@ -522,7 +522,7 @@ class TestGridCoverage(unittest.TestCase):
                 self.assertEqual(access_data2["GP index"][25], 1436)
                 if method=='ProjectedSphericalPointInPolygon':
                     self.assertEqual(access_data2["time index"][25], 129)
-                elif method=='DirectSphericalPointInPolygon':
+                elif method=='DirectSphericalPointInPolygon' or method=='DirectPointInRectangularPolygon':
                     self.assertEqual(access_data2["time index"][25], 128)
     
     #@unittest.skip
