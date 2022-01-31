@@ -335,7 +335,7 @@ class GridCoverage(Entity):
     def __repr__(self):
         return "GridCoverage.from_dict({})".format(self.to_dict())
 
-    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, filter_mid_acc=False, method='DirectSphericalPointInPolygon'):
+    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, filter_mid_acc=False, method='DirectSphericalPIP'):
         """ Perform orbit coverage calculation for a specific instrument and mode of the instrument in the object instance. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
             same as the time resolution at which the spacecraft states are available. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV)
@@ -381,13 +381,13 @@ class GridCoverage(Entity):
         :paramtype filter_mid_acc: bool
 
         :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
-                        Only entries `DirectSphericalPointInPolygon` or `ProjectedSphericalPointInPolygon` or `DirectPointInRectangularPolygon` are allowed. 
-                        Default method is `DirectSphericalPointInPolygon`.
+                        Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
+                        Default method is `DirectSphericalPIP`.
 
-                        The `DirectSphericalPointInPolygon` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
-                        the `ProjectedSphericalPointInPolygon` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
+                        The `DirectSphericalPIP` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
+                        the `ProjectedPIP` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
                         
-                        For details on the `DirectSphericalPointInPolygon` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
+                        For details on the `DirectSphericalPIP` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
                         'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.
                         
                         In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
@@ -395,7 +395,7 @@ class GridCoverage(Entity):
                         Compared to the `propcov.GMATCustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
                         and also to be more accurate.
 
-                        `DirectPointInRectangularPolygon` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
+                        `RectangularPIP` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
                         `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
                          formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
                          if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
@@ -456,17 +456,17 @@ class GridCoverage(Entity):
             if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
             elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
-                if method=='DirectSphericalPointInPolygon':
+                if method=='DirectSphericalPIP':
                     sensor = propcov.DSPIPCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   ),
                                                 contained = [0.0,0.0]  
                                                 )
                 
-                elif method=='ProjectedSphericalPointInPolygon':
+                elif method=='ProjectedPIP':
                     sensor = propcov.GMATCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
                                                 )
-                elif method=='DirectPointInRectangularPolygon':
+                elif method=='RectangularPIP':
                     [angleHeightIn, angleWidthIn] = sen_sph_geom.get_fov_height_and_width()
                     sensor = propcov.RectangularSensor( angleHeightIn    =   np.deg2rad( angleHeightIn ) ,  # input angle in radians  
                                                         angleWidthIn   =   np.deg2rad( angleWidthIn )   
@@ -838,7 +838,7 @@ class PointingOptionsWithGridCoverage(Entity):
     def __repr__(self):
         return "PointingOptionsWithGridCoverage.from_dict({})".format(self.to_dict())
 
-    def execute(self, instru_id=None, mode_id=None, out_file_access=None, filter_mid_acc=False, method="DirectSphericalPointInPolygon"):
+    def execute(self, instru_id=None, mode_id=None, out_file_access=None, filter_mid_acc=False, method="DirectSphericalPIP"):
         """ Perform orbit coverage calculation for a specific instrument and mode. 
             The scene-field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
             Coverage is calculated for the period over which the input spacecraft propagated states are available. 
@@ -883,13 +883,13 @@ class PointingOptionsWithGridCoverage(Entity):
         :paramtype filter_mid_acc: bool
 
         :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
-                        Only entries `DirectSphericalPointInPolygon` or `ProjectedSphericalPointInPolygon` or `DirectPointInRectangularPolygon` are allowed. 
-                        Default method is `DirectSphericalPointInPolygon`.
+                        Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
+                        Default method is `DirectSphericalPIP`.
 
-                        The `DirectSphericalPointInPolygon` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
-                        the `ProjectedSphericalPointInPolygon` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
+                        The `DirectSphericalPIP` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
+                        the `ProjectedPIP` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
                         
-                        For details on the `DirectSphericalPointInPolygon` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
+                        For details on the `DirectSphericalPIP` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
                         'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.
                         
                         In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
@@ -897,7 +897,7 @@ class PointingOptionsWithGridCoverage(Entity):
                         Compared to the `propcov.GMATCustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
                         and also to be more accurate.
 
-                        `DirectPointInRectangularPolygon` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
+                        `RectangularPIP` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
                         `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
                          formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
                          if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
@@ -946,17 +946,17 @@ class PointingOptionsWithGridCoverage(Entity):
             if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
                 sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
             elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
-                if method=="DirectSphericalPointInPolygon":
+                if method=="DirectSphericalPIP":
                     sensor = propcov.DSPIPCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   ),
                                                 contained = [0.0,0.0]  
                                                 )
                 
-                elif method=="ProjectedSphericalPointInPolygon":
+                elif method=="ProjectedPIP":
                     sensor = propcov.GMATCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
                                                 clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
                                                 )
-                elif method=='DirectPointInRectangularPolygon':
+                elif method=='RectangularPIP':
                     [angleHeightIn, angleWidthIn] = sen_sph_geom.get_fov_height_and_width()
                     sensor = propcov.RectangularSensor( angleHeightIn    =   np.deg2rad( angleHeightIn ) ,  # input angle in radians  
                                                         angleWidthIn   =   np.deg2rad( angleWidthIn )   

@@ -19,7 +19,7 @@ It performs the following functions:
 The ``bin/run_mission.py`` script simply invokes the :class:`orbitpy.mission` module. Please refer to :ref:`mission_module` for description
 of valid JSON key/value pairs which can be used in the mission specifications JSON file.
 
-.. note:: In case of coverage calculations for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV) the default ``DirectSphericalPointInPolygon`` method is used.
+.. note:: In case of coverage calculations for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV) the default ``DirectSphericalPIP`` method is used.
     
 *Example*
 

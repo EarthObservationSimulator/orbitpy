@@ -3,7 +3,7 @@
    :code:`/temp/` folder contains temporary files produced during the run of the tests below.
 
    In case of rectangular sensors, both the methods to evaluate point in spherical polygon: 
-   (1) 'ProjectedSphericalPointInPolygon' and (2) 'DirectSphericalPointInPolygon' are evaluated.
+   (1) 'ProjectedPIP' and (2) 'DirectSphericalPIP' are evaluated.
 
 
 Expected output:
@@ -150,7 +150,7 @@ sys.path.append('../')
 from util.coverage import Coverage
 
 # method used in coverage calculation involving rectangular sensors. Tests are carried out for each method seperately.
-method_list = ['ProjectedSphericalPointInPolygon', 'DirectSphericalPointInPolygon','DirectPointInRectangularPolygon']
+method_list = ['ProjectedPIP', 'DirectSphericalPIP','RectangularPIP']
 class TestOrbitPropCovGrid(unittest.TestCase):
         
     @classmethod
@@ -193,7 +193,7 @@ class TestOrbitPropCovGrid(unittest.TestCase):
         
         # Establish thresholds for each metric
         cls.m1 = .1
-        cls.m2 = .052 # threshold for 'ProjectedSphericalPointInPolygon' is 0.5
+        cls.m2 = .052 # threshold for 'ProjectedPIP' is 0.5
         cls.m3 = .05
         cls.m4 = .3
     

@@ -7,8 +7,6 @@ import time
 from orbitpy.util import OrbitState, Spacecraft
 from orbitpy.propagator import J2AnalyticalPropagator
 from orbitpy.coveragecalculator import GridCoverage
-from datametricscalculator import DataMetricsCalculator, AccessFileInfo
-from orbitpy.eclipsefinder import EclipseFinder
 from orbitpy.grid import Grid
 
 

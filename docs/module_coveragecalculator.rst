@@ -37,9 +37,9 @@ The ``out_file_access`` input argument is
 used to specify the filepath (with filename) at which the results are to be written.
 
 Three coverage methods (relevant for the case of sensor FOVs described by spherical-polygon vertices and Rectangular FOVs) can be 
-specified: (1) ``DirectSphericalPointInPolygon`` or (2) ``ProjectedSphericalPointInPolygon`` or (3) ``DirectPointInRectangularPolygon``. 
-Default method is ``DirectSphericalPointInPolygon``.
-The ``DirectSphericalPointInPolygon`` method is based on a point in spherical polygon algorithm described in the article: 
+specified: (1) ``DirectSphericalPIP`` or (2) ``ProjectedPIP`` or (3) ``RectangularPIP``. 
+Default method is ``DirectSphericalPIP``.
+The ``DirectSphericalPIP`` method is based on a point in spherical polygon algorithm described in the article: 
 *R. Ketzner, V. Ravindra and M. Bramble, 'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.*
 
 A ``CoverageOutputInfo`` object containing meta-info about the results is returned at the end of execution of the function.
@@ -242,7 +242,7 @@ Examples
          
          # run the coverage calculator
          cov_cal = GridCoverage(grid=grid, spacecraft=sc, state_cart_file=state_cart_file)
-         out_info = cov_cal.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, filter_mid_acc=False, method='ProjectedSphericalPointInPolygon')
+         out_info = cov_cal.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, filter_mid_acc=False, method='ProjectedPIP')
          
          access.csv
          -----------
@@ -276,7 +276,7 @@ Examples
 
    .. code-block:: python
 
-      out_info = cov_cal.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, filter_mid_acc=True, method='ProjectedSphericalPointInPolygon')
+      out_info = cov_cal.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, filter_mid_acc=True, method='ProjectedPIP')
 
       access.csv
       -----------
@@ -296,7 +296,7 @@ Examples
    In the below snippet, the satellite is equipped with two instruments. The second instrument, and second mode is selected for
    coverage calculation. The ``use_field_of_regard`` flag is set true to indicate that the field-of-regard should be considered for the coverage calculation.
    Note that in absence of the ``orientation`` specifications for the ``SpacecraftBus`` object, the default is assumed to be aligned to the nadir-pointing frame.
-   In case of the instrument, the default orientation is alignment to the spacecraft bus. Since the ``method`` is not specified, the default method ``DirectSphericalPointInPolygon`` is used. 
+   In case of the instrument, the default orientation is alignment to the spacecraft bus. Since the ``method`` is not specified, the default method ``DirectSphericalPIP`` is used. 
 
    .. code-block:: python
 
@@ -390,7 +390,7 @@ Examples
 
       # run the coverage calculator
       cov_cal = PointingOptionsCoverage(spacecraft=sc, state_cart_file=state_cart_file)
-      out_info = cov_cal.execute(instru_id="B", mode_id=None, out_file_access=out_file_access, method='ProjectedSphericalPointInPolygon') # specify instrument "B"
+      out_info = cov_cal.execute(instru_id="B", mode_id=None, out_file_access=out_file_access, method='ProjectedPIP') # specify instrument "B"
 
       access.csv
       -----------
@@ -452,7 +452,7 @@ Examples
             
             # run the coverage calculator
             cov_cal = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sc, state_cart_file=state_cart_file)
-            out_info = cov_cal.execute(instru_id="B", mode_id=None, out_file_access=out_file_access, filter_mid_acc=True, method='DirectPointInRectangularPolygon')
+            out_info = cov_cal.execute(instru_id="B", mode_id=None, out_file_access=out_file_access, filter_mid_acc=True, method='RectangularPIP')
 
             access.csv
             -----------

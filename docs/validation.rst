@@ -252,7 +252,7 @@ STK Coverage Tests: Model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ground point access capabilities of OrbitPy's :class:`orbitpy.orbitpropcov.OrbitPropCovGrid` class were also verified against STK results.
-There are two methods which can be specified for coverage calculations involving Rectangular sensors: *ProjectedSphericalPointInPolygon* and *DirectSphericalPointInPolygon*.
+There are two methods which can be specified for coverage calculations involving Rectangular sensors: *ProjectedPIP* and *DirectSphericalPIP*.
 Verification of both the methods were done.
 The orbit propagation settings for these tests remain identical to the settings used for the propagation tests. 
 In order to make these tests as modular as possible, most of the orbits used were previously tested in the propagation tests.
@@ -422,9 +422,9 @@ Each of the test functions can be found in :code:`tests/validation/test_STK_cove
 STK Coverage Tests: Analysis 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The results of all of the test cases across each metric is shown in the table below. In case of rectangular sensors the results from the DirectSphericalPointInPolygon,
-ProjectedSphericalPointInPolygon and DirectPointInRectangularPolygon methods are given in the format X/Y/Z, where X is the result from the DirectSphericalPointInPolygon method and 
-Y is the result from the ProjectedSphericalPointInPolygon method and Z is the result from the DirectPointInRectangularPolygon method. 
+The results of all of the test cases across each metric is shown in the table below. In case of rectangular sensors the results from the DirectSphericalPIP,
+ProjectedPIP and RectangularPIP methods are given in the format X/Y/Z, where X is the result from the DirectSphericalPIP method and 
+Y is the result from the ProjectedPIP method and Z is the result from the RectangularPIP method. 
 
 It has been observed that Y=Z for all the cases which is expected since both the methods classify the target points directly on spherical surface. X is different from
 Y and Z since it is based on a method which classifies target points after projection of the polygon, target points onto a flat surface.
@@ -501,7 +501,7 @@ Y and Z since it is based on a method which classifies target points after proje
 
 
 Visual inspection of the test case results shows excellent agreement between OrbitPy and STK coverage. In this section, the most divergent results (highest percent difference) across each metric will be analyzed.
-(The results from the *ProjectedSphericalPointInPolygon* method are considered in case of coverage with rectangular sensors.)
+(The results from the *ProjectedPIP* method are considered in case of coverage with rectangular sensors.)
 
 For metric 1 (total number of grid points accessed), test case 10 showed the highest percent difference at 8.28 percent. Test case 10 propagated a sun-synchronous orbit over a continental US grid, with a nadir-pointing rectangular sensor. The STK and OrbitPy results are shown below.
 
