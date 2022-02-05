@@ -116,7 +116,7 @@ bool DSPIPCustomSensor::CheckTargetVisibility(Real viewConeAngle, Real viewClock
    #endif
    
    // we've executed the quick tests, if point is possibly in the FOV
-   // then run a line intersection test to determine if it is or not
+   // then run the spherical point in polygon algorithm
    if (!possiblyInView)
         return false;
    else

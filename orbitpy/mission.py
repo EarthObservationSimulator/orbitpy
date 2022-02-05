@@ -19,7 +19,7 @@ import orbitpy.propagator
 import orbitpy.grid
 from orbitpy.propagator import PropagatorFactory, PropagatorOutputInfo
 from orbitpy.coveragecalculator import GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage, CoverageOutputInfo
-from datametricscalculator import DataMetricsCalculator, AccessFileInfo, DataMetricsOutputInfo
+from orbitpy.datametricscalculator import DataMetricsCalculator, AccessFileInfo, DataMetricsOutputInfo
 from orbitpy.contactfinder import ContactFinder, ContactFinderOutputInfo
 from orbitpy.eclipsefinder import EclipseFinder, EclipseFinderOutputInfo
 from orbitpy.grid import Grid, GridOutputInfo

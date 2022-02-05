@@ -21,8 +21,10 @@ The `orbitpy` package is built on top of the `propcov`package available in the `
 
 Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`
 
+It is recommended to carry out the installation in a `conda` environment. Instructions are available in the README file of the InstruPy package.
+
 1. Make sure the `instrupy` package (dependency) has been installed.
-2. Run `make` from the main git directory.
+2. Run `make` from the main repo directory.
 3. Run `make runtest`. This runs all the tests and can be used to verify the package.
 
 Find the documentation in: `/docs/_build/html/index.html#`
@@ -31,7 +33,7 @@ Note that this installation also automatically installs the package `propcov` wh
 
 In order to uninstall run `make bare` in the terminal.
 
-Ask `make runtest` to also run the C++ tests (google tests) of the `propcov` library.
+Run `make runtest` inside the `propcov/tests/` directory to also run the C++ tests (Google tests) of the `propcov` library.
 
 ---
 **NOTE**
