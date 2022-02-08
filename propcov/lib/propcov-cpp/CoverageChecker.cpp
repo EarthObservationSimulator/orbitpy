@@ -446,10 +446,12 @@ void CoverageChecker::CheckGridFeasibility(const Rvector3& bodyFixedState)
                                     bodyFixedState.ToString(12).c_str());
    #endif
 
-   bodyUnit = bodyFixedState.GetUnitVector();
+   bodyUnit = bodyFixedState.GetUnitVector();   
    
    for (Integer ptIdx = 0; ptIdx < pointArray.size(); ptIdx++)
    {
+      feasibilityTest.at(ptIdx) = false; //initialize
+      
       // feasibilityTest.at(ptIdx) = CheckGridFeasibility(ptIdx, bodyFixedState); // this makes it slow because unit body vector is calculated repeatedly
 
       unitPtPos    = *(pointArray.at(ptIdx)); // is normalized
@@ -468,10 +470,7 @@ void CoverageChecker::CheckGridFeasibility(const Rvector3& bodyFixedState)
          */      
          rangeVec  = bodyFixedState/centralBodyRadius - unitPtPos; // scaled version of the actual range vector
          if ((rangeVec * unitPtPos) > 0.0)
-            feasibilityTest.at(ptIdx) = true;
-         else
-            feasibilityTest.at(ptIdx) = false;
-         
+            feasibilityTest.at(ptIdx) = true;         
       }
 
    }
