@@ -397,9 +397,9 @@ class GridCoverage(Entity):
 
                         `RectangularPIP` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
                         `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
-                         formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
-                         if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
-                         within the sensor FOV.  
+                        formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
+                        if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
+                        within the sensor FOV.  
  
         :paramtype method: str
 
@@ -899,9 +899,9 @@ class PointingOptionsWithGridCoverage(Entity):
 
                         `RectangularPIP` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
                         `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
-                         formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
-                         if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
-                         within the sensor FOV.
+                        formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
+                        if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
+                        within the sensor FOV.
 
         :return: Coverage output info.
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
