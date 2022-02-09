@@ -2,9 +2,15 @@
 
    :code:`/temp/` folder contains temporary files produced during the run of the tests below.
 
-   In case of rectangular sensors, both the methods to evaluate point in spherical polygon: 
-   (1) 'ProjectedPIP' and (2) 'DirectSphericalPIP' are evaluated.
+   In case of rectangular sensors, all three methods to evaluate point in spherical polygon are considered seperately: 
+   (1) 'ProjectedPIP', (2) 'DirectSphericalPIP' and (3) RectangularPIP.
 
+   Differences from STK are expected due to following reasons:
+   1. The orbital states of the satellite are different. STK J2 Analytical Propagator is used when evaluating STK coverage while 
+      Orbitpy J2 Analytical Propagator is used when evaluating the OrbitPy coverage. 
+      Small differences have been observed in the results of both the propagators as can be seen in the `test_propagator_J2AnalyticalPropagator_with_STK.py` validation script.
+      The tests could be improved by forcing the STK orbital states to be used by OrbitPy when doing the coverage calculations for OrbitPy.
+   2. The coverage algorithm of STK is unknown, so we do not know what we are comparing against.
 
 Expected output:
 

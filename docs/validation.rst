@@ -429,75 +429,85 @@ Y is the result from the ProjectedPIP method and Z is the result from the Rectan
 It has been observed that Y=Z for all the cases which is expected since both the methods classify the target points directly on spherical surface. X is different from
 Y and Z since it is based on a method which classifies target points after projection of the polygon, target points onto a flat surface.
 
+Differences from STK are expected due to following reasons:
+
+1. The orbital states of the satellite are different. STK J2 Analytical Propagator is used when evaluating STK coverage while 
+Orbitpy J2 Analytical Propagator is used when evaluating the OrbitPy coverage. 
+Small differences have been observed in the results of both the propagators as can be seen in the ``test_propagator_J2AnalyticalPropagator_with_STK.py`` validation script.
+The tests could be improved by forcing the STK orbital states to be used by OrbitPy when doing the coverage calculations for OrbitPy.
+
+2. The coverage algorithm of STK is unknown, so we do not know what we are comparing against.
+
 .. list-table:: **Test Results**
    :header-rows: 1
    :stub-columns: 1
 
    * -
-     - 1
-     - 2
-     - 3
-     - 4
-     - 5
-     - 6
-     - 7
-     - 8
-     - 9
-     - 10
-     - 11
-     - 12
-   * - Metric 1 [%]
+     - Metric 1 [%]
+     - Metric 2 [%]
+     - Metric 3 [%]
+     - Metric 4 [%]
+   * - 1
      - 0
+     - 3.26
+     - 0
+     - 3.26
+   * - 2
      - 0/0
+     - 2.73/3.50/3.50
+     - 0/0
+     - 2.73/3.50/3.50
+   * - 3
      - 1.13
-     - 6.57/6.57/6.57
-     - 1.43
-     - 2.79/2.22/2.22
-     - 2.90
-     - 1.82
-     - 2.57/2.57/2.57
-     - 8.28/8.28/8.28
-     - .352/.352/.352
-     - .304/.305/.305
-   * - Metric 2 [%]
-     - 3.26
-     - 2.73/3.50/3.50
      - 4.87
-     - 2.41/.498/.498
-     - .318
-     - 1.11/.491/.491
-     - 1.81
-     - 1.92
-     - 3.35/5.20/5.20
-     - 1.48/.113/.113
-     - .465/2.30/2.30
-     - 2.38/.126/.126
-   * - Metric 3 [%]
      - 0
-     - 0/0
-     - 0
-     - 3.79/2.29/2.29
-     - .022
-     - .651/.796/.796
-     - .730
-     - .831
-     - .835/2.02/2.02
-     - 2.21/.682/.682
-     - 1.16/2.77/2.77
-     - 1.23/3.27/3.27
-   * - Metric 4 [%]
-     - 3.26
-     - 2.73/3.50/3.50
      - 4.88
+   * - 4
+     - 6.57/6.57/6.57
+     - 2.41/.498/.498
+     - 3.79/2.29/2.29
      - 9.64/8.82/8.82
+   * - 5
+     - 1.43
+     - .318
+     - .022
      - 7.60
+   * - 6
+     - 2.79/2.22/2.22
+     - 1.11/.491/.491
+     - .651/.796/.796
      - 6.39/5.95/5.95
+   * - 7
+     - 2.90
+     - 1.81
+     - .730
      - 16.9
+   * - 8
+     - 1.82
+     - 1.92
+     - .831
      - 3.51
+   * - 9
+     - 2.57/2.57/2.57
+     - 3.35/5.20/5.20
+     - .835/2.02/2.02
      - 18.75/18.42/18.42
+   * - 10
+     - 8.28/8.28/8.28
+     - 1.48/.113/.113
+     - 2.21/.682/.682
      - 15.84/14.98/14.98
+   * - 11
+     - .352/.352/.352
+     - .465/2.30/2.30
+     - 1.16/2.77/2.77
      - 6.20/6.49/6.49
+   * - 12
+     - .304/.305/.305
+     - 2.38/.126/.126
+     - 1.23/3.27/3.27
      - 25.7/25.2/25.2
+
 
 
 Visual inspection of the test case results shows excellent agreement between OrbitPy and STK coverage. In this section, the most divergent results (highest percent difference) across each metric will be analyzed.
