@@ -41,7 +41,7 @@
 ├───util -> Util folder for tests.
 │   │   coverage.py
 │   │   plot.py
-│   │   spacecrafts.py -> Contains spacecraft specs.
+│   │   spacecrafts.py -> Contains spacecraft specs used for testing.
 │   │   __init__.py
 │   │
 ```

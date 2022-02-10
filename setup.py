@@ -14,6 +14,6 @@ setup(
     scripts=[ # TODO: remove this? Does not seem to serve any purpose. 
     'bin/dshield_mission.py'
     ],
-    install_requires=['numpy', 'instrupy', 'nose', 'pandas', 'scipy', 'sphinx', 
+    install_requires=['numpy', 'instrupy', 'pandas', 'scipy', 'sphinx', 
                       'sphinx_rtd_theme==0.5.2', 'propcov']
 )

@@ -4,43 +4,57 @@ This package contain set of modules to compute *mission-data* of satellites. It 
 
 1. Generation of satellite orbits from constellation specifications.
 2. Computation of propagated satellite state (position and velocity) data.
-3. Generation of grid-of-points at a (user-defined or auto) angular resolution over region of interest.
+3. Generation of grid points at a (user-defined or auto) angular resolution over region of interest.
 4. *Grid Coverage*: Computation of satellite access intervals over given set of grid points (*grid-coverage*) for the length of the mission.
-        i. Consideration of sensor pointing directions.
-        ii. Consideration of sensor field-of-view (FOV) and field-of-regard (FOR).
-5. *Pointing-options Coverage:* Computation of coverage in which set of pointing-options of the instrument are specified and accessed ground-locations are calculated.
-6. *Pointing-options with Grid Coverage*.
+
+        i. With consideration of satellite/sensor pointing (orientation) directions.
+        ii. With consideration of sensor field-of-view (FOV) and field-of-regard (FOR).
+5. *Pointing-options Coverage:* Computation of coverage in which set of pointing-options of the satellite/instrument are specified and accessed ground-locations (intersection of the pointing-axis with the Earth's surface) is calculated.
+6. *Pointing-options with Grid Coverage*: Grid Coverage calculated for different satellite/instrument orientations.
 7. Computation of inter-satellite communication (line-of-sight) time intervals.
 8. Computation of ground-station contact time intervals.
 9. Computation of satellite eclipse time-intervals.
-10. Sensor pixel-array projection.
+10. Sensor pixel-array projection to simulated Level 2 satellite imagery.
 
-The `orbitpy` package is built on top of the `propcov`package available in the `propcov` folder. Please refer to the README.MD file within the `propcov` folder for description of the respective package.
+The `orbitpy` package is built on top of the `propcov`package available in the `propcov` folder. Please refer to the `README.MD` file within the `propcov` folder for description of the respective package.
 
 ## Install
 
-Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`
+Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `cmake`
 
 It is recommended to carry out the installation in a `conda` environment. Instructions are available in the README file of the InstruPy package.
 
-1. Make sure the `instrupy` package (dependency) has been installed.
-2. Run `make` from the main repo directory.
-3. Run `make runtest`. This runs all the tests and can be used to verify the package.
+1.  Make sure the `instrupy` package (dependency) has been installed.
 
-Find the documentation in: `/docs/_build/html/index.html#`
+2.  Run `make` from the main repo directory.
 
-Note that this installation also automatically installs the package `propcov` which consists of python wrapper and C++ source code which provide the functionality for orbit propagation, coverage calculations and sensor pixel-array projection.
+    All the below dependencies are automatically installed. If any errors are encountered please check that the following dependencies are 
+    installed:
+
+    * :code:`numpy`
+    * :code:`pandas`
+    * :code:`scipy`
+    * :code:`sphinx`
+    * :code:`sphinx_rtd_theme==0.5.2`
+
+3.  Run `make runtest`. This runs all the tests and can be used to verify the package.
+
+4.  Find the documentation in: `/docs/_build/html/index.html#`
 
 In order to uninstall run `make bare` in the terminal.
 
-Run `make runtest` inside the `propcov/tests/` directory to also run the C++ tests (Google tests) of the `propcov` library.
 
 ---
 **NOTE**
 
+The OrbitPy installation also automatically installs the package `propcov` which consists of python binding of C++ classes which provide the functionality for orbit propagation, coverage calculations and sensor pixel-array projection. The python bound C++ objects are implemented in OrbitPy.
+
 The `make runtest` does *not* run the tests of the `propcov` library. Please see the `README.MD` in the `propcov` folder on how to run it's tests.
 
+Documentation of the `propcov` library is available in the Word document `propcov/docs/propcov-cpp.docx`.
+
 ---
+
 If using a Windows system, one may consider setting up a virtual-machine with Ubuntu (or similar) OS. VMware Workstation player is available free for non-commercial, personal or home use. VMWare tools may need to be installed separately after the player installation.
 
 [https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html](https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html)
@@ -68,7 +82,7 @@ The present version of OrbitPy has been tested on Ubuntu 18.04.3.
 ```
 ## License and Copyright
 
-Copyright 2021 Bay Area Environmental Research Institute
+Copyright 2022 Bay Area Environmental Research Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -106,7 +120,7 @@ Please contact Vinay (vinay.ravindra@nasa.gov)
 ### Propcov-cpp
 
 - [ ] Explore the orbit interpolation functions.
-- [ ] Make a SystemTestDriver
+- [ ] Make a C++ SystemTestDriver
 - [ ] Add unconventional sensor FOV geometry shapes GTests for `GMATCustomSensor` and `DSPIPCustomSensor` class.
 - [ ] Rename `TATCException` to `PropcovCppException`
 - [ ] Add GTests for `Spacecraft`, `CoverageChecker`, `NadirPointingAttitude` and other classes. (There are in total 26 propcov-cpp active classes, of which currently there are GTests ofr 15 of these classes. Some tests in the `tests/tests-cpp/old` folder can be rewritten into the GTest format.)

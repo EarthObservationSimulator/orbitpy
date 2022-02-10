@@ -1,10 +1,10 @@
 
 # PROPCOV
 
-The `propcov` package consists of C++ source files wrapped with python using `pybind11`. The C++ classes and functions
-are made available as python objects to be used by the main `orbitpy` package.
+The `propcov` package consists of C++ source files bound with python using `pybind11`. The C++ classes and functions
+are made available as python objects to be used by the `orbitpy` package.
 
-## Use of `pybind11` for wrapping C++ with python
+## Use of `pybind11` for binding C++ with python
 
 `pybind11 version 2.6.2` is used to bind the C++ source to python. It uses CMake for the build process.
 
@@ -19,7 +19,7 @@ classes are bound.
 
 * `cmake`, `gcc` are primary requirements.
 
-* The primary work needed to utilize `pybind11` is to:
+* The primary work needed to utilize `pybind11` requires inclusion, modifications of the following:
 
     * The `pybind11` source folder in `propcov/extern/`
     
@@ -29,17 +29,19 @@ classes are bound.
 
     * The `setup.py` file in the `propcov` folder.
 
-* The `propcov/src/main.cpp` source ile contains the wrapping code of the C++ sources. Note that not all the C++ source is currently wrapped.
+* The `propcov/src/main.cpp` source file contains the binding code of the C++ sources. Note that *not* all the C++ source is currently bound.
 
 * When the `propcov` package is installed a `build` folder and `***.so` library file is created along with `***.egg-info`. These must be deleted in the un-installation process so as to allow for smooth re-installation.
 
-* The `Makefile` present in the `propcov` folder is to facilitate easy installation, cleanup of the `propcov` package. 
+* The `Makefile` present in the `propcov` folder is to facilitate easy installation, cleanup of the `propcov` package. I.e. when `make` is run from the `propcov` directory, the propcov library is installed.
 
-* The Makefiles in the `extern/gmatutil/`, `lib/propcov-cpp/` are to facilitate a separate build process (not associated with `cmake`). The builds are triggered when running the Makefile in the `tests/` folder.
+* The Makefiles in the `extern/gmatutil/`, `lib/propcov-cpp/` are to facilitate a separate build process (not associated with `cmake`). The builds are triggered when running the Makefile in the `tests/` folder. This allows for independent build of the C++ sources (not associated with the python binding provided by Pybind11).
 
 ## Installation
 
 **Requires:** Unix-like operating system, `python 3.8`, `pip`, `gcc`, `cmake`.
+
+`pybind11` 
 
 **To install:** Run `make` from the main git directory.
 
@@ -48,6 +50,14 @@ In case of MacOS, there may arise a compiler selection error, in which case plea
 Export CC=gcc 
 ```
 Also please refer to: https://stackoverflow.com/questions/24380456/how-can-i-make-cmake-use-gcc-instead-of-clang-on-mac-os-x
+
+## Tests
+
+The folder `tests/test-cpp/` contains C++ tests of the `propcov` C++ classes. GoogleTest (GTest) library is used and must be installed to run the tests. [This link](https://www.eriksmistad.no/getting-started-with-google-test-on-ubuntu/) provides good tutorial on installing GTest on Ubuntu.
+
+To run the tests navigate to `tests/` folder and run `make all` followed by `make runtest`.
+
+Running `make all` from the `tests` directory shall trigger clean-up and build of the sources in the `extern/gmatutil` folder and the `lib/propcov-cpp` folder. The test-files in the `tests/test-cpp` folder are built and the executables written in the `tests/build` folder. The executables can be run one after another using the `make runtest` command. 
 
 ## Directory structure
 
@@ -64,7 +74,7 @@ C:.
 │   └───pybind11 (pybind11 library)
 │       
 ├───lib (source library)
-│   └───propcov-cpp  (cpp library which is wrapped)
+│   └───propcov-cpp  (cpp library)
 │       └───polygon
 ├───src
 │
@@ -76,7 +86,7 @@ C:.
     └───tests-cpp (cpp tests on the `propcov-cpp` library)
         ├───bin
         └───old
-    └───tests-python (python tests on the wrapped `src`)
+    └───tests-python (python tests on the python-bound `src`)
 
 ```
 
@@ -87,17 +97,9 @@ The `gmatutil` folder is a copy of the same folder from the GMAT2020a repository
 3. The CMakeLists.txt file was revised according to the changes 1,2 and additional removals (see the file for details).
 4. The CmakeLists.txt was modifed to output a static library with target-name `GmatUtil` with the flags `POSITION_INDEPENDENT_CODE ON`.
 
-## Tests
-
-The folder `tests/test-cpp/` contains C++ tests of the `propcov` C++ classes. GoogleTest (GTest) library is used and must be installed to run the tests. [This link](https://www.eriksmistad.no/getting-started-with-google-test-on-ubuntu/) provides good tutorial on installing GTest on Ubuntu.
-
-To run the tests navigate to `tests/` folder and run `make all` followed by `make runtest`.
-
-Running `make all` from the `tests` directory shall trigger clean-up and build of the sources in the `extern/gmatutil` folder and the `lib/propcov-cpp` folder. The test-files in the `tests/test-cpp` folder are built and the executables written in the `tests/build` folder. The executables can be run one after another using the `make runtest` command. 
-
 ## Documentation
 
-The `docs/propcov-cpp_description.doc` contains description of the `lib\propocov-cpp\` C++ classes.
+The `docs/propcov-cpp.doc` contains description of the `lib\propocov-cpp\` C++ classes.
 
 The `docs/tatc_docs` contains **old** (March 2019) documentation of most of the `lib\propocov-cpp\` C++ classes which was developed during the course of the TAT-C project. Note that some of the classes referred to in the documentation might have changed since the docs  was made.
 
