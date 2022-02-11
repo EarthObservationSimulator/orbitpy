@@ -49,12 +49,12 @@ The date type can be either ``GREGORIAN_UTC`` or ``JULIAN_DATE_UT1``.
       :header: Parameter, Data type, Units, Description
       :widths: 10,10,5,40
 
-      year, int, , Year
-      month, int, , Month
-      day, int, , Day
-      hour, int, , Hour
-      minute, int, , Minutes
-      second, float, , Seconds
+      year, int, year, Year
+      month, int, month, Month
+      day, int, day, Day
+      hour, int, hour, Hour
+      minute, int, minute, Minutes
+      second, float, second, Seconds
       
 2. ``JULIAN_DATE_UT1`` date-type
 
@@ -62,7 +62,7 @@ The date type can be either ``GREGORIAN_UTC`` or ``JULIAN_DATE_UT1``.
       :header: Parameter, Data type, Units, Description
       :widths: 10,10,5,40
 
-      jd, float, , Julian date UT1
+      jd, float, decimal data, Julian date UT1
 
 **Example**
 

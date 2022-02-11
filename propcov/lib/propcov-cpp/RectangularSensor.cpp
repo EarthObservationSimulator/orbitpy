@@ -146,6 +146,7 @@ bool RectangularSensor::CheckTargetVisibility(Real viewConeAngle,
       Real viewDec = PI/2.0 - viewConeAngle;
       Rvector3 viewVector = RADECtoUnitVec(viewClockAngle,viewDec);
       
+      // Below condition works only when the corners (from which the poles are built) are specified in anti-clockwise order. 
       if( poles[0]*viewVector > 0.0 && poles[1]*viewVector > 0.0 && 
          poles[2]*viewVector > 0.0 && poles[3]*viewVector > 0.0 )
       {
@@ -216,6 +217,7 @@ std::vector<Real> RectangularSensor::getClockAngles()
 {
 	std::vector<Real> clocks(4);
    Real clock = ASin(Sin(angleHeight/2)/Sin(maxExcursionAngle));
+   // anti-clockwise order. Note that it is critical that this order be the anticlockwise for the CheckTargetVisibility function.
 	clocks[0] = clock;
 	clocks[1] = PI - clock;
 	clocks[2] = PI + clock;
@@ -241,7 +243,7 @@ std::vector<Rvector3> RectangularSensor::getCornerHeadings(std::vector<Real> &cl
 std::vector<Rvector3> RectangularSensor::getPoleHeadings(std::vector<Rvector3> &corners)
 {
 	std::vector<Rvector3> poles(4);
-	
+	// corners are expected to be ordered
 	poles[0] = Cross(corners[0],corners[1]);
 	poles[1] = Cross(corners[1],corners[2]);
 	poles[2] = Cross(corners[2],corners[3]);

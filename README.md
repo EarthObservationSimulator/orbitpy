@@ -14,7 +14,7 @@ This package contain set of modules to compute *mission-data* of satellites. It 
 7. Computation of inter-satellite communication (line-of-sight) time intervals.
 8. Computation of ground-station contact time intervals.
 9. Computation of satellite eclipse time-intervals.
-10. Sensor pixel-array projection to simulated Level 2 satellite imagery.
+10. Sensor pixel-array projection to simulated Level-2 satellite imagery.
 
 The `orbitpy` package is built on top of the `propcov`package available in the `propcov` folder. Please refer to the `README.MD` file within the `propcov` folder for description of the respective package.
 
@@ -24,18 +24,18 @@ Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `cmake`
 
 It is recommended to carry out the installation in a `conda` environment. Instructions are available in the README file of the InstruPy package.
 
-1.  Make sure the `instrupy` package (dependency) has been installed.
+1.  Install the `instrupy` package (dependency).
 
 2.  Run `make` from the main repo directory.
 
     All the below dependencies are automatically installed. If any errors are encountered please check that the following dependencies are 
     installed:
 
-    * :code:`numpy`
-    * :code:`pandas`
-    * :code:`scipy`
-    * :code:`sphinx`
-    * :code:`sphinx_rtd_theme==0.5.2`
+    * `numpy`
+    * `pandas`
+    * `scipy`
+    * `sphinx`
+    * `sphinx_rtd_theme==0.5.2`
 
 3.  Run `make runtest`. This runs all the tests and can be used to verify the package.
 
@@ -47,7 +47,7 @@ In order to uninstall run `make bare` in the terminal.
 ---
 **NOTE**
 
-The OrbitPy installation also automatically installs the package `propcov` which consists of python binding of C++ classes which provide the functionality for orbit propagation, coverage calculations and sensor pixel-array projection. The python bound C++ objects are implemented in OrbitPy.
+The OrbitPy installation automatically installs the package `propcov` which consists of python binding of C++ classes which provide the functionality for orbit propagation, coverage calculations and sensor pixel-array projection. The python bound C++ objects are implemented in OrbitPy.
 
 The `make runtest` does *not* run the tests of the `propcov` library. Please see the `README.MD` in the `propcov` folder on how to run it's tests.
 

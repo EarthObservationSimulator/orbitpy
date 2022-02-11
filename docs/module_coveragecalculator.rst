@@ -32,6 +32,7 @@ Note that the sceneFOV of an instrument (which may be the same as the instrument
 The ``filter_mid_acc`` input argument can be used to specify if the access times only at the middle of an continuous access-interval. 
 E.g. If the access takes place at time-indices 450, 451, 452, 453, 454, and if the ``filter_mid_acc`` flag is specified to be true, then only the access time-index = 452 is written
 in the results.
+Please see :ref:`correction_of_access_files` for situations when the ``filter_mid_acc`` flag would need to be set true.
 
 The ``out_file_access`` input argument is 
 used to specify the filepath (with filename) at which the results are to be written.
@@ -161,8 +162,7 @@ Description of the columns headers and data is given below:
 .. _correction_of_access_files:
 
 *Correction* of access files for purely side-looking instruments with narrow along-track FOV
------------------------------------------------------------------------------------------------
-
+----------------------------------------------------------------------------------------------------
 In case of purely side-looking instruments with narrow-FOV (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place
 when the grid-point is seen with no squint angle and the access is almost instantaneous (i.e. access duration is very small). 
 The coverage calculations is carried out with the corresponding instrument scene-field-of-view or field-of-regard (built using the scene-field-of-view) 
@@ -192,8 +192,8 @@ is to be used for the data-metrics calculation.
       :scale: 75 %
       :align: center
 
-.. warning:: The correction method is to be used only when the instrument access-duration (determined from the instrument FOV) is smaller 
-            than the propagation time step (determined from the sceneFOV).
+.. warning:: The correction method is to be used only when the instrument access-duration (which is determined from the instrument FOV) is smaller 
+            than the propagation time step (which is determined from the sceneFOV (assume no maneuver in which case FOR = sceneFOV)).
 
 Examples
 ^^^^^^^^^

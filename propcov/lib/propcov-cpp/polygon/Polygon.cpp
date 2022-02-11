@@ -58,7 +58,7 @@ AnglePair util::transformSpherical(const AnglePair &spherical,const Rmatrix33 &t
 	return transformedSpherical;
 }
 
-// Checks wheter a longitude is bounded by the minor arc defined by two other longitudes. 
+// Checks whether a longitude is bounded by the minor arc defined by two other longitudes. 
 bool util::lonBounded(Real bound1, Real bound2, Real lon)
 {
 	if ((bound2 - bound1) < M_PI)
@@ -67,15 +67,15 @@ bool util::lonBounded(Real bound1, Real bound2, Real lon)
 		return !((lon >= bound1) && (lon <= bound2));
 }
 
-// Transform from cartesian to spherical coordinates
+// Transform from cartesian to spherical coordinates (cone/clock)
 AnglePair util::cartesianToSpherical(const Rvector3 &cart)
 {
 	Real x = cart[0];
 	Real y = cart[1];
 	Real z = cart[2];
 	
-	Real az = atan2(y,x);
-	Real inc = acos(z);
+	Real az = atan2(y,x); // clock angle
+	Real inc = acos(z); // cone angle
 
 	while (az < 0)
 	{

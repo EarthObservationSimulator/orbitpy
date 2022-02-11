@@ -6,5 +6,4 @@ User Guide
 
    package_overview
    installation
-   run
-   miscellaneous
+   run   

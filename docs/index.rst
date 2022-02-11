@@ -1,7 +1,10 @@
 Welcome to OrbitPy's documentation!
 ===================================
 
-Welcome! This is the documentation for OrbitPy 0.2, last updated 9 Aug, 2021.
+Welcome! This is the documentation for OrbitPy 0.2, last updated 10 Feb, 2022.
+
+The recommended way to get started, is to first read through the User Guide (install and run the example). 
+The :ref:`Run<run>` section details the two ways in which the OrbitPy package can be used to setup simulations.
 
 Contents
 ---------
@@ -12,11 +15,11 @@ Contents
    user_guide
    api_reference
    development
-   
+   miscellaneous
 
 Questions?
 ------------------
-Please contact Vinay (vinay.ravindra@nasa.gov)
+Please contact Vinay (vravindra@baeri.org, vinay.ravindra@nasa.gov)
 
 
 Credits and Acknowledgments
