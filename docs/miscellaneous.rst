@@ -7,7 +7,6 @@ This page describes miscellaneous concepts relating to the OrbitPy package.
 .. todo:: OUTDATED. REVISION NECESSARY.
 
 Issues with the above coverage calculation approach 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Current implementation works well only for:
    1. Instruments whose required observation time < propagation step-size.  For scanning type instruments 
@@ -33,10 +32,10 @@ However, what we require are the imaging opportunities, where a imaging opportun
 
 
 Common issues:
-==============
+
 
 Issue
-^^^^^^
+
 
 * The area around the ground-point is not the same at each observation, especially for rectangular FOV sensors.
 
@@ -48,7 +47,7 @@ Issue
 
 
 Unclassified 
-========================
+
 
 With respect to integration in DSHIELD, the outputs/ functions of the package are used by other modules
 of DSHIELD as follows:
@@ -66,7 +65,7 @@ The input to the first three items is straightforward and can be used directly f
 however has issues. The raw access outputs are naive, and need to be filtered, post-processed to imaging opportunities (**raw access vs imaging opps**).     
 
 Issue #1
-^^^^^^^^
+
 Consider a 5 second mission, the desired output from the Orbits to the Planner would be as follows:
 
 .. code-block:: bash
@@ -92,7 +91,7 @@ In order to deal with the above issue, the observation is deemed to be made with
 it is not natural for the case of coverage calculated from grid-points. See :ref:`correction_of_access_files`.
 
 Issue #2
-^^^^^^^^
+
 A similar issue exists in the time domain:
 
 .. code-block:: bash

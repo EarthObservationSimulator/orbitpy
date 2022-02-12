@@ -33,6 +33,8 @@ Glossary of terms used in the package
 
 * Grid-point, ground-point and target-point synonymous.
 
+* Data-metrics and Observation-metrics are synonymous.
+
 * Access vs Coverage
 
       * Sometimes access and coverage are used synonymously.

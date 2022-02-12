@@ -15,6 +15,7 @@ Contents
    user_guide
    api_reference
    development
+   examples
    miscellaneous
 
 Questions?
