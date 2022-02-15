@@ -841,9 +841,9 @@ class Mission(Entity):
                                 cov_calc = GridCoverage(grid=grid, spacecraft=spc, state_cart_file=spc_state_cart_file)
                                 # For SAR instruments pick only the time-instants at the middle of access-intervals
                                 if instru._type == 'Synthetic Aperture Radar':
-                                    filter_mid_acc = True
+                                    mid_access_only = True
                                 else:
-                                    filter_mid_acc = False
+                                    mid_access_only = False
                                 x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl)
                                 oi.append(x) 
 
@@ -865,10 +865,10 @@ class Mission(Entity):
 
                                 # For SAR instruments pick only the time-instants at the middle of access-intervals
                                 if instru._type == 'Synthetic Aperture Radar':
-                                    filter_mid_acc = True
+                                    mid_access_only = True
                                 else:
-                                    filter_mid_acc = False
-                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, filter_mid_acc=filter_mid_acc)
+                                    mid_access_only = False
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, mid_access_only=mid_access_only)
                                 oi.append(x) 
                         
         # delete any output-info object(s) associated with a previous execution
@@ -1015,9 +1015,9 @@ class Mission(Entity):
                                 cov_calc = GridCoverage(grid=grid, spacecraft=spc, state_cart_file=state_cart_file)
                                 # For SAR instruments pick only the time-instants at the middle of access-intervals
                                 if instru._type == 'Synthetic Aperture Radar':
-                                    filter_mid_acc = True
+                                    mid_access_only = True
                                 else:
-                                    filter_mid_acc = False
+                                    mid_access_only = False
                                 x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl)
                                 out_info.append(x)     
 
@@ -1049,10 +1049,10 @@ class Mission(Entity):
                                 
                                 # For SAR instruments pick only the time-instants at the middle of access-intervals
                                 if instru._type == 'Synthetic Aperture Radar':
-                                    filter_mid_acc = True
+                                    mid_access_only = True
                                 else:
-                                    filter_mid_acc = False
-                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, filter_mid_acc=filter_mid_acc)
+                                    mid_access_only = False
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, mid_access_only=mid_access_only)
                                 out_info.append(x)
                         
                                 dm_file = sat_dir + 'datametrics_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'

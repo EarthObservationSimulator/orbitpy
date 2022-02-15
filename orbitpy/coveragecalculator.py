@@ -335,7 +335,7 @@ class GridCoverage(Entity):
     def __repr__(self):
         return "GridCoverage.from_dict({})".format(self.to_dict())
 
-    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, filter_mid_acc=False, method='DirectSphericalPIP'):
+    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, mid_access_only=False, method='DirectSphericalPIP'):
         """ Perform orbit coverage calculation for a specific instrument and mode of the instrument in the object instance. Coverage is calculated for the period over which the 
             input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
             same as the time resolution at which the spacecraft states are available. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV)
@@ -376,9 +376,9 @@ class GridCoverage(Entity):
 
         :paramtype out_file_access: str
 
-        :param filter_mid_acc: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
+        :param mid_access_only: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
                                 Default value is ``False``.
-        :paramtype filter_mid_acc: bool
+        :paramtype mid_access_only: bool
 
         :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
                         Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
@@ -509,7 +509,7 @@ class GridCoverage(Entity):
             access_file.close()
 
         ##### filter mid-interval access data if necessary #####
-        if filter_mid_acc is True:
+        if mid_access_only is True:
             filter_mid_interval_access(inp_acc_fl=out_file_access, out_acc_fl=out_file_access)        
         
         return CoverageOutputInfo.from_dict({   "coverageType": "GRID COVERAGE",
@@ -517,7 +517,7 @@ class GridCoverage(Entity):
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
                                                 "usedFieldOfRegard": use_field_of_regard,
-                                                "filterMidIntervalAccess": filter_mid_acc,
+                                                "filterMidIntervalAccess": mid_access_only,
                                                 "gridId": self.grid._id,
                                                 "stateCartFile": self.state_cart_file,
                                                 "accessFile": out_file_access,
@@ -838,7 +838,7 @@ class PointingOptionsWithGridCoverage(Entity):
     def __repr__(self):
         return "PointingOptionsWithGridCoverage.from_dict({})".format(self.to_dict())
 
-    def execute(self, instru_id=None, mode_id=None, out_file_access=None, filter_mid_acc=False, method="DirectSphericalPIP"):
+    def execute(self, instru_id=None, mode_id=None, out_file_access=None, mid_access_only=False, method="DirectSphericalPIP"):
         """ Perform orbit coverage calculation for a specific instrument and mode. 
             The scene-field-of-view of the instrument is considered (no scope to use field-of-regard) in the coverage calculation. 
             Coverage is calculated for the period over which the input spacecraft propagated states are available. 
@@ -878,9 +878,9 @@ class PointingOptionsWithGridCoverage(Entity):
         
         :paramtype out_file_access: str
 
-        :param filter_mid_acc: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
+        :param mid_access_only: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
                                 Default value is ``False``.
-        :paramtype filter_mid_acc: bool
+        :paramtype mid_access_only: bool
 
         :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
                         Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
@@ -996,7 +996,7 @@ class PointingOptionsWithGridCoverage(Entity):
             access_file.close()
 
         ##### filter mid-interval access data if necessary #####
-        if filter_mid_acc is True:
+        if mid_access_only is True:
             #inp_acc_df = pd.read_csv(out_file_access, skiprows = 4)
             filter_mid_interval_access(inp_acc_fl=out_file_access, out_acc_fl=out_file_access)
 
@@ -1005,7 +1005,7 @@ class PointingOptionsWithGridCoverage(Entity):
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
                                                 "usedFieldOfRegard": None,
-                                                "filterMidIntervalAccess": filter_mid_acc,
+                                                "filterMidIntervalAccess": mid_access_only,
                                                 "gridId": self.grid._id,
                                                 "stateCartFile": self.state_cart_file,
                                                 "accessFile": out_file_access,

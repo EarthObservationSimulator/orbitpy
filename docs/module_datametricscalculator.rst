@@ -103,7 +103,7 @@ Examples
 
          # execute coverage calculations for "bs1" and subsequently datametrics calculations
          cov_cal = GridCoverage(grid=grid, spacecraft=sc, state_cart_file=state_cart_file)
-         cov_cal.execute(instru_id="bs1", mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, filter_mid_acc=False)
+         cov_cal.execute(instru_id="bs1", mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, mid_access_only=False)
 
          acf = AccessFileInfo("bs1", None, out_file_access)
          dm_calc = DataMetricsCalculator(sc, state_cart_file, acf)
@@ -113,7 +113,7 @@ Examples
 
          # execute coverage calculations for "bs2" and subsequently datametrics calculations
          out_file_access = out_dir + '/access_bs2.csv'
-         cov_cal.execute(instru_id="bs2", mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, filter_mid_acc=False)
+         cov_cal.execute(instru_id="bs2", mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, mid_access_only=False)
 
          # add the (new) access file information
          dm_calc.add_access_file_info(AccessFileInfo("bs2", None, out_file_access)) 

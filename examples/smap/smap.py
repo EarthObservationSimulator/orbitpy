@@ -68,6 +68,6 @@ for k in range(0,4):
     print("start coverage")
     acc_fl = sat_dir + 'access_instru_sar_' + str(6*k) + 'hrs.csv'
     cov_calc = GridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file)
-    x = cov_calc.execute(instru_id='smap', mode_id=None, use_field_of_regard=False, out_file_access=acc_fl, filter_mid_acc=True)
+    x = cov_calc.execute(instru_id='smap', mode_id=None, use_field_of_regard=False, out_file_access=acc_fl, mid_access_only=True)
     out_info.append(x)     
     print('finished coverage, time until now: {}s'.format(time.process_time() - start_time))

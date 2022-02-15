@@ -29,10 +29,10 @@ in the list of modes of the instrument shall be selected.
 Coverage is calculated for the period over which the input spacecraft propagated states are available. The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
 Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations unless it has been specified to use the field-of-regard (using the ``use_field_of_regard`` input argument).
 
-The ``filter_mid_acc`` input argument can be used to specify if the access times only at the middle of an continuous access-interval. 
-E.g. If the access takes place at time-indices 450, 451, 452, 453, 454, and if the ``filter_mid_acc`` flag is specified to be true, then only the access time-index = 452 is written
+The ``mid_access_only`` input argument can be used to specify if the access times only at the middle of an continuous access-interval. 
+E.g. If the access takes place at time-indices 450, 451, 452, 453, 454, and if the ``mid_access_only`` flag is specified to be true, then only the access time-index = 452 is written
 in the results.
-Please see :ref:`correction_of_access_files` for situations when the ``filter_mid_acc`` flag would need to be set true.
+Please see :ref:`correction_of_access_files` for situations when the ``mid_access_only`` flag would need to be set true.
 
 The ``out_file_access`` input argument is 
 used to specify the filepath (with filename) at which the results are to be written.
@@ -242,7 +242,7 @@ Examples
          
          # run the coverage calculator
          cov_cal = GridCoverage(grid=grid, spacecraft=sc, state_cart_file=state_cart_file)
-         out_info = cov_cal.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, filter_mid_acc=False, method='ProjectedPIP')
+         out_info = cov_cal.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, mid_access_only=False, method='ProjectedPIP')
          
          access.csv
          -----------
@@ -270,13 +270,13 @@ Examples
          12,4304,0.0,78.0
          ...
    
-   In below snippet the ``filter_mid_acc`` flag is set to ``True`` instead of ``False``. Observe the difference in the output access data between the above result
+   In below snippet the ``mid_access_only`` flag is set to ``True`` instead of ``False``. Observe the difference in the output access data between the above result
    and the below result. In the below result only access at the middle of the access time-interval is shown. E.g. The very-first access to the GP 4303 is from time-index = 0 to 10 
    and the mid-interval access is at time-index = 5.
 
    .. code-block:: python
 
-      out_info = cov_cal.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, filter_mid_acc=True, method='ProjectedPIP')
+      out_info = cov_cal.execute(instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=out_file_access, mid_access_only=True, method='ProjectedPIP')
 
       access.csv
       -----------
@@ -336,7 +336,7 @@ Examples
 
       # run the coverage calculator
       cov_cal = GridCoverage(grid=grid, spacecraft=sc, state_cart_file=state_cart_file)
-      out_info = cov_cal.execute(instru_id="B", mode_id=2, use_field_of_regard=True, out_file_access=out_file_access, filter_mid_acc=True) # select instru B, mode 2
+      out_info = cov_cal.execute(instru_id="B", mode_id=2, use_field_of_regard=True, out_file_access=out_file_access, mid_access_only=True) # select instru B, mode 2
 
       access.csv
       -----------
@@ -409,7 +409,7 @@ Examples
 4. *POINTING OPTIONS WITH GRID COVERAGE example*
    
       In the below snippet, the satellite is equipped with two instruments. The second instrument with the pointing-options specifications is chosen for
-      coverage calculations.  The ``filter_mid_acc`` flag is set to ``True`` to have only the access-times at the middle of access-intervals. The output csv file
+      coverage calculations.  The ``mid_access_only`` flag is set to ``True`` to have only the access-times at the middle of access-intervals. The output csv file
       shows the grid-points accessed (if any) for each of the pointing-options at every time-step.
    
       .. code-block:: python
@@ -452,7 +452,7 @@ Examples
             
             # run the coverage calculator
             cov_cal = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sc, state_cart_file=state_cart_file)
-            out_info = cov_cal.execute(instru_id="B", mode_id=None, out_file_access=out_file_access, filter_mid_acc=True, method='RectangularPIP')
+            out_info = cov_cal.execute(instru_id="B", mode_id=None, out_file_access=out_file_access, mid_access_only=True, method='RectangularPIP')
 
             access.csv
             -----------

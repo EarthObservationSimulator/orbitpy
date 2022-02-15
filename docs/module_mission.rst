@@ -23,9 +23,9 @@ Each of the acceptable json objects in the mission specifications is described b
    propagator, :ref:`propagator_json_object`, ,Propagator specifications.
    settings, :ref:`settings_json_object`, , General settings.
 
-.. note:: In case of *GRID COVERAGE* calculation, the field-of-regard is used (and not the scene-field-of-view). In case of SAR instruments and coverage calculations
-          involving grid (i.e. *GRID COVERAGE* and *POINTING OPTIONS WITH GRID COVERAGE*), only the access at the middle of a continuous access interval is shown
-          (see :ref:`correction_of_access_files`). 
+.. note:: In case of *GRID COVERAGE* calculation, the field-of-regard is used (FOR = sceneFOV if unspecified, and sceneFOV = instrument FOV if unspecified). 
+          In case of SAR instruments and coverage calculations involving grid (i.e. *GRID COVERAGE* and *POINTING OPTIONS WITH GRID COVERAGE*), 
+          only the access at the middle of a continuous access interval is shown (see :ref:`correction_of_access_files`). 
 
 .. note:: *Either* of the ``constellation``, ``instrument`` json objects or the ``spacecraft`` json object should be provided in the mission specifications. Both should not be specified.
 

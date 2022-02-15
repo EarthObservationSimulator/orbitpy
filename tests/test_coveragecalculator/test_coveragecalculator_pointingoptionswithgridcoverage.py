@@ -218,7 +218,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
     
 
     def test_execute_3(self):
-        """ Test with the `filter_mid_acc` flag set to 'True' in PointingOptionsWithGridCoverage.  
+        """ Test with the `mid_access_only` flag set to 'True' in PointingOptionsWithGridCoverage.  
         """
         
         duration = 0.0025
@@ -253,7 +253,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
 
         out_file_access = self.out_dir+'/test_cov_access1.csv'
         # run the coverage calculator, bs1 instrument
-        out_info = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id='bs1', mode_id=None, out_file_access=out_file_access, filter_mid_acc=False)
+        out_info = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id='bs1', mode_id=None, out_file_access=out_file_access, mid_access_only=False)
         self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
                                                                     "spacecraftId": sat._id,
                                                                     "instruId": 'bs1',
@@ -268,7 +268,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access2.csv'
         # run the coverage calculator, bs1 instrument
-        out_info = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id='bs1', mode_id=None, out_file_access=out_file_access, filter_mid_acc=True)
+        out_info = PointingOptionsWithGridCoverage(grid=grid, spacecraft=sat, state_cart_file=state_cart_file).execute(instru_id='bs1', mode_id=None, out_file_access=out_file_access, mid_access_only=True)
         self.assertEqual(out_info, CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS WITH GRID COVERAGE",
                                                                     "spacecraftId": sat._id,
                                                                     "instruId": 'bs1',
