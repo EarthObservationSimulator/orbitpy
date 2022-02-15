@@ -39,20 +39,20 @@ class Settings(Entity):
     :ivar gridResFactor: Factor which influences the grid-resolution of an auto-generated grid. See :class:`orbitpy.grid.compute_grid_res`. 
     :vartype gridResFactor: float
 
-    :ivar opaque_atmos_height: Relevant in-case of inter-satellite communications. Height of atmosphere (in kilometers) below which line-of-sight 
+    :ivar opaqueAtmosHeight: Relevant in-case of inter-satellite communications. Height of atmosphere (in kilometers) below which line-of-sight 
                                     communication between two satellites **cannot** take place. Default value is 0 km.
-    :vartype opaque_atmos_height_km: float
+    :vartype opaqueAtmosHeight: float
 
     :ivar _id: Unique identifier of the settings object.
     :vartype _id: int/ str
 
     """
-    def __init__(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaque_atmos_height=None, _id=None):
+    def __init__(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaqueAtmosHeight=None, _id=None):
         self.outDir = str(outDir) if outDir is not None else None
         self.coverageType = coverageType if coverageType is not None else None
         self.propTimeResFactor = float(propTimeResFactor) if propTimeResFactor is not None else None
         self.gridResFactor = float(gridResFactor) if gridResFactor is not None else None
-        self.opaque_atmos_height = float(opaque_atmos_height) if opaque_atmos_height is not None else None
+        self.opaqueAtmosHeight = float(opaqueAtmosHeight) if opaqueAtmosHeight is not None else None
 
         super(Settings, self).__init__(_id, "Settings")
     
@@ -68,7 +68,7 @@ class Settings(Entity):
         * coverageType: Type of coverage calculation. Default value is ``None``.
         * propTimeResFactor: Factor which influences the propagation step-size calculation. See :class:`orbitpy.propagator.compute_time_step`. Default value is 0.25.
         * gridResFactor: Factor which influences the grid-resolution of an auto-generated grid. See :class:`orbitpy.grid.compute_grid_res`. Default value is 0.9.
-        * opaque_atmos_height: Relevant in-case of inter-satellite communications. Height of atmosphere (in kilometers) below which line-of-sight communication between two satellites **cannot** take place. Default value is 0 km.
+        * opaqueAtmosHeight: Relevant in-case of inter-satellite communications. Height of atmosphere (in kilometers) below which line-of-sight communication between two satellites **cannot** take place. Default value is 0 km.
         * @id: Unique identifier. Default is ``None``.
 
         :paramtype d: dict
@@ -81,7 +81,7 @@ class Settings(Entity):
                          coverageType = d.get('coverageType', None),
                          propTimeResFactor = d.get('propTimeResFactor', 0.25), # default value is 0.25
                          gridResFactor = d.get('gridResFactor', 0.9), # default value is 0.9
-                         opaque_atmos_height = d.get('opaque_atmos_height', 0), # default value is 0
+                         opaqueAtmosHeight = d.get('opaqueAtmosHeight', 0), # default value is 0
                          _id = d.get('@id', None)
                         )                        
         
@@ -97,7 +97,7 @@ class Settings(Entity):
                      "coverageType": self.coverageType if self.coverageType is not None else None,
                      "propTimeResFactor": self.propTimeResFactor,                     
                      "gridResFactor": self.gridResFactor,
-                     "opaque_atmos_height": self.opaque_atmos_height,
+                     "opaqueAtmosHeight": self.opaqueAtmosHeight,
                      "@id": self._id})
 
     def __repr__(self):
@@ -108,7 +108,7 @@ class Settings(Entity):
         if(isinstance(self, other.__class__)):
             return (self.outDir==other.outDir) and (self.coverageType==other.coverageType) \
                     and (self.propTimeResFactor==other.propTimeResFactor) and (self.gridResFactor==other.gridResFactor) \
-                        and (self.opaque_atmos_height==other.opaque_atmos_height)                   
+                        and (self.opaqueAtmosHeight==other.opaqueAtmosHeight)                   
         else:
             return NotImplemented
 
@@ -417,7 +417,7 @@ class Mission(Entity):
         self.update_settings(gridResFactor=gridResFactor)
         
 
-    def update_settings(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaque_atmos_height=None):
+    def update_settings(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaqueAtmosHeight=None):
         """ Update settings.
 
             :param outDir: Output directory path.
@@ -432,9 +432,9 @@ class Mission(Entity):
             :param gridResFactor: Factor which influences the grid-resolution of an auto-generated grid. See :class:`orbitpy.grid.compute_grid_res`. 
             :paramtype gridResFactor: float
 
-            :param opaque_atmos_height: Relevant in-case of inter-satellite communications. Height of atmosphere (in kilometers) below which line-of-sight 
+            :param opaqueAtmosHeight: Relevant in-case of inter-satellite communications. Height of atmosphere (in kilometers) below which line-of-sight 
                                     communication between two satellites **cannot** take place. Default value is 0 km.
-            :paramtype opaque_atmos_height_km: float
+            :paramtype opaqueAtmosHeight: float
 
         """
         if outDir:
@@ -445,8 +445,8 @@ class Mission(Entity):
             self.settings.propTimeResFactor = float(propTimeResFactor)
         if gridResFactor:
             self.settings.gridResFactor = float(gridResFactor)
-        if opaque_atmos_height:
-            self.settings.opaque_atmos_height = float(opaque_atmos_height)
+        if opaqueAtmosHeight:
+            self.settings.opaqueAtmosHeight = float(opaqueAtmosHeight)
 
     def add_spacecraft_from_dict(self, d):
         """ Add one or more spacecrafts to the list of spacecrafts (instance variable ``spacecraft``).
@@ -723,7 +723,7 @@ class Mission(Entity):
                 spc2_state_cart_file = spc2_prop_out_info.stateCartFile
                                 
                 out_intersat_filename = 'sat'+str(spc1_idx)+'_to_sat'+str(spc2_idx)+'.csv'
-                x = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaque_atmos_height)
+                x = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaqueAtmosHeight)
                 oi.append(x)
 
         # delete any output-info object(s) associated with a previous execution
@@ -1086,7 +1086,7 @@ class Mission(Entity):
                 spc2_state_cart_file = self.settings.outDir + 'sat' + str(spc2_idx) + '/state_cartesian.csv'
                                 
                 out_intersat_filename = 'sat'+str(spc1_idx)+'_to_sat'+str(spc2_idx)+'.csv'
-                x = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaque_atmos_height)
+                x = ContactFinder.execute(spc1, spc2, intersat_comm_dir, spc1_state_cart_file, spc2_state_cart_file, out_intersat_filename, ContactFinder.OutType.INTERVAL, self.settings.opaqueAtmosHeight)
                 out_info.append(x)
     
         return out_info

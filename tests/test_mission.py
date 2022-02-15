@@ -52,7 +52,7 @@ class TestMission(unittest.TestCase):
                                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                 } \
                                     }, \
-                                "settings": {"outDir": "temp/", "opaque_atmos_height":30} \
+                                "settings": {"outDir": "temp/", "opaqueAtmosHeight":30} \
                             }'
         mission = Mission.from_json(mission_json_str)
         self.assertAlmostEqual(mission.epoch.GetJulianDate(), 2459299.1292592594)
@@ -70,7 +70,7 @@ class TestMission(unittest.TestCase):
         self.assertIsNone(mission.settings.coverageType)
         self.assertEqual(mission.settings.propTimeResFactor, 0.25)
         self.assertEqual(mission.settings.gridResFactor, 0.9)
-        self.assertEqual(mission.settings.opaque_atmos_height, 30)
+        self.assertEqual(mission.settings.opaqueAtmosHeight, 30)
 
         out_info = mission.execute()
 
