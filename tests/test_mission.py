@@ -209,7 +209,7 @@ class TestMission(unittest.TestCase):
                                                     } \
                                     }, \
                                 "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180}, {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180}], \
-                                "settings": {"outDir": "temp/", "coverageType": "POINTING OPTIONS WITH GRID COVERAGE"} \
+                                "settings": {"outDir": "temp/", "coverageType": "POINTING OPTIONS WITH GRID COVERAGE", "midAccessOnly": true} \
                             }'
 
         mission = Mission.from_json(mission_json_str)
@@ -441,7 +441,7 @@ class TestMission(unittest.TestCase):
                                                     }] \
                                     }], \
                                 "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180, "gridRes": 1}], \
-                                "settings": {"outDir": "temp/", "coverageType": "GRID COVERAGE"} \
+                                "settings": {"outDir": "temp/", "coverageType": "GRID COVERAGE", "midAccessOnly": true} \
                             }'
 
         mission = Mission.from_json(mission_json_str)

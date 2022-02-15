@@ -169,7 +169,7 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
         This should be coupled with the required scene-scan-duration (from scene-field-of-view) to get complete information about the access. 
 
         .. warning:: The correction method is to be used only when the instrument access-duration (determined from the instrument FOV) is smaller 
-                     than the propagation time step (determined from the sceneFOV). 
+                     than the propagation time step (determined from the FOR or sceneFOV). 
 
         :ivar inp_acc_df: Dataframe with the access data which needs to be filtered. The rows correspond to pairs of 
                           access time and corresponding ground-point index. The columns are to be named as: ``time index``, ``GP index``, ``lat [deg]``, ``lon [deg]``.

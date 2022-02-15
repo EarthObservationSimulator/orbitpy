@@ -24,8 +24,6 @@ Each of the acceptable json objects in the mission specifications is described b
    settings, :ref:`settings_json_object`, , General settings.
 
 .. note:: In case of *GRID COVERAGE* calculation, the field-of-regard is used (FOR = sceneFOV if unspecified, and sceneFOV = instrument FOV if unspecified). 
-          In case of SAR instruments and coverage calculations involving grid (i.e. *GRID COVERAGE* and *POINTING OPTIONS WITH GRID COVERAGE*), 
-          only the access at the middle of a continuous access interval is shown (see :ref:`correction_of_access_files`). 
 
 .. note:: *Either* of the ``constellation``, ``instrument`` json objects or the ``spacecraft`` json object should be provided in the mission specifications. Both should not be specified.
 
@@ -359,12 +357,14 @@ This json object is used to specify some common mission settings. Following key/
    coverageType, str, , Indicates the coverage calculation type. Accepted values for the in-built coverage calculators are: GRID COVERAGE/ POINTING OPTIONS COVERAGE/ POINTING OPTIONS WITH GRID COVERAGE.
    propTimeResFactor, float, ,  Factor which influences the propagation step-size calculation. See :class:`orbitpy.propagator.compute_time_step`. Default value is 0.25.
    gridResFactor, float, , Factor which influences the grid-resolution of an auto-generated grid. See :class:`orbitpy.grid.compute_grid_res`. Default value is 0.9.
+   opaqueAtmosHeight, float, km, Relevant in-case of inter-satellite communications. Height of atmosphere (in kilometers) below which line-of-sight communication between two satellites **cannot** take place. Default value is 0 km.
+   midAccessOnly, bool, , Flag to have only the access-times at the middle of access-intervals. The flag is set to `True` when coverage calculations are done for narrow FOV instruments like SAR or pushbroom-optical sensors using a sceneFOV (or FOR defined by a sceneFOV). See :ref:`correction_of_access_files`.
 
 **Example**
 
 .. code-block:: javascript
 
-   "settings": {"outDir": "temp/", "coverageType": "GRID COVERAGE", "gridResFactor": 0.5} 
+   "settings": {"outDir": "temp/", "coverageType": "GRID COVERAGE", "gridResFactor": 0.5, "midAccessOnly": true} 
 
 Output
 ^^^^^^^

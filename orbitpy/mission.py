@@ -43,16 +43,21 @@ class Settings(Entity):
                                     communication between two satellites **cannot** take place. Default value is 0 km.
     :vartype opaqueAtmosHeight: float
 
+    :ivar midAccessOnly: Flag to have only the access-times at the middle of access-intervals. The flag is set to `True` when coverage calculations are done for narrow FOV instruments 
+                         like SAR or pushbroom-optical sensors using a sceneFOV (or FOR defined by a sceneFOV). See :ref:`correction_of_access_files`.
+    :vartype midAccessOnly: bool
+
     :ivar _id: Unique identifier of the settings object.
     :vartype _id: int/ str
 
     """
-    def __init__(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaqueAtmosHeight=None, _id=None):
+    def __init__(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaqueAtmosHeight=None, midAccessOnly=None, _id=None):
         self.outDir = str(outDir) if outDir is not None else None
         self.coverageType = coverageType if coverageType is not None else None
         self.propTimeResFactor = float(propTimeResFactor) if propTimeResFactor is not None else None
         self.gridResFactor = float(gridResFactor) if gridResFactor is not None else None
         self.opaqueAtmosHeight = float(opaqueAtmosHeight) if opaqueAtmosHeight is not None else None
+        self.midAccessOnly = bool(midAccessOnly) if midAccessOnly is not None else None
 
         super(Settings, self).__init__(_id, "Settings")
     
@@ -69,6 +74,7 @@ class Settings(Entity):
         * propTimeResFactor: Factor which influences the propagation step-size calculation. See :class:`orbitpy.propagator.compute_time_step`. Default value is 0.25.
         * gridResFactor: Factor which influences the grid-resolution of an auto-generated grid. See :class:`orbitpy.grid.compute_grid_res`. Default value is 0.9.
         * opaqueAtmosHeight: Relevant in-case of inter-satellite communications. Height of atmosphere (in kilometers) below which line-of-sight communication between two satellites **cannot** take place. Default value is 0 km.
+        * midAccessOnly: Flag to have only the access-times at the middle of access-intervals. The flag is set to `True` when coverage calculations are done for narrow FOV instruments like SAR or pushbroom-optical sensors using a sceneFOV (or FOR defined by a sceneFOV). See :ref:`correction_of_access_files`.
         * @id: Unique identifier. Default is ``None``.
 
         :paramtype d: dict
@@ -82,6 +88,7 @@ class Settings(Entity):
                          propTimeResFactor = d.get('propTimeResFactor', 0.25), # default value is 0.25
                          gridResFactor = d.get('gridResFactor', 0.9), # default value is 0.9
                          opaqueAtmosHeight = d.get('opaqueAtmosHeight', 0), # default value is 0
+                         midAccessOnly = d.get('midAccessOnly', 0), # default value is False
                          _id = d.get('@id', None)
                         )                        
         
@@ -98,6 +105,7 @@ class Settings(Entity):
                      "propTimeResFactor": self.propTimeResFactor,                     
                      "gridResFactor": self.gridResFactor,
                      "opaqueAtmosHeight": self.opaqueAtmosHeight,
+                     "midAccessOnly": self.midAccessOnly,
                      "@id": self._id})
 
     def __repr__(self):
@@ -108,7 +116,7 @@ class Settings(Entity):
         if(isinstance(self, other.__class__)):
             return (self.outDir==other.outDir) and (self.coverageType==other.coverageType) \
                     and (self.propTimeResFactor==other.propTimeResFactor) and (self.gridResFactor==other.gridResFactor) \
-                        and (self.opaqueAtmosHeight==other.opaqueAtmosHeight)                   
+                        and (self.opaqueAtmosHeight==other.opaqueAtmosHeight) and (self.midAccessOnly==other.midAccessOnly)                  
         else:
             return NotImplemented
 
@@ -417,7 +425,7 @@ class Mission(Entity):
         self.update_settings(gridResFactor=gridResFactor)
         
 
-    def update_settings(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaqueAtmosHeight=None):
+    def update_settings(self, outDir=None, coverageType=None, propTimeResFactor=None, gridResFactor=None, opaqueAtmosHeight=None, midAccessOnly=None):
         """ Update settings.
 
             :param outDir: Output directory path.
@@ -436,6 +444,10 @@ class Mission(Entity):
                                     communication between two satellites **cannot** take place. Default value is 0 km.
             :paramtype opaqueAtmosHeight: float
 
+            :param midAccessOnly: Flag to have only the access-times at the middle of access-intervals. The flag is set to `True` when coverage calculations are done for narrow FOV instruments 
+                         like SAR or pushbroom-optical sensors using a sceneFOV (or FOR defined by a sceneFOV). See :ref:`correction_of_access_files`.
+            :paramtype midAccessOnly: bool
+
         """
         if outDir:
             self.settings.outDir = str(outDir)
@@ -447,6 +459,8 @@ class Mission(Entity):
             self.settings.gridResFactor = float(gridResFactor)
         if opaqueAtmosHeight:
             self.settings.opaqueAtmosHeight = float(opaqueAtmosHeight)
+        if midAccessOnly:
+            self.settings.midAccessOnly = bool(midAccessOnly)
 
     def add_spacecraft_from_dict(self, d):
         """ Add one or more spacecrafts to the list of spacecrafts (instance variable ``spacecraft``).
@@ -839,12 +853,7 @@ class Mission(Entity):
                             for grid_idx, grid in enumerate(self.grid):
                                 acc_fl = spc_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
                                 cov_calc = GridCoverage(grid=grid, spacecraft=spc, state_cart_file=spc_state_cart_file)
-                                # For SAR instruments pick only the time-instants at the middle of access-intervals
-                                if instru._type == 'Synthetic Aperture Radar':
-                                    mid_access_only = True
-                                else:
-                                    mid_access_only = False
-                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl)
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, use_field_of_regard=True, out_file_access=acc_fl, mid_access_only=self.settings.midAccessOnly)
                                 oi.append(x) 
 
                         elif self.settings.coverageType == "POINTING OPTIONS COVERAGE":
@@ -862,13 +871,7 @@ class Mission(Entity):
 
                                 acc_fl = spc_dir + 'access_instru' + str(instru_idx) + '_mode' + str(mode_idx) + '_grid'+ str(grid_idx) + '.csv'
                                 cov_calc = PointingOptionsWithGridCoverage(grid=grid, spacecraft=spc, state_cart_file=spc_state_cart_file)
-
-                                # For SAR instruments pick only the time-instants at the middle of access-intervals
-                                if instru._type == 'Synthetic Aperture Radar':
-                                    mid_access_only = True
-                                else:
-                                    mid_access_only = False
-                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, mid_access_only=mid_access_only)
+                                x = cov_calc.execute(instru_id=instru._id, mode_id=mode._id, out_file_access=acc_fl, mid_access_only=self.settings.midAccessOnly)
                                 oi.append(x) 
                         
         # delete any output-info object(s) associated with a previous execution

@@ -193,7 +193,7 @@ is to be used for the data-metrics calculation.
       :align: center
 
 .. warning:: The correction method is to be used only when the instrument access-duration (which is determined from the instrument FOV) is smaller 
-            than the propagation time step (which is determined from the sceneFOV (assume no maneuver in which case FOR = sceneFOV)).
+            than the propagation time step (which is determined from the sceneFOV or FOR).
 
 Examples
 ^^^^^^^^^
