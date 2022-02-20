@@ -23,6 +23,9 @@ CPPFLAGS = $(HEADERS) $(OPTIMIZATIONS) -Wall -g -std=gnu++17
 CPP = g++
 
 OBJECTS = \
+    Grid.o \
+    HelicalGrid.o \
+    GridFilter.o \
     AbsoluteDate.o \
     Attitude.o \
     ConicalSensor.o \
