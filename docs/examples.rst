@@ -13,7 +13,57 @@ Simple Mission 1
 This example available in the folder ``examples/simple_mission_1`` is based on configuring the mission in a JSON file.
 It has been described in the :ref:`run_json_specs_file` section.
 
+Planet SkySat 
+===============
+This example is configured in the ``MissionSpecs.json`` file in the ``examples/planet_skysat`` folder. 
+It can be executed from the repo directory using the command: ``python bin/run_mission.py examples/planet_skysat/``
 
+Skysat-C1 to Skysat-C6 (of the 21 available) are modeled along with their optical instrument. The instrument is modeled as a Matrix imager 
+(spectral information configured to the blue band). 
+Please see the InstruPy repository for references from which the instrument was built (``examples/passive_scanner_model/skysat_camera``).
+The imager has 3 adjacent CMOS chips. A scene size of 9.25kmX6.6km is considered.
+
+The maneuvering of the satellites to 28 roll angles is modeled as set of pointing options, with each pointing-option placed under a separate instrument mode.
+The roll angles are chosen so that the corresponding swaths are adjacent to each other and they cover a span of -10deg to +10deg.
+The *POINTING OPTIONS COVERAGE* type of coverage calculation is implemented. At each time-step of propagation, the lat/lon coordinates of the
+ground points at the intersection of the instrument pointing-axis and the Earths surface are output. 
+
+The output file structure is as follows:
+
+.. code:: bash
+
+    │   MissionSpecs.json (Mission configuration file)
+    │
+    ├───comm (intersatellite contact periods)
+    │       ...
+    │
+    ├───sat0 (SkySat-C1)
+    │       access_instru0_mode0.csv (access events corresponding to mode-0, i.e. pointing at 0 deg roll)
+    │       access_instru0_mode1.csv
+    │       access_instru0_mode2.csv
+    │       ...
+    │       datametrics_instru0_mode0.csv (data-metrics corresponding to the access events of mode-0)
+    │       datametrics_instru0_mode1.csv
+    │       datametrics_instru0_mode2.csv
+    │       ...
+    │       state_cartesian.csv (Cartesian orbit data)
+    │       state_keplerian.csv (Keplerian orbit data)
+    │
+    ├───sat1 (SkySat-C2)
+    │       ...
+    │
+    ├───sat2 (SkySat-C3)
+    │       ...
+    │
+    ├───sat3 (SkySat-C4)
+    │       ...
+    │
+    ├───sat4 (SkySat-C5)
+    │       ...
+    │
+    └───sat5 (SkySat-C6)
+            ...
+            
 SAR Constellation
 ==================
 This example (available in ``examples/sar_constellation/``) was developed for the DSHIELD project. 
@@ -51,3 +101,6 @@ The instruments of the satellites (TIRS, OLI and HawkEye are modeled) and corres
 Since the instruments have a narrow FOV in the along-track direction, and if these FOV were considered, the coverage calculations would need to done with very small propagation step-size. Hence a sceneFOV is defined which has a larger 
 along-track dimension (cross-track dimension is same as the instrument FOV).
 For detailed description of the mission please refer the ``landsat_seahawk.py`` script.
+
+
+

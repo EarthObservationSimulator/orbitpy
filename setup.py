@@ -12,7 +12,7 @@ setup(
     author_email='vinay.ravindra@nasa.gov',
     packages=['orbitpy'],
     scripts=[ # TODO: remove this? Does not seem to serve any purpose. 
-    'bin/dshield_mission.py'
+    'bin/run_mission.py'
     ],
     install_requires=['numpy', 'instrupy', 'pandas', 'scipy', 'sphinx', 
                       'sphinx_rtd_theme==0.5.2', 'propcov']
