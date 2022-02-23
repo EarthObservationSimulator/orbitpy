@@ -26,6 +26,7 @@ OBJECTS = \
     Grid.o \
     HelicalGrid.o \
     GridFilter.o \
+    HorizonFilter.o \
     AbsoluteDate.o \
     Attitude.o \
     ConicalSensor.o \

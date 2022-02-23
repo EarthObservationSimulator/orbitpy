@@ -9,7 +9,7 @@
 class GridFilter
 {
     public:
-        virtual IntegerArray FilterGrid(Spacecraft* spacecraft, Grid* grid);
+        virtual IntegerArray FilterGrid();
         // Returns true if the filter is set to prefilter
         bool IsPrefilter();
         // Set the filter to be applied before the FOV check
