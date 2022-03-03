@@ -32,10 +32,3 @@ In order to uninstall run ``make bare`` in the terminal.
             *   The ``make runtest`` does *not* run the tests of the ``propcov`` library. Please see the ``README.MD`` in the ``propcov`` folder on how to run it's tests.
 
             *   Documentation of the ``propcov`` library is available in the Word document ``propcov/docs/propcov-cpp.docx``.
-
-If using a Windows system, one may consider setting up a virtual-machine with Ubuntu (or similar) OS. 
-`VMware workstation player <https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html>`_ is available free for non-commercial, personal or home use. VMWare tools may need to be installed separately after the player installation.
-
-Ubuntu virtual machine images for VMWare and VirtualBox are available at `OSBoxes <https://www.osboxes.org/ubuntu/>`_
-
-The present version of OrbitPy has been tested on Ubuntu 18.04.3.

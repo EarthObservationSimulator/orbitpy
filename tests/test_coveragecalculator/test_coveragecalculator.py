@@ -4,6 +4,7 @@ import os, shutil
 import sys
 import unittest
 import pandas as pd
+from deepdiff import DeepDiff
 
 from orbitpy.coveragecalculator import CoverageCalculatorFactory, GridCoverage, PointingOptionsCoverage, PointingOptionsWithGridCoverage
 import orbitpy.coveragecalculator
@@ -81,14 +82,15 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         self.assertEqual(x[2].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 0.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5.0, 'angleWidth': 10, '@id': None}}))
-        self.assertEqual(x[2].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
-                                [
-                                    ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 12.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
+        ddiff = DeepDiff(x[2].field_of_regard,  # note that the field-of-regard is a list of ViewGeometry objects
+                         [ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 12.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                                  "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}}), 
-                                    ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 347.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
+                          ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 347.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                                  "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}})
-                                ]
-                        )
+                         ], 
+                         significant_digits=9, ignore_numeric_type_changes=True)
+        self.assertEqual(ddiff, {}, msg=ddiff)
+
         self.assertIsNone(x[2].pointing_option)
         # instrument 3, mode 2
         self.assertEqual(x[3].instru_id, 'bs3')
@@ -96,12 +98,14 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         self.assertEqual(x[3].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 25.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5.0, 'angleWidth': 10, '@id': None}}))
-        self.assertEqual(x[3].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
-                                [ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 12.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
+        ddiff = DeepDiff(x[3].field_of_regard,  # note that the field-of-regard is a list of ViewGeometry objects
+                         [ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 12.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                               "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}}), 
-                                 ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 347.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
-                                              "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}})]
-                        )
+                          ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 347.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
+                                              "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}})
+                         ], 
+                         significant_digits=9, ignore_numeric_type_changes=True)
+        self.assertEqual(ddiff, {}, msg=ddiff)
         self.assertIsNone(x[3].pointing_option)
         # instrument 3, mode 3
         self.assertEqual(x[4].instru_id, 'bs3')
@@ -109,12 +113,13 @@ class TestCoverageCalculatorFunctions(unittest.TestCase):
         self.assertEqual(x[4].scene_field_of_view, 
                             ViewGeometry.from_dict({"orientation":{'referenceFrame': 'SC_BODY_FIXED', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': -25.0, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                          "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5.0, 'angleWidth': 10, '@id': None}}))
-        self.assertEqual(x[4].field_of_regard, # note that the field-of-regard is a list of ViewGeometry objects
-                                [ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 12.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
+        ddiff = DeepDiff(x[4].field_of_regard,  # note that the field-of-regard is a list of ViewGeometry objects
+                         [ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 12.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
                                               "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}}), 
-                                 ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 347.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
-                                              "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}})]
-                        )
+                          ViewGeometry.from_dict({"orientation":{'referenceFrame': 'NADIR_POINTING', 'convention': 'EULER', 'eulerAngle1': 0.0, 'eulerAngle2': 347.5, 'eulerAngle3': 0.0, 'eulerSeq1': 1, 'eulerSeq2': 2, 'eulerSeq3': 3, '@id': None}, 
+                                              "sphericalGeometry":{'shape': 'RECTANGULAR', 'angleHeight': 5, 'angleWidth': 15, '@id': None}})
+                         ], 
+                         significant_digits=9, ignore_numeric_type_changes=True)
         self.assertIsNone(x[4].pointing_option)
       
     
