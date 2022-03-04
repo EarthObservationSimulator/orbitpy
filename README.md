@@ -16,11 +16,11 @@ This package contain set of modules to compute *mission-data* of satellites. It 
 9. Computation of satellite eclipse time-intervals.
 10. Sensor pixel-array projection to simulated Level-2 satellite imagery.
 
-The `orbitpy` package is built on top of the `propcov`package available in the `propcov` folder. Please refer to the `README.MD` file within the `propcov` folder for description of the respective package.
+The `orbitpy` package is built on top of the `propcov` package available in the `propcov` folder. Please refer to the `README.MD` file within the `propcov` folder for description of the respective package.
 
 ## Install
 
-Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `cmake`
+Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `make`, `cmake`
 
 It is recommended to carry out the installation in a `conda` environment. Instructions are available in the README file of the InstruPy package.
 

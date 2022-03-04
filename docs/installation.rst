@@ -1,7 +1,7 @@
 Installation
 ==============
 
-Requires: Unix-like operating system, ``python 3.8``, ``pip``, ``gcc``, ``cmake``
+Requires: Unix-like operating system, ``python 3.8``, ``pip``, ``gcc``, ``make``, ``cmake``
 
 It is recommended to carry out the installation in a ``conda`` environment. Instructions are available in the ``README.md`` file of the InstruPy package.
 
