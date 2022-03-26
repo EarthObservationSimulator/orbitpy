@@ -27,7 +27,7 @@
  * legacy version includes functionality to generate reports, this class only checks for 
  * point-coverage.
  * 
- * The CoverageChecker is instantiated with pointers to PointGroup object and a Spacecraft object.
+ * The CoverageChecker is instantiated with pointers to Grid object and a Spacecraft object.
  * The point-group contains list of points which are to be checked for coverage calculations. 
  * The spacecraft may contain sensor, in which case coverage is evaluated for the sensor FOV or if no sensor
  * the coverage is evaluated for the spacecraft (horizon-test is performed). There is room to expand to multiple sensors
@@ -45,17 +45,18 @@
 #include "gmatdefs.hpp"
 #include "AbsoluteDate.hpp"
 #include "Spacecraft.hpp"
-#include "PointGroup.hpp"
+#include "Grid.hpp"
 #include "Earth.hpp"
 #include "Rvector.hpp"
 #include "Rvector3.hpp"
+#include "GridFilter.hpp"
 
 class CoverageChecker
 {
 public:
    
    /// class construction/destruction
-   CoverageChecker(PointGroup *ptGroup, Spacecraft *sat);
+   CoverageChecker(Grid *ptGroup, Spacecraft *sat, GridFilter* filter);
    CoverageChecker( const CoverageChecker &copy);
    CoverageChecker& operator=(const CoverageChecker &copy);
    
@@ -75,35 +76,18 @@ public:
 protected:
    
    /// the points to use for coverage
-   PointGroup                 *pointGroup;
+   Grid                 *pointGroup;
    /// The spacecraft object @todo Should this be an array of spacecraft?
    Spacecraft                 *sc;
+   // Filters applied to grid
+   GridFilter                 *filter;
    /// the central body; the model of Earth's properties & rotation
    Earth                      *centralBody;
    /// central body radius
    Real centralBodyRadius;
-
-   /// array of all unit position vectors of points @todo: Move this to the PointGroup class.
-   std::vector<Rvector3*>     pointArray;
-   /// feasibility values for each point
-   std::vector<bool>          feasibilityTest;
    
    /// Get the central body fixed state at the input time for the input cartesian state
    virtual Rvector6          GetCentralBodyFixedState(Real jd, const Rvector6& scCartState);
-   /// Check the grid feasibility for the input point with the input body fixed state
-   virtual bool              CheckGridFeasibility(Integer ptIdx,
-                                  const Rvector3& bodyFixedState);
-   /// Check the grid feasibility for all points for the input body fixed state
-   virtual void              CheckGridFeasibility(
-                                  const Rvector3& bodyFixedState);
-   
-   /// local Rvectors used for Grid Feasibility calculations
-   /// (for performance)
-   Rvector3 rangeVec;
-   Rvector3 unitRangeVec;  
-   Rvector3 bodyUnit;
-   Rvector3 unitPtPos;
-   Rvector3 ptPos;
 };
 #endif // CoverageChecker_hpp
 

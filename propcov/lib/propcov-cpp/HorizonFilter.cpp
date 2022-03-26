@@ -29,7 +29,75 @@ HorizonFilter::HorizonFilter(Spacecraft *spacecraft, Grid *grid) :
 }
 
 //------------------------------------------------------------------------------
-// IntegerArray FilterGrid()
+//  HorizonFilter(const HorizonFilter &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param copy  the object to copy
+ * 
+ * @todo: Cloning required of the pointGroup, sc, centralBody, pointArray objects? 
+ * 
+ */
+//------------------------------------------------------------------------------
+HorizonFilter::HorizonFilter(const HorizonFilter &copy) :
+   grid        (copy.grid),
+   spacecraft                (copy.spacecraft),
+   centralBody       (copy.centralBody)
+{  
+   for (Integer ii = 0; ii < pointArray.size(); ii++)
+      delete pointArray.at(ii);
+   pointArray.clear();
+   for (Integer ii = 0; ii < copy.pointArray.size(); ii++)
+   {
+      // these Rvector3s are coordinates (x,y,z)
+      Rvector3 *rv = new Rvector3(*copy.pointArray.at(ii));
+      pointArray.push_back(rv);
+   }
+   feasibilityTest.clear();
+   for (Integer ff = 0; ff < copy.feasibilityTest.size(); ff++)
+      feasibilityTest.push_back(copy.feasibilityTest.at(ff));
+}
+
+//------------------------------------------------------------------------------
+//  HorizonFilter& operator=(const HorizonFilter &copy)
+//------------------------------------------------------------------------------
+/**
+ * The operator= for the HorizonFilter object
+ *
+ * @param copy  the object to copy
+ * 
+ * @todo: Cloning required of the pointGroup, sc, centralBody, pointArray objects? 
+ * 
+ */
+//------------------------------------------------------------------------------
+HorizonFilter& HorizonFilter::operator=(const HorizonFilter &copy)
+{
+   if (&copy == this)
+      return *this;
+   
+   grid        = copy.grid;
+   spacecraft                = copy.spacecraft;
+   centralBody       = copy.centralBody;
+
+   for (Integer ii = 0; ii < pointArray.size(); ii++)
+      delete pointArray.at(ii);
+   pointArray.clear();
+   for (Integer ii = 0; ii < copy.pointArray.size(); ii++)
+   {
+      // these Rvector3s are coordinates (x,y,z)
+      Rvector3 *rv = new Rvector3(*copy.pointArray.at(ii));
+      pointArray.push_back(rv);
+   }
+   feasibilityTest.clear();
+   for (Integer ff = 0; ff < copy.feasibilityTest.size(); ff++)
+      feasibilityTest.push_back(copy.feasibilityTest.at(ff));
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// std::vector<bool> FilterGrid()
 //------------------------------------------------------------------------------
 /**
  * Returns an array of grid indices to be examined for FOV inclusion
@@ -38,9 +106,9 @@ HorizonFilter::HorizonFilter(Spacecraft *spacecraft, Grid *grid) :
  * 
  */
 //------------------------------------------------------------------------------
-IntegerArray HorizonFilter::FilterGrid()
+std::vector<bool> HorizonFilter::FilterGrid()
 {
-        // Get the state and date here
+   // Get the state and date here
     Real     theDate   = spacecraft->GetJulianDate();
     Rvector6 scCartState = spacecraft->GetCartesianState();
     Rvector6 bodyFixedState  = GetCentralBodyFixedState(theDate, scCartState);
@@ -49,14 +117,7 @@ IntegerArray HorizonFilter::FilterGrid()
                                  bodyFixedState[2]);
     CheckGridFeasibility(centralBodyFixedPos);
 
-    IntegerArray pointIndices;
-    int numPoints = grid->GetNumPoints();
-    for (int i = 0; i < numPoints; i++)
-    {
-        if (feasibilityTest[i])
-            pointIndices.push_back(i);
-    }
-    return pointIndices;
+    return feasibilityTest;
 }
 
 //------------------------------------------------------------------------------

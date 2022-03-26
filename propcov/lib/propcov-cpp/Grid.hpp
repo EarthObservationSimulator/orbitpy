@@ -10,17 +10,16 @@
 class Grid
 {
 public:
-   
    /// Get point position for given index
-   virtual Rvector3* GetPointPositionVector(Integer idx);
+   virtual Rvector3* GetPointPositionVector(Integer idx) = 0;
    /// Get the latitude and longitude for the given index
-   virtual void      GetLatAndLon(Integer idx, Real &theLat, Real &theLon);
-   virtual std::pair<Real, Real> GetLatAndLon(Integer idx);
+   virtual void      GetLatAndLon(Integer idx, Real &theLat, Real &theLon) = 0;
+   virtual std::pair<Real, Real> GetLatAndLon(Integer idx) = 0;
    /// Get the number of points
-   virtual Integer   GetNumPoints();
+   virtual Integer   GetNumPoints() = 0;
    /// Get the latitude and longitude vectors
-   virtual void      GetLatLonVectors(RealArray &lats, RealArray &lons);
-   virtual std::pair<RealArray, RealArray> GetLatLonVectors();
+   virtual void      GetLatLonVectors(RealArray &lats, RealArray &lons) = 0;
+   virtual std::pair<RealArray, RealArray> GetLatLonVectors() = 0;
 
 protected:
    

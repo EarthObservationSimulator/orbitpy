@@ -20,6 +20,10 @@ pg = p.PointGroup()
 pg.AddUserDefinedPoints([0,1,0.5], [0,0.75,-0.45])
 print(pg.GetNumPoints())
 
+g = p.HelicalGrid()
+g.AddUserDefinedPoints([0,1,0.5], [0,0.75,-0.45])
+print(g.GetNumPoints())
+
 
 lats = [1,2,3]
 lons = [1,2,3]

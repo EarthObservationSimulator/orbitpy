@@ -46,41 +46,23 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//  CoverageChecker(PointGroup *ptGroup, Spacecraft *sat)
+//  CoverageChecker(Grid *ptGroup, Spacecraft *sat)
 //------------------------------------------------------------------------------
 /**
  * Constructor
  *
- * @param ptGroup  pointer to the PointGroup object to use
+ * @param ptGroup  pointer to the Grid object to use
  * @param sat      pointer to the Spacecraft object to use
  */
 //------------------------------------------------------------------------------
-CoverageChecker::CoverageChecker(PointGroup *ptGroup, Spacecraft *sat) :
+CoverageChecker::CoverageChecker(Grid *ptGroup, Spacecraft *sat, GridFilter* filter) :
    pointGroup        (ptGroup),
    sc                (sat),
+   filter            (filter),
    centralBody       (NULL)
 {
-   pointArray.clear();
-   feasibilityTest.clear();
-
    centralBody    = new Earth();
    centralBodyRadius = centralBody->GetRadius();
-
-   Integer numPts = pointGroup->GetNumPoints();
-   for (Integer ii = 0; ii < numPts; ii++)
-   {     
-      /// @TODO This should not be set here - we should store both
-      /// positions and unitized positions in the PointGroup and
-      /// then access those arrays when needed <<<<<<<<<<<<<<
-      Rvector3 *ptPos1  = pointGroup->GetPointPositionVector(ii);
-      Rvector3 *posUnit = new Rvector3(ptPos1->GetUnitVector());
-      #ifdef DEBUG_GRID
-         MessageInterface::ShowMessage("CovCheck: posUnit = %s\n",
-                                       posUnit->ToString(12).c_str());
-      #endif
-      pointArray.push_back(posUnit);
-      feasibilityTest.push_back(false);
-   }
 }
 
 //------------------------------------------------------------------------------
@@ -98,21 +80,9 @@ CoverageChecker::CoverageChecker(PointGroup *ptGroup, Spacecraft *sat) :
 CoverageChecker::CoverageChecker(const CoverageChecker &copy) :
    pointGroup        (copy.pointGroup),
    sc                (copy.sc),
-   centralBody       (copy.centralBody)
-{  
-   for (Integer ii = 0; ii < pointArray.size(); ii++)
-      delete pointArray.at(ii);
-   pointArray.clear();
-   for (Integer ii = 0; ii < copy.pointArray.size(); ii++)
-   {
-      // these Rvector3s are coordinates (x,y,z)
-      Rvector3 *rv = new Rvector3(*copy.pointArray.at(ii));
-      pointArray.push_back(rv);
-   }
-   feasibilityTest.clear();
-   for (Integer ff = 0; ff < copy.feasibilityTest.size(); ff++)
-      feasibilityTest.push_back(copy.feasibilityTest.at(ff));
-}
+   centralBody       (copy.centralBody),
+   filter            (copy.filter)
+{}
 
 //------------------------------------------------------------------------------
 //  CoverageChecker& operator=(const CoverageChecker &copy)
@@ -134,19 +104,7 @@ CoverageChecker& CoverageChecker::operator=(const CoverageChecker &copy)
    pointGroup        = copy.pointGroup;
    sc                = copy.sc;
    centralBody       = copy.centralBody;
-
-   for (Integer ii = 0; ii < pointArray.size(); ii++)
-      delete pointArray.at(ii);
-   pointArray.clear();
-   for (Integer ii = 0; ii < copy.pointArray.size(); ii++)
-   {
-      // these Rvector3s are coordinates (x,y,z)
-      Rvector3 *rv = new Rvector3(*copy.pointArray.at(ii));
-      pointArray.push_back(rv);
-   }
-   feasibilityTest.clear();
-   for (Integer ff = 0; ff < copy.feasibilityTest.size(); ff++)
-      feasibilityTest.push_back(copy.feasibilityTest.at(ff));
+   filter            = copy.filter;
 
    return *this;
 }
@@ -162,10 +120,6 @@ CoverageChecker& CoverageChecker::operator=(const CoverageChecker &copy)
 CoverageChecker::~CoverageChecker()
 {
    delete centralBody;
-   for(int x = 0; x < pointArray.size(); x++)
-   {
-      delete pointArray[x];
-   }
 }
 
 //------------------------------------------------------------------------------
@@ -195,7 +149,7 @@ IntegerArray CoverageChecker::CheckPointCoverage()
 /**
  * Check point coverage at the current date and spacecraft state.
  *
- * @param PointIndices: Indices of the points (of the respective PointGroup object)
+ * @param PointIndices: Indices of the points (of the respective Grid object)
  *                      to be considered for coverage.
  * 
  * @return  array of indexes
@@ -218,7 +172,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(IntegerArray PointIndices)
 //                                                   const Rvector6 &cartState) 
 //------------------------------------------------------------------------------
 /**
- * Coverage calculation done for all points in PointGroup object
+ * Coverage calculation done for all points in Grid object
  * 
  * @param   bodyFixedState    central body fixed state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s]))
  * @param   theTime     time corresponding to the state of spacecraft (JDUT1)
@@ -234,7 +188,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
 {
    const Integer numPts = pointGroup->GetNumPoints();
    IntegerArray PointIndices;
-   for(int i=0; i < numPts; i++) // Coverage calculation done for all points in PointGroup object
+   for(int i=0; i < numPts; i++) // Coverage calculation done for all points in Grid object
    {
       PointIndices.push_back(i);
    }
@@ -246,7 +200,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
 //                                                   const Rvector6 &cartState) 
 //------------------------------------------------------------------------------
 /**
- * Coverage calculation done for select points in PointGroup object
+ * Coverage calculation done for select points in Grid object
  * 
  * @param   bodyFixedState      central body fixed state of spacecraft (Cartesian (x[km], y[km], z[km], vx[km/s], vy[km/s], vz[km/s]))
  * @param   theTime                    time corresponding to the state of spacecraft (JDUT1)
@@ -289,11 +243,10 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
       MessageInterface::ShowMessage(" --- Checking Feasibility ...\n");
    #endif
    
-   CheckGridFeasibility(centralBodyFixedPos); // line of sight followed by horizon test for each point, the `feasibilityTest` instance variable is updated 
+   std::vector<bool> feasibilityTest = filter->FilterGrid(); // line of sight followed by horizon test for each point, the `feasibilityTest` instance variable is updated 
    for ( Integer k = 0; k < numPts; k++)
    {
-      // if (CheckGridFeasibility(pointIdx, centralBodyFixedPos)) // this is slower
-      if (feasibilityTest.at(PointIndices[k])) //  > 0)
+      if (feasibilityTest.at(PointIndices[k]))
       {
          #ifdef DEBUG_COV_CHECK
             MessageInterface::ShowMessage(
@@ -309,8 +262,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
          {
             // The CheckTargetVisibility function first expresses the satToTargetVec in sensor frame and then 
             // evaluates its presence/absence in sensor FOV
-            Rvector3 pointLocation = (*pointArray.at(PointIndices[k])) *
-                                   centralBodyRadius;
+            Rvector3 pointLocation = *(pointGroup->GetPointPositionVector(PointIndices[k]));
             Rvector3 satToTargetVec = pointLocation - centralBodyFixedPos;
             inView = sc->CheckTargetVisibility(bodyFixedState, satToTargetVec,
                                                theTime,  sensorNum);                 
@@ -368,110 +320,4 @@ Rvector6 CoverageChecker::GetCentralBodyFixedState(Real jd,
                             centralBodyFixedVel(0), centralBodyFixedVel(1),
                             centralBodyFixedVel(2));
    return bodyFixedState;
-}
-
-//------------------------------------------------------------------------------
-// protected methods
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// bool CheckGridFeasibility(Integer         ptIdx,,
-//                           const Rvector3& bodyFixedState)
-//------------------------------------------------------------------------------
-/**
- * Checks the grid feasibility for a (single) select point.
- * First it is checked if the spacecraft and the ground-point are on the same hemispheres
- * (where the hemisphere is formed by the plane defined by the unit-normal along the ground-point position-vector).
- * If so, a horizon test is performed, i.e. to check if the ground-point is within the horizon seen by the spacecraft.
- *
- * @param   ptIdx             point index
- * @param   bodyFixedState    central body fixed state (position) of spacecraft
- *
- * @return   output feasibility flag
- *
- */
-//------------------------------------------------------------------------------
-bool CoverageChecker::CheckGridFeasibility(Integer         ptIdx,
-                                           const Rvector3& bodyFixedState)
-{
-   #ifdef DEBUG_GRID
-      MessageInterface::ShowMessage(
-                        "CheckGridFeasibility: ptIDx = %d, bodyFixedState = %s\n",
-                        ptIdx, bodyFixedState.ToString(12).c_str());
-   #endif
-
-   bool     isFeasible = false;   
-   bodyUnit = bodyFixedState.GetUnitVector();
-
-   unitPtPos    = *(pointArray.at(ptIdx)); // is normalized
-   Real  feasibilityReal = unitPtPos * bodyUnit; // gives the cosine of the angle b/w the spacecraft and point
-   
-   if (feasibilityReal > 0.0) // i.e. check if the point and satellite are on the same hemisphere
-   {
-      // do horizon test           
-      /* This code is  slower. Next snippet is the faster.
-      ptPos  = unitPtPos*centralBodyRadius;
-      rangeVec  = bodyFixedState - ptPos;
-      unitRangeVec   = rangeVec.GetUnitVector(); 
-      Real dot  = unitRangeVec * unitPtPos;
-      if (dot > 0.0)
-         isFeasible = true;
-      */
-      rangeVec  = bodyFixedState/centralBodyRadius - unitPtPos; // scaled version of the actual range vector
-      Real dot  = rangeVec * unitPtPos;
-      if (dot > 0.0)
-         isFeasible = true;    
-      
-   }
-   return isFeasible;
-}
-
-//------------------------------------------------------------------------------
-// void CheckGridFeasibility(const Rvector3& bodyFixedState)
-//------------------------------------------------------------------------------
-/**
- * Checks the grid feasibility for all the points. The `feasibilityTest` instance variable is updated.
- * First it is checked if the spacecraft and the ground-point are on the same hemispheres
- * (where the hemisphere is formed by the plane defined by the unit-normal along the ground-point position-vector).
- * If so, a horizon test is performed, i.e. to check if the ground-point is within the horizon seen by the spacecraft.
- *
- * @param   bodyFixedState    central body fixed state of spacecraft
- *
- */
-//------------------------------------------------------------------------------
-void CoverageChecker::CheckGridFeasibility(const Rvector3& bodyFixedState)
-{
-   #ifdef DEBUG_GRID
-      MessageInterface::ShowMessage("CheckGridFeasibility: bodyFixedState = %s\n",
-                                    bodyFixedState.ToString(12).c_str());
-   #endif
-
-   bodyUnit = bodyFixedState.GetUnitVector();   
-   
-   for (Integer ptIdx = 0; ptIdx < pointArray.size(); ptIdx++)
-   {
-      feasibilityTest.at(ptIdx) = false; //initialize
-      
-      // feasibilityTest.at(ptIdx) = CheckGridFeasibility(ptIdx, bodyFixedState); // this makes it slow because unit body vector is calculated repeatedly
-
-      unitPtPos    = *(pointArray.at(ptIdx)); // is normalized
-      //Real  feasibilityReal = unitPtPos * bodyUnit; // gives the cosine of the angle b/w the spacecraft and point
-      
-      if ((unitPtPos * bodyUnit) > 0.0) // i.e. check if the point and satellite are on the same hemisphere
-      {
-         // do horizon test           
-         /* This code is  slower. Next snippet is the faster.
-         ptPos  = unitPtPos*centralBodyRadius;
-         rangeVec  = bodyFixedState - ptPos;
-         unitRangeVec   = rangeVec.GetUnitVector(); 
-         Real dot  = unitRangeVec * unitPtPos;
-         if (dot > 0.0)
-            isFeasible = true;
-         */      
-         rangeVec  = bodyFixedState/centralBodyRadius - unitPtPos; // scaled version of the actual range vector
-         if ((rangeVec * unitPtPos) > 0.0)
-            feasibilityTest.at(ptIdx) = true;         
-      }
-
-   }
 }

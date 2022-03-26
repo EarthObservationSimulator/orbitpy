@@ -485,8 +485,9 @@ class GridCoverage(Entity):
             
             ###### attach the sensor ######
             spc.AddSensor(sensor)
+            horizon_filter = propcov.HorizonFilter(spc,self.grid.point_group)
             ###### make propcov coverage checker object ######
-            cov_checker = propcov.CoverageChecker(self.grid.point_group, spc)
+            cov_checker = propcov.CoverageChecker(self.grid.point_group, spc, horizon_filter)
             ###### iterate over the propagated states ######
             date = propcov.AbsoluteDate()
             for idx, state in states_df.iterrows():
@@ -972,8 +973,9 @@ class PointingOptionsWithGridCoverage(Entity):
             
             ###### attach the sensor ######
             spc.AddSensor(sensor)
+            horizon_filter = propcov.HorizonFilter(spc,self.grid.point_group)
             ###### make propcov coverage checker object ######
-            cov_checker = propcov.CoverageChecker(self.grid.point_group, spc)
+            cov_checker = propcov.CoverageChecker(self.grid.point_group, spc, horizon_filter)
             ###### iterate over the propagated states ######
             date = propcov.AbsoluteDate()
             for idx, state in states_df.iterrows():

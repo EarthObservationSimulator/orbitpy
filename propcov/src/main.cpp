@@ -23,6 +23,9 @@
 #include "../lib/propcov-cpp/Propagator.hpp"
 #include "../lib/propcov-cpp/CoverageChecker.hpp"
 #include "../lib/propcov-cpp/PointGroup.hpp"
+#include "../lib/propcov-cpp/Grid.hpp"
+#include "../lib/propcov-cpp/HelicalGrid.hpp"
+#include "../lib/propcov-cpp/HorizonFilter.hpp"
 
 #include "../lib/propcov-cpp/testclass.hpp"
 
@@ -313,9 +316,32 @@ PYBIND11_MODULE(propcov, m)
         .def("SetLatLonBounds", &PointGroup::SetLatLonBounds, py::arg("latUp"), py::arg("latLow"), py::arg("lonUp"), py::arg("lonLow"))
         ///@todo write __repr__
         ;
+        
+   py::class_<Grid>(m, "Grid")
+       ;
+        
+
+    py::class_<HelicalGrid,Grid>(m, "HelicalGrid", R"pbdoc(Lat, lons are in radians. Lat range is between -90 to +90 and lon range is between -180 to 180.)pbdoc")
+    	 .def(py::init())
+        .def("AddUserDefinedPoints", &HelicalGrid::AddUserDefinedPoints, py::arg("lats"), py::arg("lons"), "Add user defined latitude and longitude points in radians.")
+        .def("AddHelicalPointsByAngle", &HelicalGrid::AddHelicalPointsByAngle, py::arg("angleBetweenPoints"))
+        .def("GetPointPositionVector", &HelicalGrid::GetPointPositionVector, py::arg("index"))
+        .def("GetLatAndLon", py::overload_cast<int>(&HelicalGrid::GetLatAndLon), py::arg("index"))
+        .def("GetNumPoints", &HelicalGrid::GetNumPoints)
+        .def("GetLatLonVectors", py::overload_cast<>(&HelicalGrid::GetLatLonVectors))
+        .def("SetLatLonBounds", &HelicalGrid::SetLatLonBounds, py::arg("latUp"), py::arg("latLow"), py::arg("lonUp"), py::arg("lonLow"))
+        ///@todo write __repr__
+        ;
+
+    py::class_<GridFilter>(m, "GridFilter")
+        ;
+
+    py::class_<HorizonFilter,GridFilter>(m, "HorizonFilter")
+        .def(py::init<Spacecraft*, Grid*>(), py::arg("sat"), py::arg("ptGroup"))
+        ;
 
     py::class_<CoverageChecker>(m, "CoverageChecker")
-        .def(py::init<PointGroup*, Spacecraft*>(), py::arg("ptGroup"), py::arg("sat"))
+        .def(py::init<Grid*, Spacecraft*, GridFilter*>(), py::arg("ptGroup"), py::arg("sat"), py::arg("filter"))
         .def("CheckPointCoverage", py::overload_cast<>(&CoverageChecker::CheckPointCoverage))
         .def("CheckPointCoverage", py::overload_cast<IntegerArray>(&CoverageChecker::CheckPointCoverage), py::arg("PointIndices"))
         //.def("AccumulateCoverageData", py::overload_cast<>(&CoverageChecker::AccumulateCoverageData))

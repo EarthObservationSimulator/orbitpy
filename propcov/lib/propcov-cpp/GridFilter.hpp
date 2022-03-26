@@ -9,7 +9,7 @@
 class GridFilter
 {
     public:
-        virtual IntegerArray FilterGrid();
+        virtual std::vector<bool> FilterGrid() = 0;
         // Returns true if the filter is set to prefilter
         bool IsPrefilter();
         // Set the filter to be applied before the FOV check

@@ -15,6 +15,10 @@ SET(PROPCOVCPP_DIRS
 # ====================================================================
 # source files
 SET(PROPCOVCPP_SRCS
+    Grid.cpp
+    HelicalGrid.cpp
+    GridFilter.cpp
+    HorizonFilter.cpp
     AbsoluteDate.cpp
     Attitude.cpp
     ConicalSensor.cpp

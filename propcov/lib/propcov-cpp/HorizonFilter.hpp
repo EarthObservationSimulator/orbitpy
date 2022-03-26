@@ -8,7 +8,10 @@ class HorizonFilter : public GridFilter
 public:
 
     HorizonFilter(Spacecraft* spacecraft, Grid* grid);
-    IntegerArray FilterGrid();
+    HorizonFilter( const HorizonFilter &copy);
+    HorizonFilter& operator=(const HorizonFilter &copy);
+
+    std::vector<bool> FilterGrid();
 
 protected:
 

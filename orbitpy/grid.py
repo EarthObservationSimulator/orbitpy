@@ -24,11 +24,11 @@ GridPoint = namedtuple("GridPoint", ["latitude", "longitude"])
 class Grid(Entity):
     """ Class to handle grid related operations. 
 
-    :ivar point_group: A ``propcov`` object of the instance ``propcov.PointGroup``, used to store and handle 
+    :ivar point_group: A ``propcov`` object of the instance ``propcov.Grid``, used to store and handle 
                        the grid locations (latitudes and longitudes in degrees). The grid-points are referred by indices starting from 0.
                        E.g. Grid-point 0 refers to the first grid-point in the point_group object (which can be obtained 
                        using the ``GetLatLon(.)``, ``GetPointPositionVector(.)`` function.).
-    :vartype point_group: :class:`propcov.PointGroup`
+    :vartype point_group: :class:`propcov.Grid`
 
     :ivar num_points: Total number of grid points.
     :vartype num_points: int
@@ -44,7 +44,7 @@ class Grid(Entity):
 
     def __init__(self, point_group=None, filepath=None, _id=None):
 
-        self.point_group = point_group if point_group is not None and isinstance(point_group, propcov.PointGroup) else None
+        self.point_group = point_group if point_group is not None and isinstance(point_group, propcov.Grid) else None
         self.num_points = self.point_group.GetNumPoints()
         self.filepath = str(filepath) if filepath is not None else None
         super(Grid, self).__init__(_id, "Grid")
@@ -128,7 +128,7 @@ class Grid(Entity):
         lonLow = np.deg2rad(d.get("lonLower", -180))
         angleBetweenPoints = np.deg2rad(d.get("gridRes", 1))
 
-        point_group = propcov.PointGroup()
+        point_group = propcov.HelicalGrid()
         point_group.SetLatLonBounds(latUp=latUp, latLow=latLow, lonUp=lonUp, lonLow=lonLow)
         point_group.AddHelicalPointsByAngle(angleBetweenPoints=angleBetweenPoints)
         return Grid( point_group=point_group,
@@ -181,7 +181,7 @@ class Grid(Entity):
         """
         data = pd.read_csv(d['covGridFilePath'])
         data = data.multiply(np.pi/180) # convert angles to radians
-        point_group = propcov.PointGroup()
+        point_group = propcov.HelicalGrid()
         point_group.AddUserDefinedPoints(data['lat [deg]'].tolist(),data['lon [deg]'].tolist())
         return Grid( point_group = point_group,
                      filepath = d['covGridFilePath'],
