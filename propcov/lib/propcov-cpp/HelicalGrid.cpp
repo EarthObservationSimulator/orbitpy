@@ -31,13 +31,14 @@ using namespace GmatMathUtil;
  */
 //------------------------------------------------------------------------------
 HelicalGrid::HelicalGrid() :
-   numPoints          (0),
+   // numPoints          (0),
    numRequestedPoints (0),
    latUpper           (PI_OVER_TWO),
    latLower           (-PI_OVER_TWO),
    lonUpper           (PI), //Vinay TODO: CORRECT THIS. LEADS TO VALID POINTS NOT BEING ADDED.
    lonLower           (-PI) //Vinay TODO: CORRECT THIS. LEADS TO VALID POINTS NOT BEING ADDED.
 {
+   numPoints = 0;
    // lat, lon, and coords are all empty at the start
 }
 
@@ -52,13 +53,14 @@ HelicalGrid::HelicalGrid() :
  */
 //------------------------------------------------------------------------------
 HelicalGrid::HelicalGrid(const HelicalGrid &copy) :
-   numPoints          (copy.numPoints),
+   // numPoints          (copy.numPoints),
    numRequestedPoints (copy.numRequestedPoints),
    latUpper           (copy.latUpper),
    latLower           (copy.latLower),
    lonUpper           (copy.lonUpper),
    lonLower           (copy.lonLower)
 {
+   numPoints = copy.numPoints;
    lat.clear();
    lon.clear();
    coords.clear();
@@ -186,36 +188,6 @@ void HelicalGrid::AddHelicalPointsByAngle(Real angleBetweenPoints)
    Integer numGridPoints = Floor(4.0*PI/
                            (angleBetweenPoints*angleBetweenPoints));
    ComputeTestPoints("Helical",numGridPoints);
-}
-
-//------------------------------------------------------------------------------
-// Rvector3* GetPointPositionVector(Integer idx)
-//------------------------------------------------------------------------------
-/**
- * Returns the coordinates of the specified point.
- * 
- * @param idx  index of point whose coordinates to return
- * 
- * @return  a 3-vector representing the coordinates of the specifed point
- *
- */
-//------------------------------------------------------------------------------
-Rvector3* HelicalGrid::GetPointPositionVector(Integer idx)
-{
-   // Returns body fixed location of point given point index
-   // Inputs. int poiIndex
-   // Outputs. Rvector 3x1 containing the position.
-   
-   // Make sure there are points
-   CheckHasPoints();
-   
-   #ifdef DEBUG_POINTS
-      MessageInterface::ShowMessage(
-                 "In PG::GetPointPositionVector, returning coords "
-                 "(%p) at idx = %d\n",
-                 coords.at(idx), idx);
-   #endif
-  return coords.at(idx);
 }
 
 //------------------------------------------------------------------------------
@@ -359,27 +331,6 @@ void  HelicalGrid::SetLatLonBounds(Real latUp, Real latLow,
       MessageInterface::ShowMessage("       lonLower = %12.10f\n", lonLower);
       MessageInterface::ShowMessage("       lonUpper = %12.10f\n", lonUpper);
 #endif
-}
-
-//------------------------------------------------------------------------------
-// protected methods
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// bool CheckHasPoints()
-//------------------------------------------------------------------------------
-/**
- * Checks to see if there are any ponts set or computed
- * 
- * @return   true if there are points; false otherwise
- *
- */
-//------------------------------------------------------------------------------
-bool HelicalGrid::CheckHasPoints()
-{
-   if (numPoints <= 0)
-      throw TATCException("The point group does not have any points\n");
-   return true;
 }
 
 //------------------------------------------------------------------------------

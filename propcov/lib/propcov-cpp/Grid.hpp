@@ -6,12 +6,17 @@
 #include "Spacecraft.hpp"
 #include "OrbitState.hpp"
 #include "Rvector6.hpp"
+#include "TATCException.hpp"
 
 class Grid
 {
 public:
    /// Get point position for given index
-   virtual Rvector3* GetPointPositionVector(Integer idx) = 0;
+   Rvector3* GetPointPositionVector(Integer idx);
+
+   /// Protected methods for managing points
+   bool CheckHasPoints();
+
    /// Get the latitude and longitude for the given index
    virtual void      GetLatAndLon(Integer idx, Real &theLat, Real &theLon) = 0;
    virtual std::pair<Real, Real> GetLatAndLon(Integer idx) = 0;
@@ -22,7 +27,8 @@ public:
    virtual std::pair<RealArray, RealArray> GetLatLonVectors() = 0;
 
 protected:
-   
+
+   std::vector<Rvector3*> coords;
    /// num of points
    Integer                numPoints;
    /// Number of points requested in the point algorithm
