@@ -11,7 +11,7 @@ public:
     HorizonFilter( const HorizonFilter &copy);
     HorizonFilter& operator=(const HorizonFilter &copy);
 
-    std::vector<bool> FilterGrid();
+    std::vector<Integer> FilterGrid();
 
 protected:
 
@@ -23,7 +23,7 @@ protected:
     /// array of all unit position vectors of points @todo: Move this to the PointGroup class.
     std::vector<Rvector3*>     pointArray;
     /// feasibility values for each point
-    std::vector<bool>          feasibilityTest;
+    std::vector<Integer>          feasibilityTest;
 
     /// Get the central body fixed state at the input time for the input cartesian state
     virtual Rvector6          GetCentralBodyFixedState(Real jd, const Rvector6& scCartState);

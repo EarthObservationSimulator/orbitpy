@@ -243,18 +243,16 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
       MessageInterface::ShowMessage(" --- Checking Feasibility ...\n");
    #endif
    
-   std::vector<bool> feasibilityTest = filter->FilterGrid(); // line of sight followed by horizon test for each point, the `feasibilityTest` instance variable is updated 
+   std::vector<Integer> feasibilityTest = filter->FilterGrid(); // line of sight followed by horizon test for each point, the `feasibilityTest` instance variable is updated 
    
    // no performance difference
    //const std::vector<Rvector3*> gridpts = pointGroup->GetPointPositionVectors();
-   for ( Integer k = 0; k < numPts; k++)
+   for ( Integer k = 0; k < feasibilityTest.size(); k++)
    {
-      if (feasibilityTest.at(PointIndices[k]))
-      {
          #ifdef DEBUG_COV_CHECK
             MessageInterface::ShowMessage(
                               " --- feasibility at point %d is TRUE!\n",
-                              PointIndices[k]);
+                              feasibilityTest[k]);
          #endif
 
          Integer  sensorNum = 0; // 1; // Currently only works for one sensor, hence hardcoded!!
@@ -265,7 +263,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
          {
             // The CheckTargetVisibility function first expresses the satToTargetVec in sensor frame and then 
             // evaluates its presence/absence in sensor FOV
-            Rvector3 pointLocation = *(pointGroup->GetPointPositionVector(PointIndices[k]));
+            Rvector3 pointLocation = *(pointGroup->GetPointPositionVector(feasibilityTest[k]));
             Rvector3 satToTargetVec = pointLocation - centralBodyFixedPos;
             inView = sc->CheckTargetVisibility(bodyFixedState, satToTargetVec,
                                                theTime,  sensorNum);                 
@@ -277,7 +275,7 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
          }
          if(inView)
          {
-            result.push_back(PointIndices[k]);   // covCount'th entry
+            result.push_back(feasibilityTest[k]);   // covCount'th entry
             covCount++;
          }
 
@@ -286,8 +284,6 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
                             " --- In CheckPointCoverage, bodyFixedState = %s\n",
                             bodyFixedState.ToString(12).c_str());
          #endif
-
-      }
    }
 
    return result;

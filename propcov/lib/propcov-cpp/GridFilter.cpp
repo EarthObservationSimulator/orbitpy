@@ -5,12 +5,17 @@ bool GridFilter::IsPrefilter()
     return prefilter;
 }
 
-void GridFilter::SetPrefilter()
+bool GridFilter::IsPostfilter()
 {
-    prefilter = 1;
+    return postfilter;
 }
 
-void GridFilter::SetPostfilter()
+void GridFilter::SetPrefilter(bool truthval)
 {
-    prefilter = 0;
+    prefilter = truthval;
+}
+
+void GridFilter::SetPostfilter(bool truthval)
+{
+    postfilter = truthval;
 }

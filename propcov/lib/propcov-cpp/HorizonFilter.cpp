@@ -24,7 +24,6 @@ HorizonFilter::HorizonFilter(Spacecraft *spacecraft, Grid *grid) :
                                        posUnit->ToString(12).c_str());
       #endif
       pointArray.push_back(posUnit);
-      feasibilityTest.push_back(false);
    }
 }
 
@@ -97,7 +96,7 @@ HorizonFilter& HorizonFilter::operator=(const HorizonFilter &copy)
 }
 
 //------------------------------------------------------------------------------
-// std::vector<bool> FilterGrid()
+// std::vector<Integer> FilterGrid()
 //------------------------------------------------------------------------------
 /**
  * Returns an array of grid indices to be examined for FOV inclusion
@@ -106,7 +105,7 @@ HorizonFilter& HorizonFilter::operator=(const HorizonFilter &copy)
  * 
  */
 //------------------------------------------------------------------------------
-std::vector<bool> HorizonFilter::FilterGrid()
+std::vector<Integer> HorizonFilter::FilterGrid()
 {
    // Get the state and date here
     Real     theDate   = spacecraft->GetJulianDate();
@@ -115,6 +114,8 @@ std::vector<bool> HorizonFilter::FilterGrid()
     Rvector3 centralBodyFixedPos(bodyFixedState[0],
                                  bodyFixedState[1],
                                  bodyFixedState[2]);
+
+    feasibilityTest.clear();
     CheckGridFeasibility(centralBodyFixedPos);
 
     return feasibilityTest;
@@ -232,10 +233,6 @@ void HorizonFilter::CheckGridFeasibility(const Rvector3& bodyFixedState)
    
    for (Integer ptIdx = 0; ptIdx < pointArray.size(); ptIdx++)
    {
-      feasibilityTest.at(ptIdx) = false; //initialize
-      
-      // feasibilityTest.at(ptIdx) = CheckGridFeasibility(ptIdx, bodyFixedState); // this makes it slow because unit body vector is calculated repeatedly
-
       unitPtPos    = *(pointArray.at(ptIdx)); // is normalized
       //Real  feasibilityReal = unitPtPos * bodyUnit; // gives the cosine of the angle b/w the spacecraft and point
       
@@ -252,7 +249,7 @@ void HorizonFilter::CheckGridFeasibility(const Rvector3& bodyFixedState)
          */      
          rangeVec  = bodyFixedState/centralBodyRadius - unitPtPos; // scaled version of the actual range vector
          if ((rangeVec * unitPtPos) > 0.0)
-            feasibilityTest.at(ptIdx) = true;         
+            feasibilityTest.push_back(ptIdx);         
       }
 
    }
