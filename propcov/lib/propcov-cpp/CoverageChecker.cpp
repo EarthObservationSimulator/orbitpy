@@ -244,6 +244,8 @@ IntegerArray CoverageChecker::CheckPointCoverage(const Rvector6 &bodyFixedState,
    #endif
    
    std::vector<bool> feasibilityTest = filter->FilterGrid(); // line of sight followed by horizon test for each point, the `feasibilityTest` instance variable is updated 
+   
+   // no performance difference
    //const std::vector<Rvector3*> gridpts = pointGroup->GetPointPositionVectors();
    for ( Integer k = 0; k < numPts; k++)
    {

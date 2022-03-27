@@ -318,14 +318,17 @@ PYBIND11_MODULE(propcov, m)
         ;
         
    py::class_<Grid>(m, "Grid")
+       .def("GetPoint", &Grid::GetPoint)
+       .def("GetPoints", &Grid::GetPoints)
        ;
         
 
     py::class_<HelicalGrid,Grid>(m, "HelicalGrid", R"pbdoc(Lat, lons are in radians. Lat range is between -90 to +90 and lon range is between -180 to 180.)pbdoc")
     	 .def(py::init())
+        .def("GetPointHeader", &HelicalGrid::GetPointHeader)
         .def("AddUserDefinedPoints", &HelicalGrid::AddUserDefinedPoints, py::arg("lats"), py::arg("lons"), "Add user defined latitude and longitude points in radians.")
         .def("AddHelicalPointsByAngle", &HelicalGrid::AddHelicalPointsByAngle, py::arg("angleBetweenPoints"))
-        .def("GetPointPositionVector", &HelicalGrid::GetPointPositionVector, py::arg("index"))
+        //.def("GetPointPositionVector", &HelicalGrid::GetPointPositionVector, py::arg("index"))
         .def("GetLatAndLon", py::overload_cast<int>(&HelicalGrid::GetLatAndLon), py::arg("index"))
         .def("GetNumPoints", &HelicalGrid::GetNumPoints)
         .def("GetLatLonVectors", py::overload_cast<>(&HelicalGrid::GetLatLonVectors))

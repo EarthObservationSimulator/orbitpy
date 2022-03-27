@@ -12,7 +12,7 @@
  *
  */
 //------------------------------------------------------------------------------
-inline Rvector3* Grid::GetPointPositionVector(Integer idx)
+Rvector3* Grid::GetPointPositionVector(Integer idx)
 {
    // Returns body fixed location of point given point index
    // Inputs. int poiIndex

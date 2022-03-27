@@ -17,6 +17,7 @@ import orbitpy.util
 from orbitpy.util import OutputInfoUtility
 
 GridPoint = namedtuple("GridPoint", ["latitude", "longitude"])
+GridPointXYZ = namedtuple("GridPointXYZ", ["x","y","z"])
 """Function returns a namedtuple class to store grid-points as (in general this shall be a list) latitudes and longitudes in degrees.
 
 """
@@ -199,14 +200,24 @@ class Grid(Entity):
         :rtype: :class:`orbitpy.grid.GridOutputInfo`
 
         """
-        grid_points = self.get_lat_lon()
-        df = pd.DataFrame(list(zip(grid_points.latitude, grid_points.longitude)), columns =['lat [deg]','lon [deg]'])
+        grid_points = self.GetPoints()
+        df = pd.DataFrame(list(zip(*grid_points)), columns = self.get_header_columns())
         df.to_csv(filepath, index=False)
         self.filepath = filepath # update the instance variable
         return GridOutputInfo.from_dict({'gridId': self._id,
                                          'gridFile': self.filepath,
                                          '_id': None}    
                                         )
+
+    def get_header_columns(self):
+        """ Get a list of header label strings for the grid output representation
+        
+        :returns: a list of header label strings in the preferred output coordinate representation
+        :rtype: list
+        
+        """
+        
+        return self.point_group.GetPointHeader()
 
     def get_lat_lon(self):
         """ Get all the grid points (coordinates).
@@ -247,6 +258,48 @@ class Grid(Entity):
         lon = [_lon[x] for x in indexes]        
 
         return GridPoint(latitude=lat, longitude=lon)
+    
+    def get_points(self):
+        """ Get all the grid points (coordinates).
+        
+        :return: Grid points (in the preferred output coordinate representation for the grid type)
+        :rtype: tuple, (list,list), float
+        """
+        
+        [lat, lon] = self.point_group.GetPoints()
+        # convert to degrees and round to two decimal places
+        lat = np.rad2deg(np.array(lat)).round(decimals=3)
+        lon = np.rad2deg(np.array(lon)).round(decimals=3)   
+
+        return (list(lat), list(lon))
+    
+    def get_point(self, indexes):
+        """ Get the grid points (coordinates) corresponding to the input (list of) point-indices.
+        
+        :param indexes: List of indices.
+        :paramtype indexes: list, int
+
+        :return: Grid points (in the preferred output coordinate representation for the grid type) corresponding to the input indices.
+        :rtype: namedtuple, (list, list), float
+
+        """
+        
+        # if only one index specified
+        if isinstance(indexes, int):
+            (lat, lon) = self.point_group.GetPoint(indexes)
+            return (np.rad2deg(lat).round(decimals=3), np.rad2deg(lon).round(decimals=3))
+        elif isinstance(indexes, list):
+            if len(indexes)==1:
+                (lat, lon) = self.point_group.GetPoint(indexes[0])
+                return GridPoint(np.rad2deg(lat).round(decimals=3), np.rad2deg(lon).round(decimals=3))
+
+        (_lat, _lon) = self.get_lat_lon()
+        # filter
+        lat = [_lat[x] for x in indexes]
+        lon = [_lon[x] for x in indexes]        
+
+        return (lat, lon)
+        
 
 def compute_grid_res(spacecraft, grid_res_fac):
     """ Compute grid resolution to be used for coverage grid generation. See SMAD 3rd ed Pg 113. Fig 8-13.

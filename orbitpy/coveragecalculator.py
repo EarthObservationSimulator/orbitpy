@@ -419,10 +419,10 @@ class GridCoverage(Entity):
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index','GP index', 'lat [deg]', 'lon [deg]'])
+            access_writer.writerow(['time index','GP index', *self.grid.get_header_columns()])
         
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
-        cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
+        cov_param = find_in_cov_params_list(self.cov_params, instru_id, mode_id)
         #print("cov_param ", cov_param)
         # the input instru_id, mode_id may be None, so get the sensor, mode ids.
         instru_id = cov_param.instru_id
@@ -485,6 +485,7 @@ class GridCoverage(Entity):
             
             ###### attach the sensor ######
             spc.AddSensor(sensor)
+            ###### setup horizon filter for performance ######
             horizon_filter = propcov.HorizonFilter(spc,self.grid.point_group)
             ###### make propcov coverage checker object ######
             cov_checker = propcov.CoverageChecker(self.grid.point_group, spc, horizon_filter)
@@ -502,8 +503,8 @@ class GridCoverage(Entity):
                 points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
                 if len(points)>0: #If no ground-points are accessed at this time, skip writing the row altogether.
                     for pnt in points:
-                        coords = self.grid.get_lat_lon_from_index(pnt)
-                        access_writer.writerow([time_index, pnt, coords.latitude, coords.longitude])
+                        coords = self.grid.get_point(pnt)
+                        access_writer.writerow([time_index, pnt, *coords])
 
         ##### Close file #####                
         if access_file:

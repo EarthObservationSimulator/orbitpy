@@ -7,15 +7,13 @@
 #include "OrbitState.hpp"
 #include "Rvector6.hpp"
 #include "TATCException.hpp"
+#include <string>
 
 class Grid
 {
 public:
    /// Get point position for given index
    Rvector3* GetPointPositionVector(Integer idx);
-
-   /// Protected methods for managing points
-   bool CheckHasPoints();
 
    /// Get the latitude and longitude for the given index
    virtual void      GetLatAndLon(Integer idx, Real &theLat, Real &theLon) = 0;
@@ -26,13 +24,21 @@ public:
    virtual void      GetLatLonVectors(RealArray &lats, RealArray &lons) = 0;
    virtual std::pair<RealArray, RealArray> GetLatLonVectors() = 0;
 
+   // Get point representations for output file
+   virtual std::vector<std::string> GetPointHeader() = 0;
+   virtual std::vector<Real> GetPoint(Integer idx) = 0;
+   virtual std::vector<RealArray> GetPoints() = 0;
+   
+   // Todo
+   // virtual std::vector<RealArray> GetPoints(Integer idx) = 0;
 protected:
+
+   /// Protected methods for managing points
+   bool CheckHasPoints();
 
    std::vector<Rvector3*> coords;
    /// num of points
    Integer                numPoints;
-   /// Number of points requested in the point algorithm
-   Integer                numRequestedPoints;  // WHERE/WHY is this used?
    
 };
 #endif // Grid_hpp

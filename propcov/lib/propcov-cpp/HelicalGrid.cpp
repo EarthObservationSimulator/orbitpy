@@ -530,3 +530,41 @@ void HelicalGrid::ComputeHelicalPoints(Integer numReqPts)
       }
    }
 }
+
+std::vector<std::string> HelicalGrid::GetPointHeader()
+{
+   std::vector<std::string> header;
+   header.push_back("lat [deg]");
+   header.push_back("lon [deg]");
+   return header;
+}
+
+std::vector<Real> HelicalGrid::GetPoint(Integer idx)
+{
+   // Returns body fixed location of point given point index
+   // Make sure there are points
+   CheckHasPoints();
+   
+   Real theLat = lat.at(idx);
+   Real theLon = lon.at(idx);
+
+   std::vector<Real> point = {theLat,theLon};
+   return point;
+}
+
+std::vector<RealArray> HelicalGrid::GetPoints()
+{
+   // Returns the latitude and longitude vectors as a pair
+   
+   // Make sure there are points
+   CheckHasPoints();
+
+   std::vector<RealArray> points = {lat,lon};
+   return points;
+}
+
+// Todo
+// std::vector<RealArray> HelicalGrid::GetPoints(Integer idx)
+// {
+
+// }
