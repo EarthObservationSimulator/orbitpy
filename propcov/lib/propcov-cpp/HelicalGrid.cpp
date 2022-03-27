@@ -31,8 +31,6 @@ using namespace GmatMathUtil;
  */
 //------------------------------------------------------------------------------
 HelicalGrid::HelicalGrid() :
-   // numPoints          (0),
-   numRequestedPoints (0),
    latUpper           (PI_OVER_TWO),
    latLower           (-PI_OVER_TWO),
    lonUpper           (PI), //Vinay TODO: CORRECT THIS. LEADS TO VALID POINTS NOT BEING ADDED.
@@ -53,8 +51,6 @@ HelicalGrid::HelicalGrid() :
  */
 //------------------------------------------------------------------------------
 HelicalGrid::HelicalGrid(const HelicalGrid &copy) :
-   // numPoints          (copy.numPoints),
-   numRequestedPoints (copy.numRequestedPoints),
    latUpper           (copy.latUpper),
    latLower           (copy.latLower),
    lonUpper           (copy.lonUpper),
@@ -90,7 +86,6 @@ HelicalGrid& HelicalGrid::operator=(const HelicalGrid &copy)
       return *this;
    
    numPoints          = copy.numPoints;
-   numRequestedPoints = copy.numRequestedPoints;
    latUpper           = copy.latUpper;
    latLower           = copy.latLower;
    lonUpper           = copy.lonUpper;
