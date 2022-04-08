@@ -45,11 +45,39 @@ classes are bound.
 
 **To install:** Run `make` from the main git directory.
 
-In case of MacOS, there may arise a compiler selection error, in which case please try the installation after running:
+### Issues in MacOS
+
+In case of MacOS, there may arise a errors due to wrong compiler selection. This is the case if the following lines are displayed in the traceback log (in the console) during the `propcov` installation:
+
 ```
-Export CC=gcc 
+-- The C compiler identification is AppleClang 11.0.3.11030032
+-- The CXX compiler identification is AppleClang 11.0.3.11030032
 ```
-Also please refer to: https://stackoverflow.com/questions/24380456/how-can-i-make-cmake-use-gcc-instead-of-clang-on-mac-os-x
+
+Instead of Clang compiler, GCC needs to be used.  For more details please refer to: https://stackoverflow.com/questions/24380456/how-can-i-make-cmake-use-gcc-instead-of-clang-on-mac-os-x 
+
+Possible solutions
+
+1. Try the below line before running the installation:
+
+```
+export CC=gcc 
+```
+
+2. Install specific version of `gcc` and then set the compiler selection in the `CMakeLists.txt` file.
+
+For example install `gcc-11` using the command `brew install gcc@11`
+
+Then add the below lines to the `propcov/CMakeLists.txt` file.
+
+``` 
+# THIS HAS TO COME BEFORE THE PROJECT LINE
+set(CMAKE_C_COMPILER "gcc-11")
+set(CMAKE_CXX_COMPILER "g++-11")
+# THIS HAS TO COME BEFORE THE PROJECT LINE
+```
+
+Then run the installation.
 
 ## Tests
 

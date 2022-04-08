@@ -28,14 +28,14 @@ It is recommended to carry out the installation in a `conda` environment. Instru
 
 2.  Run `make` from the main repo directory.
 
-    All the below dependencies are automatically installed. If any errors are encountered please check that the following dependencies are 
-    installed:
+    All the below dependencies are automatically installed. If any errors are encountered please check that the following dependencies are installed. Install the dependencies separately and then run `make`.
 
     * `numpy`
     * `pandas`
     * `scipy`
     * `sphinx`
     * `sphinx_rtd_theme==0.5.2`
+    * `propcov`
 
 3.  Run `make runtest`. This runs all the tests and can be used to verify the package.
 
@@ -52,6 +52,8 @@ The OrbitPy installation automatically installs the package `propcov` which cons
 The `make runtest` does *not* run the tests of the `propcov` library. Please see the `README.MD` in the `propcov` folder on how to run it's tests.
 
 Documentation of the `propcov` library is available in the Word document `propcov/docs/propcov-cpp.docx`.
+
+Mac users have reported errors in the installation of `propcov`. This mostly relates to the environmental setup in which wrong C++ compiler is selected for compilation. Please see the `README.MD` in the `propcov` for debug information.
 
 ## Directory structure
 ```

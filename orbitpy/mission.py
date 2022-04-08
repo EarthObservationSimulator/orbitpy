@@ -321,7 +321,7 @@ class Mission(Entity):
     def get_spacecraft_orbit_specs(self):
         """ Get the Keplerian elements of the orbit of the spacecraft(s).
 
-            :return: List of namedtuple objects with the following entries: <spacecraft-id, sma, ecc, inc, raan, aop, ta> 
+            :return: List of namedtuple objects with the following entries: <spacecraft-id, sma, ecc, inc, raan, aop, ta>  Angles are in radians.
             :rtype: list, namedtuple
 
         """ 
@@ -333,7 +333,8 @@ class Mission(Entity):
         if isinstance(spacecraft, list):
             for spc in spacecraft:
                 kep_state = spc.orbitState.get_keplerian_earth_centered_inertial_state()
-                orb_specs.append(specs(spc._id, kep_state.sma, kep_state.ecc, kep_state.inc, kep_state.raan, kep_state.aop, kep_state.ta))
+                orb_specs.append(specs(spc._id, kep_state.sma, kep_state.ecc, kep_state.inc, 
+                                        kep_state.raan, kep_state.aop, kep_state.ta))
 
         return orb_specs
 
