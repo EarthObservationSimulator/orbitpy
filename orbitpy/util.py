@@ -629,7 +629,7 @@ def helper_extract_spacecraft_params(spacecraft):
     return params
 
 def extract_auxillary_info_from_state_file(state_file):
-    """ Extract auxillary information (epoch, step-size, duration) from the propgated states file.
+    """ Extract auxillary information (epoch, step-size, duration) from the propagated states file.
 
     :param state_file: 
     :paramtype state_file: str

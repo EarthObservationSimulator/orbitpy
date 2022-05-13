@@ -58,7 +58,7 @@ Instead of Clang compiler, GCC needs to be used.  For more details please refer 
 
 Possible solutions
 
-1. Try the below line before running the installation:
+1. Try the below line (in the Mac terminal) before running the installation:
 
 ```
 export CC=gcc 
@@ -81,7 +81,7 @@ Then run the installation.
 
 ## Tests
 
-The folder `tests/test-cpp/` contains C++ tests of the `propcov` C++ classes. GoogleTest (GTest) library is used and must be installed to run the tests. [This link](https://www.eriksmistad.no/getting-started-with-google-test-on-ubuntu/) provides good tutorial on installing GTest on Ubuntu.
+The folder `tests/test-cpp/` contains C++ tests of the `propcov` C++ classes. GoogleTest (GTest) library is used and must be installed to run the tests. [This link](https://www.eriksmistad.no/getting-started-with-google-test-on-ubuntu/) provides good tutorial on installing GTest in Ubuntu.
 
 To run the tests navigate to `tests/` folder and run `make all` followed by `make runtest`.
 
@@ -113,7 +113,7 @@ C:.
 └───tests
     └───tests-cpp (cpp tests on the `propcov-cpp` library)
         ├───bin
-        └───old
+        └───old (outdated)
     └───tests-python (python tests on the python-bound `src`)
 
 ```

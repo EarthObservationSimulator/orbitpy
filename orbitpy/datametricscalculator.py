@@ -82,7 +82,7 @@ class DataMetricsCalculator(Entity):
                 Following keys are to be specified.
                 
                 * "spacecraft":             (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
-                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in CARTESIAN_EARTH_CENTERED_INERTIAL.
+                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propagated spacecraft states. The states must be in CARTESIAN_EARTH_CENTERED_INERTIAL.
                                             Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
                 * "accessFileInfo":         (list, dict). List of dictionaries, where each dictionary contains the following keys: (1) instruId (str or int), (2) modeId (str or int)
                                             and (3) accessFilePath (str). 

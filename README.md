@@ -117,5 +117,5 @@ Please contact Vinay (vinay.ravindra@nasa.gov)
 - [ ] Add GTests for `Spacecraft`, `CoverageChecker`, `NadirPointingAttitude` and other classes. (There are in total 26 propcov-cpp active classes, of which currently there are GTests ofr 15 of these classes. Some tests in the `tests/tests-cpp/old` folder can be rewritten into the GTest format.)
 - [ ] Consider avoiding virtual functions since it has runtime costs associated with it??
 
-### Tips
+### Debug Tips
 Errors in the propcov-cpp classes are sometime not visible (i.e. not displayed) when the propcov package is installed. The package installation can happen, but import will not work. In such cases run `make` from propcov-cpp -> tests, and debug any errors.

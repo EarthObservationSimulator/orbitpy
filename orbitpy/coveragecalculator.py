@@ -302,7 +302,7 @@ class GridCoverage(Entity):
                 
                 * "grid":                  (dict) Refer to :class:`orbitpy.grid.Grid.from_dict`
                 * "spacecraft":            (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
-                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in 
+                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propagated spacecraft states. The states must be in 
                                              CARTESIAN_EARTH_CENTERED_INERTIAL. Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
                 * "@id":                    (str or int) Unique identifier of the coverage calculator object.
 
@@ -563,7 +563,7 @@ class PointingOptionsCoverage(Entity):
                 Following keys are to be specified.
                 
                 * "spacecraft":             (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
-                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in 
+                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propagated spacecraft states. The states must be in 
                                              CARTESIAN_EARTH_CENTERED_INERTIAL. Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
                 * "@id":                    (str or int) Unique identifier of the coverage calculator object.
 
@@ -805,7 +805,7 @@ class PointingOptionsWithGridCoverage(Entity):
                 
                 * "grid":                  (dict) Refer to :class:`orbitpy.grid.Grid.from_dict`
                 * "spacecraft":            (dict) Refer to :class:`orbitpy.util.Spacecraft.from_dict`
-                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propgated spacecraft states. The states must be in 
+                * "cartesianStateFilePath": (str) File path (with file name) to the file with the propagated spacecraft states. The states must be in 
                                              CARTESIAN_EARTH_CENTERED_INERTIAL. Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the data format.
                 * "@id":                    (str or int) Unique identifier of the coverage calculator object.
 
