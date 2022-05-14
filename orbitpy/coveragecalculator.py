@@ -328,7 +328,7 @@ class GridCoverage(Entity):
         """
         return dict({"@type": "GRID COVERAGE",
                      "grid": self.grid.to_dict(),
-                     "spacecraft": self.to_dict(),
+                     "spacecraft": self.spacecraft.to_dict(),
                      "cartesianStateFilePath": self.state_cart_file,
                      "@id": self._id})
 
@@ -587,7 +587,7 @@ class PointingOptionsCoverage(Entity):
         
         """
         return dict({"@type": "POINTING OPTIONS COVERAGE",
-                     "spacecraft": self.to_dict,
+                     "spacecraft": self.spacecraft.to_dict(),
                      "cartesianStateFilePath": self.state_cart_file,
                      "@id": self._id})
 
@@ -830,8 +830,8 @@ class PointingOptionsWithGridCoverage(Entity):
         
         """
         return dict({"@type": "POINTING OPTIONS WITH GRID COVERAGE",
-                     "grid": self.grid.to_dict,
-                     "spacecraft": self.to_dict,
+                     "grid": self.grid.to_dict(),
+                     "spacecraft": self.spacecraft.to_dict(),
                      "cartesianStateFilePath": self.state_cart_file,
                      "@id": self._id})
 
@@ -1008,6 +1008,341 @@ class PointingOptionsWithGridCoverage(Entity):
                                                 "filterMidIntervalAccess": mid_access_only,
                                                 "gridId": self.grid._id,
                                                 "stateCartFile": self.state_cart_file,
+                                                "accessFile": out_file_access,
+                                                "startDate": epoch_JDUT1,
+                                                "duration": duration,
+                                                "@id": None})
+
+class SpecularCoverage(Entity):
+    """A coverage calculator which handles coverage calculation for a spacecraft with a reflectometer (nadir-pointing & conical FOV instrument). 
+        Coverage calculation involves calculation of specular point locations at each propagation time step.
+        The specifications and the state files of the receiver spacecraft/instrument and (>=1) source spacecrafts are to be provided during the object instantiation.
+        In the state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source). 
+
+    :ivar rx_spc: Spacecraft for which the coverage calculation is performed. A nadir-pointing, conical FOV instrument is to be present on the spacecraft.
+                  This spacecraft is also the receiver which processes the reflected RF signal.
+    :vartype rx_spc: :class:`orbitpy.util.Spacecraft`
+
+    :ivar rx_state_file: File name with path of the (input) file in which the orbit states of the receiving spacecraft in CARTESIAN_EARTH_CENTERED_INERTIAL frame are available.
+                         Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
+    :vartype rx_state_file: str
+
+    :ivar tx_spc: (List) Spacecrafts from which the RF signal originates (e.g. GNSS satellites).
+    :vartype tx_spc: list, :class:`orbitpy.util.Spacecraft`
+
+    :ivar tx_state_file: List of state files corresponding to the source spacecrafts. The order of entries *must* match with the order of entries of the ``src`` argument.
+                          Each list entry is the file name with path of the (input) file in which the states in CARTESIAN_EARTH_CENTERED_INERTIAL frame are available.
+                          Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
+    :vartype tx_state_file: list, str
+
+    :ivar cov_params: List of coverage parameters corresponding to all the instruments, modes per instrument in the spacecraft.
+                        Refer to the :class:`orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft` function.
+    :vartype cov_params: list, namedtuple
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+
+    """
+    def __init__(self, rx_spc=None, rx_state_file=None, tx_spc=None, tx_state_file=None, _id=None):
+        self.rx_spc             = rx_spc if rx_spc is not None and isinstance(rx_spc, Spacecraft) else None
+        self.rx_state_file      = str(rx_state_file) if rx_state_file is not None else None
+        self.tx_spc             = orbitpy.util.initialize_object_list(tx_spc, Spacecraft)
+        self.tx_state_file      = orbitpy.util.initialize_object_list(tx_state_file, str)
+        # Extract the coverage related parameters
+        self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.spacecraft) if self.spacecraft is not None else None
+
+        super(SpecularCoverage, self).__init__(_id, "SPECULAR COVERAGE")
+
+    @staticmethod
+    def from_dict(d):
+        """ Parses an ``SpecularCoverage`` object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the SpecularCoverage specifications.
+
+                Following keys are to be specified.
+                
+                * "receiver":                         (dict) Consists of two keys: 
+                                        
+                                                            (1) "spacecraft": (dict) Receiver spacecraft specifications. Refer to :class:`orbitpy.util.Spacecraft.from_dict`
+
+                                                            (2) "cartesianStateFilePath": (str) File path (with file name) to the file with the propagated (receiver) spacecraft states.
+
+                 * "source":                        (list, dict) List of sources. Each entry in the list consists of the following two keys:
+
+                                                            (1) "spacecraft": (dict) Source spacecraft specifications. Refer to :class:`orbitpy.util.Spacecraft.from_dict`
+
+                                                            (2) "cartesianStateFilePath": (str) File path (with file name) to the file with the propagated (source) spacecraft states.
+
+                * "@id":                            (str or int) Unique identifier of the coverage calculator object.
+
+                In the provided state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source).
+
+        :paramtype d: dict
+
+        :return: ``SpecularCoverage`` object.
+        :rtype: :class:`orbitpy.coveragecalculator.SpecularCoverage`
+
+        """
+        # parse the reciever
+        receiver_dict   = d.get('receiver', None)
+        rx_spc_dict     = receiver_dict.get('spacecraft', None)
+        rx_spc          = Spacecraft.from_dict(rx_spc_dict) if rx_spc_dict else None
+        rx_state_file   = receiver_dict.get('cartesianStateFilePath', None)
+
+        # parse the source
+        source_dict     = d.get('source', None)
+        # make into list if not list
+        if not isinstance(source_dict, list):
+            source_dict = [source_dict]
+
+        tx_spc = []
+        tx_state_file =  []
+        for x in source_dict:
+            _spc_dict     = x.get('spacecraft', None)
+            _spc          = Spacecraft.from_dict(_spc_dict) if _spc_dict else None
+            _state_file   = x.get('cartesianStateFilePath', None)
+
+            if _spc is not None and _state_file is not None:
+                tx_spc.append(_spc)
+                tx_state_file.append(_state_file)
+
+        return SpecularCoverage(rx_spc          = rx_spc,
+                                rx_state_file   = rx_state_file,
+                                tx_spc          = tx_spc,
+                                tx_state_file   = tx_state_file,
+                                _id             = d.get('@id', None))
+    
+    def to_dict(self):
+        """ Translate the SpecularCoverage object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: ``SpecularCoverage`` object as python dictionary
+        :rtype: dict
+        
+        """
+        source = list() # list of dictionaries containing the source spacecraft information (specifications, state file paths)
+        for index, spc in enumerate(self.tx_spc):
+            source.append({ "spacecraft": spc.to_dict(), 
+                            "cartesianStateFilePath": self.tx_state_file[index]
+                          })
+
+        return dict({"@type": "SPECULAR COVERAGE",
+                     "receiver": {"spacecraft": self.rx_spc.to_dict(), "cartesianStateFilePath":self.rx_state_file},
+                     "source": source,
+                     "cartesianStateFilePath": self.state_cart_file,
+                     "@id": self._id})
+
+    def __repr__(self):
+        return "SpecularCoverage.from_dict({})".format(self.to_dict())
+
+    @staticmethod
+    def specular_location(S, L):
+        """  Find the location of the specular point given the position vectors of the source and receiving satellites.
+             
+             Reference: David Eberly, "Computing a Point of Reflection on a Sphere", Geometric Tools, 2008. 
+             https://www.geometrictools.com/Documentation/SphereReflections.pdf
+
+             Note that a unit sphere is considered in the reference. Hence the input position vectors of the satellites need to be scaled by 
+             1/(radius of earth)
+
+             .. todo:: Special case consideration
+        
+        :param S: Position vector of source (transmit) satellite.
+        :paramtype S: list, float
+
+        :param L: Position vector of receiving (receiving) satellite.
+        :paramtype L: list, float
+
+        :return: Cartesian coordinates of the specular point if available, else ``False``.
+        :rtype: list, float
+
+        """
+        # check for line of sight condition between L and S. This is a necessary condition to be satisfied for exitense of the specular point.
+        RE = Constants.radiusOfEarthInKM
+        L = 1/RE*np.array(L)
+        S = 1/RE*np.array(L)
+
+        # check for special condition when vectors L, S are parallel. In this case the specular point is simply the intersection of L (or) S position vector with the sphere.
+        a = np.dot(S,S)
+        b = np.dot(S,L)
+        c = np.dot(L,L)
+
+        y4_coeff = 4*c*(a*c-b*b)
+        y3_coeff = -4*(a*c-b*b)
+        y2_coeff = a+2*b+c-4*a*c
+        y1_coeff = 2*(a-b)
+        y0_coeff = (a-1)
+
+        # compute the roots of the quartic equation
+        r = np.roots([y4_coeff, y3_coeff, y2_coeff,y1_coeff, y0_coeff])
+
+        # check for real valued roots y_bar
+        real_valued = r.real[abs(r.imag)<1e-5] # where 1e-5 is a threshold
+        #print("real_valued ", real_valued)
+
+        # check for root y_bar>0
+        x_bar = None
+        for y_bar in real_valued:
+            if y_bar>0:
+                _x_bar = (-2*c*y_bar*y_bar + y_bar + 1)/ (2*b*y_bar + 1)
+                # check for pair (x_bar, y_bar) so that x_bar>0, y_bar>0
+                if _x_bar>0:
+                    x_bar = _x_bar
+                    break
+
+        #print("(x_bar, y_bar)", x_bar, y_bar)
+
+        # specular point N = x_bar S + y_bar L
+        N = x_bar * S + y_bar * L
+
+        return N
+
+    def execute(self, instru_id=None, mode_id=None, out_file_access=None):
+        """ Perform coverage calculation involvign calculation of specular point locations. 
+            The calculation is performed for a specific instrument and mode (in the receiver spacecraft). 
+            Coverage is calculated for the period over which the receiver, source spacecraft propagated states are available. 
+            The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
+
+            .. note:: Only a nadir-pointing, conical FOV instrument is accepted.
+
+            .. todo:: Include instrument FOV considerations. Include grid.
+
+        :param instru_id: Sensor identifier (corresponding to the receiver spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
+        :paramtype instru_id: str (or) int
+
+        :param mode_id: Mode identifier (corresponding to the receiver sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
+        :paramtype mode_id: str (or) int
+
+        :param out_file_access: File name with path of the file in which the access data is to be written. If ``None`` the file is not written.
+                
+                The format of the output data file is as follows:
+
+                *  The first row contains the coverage calculation type.
+                *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                *  The third row contains the time-step size in seconds.
+                *  The fourth row contains the duration (in days) for which coverage calculation is executed.
+                *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+                Note that time associated with a row is: ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+                Description of the coverage data is given below:
+
+                .. csv-table:: Coverage data description
+                    :header: Column, Data type, Units, Description
+                    :widths: 10,10,10,30
+
+                    time index, int, , Access time-index.
+                    source id, int/str, , Source spacecraft identifier.
+                    lat [deg], float, degrees, Latitude of specular point.
+                    lon [deg], float, degrees, Longitude of specular point.
+        
+        :paramtype out_file_access: list, str
+
+        :return: Coverage output info.
+        :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
+
+        """
+        ###### read in the propagated states and auxillary information ######               
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.rx_state_file)
+        rx_states_df = pd.read_csv(self.rx_state_file, skiprows=4)
+
+        earth = propcov.Earth()
+
+        ###### Prepare output file in which results shall be written ######
+        if out_file_access:
+            access_file = open(out_file_access, 'w', newline='')
+            access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            access_writer.writerow(["SPECULAR COVERAGE"])
+            access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+            access_writer.writerow(["Step size [s] is {}".format(step_size)])
+            access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+            access_writer.writerow(['time index', 'Source ID', 'lat [deg]', 'lon [deg]'])        
+        
+        ###### iterate over the each of the source satellites ######
+        for idx, tx in enumerate(self.tx_spc):
+            tx_id = tx._id # source spacecraft id
+            tx_states_df = pd.read_csv(self.tx_state_file[idx], skiprows=4) # read in the states
+
+            ###### iterate over the propagated states ######
+            for idx, rx_state in rx_states_df.iterrows():
+                time_index = int(state['time index'])
+                jd_date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
+                
+                rx_pos_vec= [rx_state['x [km]'], rx_state['y [km]'], rx_state['z [km]']]
+
+                tx_state = tx_states_df.iloc[idx]
+                tx_pos_vec = [tx_state['x [km]'], tx_state['y [km]'], tx_state['z [km]']]
+
+                specular_point= SpecularCoverage.specular_location(tx_pos_vec, rx_pos_vec)
+
+                if specular_point is not False:
+                    geo_coords = earth.Convert(propcov.Rvector3(specular_point), "Cartesian", "Spherical").GetRealArray()
+                    access_writer.writerow([time_index, tx_id, np.round(np.rad2deg(geo_coords[0]),3), np.round(np.rad2deg(geo_coords[1]),3)])
+
+
+        '''
+        ###### find the pointing-options corresponding to the input sensor-id, mode-id  ######
+        cov_param = find_in_cov_params_list(self.cov_params, instru_id, mode_id)
+        pointing_option = cov_param.pointing_option
+        if pointing_option is None:
+            print("No pointing options specified for the particular sensor, mode. Exiting PointingOptionsCoverage.")
+            return
+        # the input instru_id, mode_id may be None, so get the sensor, mode ids.
+        instru_id = cov_param.instru_id
+        mode_id = cov_param.mode_id
+        ###### iterate over the propagated states ######
+        date = propcov.AbsoluteDate()
+        for idx, state in states_df.iterrows():
+            time_index = int(state['time index'])
+            jd_date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
+            date.SetJulianDate(jd_date)
+            
+            cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
+            orbit_state = propcov.OrbitState.fromCartesianState(propcov.Rvector6(cart_state))
+            
+            # iterate over all pointing options
+            if pointing_option:
+                for pnt_opt_idx, pnt_opt in enumerate(pointing_option): # note that the pointing-option is indexed from 0 onwards
+                    ###### form the propcov.Spacecraft object ######
+                    attitude = propcov.NadirPointingAttitude()
+                    interp = propcov.LagrangeInterpolator()
+
+                    spc = propcov.Spacecraft(date, orbit_state, attitude, interp, 0, 0, 0, 1, 2, 3)
+
+                    # orient the spacecraft-bus according to the pointing-option. Assumed that the instrument-pointing axis is aligned to the spacecraft-bus z-axis.
+                    if pnt_opt.ref_frame == ReferenceFrame.NADIR_POINTING:            
+                        spc.SetBodyNadirOffsetAngles(angle1=pnt_opt.euler_angle1, angle2=pnt_opt.euler_angle2, angle3=pnt_opt.euler_angle3, # input angles are in degrees
+                                                    seq1=pnt_opt.euler_seq1, seq2=pnt_opt.euler_seq2, seq3=pnt_opt.euler_seq3)            
+                    else:
+                        raise NotImplementedError # only NADIR_POINTING reference frame is supported.
+                    
+                    rot_N2B = spc.GetNadirToBodyMatrix()
+                    earth_fixed_state = earth.GetBodyFixedState(propcov.Rvector6(cart_state), jd_date)
+                    rot_EF2N = spc.GetBodyFixedToReference(earth_fixed_state) # Earth fixed to Nadir
+                    rot_EF2B = rot_N2B * rot_EF2N
+                    # find the direction of the pointing axis (z-axis of the satellite body) in the Earth-Fixed frame                
+                    pnt_axis = [rot_EF2B.GetElement(2,0), rot_EF2B.GetElement(2,1), rot_EF2B.GetElement(2,2)] # Equivalelent to pnt_axis = R_EF2B.Transpose() * Rvector3(0,0,1)
+                    earth_fixed_state = earth_fixed_state.GetRealArray()
+                    earth_fixed_pos = [earth_fixed_state[0], earth_fixed_state[1], earth_fixed_state[2]]
+
+                    intersect_point = PointingOptionsCoverage.intersect_vector_sphere(earth.GetRadius(), earth_fixed_pos, pnt_axis)
+
+                    if intersect_point is not False:
+                        geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
+                        access_writer.writerow([time_index, pnt_opt_idx, np.round(np.rad2deg(geo_coords[0]),3), np.round(np.rad2deg(geo_coords[1]),3)])
+
+        '''
+        ##### Close file #####                
+        if access_file:
+            access_file.close()
+        
+        return CoverageOutputInfo.from_dict({   "coverageType": "SPECULAR COVERAGE",
+                                                "spacecraftId": self.rx_spc._id,
+                                                #"instruId": instru_id,
+                                                #"modeId": mode_id,
+                                                "usedFieldOfRegard": None,
+                                                "filterMidIntervalAccess": None,
+                                                "gridId": None,
+                                                "stateCartFile": self.rx_state_file,
                                                 "accessFile": out_file_access,
                                                 "startDate": epoch_JDUT1,
                                                 "duration": duration,
