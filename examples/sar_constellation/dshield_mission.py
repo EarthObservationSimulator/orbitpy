@@ -113,7 +113,7 @@ from orbitpy.datametricscalculator import DataMetricsCalculator, AccessFileInfo
 from orbitpy.eclipsefinder import EclipseFinder
 from orbitpy.grid import Grid
 
-SAT_SELECTION = 2
+SAT_SELECTION = 3
 
 # pointing options (roll-angles) (as given by Emmanuel). Note that the options are to be indexed by 1.
 # the order of the entires have correspondence with the entires in `swath25km_pnt_bins` and `swath50km_pnt_bins`.
@@ -291,7 +291,7 @@ def assign_pointing_bins(datametrics_fp, swath_width, spc_acc_fp):
     spc_df = spc_df.loc[spc_df['pOpts'].apply(len)>0] 
 
     with open(spc_acc_fp, 'w') as f2:
-                spc_df.to_csv(f2, index=False, header=True, line_terminator='\n', sep="\t", quoting=csv.QUOTE_NONE, quotechar="", escapechar="") # , quoting=csv.QUOTE_NONE, quotechar="",  escapechar="\\"
+        spc_df.to_csv(f2, index=False, header=True, line_terminator='\n', sep="\t", quoting=csv.QUOTE_NONE, quotechar="", escapechar="") # , quoting=csv.QUOTE_NONE, quotechar="",  escapechar="\\"
     
 ############################ Start mission simulation ############################
 
@@ -299,7 +299,7 @@ start_time = time.process_time()
 
 wdir = os.path.dirname(os.path.realpath(__file__)) + '/'
 
-epoch_dict = {"@type":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0}
+epoch_dict = {"@type":"GREGORIAN_UTC", "year":2020, "month":1, "day":4, "hour":13, "minute":30, "second":0}
 epoch = OrbitState.date_from_dict(epoch_dict)
 epoch_JDUt1 = epoch.GetJulianDate()
 
@@ -351,7 +351,7 @@ instru_id = sat.instrument[0]._id
 mode_id = sat.instrument[0].mode[0]._id
 
 # Since amount of data produced is large, the simulation and the resulting data files are split into 6hr chunks.
-for k in range(0,4):
+for k in range(0,8):
 
     print('processing for {} hrs'.format(k*6))
 
