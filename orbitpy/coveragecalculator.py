@@ -16,7 +16,7 @@ from instrupy.util import Entity
 from orbitpy.grid import Grid
 from orbitpy.util import Spacecraft, OutputInfoUtility
 import orbitpy.util
-from instrupy.util import ReferenceFrame, SphericalGeometry
+from instrupy.util import ReferenceFrame, SphericalGeometry, Constants
 
 DAYS_PER_SEC = 1.1574074074074074074074074074074e-5
 
@@ -28,6 +28,7 @@ class CoverageCalculatorFactory:
     * :class:`GridCoverage` 
     * :class:`PointingOptionsCoverage`
     * :class:`PointingOptionsWithGridCoverage`
+    * :class:`SpecularCoverage`
      
     Additional user-defined coverage calculator classes can be registered as shown below: 
 
@@ -48,6 +49,7 @@ class CoverageCalculatorFactory:
         self.register_coverage_calculator('GRID COVERAGE', GridCoverage)
         self.register_coverage_calculator('POINTING OPTIONS COVERAGE', PointingOptionsCoverage)
         self.register_coverage_calculator('POINTING OPTIONS WITH GRID COVERAGE', PointingOptionsWithGridCoverage)
+        self.register_coverage_calculator('SPECULAR COVERAGE', SpecularCoverage)
 
     def register_coverage_calculator(self, _type, creator):
         """ Function to register coverage calculators.
@@ -1049,7 +1051,7 @@ class SpecularCoverage(Entity):
         self.tx_spc             = orbitpy.util.initialize_object_list(tx_spc, Spacecraft)
         self.tx_state_file      = orbitpy.util.initialize_object_list(tx_state_file, str)
         # Extract the coverage related parameters
-        self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.spacecraft) if self.spacecraft is not None else None
+        self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.rx_spc) if self.rx_spc is not None else None
 
         super(SpecularCoverage, self).__init__(_id, "SPECULAR COVERAGE")
 
@@ -1159,7 +1161,7 @@ class SpecularCoverage(Entity):
         # check for line of sight condition between L and S. This is a necessary condition to be satisfied for exitense of the specular point.
         RE = Constants.radiusOfEarthInKM
         L = 1/RE*np.array(L)
-        S = 1/RE*np.array(L)
+        S = 1/RE*np.array(S)
 
         # check for special condition when vectors L, S are parallel. In this case the specular point is simply the intersection of L (or) S position vector with the sphere.
         a = np.dot(S,S)
@@ -1255,7 +1257,7 @@ class SpecularCoverage(Entity):
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index', 'Source ID', 'lat [deg]', 'lon [deg]'])        
+            access_writer.writerow(['time index', 'source id', 'lat [deg]', 'lon [deg]'])        
         
         ###### iterate over the each of the source satellites ######
         for idx, tx in enumerate(self.tx_spc):
@@ -1264,7 +1266,7 @@ class SpecularCoverage(Entity):
 
             ###### iterate over the propagated states ######
             for idx, rx_state in rx_states_df.iterrows():
-                time_index = int(state['time index'])
+                time_index = int(rx_state['time index'])
                 jd_date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
                 
                 rx_pos_vec= [rx_state['x [km]'], rx_state['y [km]'], rx_state['z [km]']]
