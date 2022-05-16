@@ -67,7 +67,7 @@ class TestPropagation(unittest.TestCase):
         cls.j2_prop = factory.get_propagator(specs)
         cls.duration=1        
         # circular orbit
-        cls.default_orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0},
+        cls.default_orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0},
                                        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7000, 
                                                 "ecc": 0, "inc": 0, "raan": 0, "aop": 0, "ta": 0}
                                      }

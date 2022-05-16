@@ -15,7 +15,7 @@ spc1_json = '{"@id": "sp1", "name": "Mars", \
                                             {"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":-2.5, "zRotation":0}  \
                                             ], \
                                             "@id":"bs1", "@type":"Basic Sensor"}, \
-                            "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                            "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                             } \
                    }'
@@ -25,7 +25,7 @@ spc2_json = '{"@id": 12, "name": "Jupyter", \
               "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
                                "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                               }, \
-              "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+              "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                              "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                             } \
             }'
@@ -61,7 +61,7 @@ spc3_json = '{"name": "Saturn", \
                                                 "numberDetectorRows":5, "numberDetectorCols":10, "@id": "bs3", "@type":"Basic Sensor" \
                                             } \
                                             ], \
-                            "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                            "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                             } \
                             }'
@@ -95,7 +95,7 @@ spc4_json = '{"name": "PlanetX", \
                                                 "numberDetectorRows":5, "numberDetectorCols":10, "@id": "bs3", "@type":"Basic Sensor" \
                                             } \
                                             ], \
-                            "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                            "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 0, "raan": 35, "aop": 145, "ta": -25} \
                                             } \
                             }'
@@ -116,7 +116,8 @@ spc5_json = '{"name": "PlanetX", \
                                                 "numberDetectorRows":5, "numberDetectorCols":10, "@id": "sen1", "@type":"Basic Sensor" \
                                             } \
                                             ], \
-                            "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":18, "hour":12, "minute":10, "second":0}, \
+                            "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":3, "day":18, "hour":12, "minute":10, "second":0}, \
                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -225} \
                                             } \
                             }'
+

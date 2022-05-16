@@ -299,7 +299,7 @@ start_time = time.process_time()
 
 wdir = os.path.dirname(os.path.realpath(__file__)) + '/'
 
-epoch_dict = {"@type":"GREGORIAN_UTC", "year":2020, "month":1, "day":4, "hour":13, "minute":30, "second":0}
+epoch_dict = {"@type":"GREGORIAN_UT1", "year":2020, "month":1, "day":4, "hour":13, "minute":30, "second":0}
 epoch = OrbitState.date_from_dict(epoch_dict)
 epoch_JDUt1 = epoch.GetJulianDate()
 

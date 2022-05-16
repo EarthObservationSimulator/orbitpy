@@ -92,7 +92,7 @@ Examples
          j2_prop = factory.get_propagator(specs)
          
          # initialize orbit (initial state of the satellite)
-         orbit = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, 
+         orbit = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, 
                         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 700, "ecc": 0.002, "inc": 98.8, "raan": 120, "aop": 10, "ta": 39} })
          # spacecraft with 1 instrument
          sc = Spacecraft(orbitState=orbit)
@@ -121,7 +121,7 @@ Examples
 
    .. code-block:: python
 
-         prop_start_date = OrbitState.date_from_dict({"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":27, "hour":12, "minute":0, "second":0})
+         prop_start_date = OrbitState.date_from_dict({"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":27, "hour":12, "minute":0, "second":0})
          j2_prop.execute(sc, prop_start_date, out_file_cart, out_file_kep, duration=0.25)
 
 2. Propagation time-step calculation

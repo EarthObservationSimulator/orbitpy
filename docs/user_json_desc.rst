@@ -8,7 +8,7 @@ User JSON Input Description
    :header: Parameter, Data type, Units, Description
    :widths: 10,10,5,40
 
-   epoch, str,"year, month, day, hour, month, seconds", "Mission epoch (date and time) in UTC Gregorian. Comma seperated values. Eg: :code:`'2017, 1, 15, 22, 30, 20.111'`"
+   epoch, str,"year, month, day, hour, month, seconds", "Mission epoch (date and time) in UT1 Gregorian. Comma seperated values. Eg: :code:`'2017, 1, 15, 22, 30, 20.111'`"
    duration, float, days, Length of mission in days. Eg: :code:`0.25`
    constellation, :ref:`constellation_json_object`, ,Constellation specifications.
    instrument, list *instrument JSON object*, ,Instrument specifications (please refer :code:`InstruPy` documentation). A list of instruments is to be specified.

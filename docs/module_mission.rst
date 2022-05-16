@@ -39,9 +39,9 @@ Each of the acceptable json objects in the mission specifications is described b
 -----------------------
 
 The ``date`` json object is used to specify a date which can be used for the purpose of defining the mission epoch or the ``date`` field in the orbit-state definitions, etc.
-The date type can be either ``GREGORIAN_UTC`` or ``JULIAN_DATE_UT1``.
+The date type can be either ``GREGORIAN_UT1`` or ``JULIAN_DATE_UT1``.
 
-1. ``GREGORIAN_UTC`` date-type
+1. ``GREGORIAN_UT1`` date-type
 
    .. csv-table:: 
       :header: Parameter, Data type, Units, Description
@@ -66,7 +66,7 @@ The date type can be either ``GREGORIAN_UTC`` or ``JULIAN_DATE_UT1``.
 
 .. code-block:: javascript
    
-   "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, 
+   "epoch":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, 
                                         "hour":6, "minute":0, "second":0}
 
    'date': {'@type': 'JULIAN_DATE_UT1', 'jd': 2459270.75}  
@@ -194,7 +194,7 @@ the bus orientation with respect to a reference frame. By default the orientatio
 
 .. code-block:: javascript
    
-   /*spacecraft with 1 instrument, GREGORIAN_UTC date-type, KEPLERIAN_EARTH_CENTERED_INERTIAL state-type*/
+   /*spacecraft with 1 instrument, GREGORIAN_UT1 date-type, KEPLERIAN_EARTH_CENTERED_INERTIAL state-type*/
    "spacecraft": { 
          "@id": "sp1", 
          "name": "Spock",
@@ -206,7 +206,7 @@ the bus orientation with respect to a reference frame. By default the orientatio
                         "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 },
                         "maneuver":{"maneuverType": "CIRCULAR", "diameter":10},
                         "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"},
-         "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
+         "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
                         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
                         } \
    
@@ -399,12 +399,12 @@ Examples
 
       from orbitpy.mission import Mission
             
-      mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
+      mission_json_str = '{  "epoch":{"@type":"GREGORIAN_UT1", "year":2021, "month":3, "day":25, "hour":15, "minute":6, "second":8}, \
                               "duration": 0.1, \
                               "spacecraft": { \
                                  "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                              }, \
-                                 "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                 "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                              "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                              } \
                                  }, \

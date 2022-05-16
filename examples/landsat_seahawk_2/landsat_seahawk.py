@@ -96,7 +96,7 @@ start_time = time.process_time()
 wdir = os.path.dirname(os.path.realpath(__file__)) + "/"
 
 # define mission epoch
-mission_epoch_dict = {"@type":"GREGORIAN_UTC", "year":2018, "month":7, "day":1, "hour":0, "minute":0, "second":0}
+mission_epoch_dict = {"@type":"GREGORIAN_UT1", "year":2018, "month":7, "day":1, "hour":0, "minute":0, "second":0}
 mission_epoch = OrbitState.date_from_dict(mission_epoch_dict)
 mission_epoch_JDUt1 = mission_epoch.GetJulianDate()
 

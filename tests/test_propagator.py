@@ -133,7 +133,7 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
         self.sma = RE+random.uniform(350,850)
         
         # circular orbit
-        orbit = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                                        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": self.sma, 
                                                 "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
                                                 "aop": random.uniform(0,360), "ta": random.uniform(0,360)}

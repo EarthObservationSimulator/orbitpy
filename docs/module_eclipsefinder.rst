@@ -83,7 +83,7 @@ Example
       factory = PropagatorFactory()
       j2_prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": 10})
 
-      spc = Spacecraft.from_dict({"orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":12, "minute":29, "second":2}, \
+      spc = Spacecraft.from_dict({"orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":1, "day":28, "hour":12, "minute":29, "second":2}, \
                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 35, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
                                  }})
       state_cart_file_spc = out_dir + '/cart_states_spc.csv'

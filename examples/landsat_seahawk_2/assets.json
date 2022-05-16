@@ -1,7 +1,7 @@
 [
     {
         "@id": "landsat", "name": "Landsat-8",
-        "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":6, "day":30, "hour":18, "minute":44, "second":2.812704},
+        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":6, "day":30, "hour":18, "minute":44, "second":2.812704},
         "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7.080666116467540e+03, "ecc": 0.00012160, "inc": 98.2231, "raan": 251.6008, "aop": 92.0544, "ta": 268.0792}
         },    
         "instrument": [{
@@ -80,7 +80,7 @@
     },
     {
     "@id": "seahawk1", "name": "SeaHawk1",
-    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":6, "day":30, "hour":20, "minute":44, "second":47.875200},
+    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":6, "day":30, "hour":20, "minute":44, "second":47.875200},
     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6.959294563882585e+03, "ecc": 0.00111610, "inc": 97.7390, "raan": 253.6366, "aop": 280.7821, "ta": 79.2143}
     },    
     "instrument": {
@@ -127,7 +127,7 @@
     },
     {
     "@id": "seahawk2", "name": "SeaHawk2",
-    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":6, "day":30, "hour":20, "minute":44, "second":47.875200},
+    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":6, "day":30, "hour":20, "minute":44, "second":47.875200},
     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6.959294563882585e+03, "ecc": 0.00111610, "inc": 97.7390, "raan": 253.6366, "aop": 280.7821, "ta": 259.2143}
     },    
     "instrument": {

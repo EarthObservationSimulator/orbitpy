@@ -26,7 +26,7 @@ class StateType(EnumEntity):
     CARTESIAN_EARTH_FIXED = "CARTESIAN_EARTH_FIXED"
 
 class DateType(EnumEntity):
-    GREGORIAN_UTC = "GREGORIAN_UTC"
+    GREGORIAN_UT1 = "GREGORIAN_UT1"
     JULIAN_DATE_UT1 = "JULIAN_DATE_UT1"        
 
 class OrbitState(Entity):
@@ -119,7 +119,7 @@ class OrbitState(Entity):
 
         :param d: Dictionary with the date description. 
             
-            In case of ``GREGORIAN_UTC`` date type the following keys apply: year (int), month (int), day (int), hour (int), minute (int) and second (float).
+            In case of ``GREGORIAN_UT1`` date type the following keys apply: year (int), month (int), day (int), hour (int), minute (int) and second (float).
 
             In case of ``JULIAN_DATE_UT1`` date type the following keys apply: jd (float)
 
@@ -131,11 +131,11 @@ class OrbitState(Entity):
         """
         date = propcov.AbsoluteDate()
         if d is not None:            
-            if(DateType.get(d["@type"]) == DateType.GREGORIAN_UTC):
+            if(DateType.get(d["@type"]) == DateType.GREGORIAN_UT1):
                 try:
                     date.SetGregorianDate(year=d["year"], month=d["month"], day=d["day"], hour=d["hour"], minute=d["minute"], second=d["second"])
                 except:
-                    raise Exception("Something wrong in setting of Gregorian UTC date object. Check that the year, month, day, hour, second key/value pairs have been specified in the input dictionary.")
+                    raise Exception("Something wrong in setting of Gregorian UT1 date object. Check that the year, month, day, hour, second key/value pairs have been specified in the input dictionary.")
         
             elif(DateType.get(d["@type"]) == DateType.JULIAN_DATE_UT1):
                 try:

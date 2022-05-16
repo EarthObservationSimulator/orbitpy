@@ -66,7 +66,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         """        
         # setup spacecraft with some parameters setup randomly     
         duration=0.005
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+random.uniform(350,850), 
                             "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
                             "aop": random.uniform(0,360), "ta": random.uniform(0,360)}
@@ -143,7 +143,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         """
         
         duration=random.random()
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":30, "hour":16, "minute":0, "second":0}, # JD: 2459457.1666666665
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":30, "hour":16, "minute":0, "second":0}, # JD: 2459457.1666666665
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+750, 
                             "ecc": 0, "inc": 60, "raan": 240, 
                             "aop": 10, "ta": 320}
@@ -222,7 +222,7 @@ class TestPointingOptionsWithGridCoverage(unittest.TestCase):
         """
         
         duration = 0.0025
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":30, "hour":16, "minute":0, "second":0}, # JD: 2459457.1666666665
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":30, "hour":16, "minute":0, "second":0}, # JD: 2459457.1666666665
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+750, 
                             "ecc": 0, "inc": 60, "raan": 240, 
                             "aop": 10, "ta": 320}

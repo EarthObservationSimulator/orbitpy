@@ -11,9 +11,6 @@ from orbitpy.coveragecalculator import CoverageOutputInfo, SpecularCoverage
 from orbitpy.util import Spacecraft
 from orbitpy.propagator import PropagatorFactory
 
-sys.path.append('../')
-from util.spacecrafts import spc1_json
-
 RE = 6378.137 # radius of Earth in kilometers
 
 class TestSpecularCoverage(unittest.TestCase):
@@ -31,17 +28,42 @@ class TestSpecularCoverage(unittest.TestCase):
         factory = PropagatorFactory()
         cls.step_size = 1
         cls.j2_prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": cls.step_size})
+
+        # define test spacecrafts
+
+        # source (transmitting) spacecraft for specular coverage tests
+        cls.navstar80_json = '{ "name": "NAVSTAR 80", \
+                            "spacecraftBus":{ "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                        }, \
+                            "orbitState": { "date":{"@type":"GREGORIAN_UT1", "year":2022, "month":05, "day":15, "hour":17, "minute":58, "second":15.3}, \
+                                            "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 26560.217, "ecc": 0.00185450, "inc": 54.5899, "raan": 271.4221, "aop": 184.7310, "ta": 336.981} \
+                                        }, \
+                            "@id": "navstar80" \
+                        }'
+
+        # receiving spacecraft for specular coverage tests
+        cls.satX_json = '{  "name": "satX", \
+                        "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
+                                        "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                        }, \
+                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":3, "day":18, "hour":12, "minute":10, "second":0}, \
+                                        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 98, "raan": 35, "aop": 145, "ta": -225} \
+                                        } \
+                        }'
+        
+        #navstar80 = Spacecraft.from_json(navstar80_json)
+        #cls.satX = Spacecraft.from_json(satX_json)
     
-    '''
+    
     def test_from_dict(self):
-        o = SpecularCoverage.from_dict({ "spacecraft": json.loads(spc1_json),
-                                         "cartesianStateFilePath":"../../state.csv",
+        o = SpecularCoverage.from_dict({ "receiver": {"spacecraft": json.loads(self.satX_json), "cartesianStateFilePath":"../../state.csv"},
+                                         "source": {"spacecraft": json.loads(self.satX_json), "cartesianStateFilePath":"../../state.csv"},
                                          "@id": 15})
         self.assertEqual(o._id, 15)
         self.assertEqual(o._type, 'SPECULAR COVERAGE')
-        self.assertEqual(o.spacecraft, Spacecraft.from_json(spc1_json))
-        self.assertEqual(o.state_cart_file, "../../state.csv")
-    '''
+        self.assertEqual(o.rx_spc, Spacecraft.from_json(self.satX_json))
+        self.assertEqual(o.rx_state_file, "../../state.csv")
+    
 
     def test_to_dict(self): #TODO
         pass
@@ -51,7 +73,7 @@ class TestSpecularCoverage(unittest.TestCase):
         """        
         # setup spacecraft with some parameters setup randomly     
         duration=random.random()
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+random.uniform(350,850), 
                             "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
                             "aop": random.uniform(0,360), "ta": random.uniform(0,360)}
@@ -64,7 +86,7 @@ class TestSpecularCoverage(unittest.TestCase):
 
         spacecraftBus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}}
 
-        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict, "@id":"sat"})
+        sat = Spacecraft.from_dict({"orbitState":orbit_dict, "instrument":instrument_dict, "spacecraftBus":spacecraftBus_dict, "@id":"satX"})
 
         state_cart_file = self.out_dir+'/test_cov_cart_states.csv'
         # execute propagator

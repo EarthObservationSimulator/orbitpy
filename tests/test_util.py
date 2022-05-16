@@ -18,7 +18,7 @@ class TestOrbitState(unittest.TestCase):
         x = OrbitState.date_from_dict({"@type":"JULIAN_DATE_UT1", "jd":2459270.75})
         self.assertIsInstance(x, propcov.AbsoluteDate)
 
-        y = OrbitState.date_from_dict({"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0})
+        y = OrbitState.date_from_dict({"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0})
         self.assertIsInstance(y, propcov.AbsoluteDate)
 
         self.assertEqual(x, y)
@@ -60,7 +60,7 @@ class TestOrbitState(unittest.TestCase):
         self.assertEqual(o.state, propcov.OrbitState.fromCartesianState(propcov.Rvector6([6878.137,0,0,0,7.6126,0])))
 
         # Gregorian date, Keplerian state
-        o = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
+        o = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                                   })
         self.assertIsInstance(o, OrbitState)
@@ -86,7 +86,7 @@ class TestOrbitState(unittest.TestCase):
         self.assertIsNone(d["@id"])
 
         # Input: Gregorian date, Keplerian state
-        o = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
+        o = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                                   "@id": "123"})
         d = o.to_dict()
@@ -196,7 +196,7 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}')])
-        self.assertEqual(spc1.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+        self.assertEqual(spc1.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                               "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
         self.assertEqual(spc1._id, "sp1")
 
@@ -206,7 +206,7 @@ class TestSpacecraft(unittest.TestCase):
                                                     "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }'))
         self.assertIsNone(spc2.instrument)
-        self.assertEqual(spc2.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+        self.assertEqual(spc2.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                               "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
         self.assertEqual(spc2._id, 12)
 
@@ -227,7 +227,7 @@ class TestSpacecraft(unittest.TestCase):
         self.assertEqual(spc3.instrument[2].get_mode_id()[0], 0)
         self.assertEqual(spc3.instrument[2].get_mode_id()[1], 1)
         self.assertIsNotNone(spc3.instrument[2].get_mode_id()[2])
-        self.assertEqual(spc3.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+        self.assertEqual(spc3.orbitState, OrbitState.from_json('{"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                               "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}}'))
         self.assertIsNotNone(spc3._id)
 
@@ -273,7 +273,7 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
@@ -286,7 +286,7 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
@@ -301,7 +301,7 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
@@ -316,7 +316,7 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":15 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
@@ -331,7 +331,7 @@ class TestSpacecraft(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":15 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":3, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":3, "day":25, "hour":6, "minute":0, "second":0}, \
                                                     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
@@ -352,7 +352,7 @@ class TestUtilModuleFunction(unittest.TestCase):
                                                   "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 }, \
                                                   "maneuver":{"maneuverType": "CIRCULAR", "diameter":10}, \
                                                   "numberDetectorRows":5, "numberDetectorCols":10, "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
@@ -361,7 +361,7 @@ class TestUtilModuleFunction(unittest.TestCase):
                                    "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5, \
                                                     "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                                    }, \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')
@@ -394,7 +394,7 @@ class TestUtilModuleFunction(unittest.TestCase):
                                                         "numberDetectorRows":5, "numberDetectorCols":10, "@id": "bs3", "@type":"Basic Sensor" \
                                                     } \
                                                   ], \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                     "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                   } \
                                   }')

@@ -87,13 +87,13 @@ Examples
       factory = PropagatorFactory()
       j2_prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": 10})
       
-      spcA = Spacecraft.from_dict({"name":"spcA", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":12, "minute":29, "second":2}, \
+      spcA = Spacecraft.from_dict({"name":"spcA", "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":1, "day":28, "hour":12, "minute":29, "second":2}, \
                                                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
                                     }})
       state_cart_file_spcA = out_dir + '/cart_states_spcA.csv'
       j2_prop.execute(spacecraft=spcA, out_file_cart=state_cart_file_spcA, duration=1)
       
-      spcB = Spacecraft.from_dict({"name":"spcB", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":12, "minute":29, "second":2}, \
+      spcB = Spacecraft.from_dict({"name":"spcB", "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":1, "day":28, "hour":12, "minute":29, "second":2}, \
                                                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1816, "raan": 150, "aop": 84.837, "ta": 275.3} \
                                     }})
       state_cart_file_spcB = out_dir + '/cart_states_spcB.csv'
@@ -134,7 +134,7 @@ Examples
       factory = PropagatorFactory()
       j2_prop = factory.get_propagator({"@type": 'J2 ANALYTICAL PROPAGATOR', "stepSize": 10})
 
-      spc = Spacecraft.from_dict({"name":"Euro", "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":28, "hour":12, "minute":29, "second":2}, \
+      spc = Spacecraft.from_dict({"name":"Euro", "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":1, "day":28, "hour":12, "minute":29, "second":2}, \
                                                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7073.9, "ecc": 0.000133, "inc": 98.1818, "raan": 38.3243, "aop": 86.2045, "ta": 273.932} \
                                  }})
       state_cart_file_spc = out_dir + '/cart_states_spc.csv'

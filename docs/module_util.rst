@@ -17,8 +17,8 @@ use the equatorial plane (not the ecliptic plane) as the XY plane.
 ``DateType``
 ^^^^^^^^^^^^^^
 
-This is an enumeration class listing the allowed date types. ``GREGORIAN_UTC`` refers to the date taken from the Gregorian calender
-and the time scale as the Universal Coordinate Time (UTC). 
+This is an enumeration class listing the allowed date types. ``GREGORIAN_UT1`` refers to the date taken from the Gregorian calender
+and the time scale as the Universal Coordinate Time (UT1). 
 ``JULIAN_DATE_UT1`` refers to the number of days elapsed on the Julian calender (with the fractional part included) 
 and the time scale as Universal TIme (UT1).
 
@@ -51,8 +51,8 @@ Examples
                     'inc': 0.0, 'raan': 0.0, 'aop': 180.0, 'ta': 180.0}, '@id': 123}
 
 
-      # initialize orbit-state using Gregorian UTC and Keplerian state coordinates
-      x = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
+      # initialize orbit-state using Gregorian UT1 and Keplerian state coordinates
+      x = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
                               "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25},
                               })
 
@@ -113,7 +113,7 @@ Example
                                                              {"referenceFrame": "NADIR_POINTING", "convention": "XYZ", "xRotation":0, "yRotation":-2.5, "zRotation":0}  \
                                                             ], \
                                           "@id":"bs1", "@type":"Basic Sensor"}, \
-                                    "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
+                                    "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, \
                                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25} \
                                                    } \
                                        }')
@@ -133,7 +133,7 @@ Example
                                  "operatingWavelength": 4.2e-6, "bandwidth": 1.9e-6, "quantumEff": 0.5, "targetBlackBodyTemp": 290,
                                  "bitsPerPixel": 8, "opticsSysEff": 0.75, "numOfReadOutE": 25, "apertureDia": 0.26, "Fnum": 2.7, "atmosLossModel": "LOWTRAN7"
                                  }],
-                              "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
+                              "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
                                           "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
                                           }
                               }             

@@ -11,14 +11,14 @@ from orbitpy.grid import Grid
 
 wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/direct_vs_projected_coverage/"
 
-epoch_dict = {"@type":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0}
+epoch_dict = {"@type":"GREGORIAN_UT1", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0}
 epoch = OrbitState.date_from_dict(epoch_dict)
 epoch_JDUt1 = epoch.GetJulianDate()
 
 
 sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
                                             },
-                             "orbitState": {"date": {"@type":"GREGORIAN_UTC", "year":2019, "month":12, "day":31, "hour":18, "minute":32, "second":15.461952},
+                             "orbitState": {"date": {"@type":"GREGORIAN_UT1", "year":2019, "month":12, "day":31, "hour":18, "minute":32, "second":15.461952},
                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7060.468, "ecc": 0.00016890, "inc": 98.1228, "raan": 9.7929, "aop": 109.2526, "ta": 250.8855}
                                         },
                              "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation":2.5, "yRotation":-7.5, "zRotation":10},
@@ -28,7 +28,7 @@ sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "N
 '''
 sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
                                             },
-                             "orbitState": {"date": {"@type":"GREGORIAN_UTC", "year":2019, "month":12, "day":31, "hour":18, "minute":32, "second":15.461952},
+                             "orbitState": {"date": {"@type":"GREGORIAN_UT1", "year":2019, "month":12, "day":31, "hour":18, "minute":32, "second":15.461952},
                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7060.468, "ecc": 0.00016890, "inc": 98.1228, "raan": 9.7929, "aop": 109.2526, "ta": 250.8855}
                                         },
                              "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation":2.5, "yRotation":-7.5, "zRotation":10},
@@ -44,7 +44,7 @@ sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "N
 
 sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
                                             },
-                             "orbitState": {"date": {"@type":"GREGORIAN_UTC", "year":2019, "month":12, "day":31, "hour":18, "minute":32, "second":15.461952},
+                             "orbitState": {"date": {"@type":"GREGORIAN_UT1", "year":2019, "month":12, "day":31, "hour":18, "minute":32, "second":15.461952},
                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7060.468, "ecc": 0.00016890, "inc": 98.1228, "raan": 9.7929, "aop": 109.2526, "ta": 250.8855}
                                         },
                              "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "XYZ", "xRotation":0, "yRotation":0, "zRotation":0},

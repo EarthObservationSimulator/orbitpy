@@ -39,7 +39,7 @@ the results (file locations, assigned unique identifiers, etc) is displayed.
     -----------------
 
     {   
-        "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":1, "day":12, "hour":12, "minute":0, "second":0},
+        "epoch":{"@type":"GREGORIAN_UT1", "year":2021, "month":1, "day":12, "hour":12, "minute":0, "second":0},
         "duration": 0.25,
         "spacecraft": [{
             "@id": "sp1", "name": "Mars",
@@ -51,7 +51,7 @@ the results (file locations, assigned unique identifiers, etc) is displayed.
                             "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 },
                             "maneuver":{"maneuverType": "CIRCULAR", "diameter":10},
                             "@id":"bs1", "@type":"Basic Sensor"},
-            "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
+            "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.137, "ecc": 0.001, "inc": 45, "raan": 35, "aop": 145, "ta": -25}
                             } 
             }        

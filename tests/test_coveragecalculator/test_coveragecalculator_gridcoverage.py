@@ -76,7 +76,7 @@ class TestGridCoverage(unittest.TestCase):
         """        
         # setup spacecraft with some parameters setup randomly     
         duration=0.05
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+random.uniform(350,850), 
                             "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
                             "aop": random.uniform(0,360), "ta": random.uniform(0,360)}
@@ -143,7 +143,7 @@ class TestGridCoverage(unittest.TestCase):
         spacecraftBus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}}
         grid = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":25, "latLower":-25, "lonUpper":180, "lonLower":-180, "gridRes": 2})
         
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+500, 
                         "ecc": 0.001, "inc": 0, "raan": 20, 
                         "aop": 0, "ta": 120}
@@ -209,7 +209,7 @@ class TestGridCoverage(unittest.TestCase):
         """ 
         ####### Common attributes for both simulations #######
         duration = 0.1
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+500, 
                             "ecc": 0.001, "inc": 0, "raan": 0, 
                             "aop": 0, "ta": 0}
@@ -296,7 +296,7 @@ class TestGridCoverage(unittest.TestCase):
         """ 
         ####### Common attributes for all the simulations #######
         duration = 0.1
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+500, 
                             "ecc": 0.001, "inc": 45, "raan": 245, 
                             "aop": 0, "ta": 0}
@@ -380,7 +380,7 @@ class TestGridCoverage(unittest.TestCase):
         spacecraftBus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}}
         grid = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":25, "latLower":-25, "lonUpper":180, "lonLower":-180, "gridRes": 2})
         
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                                        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+500, 
                                                 "ecc": 0.001, "inc": 0, "raan": 20, 
                                                 "aop": 0, "ta": 120}
@@ -440,7 +440,7 @@ class TestGridCoverage(unittest.TestCase):
         """ 
         ####### Common attributes for all the simulations #######
         duration = 0.1
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+500, 
                             "ecc": 0.001, "inc": 45, "raan": 245, 
                             "aop": 0, "ta": 0}
@@ -535,7 +535,7 @@ class TestGridCoverage(unittest.TestCase):
         
         grid = Grid.from_autogrid_dict({"@type": "autogrid", "@id": 1, "latUpper":25, "latLower":-25, "lonUpper":180, "lonLower":-180, "gridRes": 2})
         
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+750, 
                                "ecc": 0.001, "inc": 25, "raan": 120.56, 
                                "aop": 0, "ta": 349}

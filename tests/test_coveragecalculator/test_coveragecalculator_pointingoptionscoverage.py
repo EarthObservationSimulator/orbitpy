@@ -63,7 +63,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         """        
         # setup spacecraft with some parameters setup randomly     
         duration=random.random()
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": RE+random.uniform(350,850), 
                             "ecc": 0, "inc": random.uniform(0,180), "raan": random.uniform(0,360), 
                             "aop": random.uniform(0,360), "ta": random.uniform(0,360)}
@@ -118,7 +118,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         # setup spacecraft with some parameters setup randomly     
         duration=0.1
         sma = RE+random.uniform(350,850)
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": sma, 
                             "ecc": 0, "inc": 56, "raan": 135, 
                             "aop": 26.23, "ta": 67}
@@ -195,7 +195,7 @@ class TestPointingOptionsCoverage(unittest.TestCase):
         duration=0.1
         sma = RE+random.uniform(350,850)
         alt = sma - RE
-        orbit_dict = {"date":{"@type":"GREGORIAN_UTC", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
+        orbit_dict = {"date":{"@type":"GREGORIAN_UT1", "year":2018, "month":5, "day":26, "hour":12, "minute":0, "second":0}, # JD: 2458265.00000
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": sma, 
                             "ecc": 0, "inc": 0, "raan": random.uniform(0,360), 
                             "aop": random.uniform(0,360), "ta": random.uniform(0,360)}
