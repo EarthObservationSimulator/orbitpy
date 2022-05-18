@@ -1,6 +1,6 @@
 """Unit tests for orbitpy.coveragecalculator.pointingoptionswithgridcoverage class.
 
-``TestGridCoverage`` class:
+``TestPointingOptionsWithGridCoverage`` class:
 
 * ``test_execute_0``: Test format of output access files.
 * ``test_execute_1``: Test PointingOptionsWithGridCoverage output with separate runs of GridCoverage calculator. 

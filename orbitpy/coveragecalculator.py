@@ -16,7 +16,7 @@ from instrupy.util import Entity
 from orbitpy.grid import Grid
 from orbitpy.util import Spacecraft, OutputInfoUtility
 import orbitpy.util
-from instrupy.util import ReferenceFrame, SphericalGeometry, Constants
+from instrupy.util import ReferenceFrame, SphericalGeometry, GeoUtilityFunctions, Constants
 
 DAYS_PER_SEC = 1.1574074074074074074074074074074e-5
 
@@ -736,14 +736,14 @@ class PointingOptionsCoverage(Entity):
                     rot_EF2N = spc.GetBodyFixedToReference(earth_fixed_state) # Earth fixed to Nadir
                     rot_EF2B = rot_N2B * rot_EF2N
                     # find the direction of the pointing axis (z-axis of the satellite body) in the Earth-Fixed frame                
-                    pnt_axis = [rot_EF2B.GetElement(2,0), rot_EF2B.GetElement(2,1), rot_EF2B.GetElement(2,2)] # Equivalelent to pnt_axis = R_EF2B.Transpose() * Rvector3(0,0,1)
+                    pnt_axis = [rot_EF2B.GetElement(2,0), rot_EF2B.GetElement(2,1), rot_EF2B.GetElement(2,2)] # Equivalent to pnt_axis = R_EF2B.Transpose() * Rvector3(0,0,1)
                     earth_fixed_state = earth_fixed_state.GetRealArray()
                     earth_fixed_pos = [earth_fixed_state[0], earth_fixed_state[1], earth_fixed_state[2]]
 
                     intersect_point = PointingOptionsCoverage.intersect_vector_sphere(earth.GetRadius(), earth_fixed_pos, pnt_axis)
 
                     if intersect_point is not False:
-                        geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
+                        geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray() # intersect_point is in Earth Fixed coords so can be converted.
                         access_writer.writerow([time_index, pnt_opt_idx, np.round(np.rad2deg(geo_coords[0]),3), np.round(np.rad2deg(geo_coords[1]),3)])
 
         ##### Close file #####                
@@ -1154,16 +1154,24 @@ class SpecularCoverage(Entity):
         :param L: Position vector of receiving (receiving) satellite.
         :paramtype L: list, float
 
-        :return: Cartesian coordinates of the specular point if available, else ``False``.
+        :return: Normalized Cartesian coordinates of the specular point if available, else ``False``.
         :rtype: list, float
 
         """
-        # check for line of sight condition between L and S. This is a necessary condition to be satisfied for exitense of the specular point.
         RE = Constants.radiusOfEarthInKM
         L = 1/RE*np.array(L)
         S = 1/RE*np.array(S)
 
+        # check for line of sight condition between L and S. This is a necessary condition to be satisfied for exitense of the specular point.
+        los = GeoUtilityFunctions.checkLOSavailability(L, S, 1)
+        if los is False:
+            return False
+
         # check for special condition when vectors L, S are parallel. In this case the specular point is simply the intersection of L (or) S position vector with the sphere.
+        if np.linalg.norm(np.cross(S, L)) < 1e-5:
+            N = S /np.linalg.norm(S)
+            return N
+        
         a = np.dot(S,S)
         b = np.dot(S,L)
         c = np.dot(L,L)
@@ -1199,7 +1207,7 @@ class SpecularCoverage(Entity):
         return N
 
     def execute(self, instru_id=None, mode_id=None, out_file_access=None):
-        """ Perform coverage calculation involvign calculation of specular point locations. 
+        """ Perform coverage calculation involving calculation of specular point locations. 
             The calculation is performed for a specific instrument and mode (in the receiver spacecraft). 
             Coverage is calculated for the period over which the receiver, source spacecraft propagated states are available. 
             The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
@@ -1277,62 +1285,9 @@ class SpecularCoverage(Entity):
                 specular_point= SpecularCoverage.specular_location(tx_pos_vec, rx_pos_vec)
 
                 if specular_point is not False:
-                    geo_coords = earth.Convert(propcov.Rvector3(specular_point), "Cartesian", "Spherical").GetRealArray()
-                    access_writer.writerow([time_index, tx_id, np.round(np.rad2deg(geo_coords[0]),3), np.round(np.rad2deg(geo_coords[1]),3)])
+                    geo_coords = GeoUtilityFunctions.eci2geo(specular_point, jd_date)
+                    access_writer.writerow([time_index, tx_id, np.round(geo_coords[0],3), np.round(geo_coords[1],3)])
 
-
-        '''
-        ###### find the pointing-options corresponding to the input sensor-id, mode-id  ######
-        cov_param = find_in_cov_params_list(self.cov_params, instru_id, mode_id)
-        pointing_option = cov_param.pointing_option
-        if pointing_option is None:
-            print("No pointing options specified for the particular sensor, mode. Exiting PointingOptionsCoverage.")
-            return
-        # the input instru_id, mode_id may be None, so get the sensor, mode ids.
-        instru_id = cov_param.instru_id
-        mode_id = cov_param.mode_id
-        ###### iterate over the propagated states ######
-        date = propcov.AbsoluteDate()
-        for idx, state in states_df.iterrows():
-            time_index = int(state['time index'])
-            jd_date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
-            date.SetJulianDate(jd_date)
-            
-            cart_state = [state['x [km]'], state['y [km]'], state['z [km]'], state['vx [km/s]'], state['vy [km/s]'], state['vz [km/s]']]
-            orbit_state = propcov.OrbitState.fromCartesianState(propcov.Rvector6(cart_state))
-            
-            # iterate over all pointing options
-            if pointing_option:
-                for pnt_opt_idx, pnt_opt in enumerate(pointing_option): # note that the pointing-option is indexed from 0 onwards
-                    ###### form the propcov.Spacecraft object ######
-                    attitude = propcov.NadirPointingAttitude()
-                    interp = propcov.LagrangeInterpolator()
-
-                    spc = propcov.Spacecraft(date, orbit_state, attitude, interp, 0, 0, 0, 1, 2, 3)
-
-                    # orient the spacecraft-bus according to the pointing-option. Assumed that the instrument-pointing axis is aligned to the spacecraft-bus z-axis.
-                    if pnt_opt.ref_frame == ReferenceFrame.NADIR_POINTING:            
-                        spc.SetBodyNadirOffsetAngles(angle1=pnt_opt.euler_angle1, angle2=pnt_opt.euler_angle2, angle3=pnt_opt.euler_angle3, # input angles are in degrees
-                                                    seq1=pnt_opt.euler_seq1, seq2=pnt_opt.euler_seq2, seq3=pnt_opt.euler_seq3)            
-                    else:
-                        raise NotImplementedError # only NADIR_POINTING reference frame is supported.
-                    
-                    rot_N2B = spc.GetNadirToBodyMatrix()
-                    earth_fixed_state = earth.GetBodyFixedState(propcov.Rvector6(cart_state), jd_date)
-                    rot_EF2N = spc.GetBodyFixedToReference(earth_fixed_state) # Earth fixed to Nadir
-                    rot_EF2B = rot_N2B * rot_EF2N
-                    # find the direction of the pointing axis (z-axis of the satellite body) in the Earth-Fixed frame                
-                    pnt_axis = [rot_EF2B.GetElement(2,0), rot_EF2B.GetElement(2,1), rot_EF2B.GetElement(2,2)] # Equivalelent to pnt_axis = R_EF2B.Transpose() * Rvector3(0,0,1)
-                    earth_fixed_state = earth_fixed_state.GetRealArray()
-                    earth_fixed_pos = [earth_fixed_state[0], earth_fixed_state[1], earth_fixed_state[2]]
-
-                    intersect_point = PointingOptionsCoverage.intersect_vector_sphere(earth.GetRadius(), earth_fixed_pos, pnt_axis)
-
-                    if intersect_point is not False:
-                        geo_coords = earth.Convert(propcov.Rvector3(intersect_point), "Cartesian", "Spherical").GetRealArray()
-                        access_writer.writerow([time_index, pnt_opt_idx, np.round(np.rad2deg(geo_coords[0]),3), np.round(np.rad2deg(geo_coords[1]),3)])
-
-        '''
         ##### Close file #####                
         if access_file:
             access_file.close()
