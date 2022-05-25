@@ -1,4 +1,8 @@
-"""A class for viewing and processing STK and OrbitPy coverage output, and switching between the two formats."""
+"""A class for viewing and processing STK and OrbitPy coverage output, and switching between the two formats.
+
+TODO: Update to the latest version of the OrbitPy output.  (Probably this file is no longer needed, check)
+
+"""
 import numpy as np
 from math import ceil,floor
 from mpl_toolkits.mplot3d import Axes3D

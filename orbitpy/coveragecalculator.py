@@ -117,6 +117,9 @@ def helper_extract_coverage_parameters_of_spacecraft(spc):
                     
     return params
 
+class NoInstrument(Exception):
+    pass
+
 def find_in_cov_params_list(cov_param_list, instru_id=None, mode_id=None):
     """ For an input instrument-id, mode-id, find the corresponding coverage-parameter in an input list of coverage-parameters 
         (list of tuples of (instru_id, mode_id, field-of-view, field-of-regard, pointing_option)). 
@@ -148,7 +151,9 @@ def find_in_cov_params_list(cov_param_list, instru_id=None, mode_id=None):
             
         raise Exception('Entry corresponding to the input instrument-id and mode-id was not found.')
     else:
-        raise Exception('cov_param_list input argument is empty.')
+        raise NoInstrument('cov_param_list input argument is empty.')
+
+
 
 def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None):
         """ Extract the access times at middle of access intervals. The input can be a path to a file or a dataframe. 
@@ -1016,12 +1021,21 @@ class PointingOptionsWithGridCoverage(Entity):
                                                 "@id": None})
 
 class SpecularCoverage(Entity):
-    """A coverage calculator which handles coverage calculation for a spacecraft with a reflectometer (nadir-pointing & conical FOV instrument). 
-        Coverage calculation involves calculation of specular point locations at each propagation time step.
-        The specifications and the state files of the receiver spacecraft/instrument and (>=1) source spacecrafts are to be provided during the object instantiation.
-        In the state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source). 
+    """A coverage calculator which handles coverage calculation for a spacecraft with a reflectometer (nadir-pointing & circular FOV instrument). 
+        Coverage calculation involves calculation of specular point locations at each propagation time step. A grid can also be specified, and the 
+        coverage results shall include the set of grid-points within a predefined circular region about each specular point. 
 
-    :ivar rx_spc: Spacecraft for which the coverage calculation is performed. A nadir-pointing, conical FOV instrument is to be present on the spacecraft.
+        The specifications and the state files of the receiver spacecraft/instrument and (>=1) source spacecrafts are to be provided during the object instantiation.
+        In the state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source).
+
+        Only a nadir-pointing & circular FOV instrument is accepted. The specular locations within the sensor FOV is calculated at each time step.
+        If a grid is specified, the set of grid-points within a specified circular region about each of the specular locations are also calculated. 
+
+    :ivar grid: Locations (longitudes, latitudes) (represented by a :class:`orbitpy.util.grid` object) over which coverage calculation is to be performed.
+                Required only if grid-based coverage is needed.
+    :vartype grid: :class:`orbitpy.util.grid`
+
+    :ivar rx_spc: Spacecraft for which the coverage calculation is performed. A nadir-pointing, circular FOV instrument is to be present on the spacecraft.
                   This spacecraft is also the receiver which processes the reflected RF signal.
     :vartype rx_spc: :class:`orbitpy.util.Spacecraft`
 
@@ -1045,7 +1059,8 @@ class SpecularCoverage(Entity):
     :vartype _id: str
 
     """
-    def __init__(self, rx_spc=None, rx_state_file=None, tx_spc=None, tx_state_file=None, _id=None):
+    def __init__(self, grid=None, rx_spc=None, rx_state_file=None, tx_spc=None, tx_state_file=None, _id=None):
+        self.grid               = grid if grid is not None and isinstance(grid, Grid) else None
         self.rx_spc             = rx_spc if rx_spc is not None and isinstance(rx_spc, Spacecraft) else None
         self.rx_state_file      = str(rx_state_file) if rx_state_file is not None else None
         self.tx_spc             = orbitpy.util.initialize_object_list(tx_spc, Spacecraft)
@@ -1063,7 +1078,9 @@ class SpecularCoverage(Entity):
 
                 Following keys are to be specified.
                 
-                * "receiver":                         (dict) Consists of two keys: 
+                * "grid":                           (dict) Required only if grid-based coverage is needed. Refer to :class:`orbitpy.grid.Grid.from_dict`
+                
+                * "receiver":                       (dict) Consists of two keys: 
                                         
                                                             (1) "spacecraft": (dict) Receiver spacecraft specifications. Refer to :class:`orbitpy.util.Spacecraft.from_dict`
 
@@ -1085,6 +1102,7 @@ class SpecularCoverage(Entity):
         :rtype: :class:`orbitpy.coveragecalculator.SpecularCoverage`
 
         """
+        grid_dict = d.get('grid', None)
         # parse the reciever
         receiver_dict   = d.get('receiver', None)
         rx_spc_dict     = receiver_dict.get('spacecraft', None)
@@ -1108,7 +1126,8 @@ class SpecularCoverage(Entity):
                 tx_spc.append(_spc)
                 tx_state_file.append(_state_file)
 
-        return SpecularCoverage(rx_spc          = rx_spc,
+        return SpecularCoverage(grid            = Grid.from_dict(grid_dict) if grid_dict else None, 
+                                rx_spc          = rx_spc,
                                 rx_state_file   = rx_state_file,
                                 tx_spc          = tx_spc,
                                 tx_state_file   = tx_state_file,
@@ -1128,6 +1147,7 @@ class SpecularCoverage(Entity):
                           })
 
         return dict({"@type": "SPECULAR COVERAGE",
+                     "grid": self.grid.to_dict() if self.grid else None,
                      "receiver": {"spacecraft": self.rx_spc.to_dict(), "cartesianStateFilePath":self.rx_state_file},
                      "source": source,
                      "cartesianStateFilePath": self.state_cart_file,
@@ -1137,22 +1157,25 @@ class SpecularCoverage(Entity):
         return "SpecularCoverage.from_dict({})".format(self.to_dict())
 
     @staticmethod
-    def specular_location(S, L):
+    def specular_location(S, L, max_rx_angular_region=None):
         """  Find the location of the specular point given the position vectors of the source and receiving satellites.
              
              Reference: David Eberly, "Computing a Point of Reflection on a Sphere", Geometric Tools, 2008. 
              https://www.geometrictools.com/Documentation/SphereReflections.pdf
 
-             Note that a unit sphere is considered in the reference. Hence the input position vectors of the satellites need to be scaled by 
-             1/(radius of earth)
-
-             .. todo:: Special case consideration
+             Note that a unit sphere is considered in the reference. Hence the input position vectors of the satellites need to be scaled by 1/(radius of earth)
         
         :param S: Position vector of source (transmit) satellite.
         :paramtype S: list, float
 
         :param L: Position vector of receiving (receiving) satellite.
         :paramtype L: list, float
+
+        :param max_rx_angular_region: [rad] Cone angle of the receiving instrument (onboard the receiving satellite, oriented in NADIR_POINTING frame)
+                                        which characterizes the circular angular region within which specular locations can be imaged.
+                                        Specular locations outside this angular region shall not be imaged.
+                                        If ``None``, the entire horizon as seen by the receiving satellite is considered. 
+        :paramtype max_rx_angular_region: float or None
 
         :return: Normalized Cartesian coordinates of the specular point if available, else ``False``.
         :rtype: list, float
@@ -1162,7 +1185,7 @@ class SpecularCoverage(Entity):
         L = 1/RE*np.array(L)
         S = 1/RE*np.array(S)
 
-        # check for line of sight condition between L and S. This is a necessary condition to be satisfied for exitense of the specular point.
+        # check for line of sight condition between L and S. This is a necessary condition to be satisfied for existence of the specular point.
         los = GeoUtilityFunctions.checkLOSavailability(L, S, 1)
         if los is False:
             return False
@@ -1204,19 +1227,29 @@ class SpecularCoverage(Entity):
         # specular point N = x_bar S + y_bar L
         N = x_bar * S + y_bar * L
 
-        return N
+        # check that the specular location falls within the receiving satellite's FOV
+        if max_rx_angular_region is None: # entire horizon is considered
+            return N
+        else:
+            specular_direction = -N - L
+            specular_cone_angle = np.dot(specular_direction, -L)/ (np.linalg.norm(specular_direction) * np.linalg.norm(L))
+            if specular_cone_angle <= max_rx_angular_region:
+                return N
+            else:
+                return False
 
-    def execute(self, instru_id=None, mode_id=None, out_file_access=None):
+    def execute(self, instru_id=None, mode_id=None, out_file_access=None, specular_region_dia=None):
         """ Perform coverage calculation involving calculation of specular point locations. 
             The calculation is performed for a specific instrument and mode (in the receiver spacecraft). 
+            If no instrument present in spacecraft the entire horizon as seen by the receiving satellite is considered for the coverage calculations. 
             Coverage is calculated for the period over which the receiver, source spacecraft propagated states are available. 
             The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
 
-            .. note:: Only a nadir-pointing, conical FOV instrument is accepted.
+            .. note:: Only a nadir-pointing, circular FOV instrument is accepted.
 
             .. todo:: Include instrument FOV considerations. Include grid.
 
-        :param instru_id: Sensor identifier (corresponding to the receiver spacecraft). If ``None``, the first sensor in the spacecraft list of sensors is considered.
+        :param instru_id: Sensor identifier (corresponding to the receiver spacecraft). If ``None``, the first sensor in the spacecraft list of sensors (if available) is considered.
         :paramtype instru_id: str (or) int
 
         :param mode_id: Mode identifier (corresponding to the receiver sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
@@ -1255,8 +1288,6 @@ class SpecularCoverage(Entity):
         (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.rx_state_file)
         rx_states_df = pd.read_csv(self.rx_state_file, skiprows=4)
 
-        earth = propcov.Earth()
-
         ###### Prepare output file in which results shall be written ######
         if out_file_access:
             access_file = open(out_file_access, 'w', newline='')
@@ -1265,8 +1296,36 @@ class SpecularCoverage(Entity):
             access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             access_writer.writerow(["Step size [s] is {}".format(step_size)])
             access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index', 'source id', 'lat [deg]', 'lon [deg]'])        
-        
+            access_writer.writerow(['time index', 'source id', 'lat [deg]', 'lon [deg]'])
+            
+        ###### find the FOV corresponding to the input sensor-id, mode-id  ######
+        try:
+            cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
+             #print("cov_param ", cov_param)
+            # the input instru_id, mode_id may be None, so get the sensor, mode ids.
+            instru_id = cov_param.instru_id
+            mode_id = cov_param.mode_id
+            view_geom = cov_param.scene_field_of_view
+            sen_sph_geom = view_geom.sph_geom
+            sen_orien = view_geom.orien
+            if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
+                # The below cone angle characterizes the maximum angular region of the receiver (spacecraft-instrument) within which 
+                # specular locations can be imaged. Specular locations outside this angular region shall not be imaged. 
+                max_rx_angular_region = np.deg2rad(0.5 * sen_sph_geom.diameter)
+                print(max_rx_angular_region*180/np.pi)
+            else:
+                raise NotImplementedError # only Circular FOV shapes are supported
+            # check that the spacecraft-instrument orientation is NADIR_POINTING. Other orientations are not supported.
+            spc_orien = self.rx_spc.spacecraftBus.orientation
+            if (spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING and (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED or sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED)):
+                pass
+            else:
+                raise NotImplementedError
+
+        except NoInstrument:
+            # no instrument present in the rx-satellite, consider the entire horizon seen by the rx-satellite
+            max_rx_angular_region = None
+
         ###### iterate over the each of the source satellites ######
         for idx, tx in enumerate(self.tx_spc):
             tx_id = tx._id # source spacecraft id
@@ -1282,7 +1341,7 @@ class SpecularCoverage(Entity):
                 tx_state = tx_states_df.iloc[idx]
                 tx_pos_vec = [tx_state['x [km]'], tx_state['y [km]'], tx_state['z [km]']]
 
-                specular_point= SpecularCoverage.specular_location(tx_pos_vec, rx_pos_vec)
+                specular_point= SpecularCoverage.specular_location(tx_pos_vec, rx_pos_vec, max_rx_angular_region)
 
                 if specular_point is not False:
                     geo_coords = GeoUtilityFunctions.eci2geo(specular_point, jd_date)
@@ -1294,8 +1353,9 @@ class SpecularCoverage(Entity):
         
         return CoverageOutputInfo.from_dict({   "coverageType": "SPECULAR COVERAGE",
                                                 "spacecraftId": self.rx_spc._id,
-                                                #"instruId": instru_id,
-                                                #"modeId": mode_id,
+                                                "grid": self.grid.to_dict() if self.grid else None,
+                                                "instruId": instru_id,
+                                                "modeId": mode_id,
                                                 "usedFieldOfRegard": None,
                                                 "filterMidIntervalAccess": None,
                                                 "gridId": None,
@@ -1303,7 +1363,8 @@ class SpecularCoverage(Entity):
                                                 "accessFile": out_file_access,
                                                 "startDate": epoch_JDUT1,
                                                 "duration": duration,
-                                                "@id": None})
+                                                "@id": None})    
+    
 
 class CoverageOutputInfo(Entity):
     """ Class to hold information about the results of the coverage calculation. An object of this class is returned upon the execution

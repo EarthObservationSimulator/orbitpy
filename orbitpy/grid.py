@@ -154,8 +154,8 @@ class Grid(Entity):
                 "covGridFilePath": "C:\workspace\covGridUSA.csv"
             }
 
-        The datafile needs to be of CSV format as indicated in the example below. *lat[deg]* is the latitude
-        in degrees, and *lon[deg]* is the longitude in degrees. The grid-points are referred by indices starting from 0.
+        The datafile needs to be of CSV format as indicated in the example below. *lat [deg]* is the latitude
+        in degrees, and *lon [deg]* is the longitude in degrees. The grid-points are referred by indices starting from 0.
 
         .. csv-table:: Example of the coverage grid data file.
             :header: lat [deg], lon [deg]
@@ -179,7 +179,7 @@ class Grid(Entity):
         :rtype: :class:`orbitpy.grid.Grid`
 
         """
-        data = pd.read_csv(d['covGridFilePath'])
+        data = pd.read_csv(d['covGridFilePath'], usecols = ['lat [deg]','lon [deg]'])
         data = data.multiply(np.pi/180) # convert angles to radians
         point_group = propcov.PointGroup()
         point_group.AddUserDefinedPoints(data['lat [deg]'].tolist(),data['lon [deg]'].tolist())

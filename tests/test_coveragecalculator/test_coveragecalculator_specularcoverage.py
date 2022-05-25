@@ -3,10 +3,10 @@
 ``TestSpecularCoverage`` class:
 
 * ``test_execute_0``: Test format of output access files.
-* ``test_execute_1``: Test with the source and receiving satellites as the same. The specular points would be the ground-locations of the satellites.
-* ``test_execute_2``: Test with the source and receiving satellites are at the same altitude, but with 180 deg True Anomaly offset (circular orbit). There should be no specular points since there is no line of sight.
-* ``test_execute_3``: Test with the source and receiving satellites are separated by 30 deg True Anomaly on an equatorial circular orbit. The specular point would have 0 latitude, and longitude defined by the angular separation between the two satellites.
-* ``test_execute_4``: Test with the source and receiving satellites are separated by 30 deg True Anomaly on an 90 deg inclination circular orbit. The specular point would have the same or complementary longitude as that of the satellites, and latitude defined by the angular separation between the two satellites.
+* ``test_execute_1``: Test with the source and receiving satellites (with no sensors) as the same. The specular points would be the ground-locations of the satellites.
+* ``test_execute_2``: Test with the source and receiving satellites (with no sensors) are at the same altitude, but with 180 deg True Anomaly offset (circular orbit). There should be no specular points since there is no line of sight.
+* ``test_execute_3``: Test with the source and receiving satellites (with no sensors) are separated by 30 deg True Anomaly on an equatorial circular orbit. The specular point would have 0 deg latitude, and longitude defined by the angular separation between the two satellites.
+* ``test_execute_4``: Test with the source and receiving satellites (with no sensors) are separated by 30 deg True Anomaly on an 90 deg inclination circular orbit. The specular point would have the same or complementary longitude as that of the satellites, and latitude defined by the angular separation between the two satellites.
 
 """
 import json
@@ -23,6 +23,7 @@ from orbitpy.coveragecalculator import SpecularCoverage
 from orbitpy.util import Spacecraft
 from orbitpy.propagator import PropagatorFactory
 
+from instrupy import Instrument
 from instrupy.util import GeoUtilityFunctions
 
 RE = 6378.137 # radius of Earth in kilometers
@@ -78,7 +79,19 @@ class TestSpecularCoverage(unittest.TestCase):
                         }'
         cls.navstar81_state_fl =   cls.out_dir +  "/navstar81_state.csv"
         
-        # receiving spacecraft for specular coverage tests
+        # receiving spacecraft (without sensor) for specular coverage tests
+        cls.testsat_json = '{  "name": "testsat", \
+                            "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                        }, \
+                            "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":20, "minute":19, "second":26.748768}, \
+                                        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.00151280, "inc": 34.9537, "raan": 47.2225, "aop": 162.3608, "ta": 197.700} \
+                                        } , \
+                            "@id": "testsat" \
+                        }'
+        cls.testsat_state_fl =    cls.out_dir + "/testsat_state.csv"
+
+        # receiving CYGNSS spacecraft (with reflectometer) for specular coverage tests
+        '''        
         cls.cygfm01_json = '{  "name": "cygfm01", \
                             "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                         }, \
@@ -88,40 +101,41 @@ class TestSpecularCoverage(unittest.TestCase):
                             "@id": "cygfm01" \
                         }'
         cls.cygfm01_state_fl =    cls.out_dir + "/cygfm01_state.csv"
+        '''
     
     def test_from_dict(self):
         # one source satellite (not in list)
-        o = SpecularCoverage.from_dict({ "receiver": {"spacecraft": json.loads(self.cygfm01_json), "cartesianStateFilePath": self.cygfm01_state_fl},
+        o = SpecularCoverage.from_dict({ "receiver": {"spacecraft": json.loads(self.testsat_json), "cartesianStateFilePath": self.testsat_state_fl},
                                          "source": {"spacecraft": json.loads(self.navstar79_json), "cartesianStateFilePath": self.navstar79_state_fl},
                                          "@id": 15})
         self.assertEqual(o._id, 15)
         self.assertEqual(o._type, 'SPECULAR COVERAGE')
-        self.assertEqual(o.rx_spc, Spacecraft.from_json(self.cygfm01_json))
-        self.assertEqual(o.rx_state_file, self.out_dir + "/cygfm01_state.csv")
+        self.assertEqual(o.rx_spc, Spacecraft.from_json(self.testsat_json))
+        self.assertEqual(o.rx_state_file, self.out_dir + "/testsat_state.csv")
         self.assertEqual(o.tx_spc, [Spacecraft.from_json(self.navstar79_json)])
         self.assertEqual(o.tx_state_file, [self.out_dir + "/navstar79_state.csv"])
 
         # one source satellite (in list)
-        o = SpecularCoverage.from_dict({ "receiver": {"spacecraft": json.loads(self.cygfm01_json), "cartesianStateFilePath": self.cygfm01_state_fl},
+        o = SpecularCoverage.from_dict({ "receiver": {"spacecraft": json.loads(self.testsat_json), "cartesianStateFilePath": self.testsat_state_fl},
                                          "source": [{"spacecraft": json.loads(self.navstar79_json), "cartesianStateFilePath": self.navstar79_state_fl}],
                                          "@id": 15})
         self.assertEqual(o._id, 15)
         self.assertEqual(o._type, 'SPECULAR COVERAGE')
-        self.assertEqual(o.rx_spc, Spacecraft.from_json(self.cygfm01_json))
-        self.assertEqual(o.rx_state_file, self.out_dir + "/cygfm01_state.csv")
+        self.assertEqual(o.rx_spc, Spacecraft.from_json(self.testsat_json))
+        self.assertEqual(o.rx_state_file, self.out_dir + "/testsat_state.csv")
         self.assertEqual(o.tx_spc, [Spacecraft.from_json(self.navstar79_json)])
         self.assertEqual(o.tx_state_file, [self.out_dir + "/navstar79_state.csv"])
 
         # several source satellites in list
-        o = SpecularCoverage.from_dict({ "receiver": {"spacecraft": json.loads(self.cygfm01_json), "cartesianStateFilePath": self.cygfm01_state_fl},
+        o = SpecularCoverage.from_dict({ "receiver": {"spacecraft": json.loads(self.testsat_json), "cartesianStateFilePath": self.testsat_state_fl},
                                          "source": [{"spacecraft": json.loads(self.navstar79_json), "cartesianStateFilePath": self.navstar79_state_fl},
                                                     {"spacecraft": json.loads(self.navstar80_json), "cartesianStateFilePath": self.navstar80_state_fl},
                                                     {"spacecraft": json.loads(self.navstar81_json), "cartesianStateFilePath": self.navstar81_state_fl}],
                                          "@id": 15})
         self.assertEqual(o._id, 15)
         self.assertEqual(o._type, 'SPECULAR COVERAGE')
-        self.assertEqual(o.rx_spc, Spacecraft.from_json(self.cygfm01_json))
-        self.assertEqual(o.rx_state_file, self.out_dir + "/cygfm01_state.csv")
+        self.assertEqual(o.rx_spc, Spacecraft.from_json(self.testsat_json))
+        self.assertEqual(o.rx_state_file, self.out_dir + "/testsat_state.csv")
         self.assertEqual(o.tx_spc[0], Spacecraft.from_json(self.navstar79_json))
         self.assertEqual(o.tx_state_file[0], self.out_dir + "/navstar79_state.csv")
         self.assertEqual(o.tx_spc[1], Spacecraft.from_json(self.navstar80_json))
@@ -142,20 +156,20 @@ class TestSpecularCoverage(unittest.TestCase):
         navstar79 = Spacecraft.from_json(self.navstar79_json)
         navstar80 = Spacecraft.from_json(self.navstar80_json)
         navstar81 = Spacecraft.from_json(self.navstar81_json)
-        cygfm01 = Spacecraft.from_json(self.cygfm01_json)
+        testsat = Spacecraft.from_json(self.testsat_json)
 
         # execute propagator
         start_date = propcov.AbsoluteDate.fromGregorianDate(2022, 5, 15, 21 ,0, 0)
         self.j2_prop.execute(spacecraft=navstar79, start_date=start_date, out_file_cart=self.navstar79_state_fl, duration=duration)
         self.j2_prop.execute(spacecraft=navstar80, start_date=start_date, out_file_cart=self.navstar80_state_fl, duration=duration)
         self.j2_prop.execute(spacecraft=navstar81, start_date=start_date, out_file_cart=self.navstar81_state_fl, duration=duration)
-        self.j2_prop.execute(spacecraft=cygfm01, start_date=start_date, out_file_cart=self.cygfm01_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=testsat, start_date=start_date, out_file_cart=self.testsat_state_fl, duration=duration)
 
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        spec_cov = SpecularCoverage(rx_spc=cygfm01, rx_state_file=self.cygfm01_state_fl, tx_spc=[navstar79, navstar80, navstar81], tx_state_file=[self.navstar79_state_fl, self.navstar80_state_fl, self.navstar81_state_fl])
-        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        spec_cov = SpecularCoverage(rx_spc=testsat, rx_state_file=self.testsat_state_fl, tx_spc=[navstar79, navstar80, navstar81], tx_state_file=[self.navstar79_state_fl, self.navstar80_state_fl, self.navstar81_state_fl])
+        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access)
 
         # check the outputs
         cov_calc_type = pd.read_csv(out_file_access, nrows=1, header=None).astype(str) # 1st row contains the coverage calculation type
@@ -184,27 +198,27 @@ class TestSpecularCoverage(unittest.TestCase):
         self.assertTrue(not cov_results_df.empty)
     
     def test_execute_1(self):
-        """ Test with the source and receiving satellites as the same. The specular points would be the ground-locations of the satellites.
+        """ Test with the source and receiving satellites (with no sensors) as the same. The specular points would be the ground-locations of the satellites.
             The test scenario satsifies a special condition where the cross product of the position vectors of the source and receiving satellites is the null vector. 
         """
         duration = 0.25 + random.random()
-        cygfm01 = Spacecraft.from_json(self.cygfm01_json)
+        testsat = Spacecraft.from_json(self.testsat_json)
 
         # execute propagator
-        self.j2_prop.execute(spacecraft=cygfm01, out_file_cart=self.cygfm01_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=testsat, out_file_cart=self.testsat_state_fl, duration=duration)
 
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        spec_cov = SpecularCoverage(rx_spc=cygfm01, rx_state_file=self.cygfm01_state_fl, tx_spc=cygfm01, tx_state_file=self.cygfm01_state_fl)
-        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        spec_cov = SpecularCoverage(rx_spc=testsat, rx_state_file=self.testsat_state_fl, tx_spc=testsat, tx_state_file=self.testsat_state_fl)
+        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access)
 
         # check the outputs
         cov_results_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3])
         self.assertTrue(not cov_results_df.empty)
 
-        (epoch_JDUT1, step_size, _) = orbitpy.util.extract_auxillary_info_from_state_file(self.cygfm01_state_fl)
-        sat_pos_df = pd.read_csv(self.cygfm01_state_fl, skiprows = [0,1,2,3])
+        (epoch_JDUT1, step_size, _) = orbitpy.util.extract_auxillary_info_from_state_file(self.testsat_state_fl)
+        sat_pos_df = pd.read_csv(self.testsat_state_fl, skiprows = [0,1,2,3])
 
         for index, row in sat_pos_df.iterrows():
             time_index = int(row['time index'])
@@ -223,11 +237,11 @@ class TestSpecularCoverage(unittest.TestCase):
             self.assertEqual(pos_lon, specular_lon)
 
     def test_execute_2(self):
-        """ Test with the source and receiving satellites are at the same altitude, but with 180 deg True Anomaly offset (circular orbit).
+        """ Test with the source and receiving satellites (with no sensors) are at the same altitude, but with 180 deg True Anomaly offset (circular orbit).
             There should be no specular points since there is no line of sight.
         """
         duration = 0.25 + random.random()
-        cygfm01 = Spacecraft.from_json(self.cygfm01_json)
+        testsat = Spacecraft.from_json(self.testsat_json)
 
         satX_json = '{ "name": "satX", \
                        "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
@@ -241,14 +255,14 @@ class TestSpecularCoverage(unittest.TestCase):
         satX_state_fl = self.out_dir +  "/satX_state.csv"
 
         # execute propagator
-        self.j2_prop.execute(spacecraft=cygfm01, out_file_cart=self.cygfm01_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=testsat, out_file_cart=self.testsat_state_fl, duration=duration)
         self.j2_prop.execute(spacecraft=satX, out_file_cart=satX_state_fl, duration=duration)
 
         # set output file path
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
-        spec_cov = SpecularCoverage(rx_spc=cygfm01, rx_state_file=self.cygfm01_state_fl, tx_spc=satX, tx_state_file=satX_state_fl)
-        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        spec_cov = SpecularCoverage(rx_spc=testsat, rx_state_file=self.testsat_state_fl, tx_spc=satX, tx_state_file=satX_state_fl)
+        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access)
 
         # check the outputs
         cov_results_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3])
@@ -256,7 +270,7 @@ class TestSpecularCoverage(unittest.TestCase):
         self.assertTrue(cov_results_df.empty)
 
     def test_execute_3(self):
-        """ Test with the source and receiving satellites are separated by 30 deg True Anomaly on an equatorial circular orbit.
+        """ Test with the source and receiving satellites (with no sensors) are separated by 30 deg True Anomaly on an equatorial circular orbit.
             The specular point always falls on the 0 deg latitude.
             The longitude of the specular point shall be the longitude of the 'behind' satellite plus half of the angle between the two satellites (about the center of Earth).
             Further note that the angular difference between the two satellites is equal to the difference in the longitudes of the two satellites.
@@ -296,7 +310,7 @@ class TestSpecularCoverage(unittest.TestCase):
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
         spec_cov = SpecularCoverage(rx_spc=satA, rx_state_file=satA_state_fl, tx_spc=satB, tx_state_file=satB_state_fl)
-        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access)
 
         # check the outputs
         cov_results_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3])
@@ -330,7 +344,7 @@ class TestSpecularCoverage(unittest.TestCase):
             self.assertEqual(specular_lon, analyt_spec_longitude)
 
     def test_execute_4(self):
-        """ Test with the source and receiving satellites are separated by 30 deg True Anomaly on an 90 deg inclination circular orbit.
+        """ Test with the source and receiving satellites (with no sensors) are separated by 30 deg True Anomaly on an 90 deg inclination circular orbit.
             The specular point always falls on the same longitude as that of the two satellite, except when the satellites are over the polar region
             in which case the longitude of one of the satellites shall be complimentary to the longitude of the specular point.
 
@@ -380,7 +394,7 @@ class TestSpecularCoverage(unittest.TestCase):
         out_file_access = self.out_dir+'/test_cov_access.csv'
         # run the coverage calculator
         spec_cov = SpecularCoverage(rx_spc=satA, rx_state_file=satA_state_fl, tx_spc=satB, tx_state_file=satB_state_fl)
-        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access) # the first instrument, mode available in the spacecraft is considered for the coverage calculation.
+        spec_cov.execute(instru_id=None, mode_id=None, out_file_access=out_file_access)
 
         # check the outputs
         cov_results_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3])
@@ -404,16 +418,8 @@ class TestSpecularCoverage(unittest.TestCase):
             satA_lat = posA_geo[0]
             satA_lon = posA_geo[1]
 
-            stateB = satB_pos_df.iloc[index]
-            posB_cart = [stateB['x [km]'], stateB['y [km]'], stateB['z [km]']]
-            posB_geo = GeoUtilityFunctions.eci2geo(posB_cart, jd_date)
-           
-            # both the satellites and the specular point lie on the same longitude line
-            print(posA_geo[1], posB_geo[1], specular_lon)
-            
-
             over_pole = False
-            if velA_cart[2] > 0: # ascending phase of satellte A
+            if velA_cart[2] > 0: # ascending phase of satellite A
                 if satA_lat>=0: # satellite in the Northern hemisphere, ascending
                     analyt_spec_latitude = satA_lat + 0.5*ta_diff
                     if analyt_spec_latitude > 90:
@@ -434,6 +440,7 @@ class TestSpecularCoverage(unittest.TestCase):
             analyt_spec_latitude = np.round(analyt_spec_latitude, 3)
             self.assertEqual(specular_lat, analyt_spec_latitude)
 
+            # satA (and satB) and the specular point lie on the same or complimentary longitude line.
             if over_pole is False:
                 self.assertAlmostEqual(satA_lon, specular_lon, places=3) # accuracy to 3 places due to round-off in the results of the specular coverage
             else:
@@ -442,6 +449,88 @@ class TestSpecularCoverage(unittest.TestCase):
                 else:
                     self.assertAlmostEqual(satA_lon - 180, specular_lon, places=3)
 
-            
+    def test_execute_5(self):
+        """ Test coverage calculations with and without a reflectometer.
+            The number of specular locations from the case of coverage calculations with the instrument must be smaller 
+            and should be a subset of the case with no instrument.
+        """
+        duration = 2
+        navstar79 = Spacecraft.from_json(self.navstar79_json) # transmitting satellite
+        testsat = Spacecraft.from_json(self.testsat_json) # receiving satellite with no instrument attached to it.
+        satX = Spacecraft.from_json(self.testsat_json) # receiving satellite, with instrument.
+        instru = Instrument.from_dict({"@type": "Reflectometer",
+                        "orientation": {
+                           "referenceFrame": "SC_BODY_FIXED",
+                            "convention": "REF_FRAME_ALIGNED"
+                        },
+                        "antenna":{"shape": "CIRCULAR", "diameter": 9e-2, "apertureExcitationProfile": "UNIFORM"},
+                        "operatingFrequency": 1575.42e6
+                        })
+        satX.add_instrument(instru)
+        satX_state_fl = self.out_dir +  "/satX_state.csv"
+        antenna_cone_angle = 60.5723 # [deg] antenna cone angle for the above defined antenna 
+
+        # execute propagator
+        self.j2_prop.execute(spacecraft=navstar79, out_file_cart=self.navstar79_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=testsat, out_file_cart=self.testsat_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=satX, out_file_cart=satX_state_fl, duration=duration)
+
+        # set output file path
+        out_file_access1 = self.out_dir+'/test_cov_access1.csv'
+        out_file_access2 = self.out_dir+'/test_cov_access2.csv'
+        # run the coverage calculator
+        spec_cov1 = SpecularCoverage(rx_spc=testsat, rx_state_file=self.testsat_state_fl, tx_spc=navstar79, tx_state_file=self.navstar79_state_fl)
+        spec_cov1.execute(instru_id=None, mode_id=None, out_file_access=out_file_access1)
+
+        spec_cov2 = SpecularCoverage(rx_spc=satX, rx_state_file=satX_state_fl, tx_spc=navstar79, tx_state_file=self.navstar79_state_fl)
+        spec_cov2.execute(instru_id=None, mode_id=None, out_file_access=out_file_access2)
+
+        # check the outputs
+        df1 = pd.read_csv(out_file_access1, skiprows = [0,1,2,3]).set_index('time index')
+        df2 = pd.read_csv(out_file_access2, skiprows = [0,1,2,3]).set_index('time index')
+
+        self.assertTrue(df2.isin(df1).all().all())
+
+        # extract the dataframe entries of the coverage involving satellite with no sensors which are *not* in the dataframe from the coverage involving satellite with the reflectometer
+        extract_idx = list(set(df1.index) - set(df2.index))
+        df_extract = df1.loc[extract_idx]
+
+        (epoch_JDUT1, step_size, _) = orbitpy.util.extract_auxillary_info_from_state_file(self.testsat_state_fl)
+        df_rx_state = pd.read_csv(self.testsat_state_fl, skiprows = [0,1,2,3]).set_index('time index')
+
+        # iterate over the entries and assert that the specular points are outside the reflectometer FOV
+        for index, row in df_extract.iterrows():
+
+            # get the specular location date in Julian Date UT1
+            jd_date = epoch_JDUT1 + index * (step_size/86400.0)
+            print("index", index)
+            specular_lat = row['lat [deg]']
+            specular_lon = row['lon [deg]']
+            specular_pos = GeoUtilityFunctions.geo2eci([specular_lat, specular_lon, 0.0], jd_date)
+            specular_pos = np.array(specular_pos)
+            print("specular_pos", specular_pos)
+
+            # get the position of the receiving satellite at the same time
+            rx_state = df_rx_state.iloc[index]
+            rx_pos = [rx_state['x [km]'], rx_state['y [km]'], rx_state['z [km]']]
+            rx_pos = np.array(rx_pos)
+            print("rx_pos", rx_pos)
+
+            # calculate the cone angle between the nadir direction and the specular direction
+            specular_dir = -1* (rx_pos + specular_pos)
+            print("specular_dir", specular_dir)
+            cone_angle = np.dot(specular_dir, -rx_pos)/(np.linalg.norm(specular_dir)*np.linalg.norm(-rx_pos))
+            cone_angle = np.rad2deg(cone_angle)
+
+            self.assertGreater(cone_angle, antenna_cone_angle)
+
+    def test_execute_6(self):
+        """ Test coverage calculations with and without a reflectometer for a orbital scenario where the specular points shall be very near to the nadir position.
+            The results of both the cases should be identical, since the reflectometer FOV shall cover all the specular points (since they fall on the Nadir position).
+        """
+        pass
+
+
+
 
                 
