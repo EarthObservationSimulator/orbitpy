@@ -1312,7 +1312,7 @@ class SpecularCoverage(Entity):
                 # The below cone angle characterizes the maximum angular region of the receiver (spacecraft-instrument) within which 
                 # specular locations can be imaged. Specular locations outside this angular region shall not be imaged. 
                 max_rx_angular_region = np.deg2rad(0.5 * sen_sph_geom.diameter)
-                print(max_rx_angular_region*180/np.pi)
+                #print(max_rx_angular_region*180/np.pi)
             else:
                 raise NotImplementedError # only Circular FOV shapes are supported
             # check that the spacecraft-instrument orientation is NADIR_POINTING. Other orientations are not supported.

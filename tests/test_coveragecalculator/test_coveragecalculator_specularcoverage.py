@@ -7,6 +7,8 @@
 * ``test_execute_2``: Test with the source and receiving satellites (with no sensors) are at the same altitude, but with 180 deg True Anomaly offset (circular orbit). There should be no specular points since there is no line of sight.
 * ``test_execute_3``: Test with the source and receiving satellites (with no sensors) are separated by 30 deg True Anomaly on an equatorial circular orbit. The specular point would have 0 deg latitude, and longitude defined by the angular separation between the two satellites.
 * ``test_execute_4``: Test with the source and receiving satellites (with no sensors) are separated by 30 deg True Anomaly on an 90 deg inclination circular orbit. The specular point would have the same or complementary longitude as that of the satellites, and latitude defined by the angular separation between the two satellites.
+* ``test_execute_5``: Test coverage calculations with and without a reflectometer. A 'general' scenario is simulated for which the results with the reflectometer are a subset of the results without the reflectometer.
+* ``test_execute_6``: Test coverage calculations with and without a reflectometer. A scenario where the specular points always fall close to the nadir (within the reflectometer FOV) is simulated. Hence both results should be equal.
 
 """
 import json
@@ -400,7 +402,6 @@ class TestSpecularCoverage(unittest.TestCase):
         cov_results_df = pd.read_csv(out_file_access, skiprows = [0,1,2,3])
         self.assertTrue(not cov_results_df.empty)
         satA_pos_df = pd.read_csv(satA_state_fl, skiprows = [0,1,2,3])
-        satB_pos_df = pd.read_csv(satB_state_fl, skiprows = [0,1,2,3])
 
         (epoch_JDUT1, step_size, _) = orbitpy.util.extract_auxillary_info_from_state_file(out_file_access)
         for index, row in cov_results_df.iterrows():
@@ -464,7 +465,8 @@ class TestSpecularCoverage(unittest.TestCase):
                             "convention": "REF_FRAME_ALIGNED"
                         },
                         "antenna":{"shape": "CIRCULAR", "diameter": 9e-2, "apertureExcitationProfile": "UNIFORM"},
-                        "operatingFrequency": 1575.42e6
+                        "operatingFrequency": 1575.42e6,
+                        "@id": "rtr"
                         })
         satX.add_instrument(instru)
         satX_state_fl = self.out_dir +  "/satX_state.csv"
@@ -483,7 +485,7 @@ class TestSpecularCoverage(unittest.TestCase):
         spec_cov1.execute(instru_id=None, mode_id=None, out_file_access=out_file_access1)
 
         spec_cov2 = SpecularCoverage(rx_spc=satX, rx_state_file=satX_state_fl, tx_spc=navstar79, tx_state_file=self.navstar79_state_fl)
-        spec_cov2.execute(instru_id=None, mode_id=None, out_file_access=out_file_access2)
+        spec_cov2.execute(instru_id="rtr", mode_id=None, out_file_access=out_file_access2)
 
         # check the outputs
         df1 = pd.read_csv(out_file_access1, skiprows = [0,1,2,3]).set_index('time index')
@@ -503,22 +505,18 @@ class TestSpecularCoverage(unittest.TestCase):
 
             # get the specular location date in Julian Date UT1
             jd_date = epoch_JDUT1 + index * (step_size/86400.0)
-            print("index", index)
             specular_lat = row['lat [deg]']
             specular_lon = row['lon [deg]']
             specular_pos = GeoUtilityFunctions.geo2eci([specular_lat, specular_lon, 0.0], jd_date)
             specular_pos = np.array(specular_pos)
-            print("specular_pos", specular_pos)
 
             # get the position of the receiving satellite at the same time
             rx_state = df_rx_state.iloc[index]
             rx_pos = [rx_state['x [km]'], rx_state['y [km]'], rx_state['z [km]']]
             rx_pos = np.array(rx_pos)
-            print("rx_pos", rx_pos)
 
             # calculate the cone angle between the nadir direction and the specular direction
             specular_dir = -1* (rx_pos + specular_pos)
-            print("specular_dir", specular_dir)
             cone_angle = np.dot(specular_dir, -rx_pos)/(np.linalg.norm(specular_dir)*np.linalg.norm(-rx_pos))
             cone_angle = np.rad2deg(cone_angle)
 
@@ -527,8 +525,74 @@ class TestSpecularCoverage(unittest.TestCase):
     def test_execute_6(self):
         """ Test coverage calculations with and without a reflectometer for a orbital scenario where the specular points shall be very near to the nadir position.
             The results of both the cases should be identical, since the reflectometer FOV shall cover all the specular points (since they fall on the Nadir position).
+            
+            To ensure that the specular point falls near to the Nadir position, the source and receiving satellites are placed on similar orbits which differ only by 2 deg in the true anomaly.
+            
         """
-        pass
+        duration = 1
+
+        ######### Simulate the case with *no* reflectometer attached to the rx-satellite #########
+        satA_json = '{ "name": "satA", \
+                       "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                   }, \
+                       "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":20, "minute":19, "second":26.748768}, \
+                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 35.45, "raan": 47.2225, "aop": 10.5, "ta": 20.25} \
+                                   }, \
+                       "@id": "satA" \
+                    }'
+        satA = Spacecraft.from_json(satA_json)
+        satA_state_fl = self.out_dir +  "/satA_state.csv"
+
+        satB_json = '{ "name": "satB", \
+                       "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                   }, \
+                       "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":20, "minute":19, "second":26.748768}, \
+                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.001, "inc": 35.45, "raan": 47.2225, "aop": 10.5, "ta": 22.25} \
+                                   }, \
+                       "@id": "satB" \
+                    }'
+        satB = Spacecraft.from_json(satB_json)
+        satB_state_fl = self.out_dir +  "/satB_state.csv"
+
+        satA = Spacecraft.from_json(satA_json)
+        satB = Spacecraft.from_json(satB_json)
+
+        # execute propagator
+        self.j2_prop.execute(spacecraft=satA, out_file_cart=satA_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=satB, out_file_cart=satB_state_fl, duration=duration)
+
+        # set output file path
+        out_file_access1 = self.out_dir+'/test_cov_access1.csv'
+        # run the coverage calculator
+        spec_cov1 = SpecularCoverage(rx_spc=satA, rx_state_file=satA_state_fl, tx_spc=satB, tx_state_file=satB_state_fl)
+        spec_cov1.execute(instru_id=None, mode_id=None, out_file_access=out_file_access1)
+
+        # check the outputs
+        cov_results_df1 = pd.read_csv(out_file_access1, skiprows = [0,1,2,3])
+
+
+        ######### Simulate the case with reflectometer attached to the rx-satellite #########
+        instru = Instrument.from_dict({"@type": "Reflectometer",
+                        "orientation": {
+                           "referenceFrame": "SC_BODY_FIXED",
+                            "convention": "REF_FRAME_ALIGNED"
+                        },
+                        "antenna":{"shape": "CIRCULAR", "diameter": 9e-2, "apertureExcitationProfile": "UNIFORM"},
+                        "operatingFrequency": 1575.42e6,
+                        "@id": "rtr"
+                        })
+        satA.add_instrument(instru)
+
+        out_file_access2 = self.out_dir+'/test_cov_access2.csv'
+        # run the coverage calculator
+        spec_cov2 = SpecularCoverage(rx_spc=satA, rx_state_file=satA_state_fl, tx_spc=satB, tx_state_file=satB_state_fl)
+        spec_cov2.execute(instru_id="rtr", mode_id=None, out_file_access=out_file_access2)
+
+        # check the outputs
+        cov_results_df2 = pd.read_csv(out_file_access2, skiprows = [0,1,2,3])
+
+        # both the results must be the equal
+        self.assertTrue(cov_results_df2.equals(cov_results_df1))
 
 
 
