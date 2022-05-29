@@ -6,6 +6,7 @@
 .. todo:: Revise to include coverage calculations of spacecrafts without sensors.
 
 """
+from turtle import Turtle
 import numpy as np
 from collections import namedtuple
 import csv
@@ -358,7 +359,7 @@ class GridCoverage(Entity):
                                     Default value is ``False`` (i.e. the scene-field-of-view will be considered in the coverage calculations).
         :paramtype use_field_of_regard: bool
 
-        :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
+        :param out_file_access: File name with path of the file in which the access data is written.
                 
                 The file format is as follows:
 
@@ -419,14 +420,13 @@ class GridCoverage(Entity):
         states_df = pd.read_csv(self.state_cart_file, skiprows=4)
 
         ###### Prepare output file in which results shall be written ######
-        if out_file_access:
-            access_file = open(out_file_access, 'w', newline='')
-            access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["GRID COVERAGE"])
-            access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
-            access_writer.writerow(["Step size [s] is {}".format(step_size)])
-            access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index','GP index', 'lat [deg]', 'lon [deg]'])
+        access_file = open(out_file_access, 'w', newline='')
+        access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        access_writer.writerow(["GRID COVERAGE"])
+        access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+        access_writer.writerow(["Step size [s] is {}".format(step_size)])
+        access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+        access_writer.writerow(['time index','GP index', 'lat [deg]', 'lon [deg]'])
         
         ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
@@ -512,8 +512,7 @@ class GridCoverage(Entity):
                         access_writer.writerow([time_index, pnt, coords.latitude, coords.longitude])
 
         ##### Close file #####                
-        if access_file:
-            access_file.close()
+        access_file.close()
 
         ##### filter mid-interval access data if necessary #####
         if mid_access_only is True:
@@ -656,7 +655,7 @@ class PointingOptionsCoverage(Entity):
         :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
         :paramtype mode_id: str (or) int        
 
-        :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
+        :param out_file_access: File name with path of the file in which the access data is written.
                 
                 The format of the output data file is as follows:
 
@@ -692,14 +691,13 @@ class PointingOptionsCoverage(Entity):
         earth = propcov.Earth()
 
         ###### Prepare output file in which results shall be written ######
-        if out_file_access:
-            access_file = open(out_file_access, 'w', newline='')
-            access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["POINTING OPTIONS COVERAGE"])
-            access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
-            access_writer.writerow(["Step size [s] is {}".format(step_size)])
-            access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index', 'pnt-opt index', 'lat [deg]', 'lon [deg]'])
+        access_file = open(out_file_access, 'w', newline='')
+        access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        access_writer.writerow(["POINTING OPTIONS COVERAGE"])
+        access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+        access_writer.writerow(["Step size [s] is {}".format(step_size)])
+        access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+        access_writer.writerow(['time index', 'pnt-opt index', 'lat [deg]', 'lon [deg]'])
         
         ###### find the pointing-options corresponding to the input sensor-id, mode-id  ######
         cov_param = find_in_cov_params_list(self.cov_params, instru_id, mode_id)
@@ -752,8 +750,7 @@ class PointingOptionsCoverage(Entity):
                         access_writer.writerow([time_index, pnt_opt_idx, np.round(np.rad2deg(geo_coords[0]),3), np.round(np.rad2deg(geo_coords[1]),3)])
 
         ##### Close file #####                
-        if access_file:
-            access_file.close()
+        access_file.close()
         
         return CoverageOutputInfo.from_dict({   "coverageType": "POINTING OPTIONS COVERAGE",
                                                 "spacecraftId": self.spacecraft._id,
@@ -859,7 +856,7 @@ class PointingOptionsWithGridCoverage(Entity):
         :param mode_id: Mode identifier (corresponding to the input sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
         :paramtype mode_id: str (or) int
 
-        :param out_file_access: File name with path of the file in which the access data is written. If ``None`` the file is not written.
+        :param out_file_access: File name with path of the file in which the access data is written.
                 
                 The format of the output data file is as follows:
 
@@ -919,14 +916,13 @@ class PointingOptionsWithGridCoverage(Entity):
         states_df = pd.read_csv(self.state_cart_file, skiprows=4)
 
         ###### Prepare output file in which results shall be written ######
-        if out_file_access:
-            access_file = open(out_file_access, 'w', newline='')
-            access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["POINTING OPTIONS WITH GRID COVERAGE"])
-            access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
-            access_writer.writerow(["Step size [s] is {}".format(step_size)])
-            access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index','pnt-opt index', 'GP index', 'lat [deg]', 'lon [deg]'])
+        access_file = open(out_file_access, 'w', newline='')
+        access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        access_writer.writerow(["POINTING OPTIONS WITH GRID COVERAGE"])
+        access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+        access_writer.writerow(["Step size [s] is {}".format(step_size)])
+        access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+        access_writer.writerow(['time index','pnt-opt index', 'GP index', 'lat [deg]', 'lon [deg]'])
         
         ###### find the coverage-parameters of the input sensor-id, mode-id  ######
         cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
@@ -999,8 +995,7 @@ class PointingOptionsWithGridCoverage(Entity):
                         access_writer.writerow([time_index, pnt_opt_idx, pnt, round(coords.latitude, 3), round(coords.longitude,3)])
 
         ##### Close file #####                
-        if access_file:
-            access_file.close()
+        access_file.close()
 
         ##### filter mid-interval access data if necessary #####
         if mid_access_only is True:
@@ -1031,10 +1026,6 @@ class SpecularCoverage(Entity):
         Only a nadir-pointing & circular FOV instrument is accepted. The specular locations within the sensor FOV is calculated at each time step.
         If a grid is specified, the set of grid-points within a specified circular region about each of the specular locations are also calculated. 
 
-    :ivar grid: Locations (longitudes, latitudes) (represented by a :class:`orbitpy.util.grid` object) over which coverage calculation is to be performed.
-                Required only if grid-based coverage is needed.
-    :vartype grid: :class:`orbitpy.util.grid`
-
     :ivar rx_spc: Spacecraft for which the coverage calculation is performed. A nadir-pointing, circular FOV instrument is to be present on the spacecraft.
                   This spacecraft is also the receiver which processes the reflected RF signal.
     :vartype rx_spc: :class:`orbitpy.util.Spacecraft`
@@ -1051,6 +1042,10 @@ class SpecularCoverage(Entity):
                           Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
     :vartype tx_state_file: list, str
 
+    :ivar grid: Locations (longitudes, latitudes) (represented by a :class:`orbitpy.util.grid` object) over which coverage calculation is to be performed.
+                Required only if grid-based coverage is needed.
+    :vartype grid: :class:`orbitpy.util.grid`
+
     :ivar cov_params: List of coverage parameters corresponding to all the instruments, modes per instrument in the spacecraft.
                         Refer to the :class:`orbitpy.coveragecalculator.helper_extract_coverage_parameters_of_spacecraft` function.
     :vartype cov_params: list, namedtuple
@@ -1059,12 +1054,12 @@ class SpecularCoverage(Entity):
     :vartype _id: str
 
     """
-    def __init__(self, grid=None, rx_spc=None, rx_state_file=None, tx_spc=None, tx_state_file=None, _id=None):
-        self.grid               = grid if grid is not None and isinstance(grid, Grid) else None
+    def __init__(self, rx_spc=None, rx_state_file=None, tx_spc=None, tx_state_file=None, grid=None, _id=None):        
         self.rx_spc             = rx_spc if rx_spc is not None and isinstance(rx_spc, Spacecraft) else None
         self.rx_state_file      = str(rx_state_file) if rx_state_file is not None else None
         self.tx_spc             = orbitpy.util.initialize_object_list(tx_spc, Spacecraft)
         self.tx_state_file      = orbitpy.util.initialize_object_list(tx_state_file, str)
+        self.grid               = grid if grid is not None and isinstance(grid, Grid) else None
         # Extract the coverage related parameters
         self.cov_params = helper_extract_coverage_parameters_of_spacecraft(self.rx_spc) if self.rx_spc is not None else None
 
@@ -1076,9 +1071,7 @@ class SpecularCoverage(Entity):
         
         :param d: Dictionary with the SpecularCoverage specifications.
 
-                Following keys are to be specified.
-                
-                * "grid":                           (dict) Required only if grid-based coverage is needed. Refer to :class:`orbitpy.grid.Grid.from_dict`
+                Following keys are to be specified.                
                 
                 * "receiver":                       (dict) Consists of two keys: 
                                         
@@ -1092,6 +1085,8 @@ class SpecularCoverage(Entity):
 
                                                             (2) "cartesianStateFilePath": (str) File path (with file name) to the file with the propagated (source) spacecraft states.
 
+                * "grid":                           (dict) Required only if grid-based coverage is needed. Refer to :class:`orbitpy.grid.Grid.from_dict`
+                
                 * "@id":                            (str or int) Unique identifier of the coverage calculator object.
 
                 In the provided state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source).
@@ -1102,7 +1097,7 @@ class SpecularCoverage(Entity):
         :rtype: :class:`orbitpy.coveragecalculator.SpecularCoverage`
 
         """
-        grid_dict = d.get('grid', None)
+        
         # parse the reciever
         receiver_dict   = d.get('receiver', None)
         rx_spc_dict     = receiver_dict.get('spacecraft', None)
@@ -1126,11 +1121,13 @@ class SpecularCoverage(Entity):
                 tx_spc.append(_spc)
                 tx_state_file.append(_state_file)
 
-        return SpecularCoverage(grid            = Grid.from_dict(grid_dict) if grid_dict else None, 
-                                rx_spc          = rx_spc,
+        grid_dict = d.get('grid', None)
+
+        return SpecularCoverage(rx_spc          = rx_spc,
                                 rx_state_file   = rx_state_file,
                                 tx_spc          = tx_spc,
                                 tx_state_file   = tx_state_file,
+                                grid            = Grid.from_dict(grid_dict) if grid_dict else None, 
                                 _id             = d.get('@id', None))
     
     def to_dict(self):
@@ -1146,11 +1143,11 @@ class SpecularCoverage(Entity):
                             "cartesianStateFilePath": self.tx_state_file[index]
                           })
 
-        return dict({"@type": "SPECULAR COVERAGE",
-                     "grid": self.grid.to_dict() if self.grid else None,
+        return dict({"@type": "SPECULAR COVERAGE",                     
                      "receiver": {"spacecraft": self.rx_spc.to_dict(), "cartesianStateFilePath":self.rx_state_file},
                      "source": source,
                      "cartesianStateFilePath": self.state_cart_file,
+                     "grid": self.grid.to_dict() if self.grid else None,
                      "@id": self._id})
 
     def __repr__(self):
@@ -1238,16 +1235,54 @@ class SpecularCoverage(Entity):
             else:
                 return False
 
-    def execute(self, instru_id=None, mode_id=None, out_file_access=None, specular_region_dia=None):
+    @staticmethod
+    def check_loc_in_circle(point, center, radius):
+        """ Check if the input point belong inside a circle (on the Earth's surface) of the specified center, radius.
+            The radius is the distance assumed to be measured along a great circle on the Earth's surface.
+
+        :param point: Cartesian coordinates of the points which need to be evaluated (x [km], y [km], z [km]).
+        :paramtype point: list, (float, float, float)
+
+        :param center: Cartesian coordinates (x [km], y [km], z [km]) of the center of the circle.
+        :paramtype center: list, (float, float, float)
+
+        :param radius: Radius of the circle [km].
+        :paramtype radius: float
+
+        :return: ``True`` if the point belongs inside the circle, else ``False``.
+        :rtype: bool
+        
+        """
+        RE = Constants.radiusOfEarthInKM
+        eca = radius/RE
+
+        p = np.array(p)
+        center = np.array(center)
+
+        # calculate the angle between the center and the test-point            
+        x = np.dot(p, center)/ (np.linalg.norm(p)*np.linalg.norm(center))
+        x = np.acos(x)
+        # check if the angle is less than the 1/2*eca
+        if x<0.5*eca:
+            return True
+        else:
+            return False
+
+    def execute(self, instru_id=None, mode_id=None, out_file_specular=None, specular_region_dia=None, out_file_grid_access=None):
         """ Perform coverage calculation involving calculation of specular point locations. 
             The calculation is performed for a specific instrument and mode (in the receiver spacecraft). 
-            If no instrument present in spacecraft the entire horizon as seen by the receiving satellite is considered for the coverage calculations. 
+            If no instrument present in spacecraft the entire horizon as seen by the receiving satellite is considered for the coverage calculations (however does not work when grid based calculations are required, see the TODO below). 
             Coverage is calculated for the period over which the receiver, source spacecraft propagated states are available. 
             The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
 
+            If a grid has been specified (during the instantiation by the ``grid`` instance variable), and the diameter of the specular region has been specified (through the ``specular_region_dia`` input parameter),
+            then the grid points which are present within the specular region are found and written in the file specified by the ``out_file_grid_access`` parameter. The specular region is 
+            approximated to be circular in shape with the calculated specular point as the center, and the diameter specified by the ``specular_region_dia`` input parameter.
+
             .. note:: Only a nadir-pointing, circular FOV instrument is accepted.
 
-            .. todo:: Include instrument FOV considerations. Include grid.
+            .. todo:: When grid is specified, the sensor **must** be present, else a `NotImplementedError` is thrown. Modify this behaviour so 
+                      that the coverage calculations with grid can be carried out considering the entire horizon to be within the satellite FOV.
 
         :param instru_id: Sensor identifier (corresponding to the receiver spacecraft). If ``None``, the first sensor in the spacecraft list of sensors (if available) is considered.
         :paramtype instru_id: str (or) int
@@ -1255,7 +1290,7 @@ class SpecularCoverage(Entity):
         :param mode_id: Mode identifier (corresponding to the receiver sensor (id) and spacecraft). If ``None``, the first mode of the corresponding input sensor of the spacecraft is considered.
         :paramtype mode_id: str (or) int
 
-        :param out_file_access: File name with path of the file in which the access data is to be written. If ``None`` the file is not written.
+        :param out_file_specular: File name with path of the file in which the specular locaion data is to be written.
                 
                 The format of the output data file is as follows:
 
@@ -1278,25 +1313,69 @@ class SpecularCoverage(Entity):
                     lat [deg], float, degrees, Latitude of specular point.
                     lon [deg], float, degrees, Longitude of specular point.
         
-        :paramtype out_file_access: list, str
+        :paramtype out_file_specular: str
+
+        :param specular_region_dia: Diameter of the circular region with the specular point as the center, which shall be imaged. 
+                                    Note that this is an approximation since the the specular region shape and dimensions 
+                                    shall depend on the source, receiver positions, topography, etc. Units in kilometers.
+        :paramtype specular_region_dia: float
+        
+        :param out_file_grid_access: File name with path of the file in which the grid access data is written. This parameter should be input in the case when
+                                        ``grid`` instance variable and the ``specular_region_dia`` input parameter are specified.
+                
+                The file format is as follows:
+
+                *  The first row contains the coverage calculation type.
+                *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                *  The third row contains the time-step size in seconds. 
+                *  The fourth row contains the duration (in days) for which coverage calculation is executed.
+                *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+                Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+                Description of the coverage data is given below:
+
+                .. csv-table:: Coverage data description
+                    :header: Column, Data type, Units, Description
+                    :widths: 10,10,10,30
+
+                    time index, int, , Access time-index.                    
+                    source id, int/str, , Source spacecraft identifier.
+                    GP index, int, , Grid-point index.
+                    lat [deg], float, degrees, Latitude corresponding to the GP index.
+                    lon [deg], float, degrees, Longitude corresponding to the GP index.
+
+        :paramtype out_file_grid_access: str
 
         :return: Coverage output info.
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
 
         """
+        calc_grid_access = False
+        if self.grid is not None and specular_region_dia is not None and out_file_grid_access is not None:
+            calc_grid_access = True
+
         ###### read in the propagated states and auxillary information ######               
         (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.rx_state_file)
         rx_states_df = pd.read_csv(self.rx_state_file, skiprows=4)
 
-        ###### Prepare output file in which results shall be written ######
-        if out_file_access:
-            access_file = open(out_file_access, 'w', newline='')
-            access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            access_writer.writerow(["SPECULAR COVERAGE"])
-            access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
-            access_writer.writerow(["Step size [s] is {}".format(step_size)])
-            access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
-            access_writer.writerow(['time index', 'source id', 'lat [deg]', 'lon [deg]'])
+        ###### Prepare output files in which results shall be written ######        
+        specular_access_file = open(out_file_specular, 'w', newline='')
+        specular_access_writer = csv.writer(specular_access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        specular_access_writer.writerow(["SPECULAR COVERAGE"])
+        specular_access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+        specular_access_writer.writerow(["Step size [s] is {}".format(step_size)])
+        specular_access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+        specular_access_writer.writerow(['time index', 'source id', 'lat [deg]', 'lon [deg]'])
+
+        if out_file_grid_access:
+            grid_access_file = open(out_file_grid_access, 'w', newline='')
+            grid_access_writer = csv.writer(grid_access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            grid_access_writer.writerow(["SPECULAR COVERAGE"])
+            grid_access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+            grid_access_writer.writerow(["Step size [s] is {}".format(step_size)])
+            grid_access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+            grid_access_writer.writerow(['time index', 'source id', 'GP index', 'lat [deg]', 'lon [deg]'])
             
         ###### find the FOV corresponding to the input sensor-id, mode-id  ######
         try:
@@ -1317,7 +1396,7 @@ class SpecularCoverage(Entity):
                 raise NotImplementedError # only Circular FOV shapes are supported
             # check that the spacecraft-instrument orientation is NADIR_POINTING. Other orientations are not supported.
             spc_orien = self.rx_spc.spacecraftBus.orientation
-            if (spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING and (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED or sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED)):
+            if (spc_orien.ref_frame==ReferenceFrame.NADIR_POINTING and (sen_orien.ref_frame==ReferenceFrame.SC_BODY_FIXED or sen_orien.ref_frame==ReferenceFrame.NADIR_POINTING)):
                 pass
             else:
                 raise NotImplementedError
@@ -1331,6 +1410,36 @@ class SpecularCoverage(Entity):
             tx_id = tx._id # source spacecraft id
             tx_states_df = pd.read_csv(self.tx_state_file[idx], skiprows=4) # read in the states
 
+            if calc_grid_access is True:
+                # If a grid and the specular region diameter are specified, calculate the grid-points within the specular region diameter
+                # First the grid coverage for the entire region within the sensor FOV is carried out. Then the grid-points around the 
+                # specular point and within the circular region (specified by the diameter) is filtered out and reported.
+                ###### form the propcov.Spacecraft object ######
+                attitude = propcov.NadirPointingAttitude()
+                interp = propcov.LagrangeInterpolator()
+
+                spc = propcov.Spacecraft(self.rx_spc.orbitState.date, self.rx_spc.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
+                if not (spc_orien.ref_frame==ReferenceFrame.NADIR_POINTING or spc_orien.euler_angle1==0 or spc_orien.euler_angle2==0 or spc_orien.euler_angle3==0):
+                    raise NotImplementedError # Only nadir-pointing attitude configuration is allowed.         
+
+                # Build the sensor object. Only nadir-pointing, circular FOV sensor is allowed.
+                if max_rx_angular_region is None:
+                    raise NotImplementedError # TODO: Requires the sensor to be present, else shall throw an error. Modify behaviour.
+                sensor= propcov.ConicalSensor(halfAngle = max_rx_angular_region) # input angle in radians
+                sensor.SetSensorBodyOffsetAngles(angle1=0.0, angle2=0.0, angle3=0.0, # input angles are in degrees
+                                                    seq1=1, seq2=2, seq3=3)
+                if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): 
+                    if sen_orien.euler_angle1==0 and sen_orien.euler_angle2==0 and sen_orien.euler_angle3==0:
+                        pass
+                else:    
+                    raise NotImplementedError # Only nadir-pointing attitude configuration is allowed.
+                ###### attach the sensor ######
+                spc.AddSensor(sensor)
+                ###### make propcov coverage checker object ######
+                cov_checker = propcov.CoverageChecker(self.grid.point_group, spc)
+                ###### make the data object ######
+                date = propcov.AbsoluteDate()
+
             ###### iterate over the propagated states ######
             for idx, rx_state in rx_states_df.iterrows():
                 time_index = int(rx_state['time index'])
@@ -1341,16 +1450,51 @@ class SpecularCoverage(Entity):
                 tx_state = tx_states_df.iloc[idx]
                 tx_pos_vec = [tx_state['x [km]'], tx_state['y [km]'], tx_state['z [km]']]
 
-                specular_point= SpecularCoverage.specular_location(tx_pos_vec, rx_pos_vec, max_rx_angular_region)
+                specular_point= SpecularCoverage.specular_location(tx_pos_vec, rx_pos_vec, max_rx_angular_region) # result shall be ECI Cartesian coordinates
+
+                ###### if applicable, carry out grid-based coverage ######
+                filtered_points_geo = []
+                if calc_grid_access is True:
+                    # Obtain *all* the grid-points under the sensor FOV
+                    date.SetJulianDate(jd_date)
+                    rx_cart_state = [rx_state['x [km]'], rx_state['y [km]'], rx_state['z [km]'], rx_state['vx [km/s]'], rx_state['vy [km/s]'], rx_state['vz [km/s]']]
+                    spc.SetOrbitEpochOrbitStateCartesian(date, propcov.Rvector6(rx_cart_state))            
+                    
+                    # compute coverage
+                    points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
+                    if len(points)>0:
+                        filtered_points_index = [] # list of filtered (within the specular region) points in geo-coordinates
+                        filtered_points_geo = []
+                        for _pnt in points:
+                            coords = self.grid.get_lat_lon_from_index(_pnt)
+                            coords_cart = GeoUtilityFunctions.geo2eci([coords.latitude, coords.longitude], jd_date) # ECI Cartesian coordinates   
+                            if SpecularCoverage.check_loc_in_circle(coords_cart, specular_point, specular_region_dia) is True:
+                                filtered_points_index.append(_pnt)
+                                filtered_points_geo.append([coords.latitude, coords.longitude])
 
                 if specular_point is not False:
+                    # write the specular locations to the file
                     geo_coords = GeoUtilityFunctions.eci2geo(specular_point, jd_date)
-                    access_writer.writerow([time_index, tx_id, np.round(geo_coords[0],3), np.round(geo_coords[1],3)])
+                    specular_access_writer.writerow([time_index, tx_id, np.round(geo_coords[0],3), np.round(geo_coords[1],3)])
 
-        ##### Close file #####                
-        if access_file:
-            access_file.close()
-        
+                    if calc_grid_access is True:
+                        if len(filtered_points_index)>0:
+                            for index, value in enumerate(filtered_points_geo):
+                                lat = value[0]
+                                lon = value[1]
+                                gp_index = filtered_points_index[index]
+                                grid_access_writer.writerow([time_index, tx_id, gp_index, round(lat, 3), round(lon,3)])                        
+
+        ##### Close file ##### 
+        try:               
+            specular_access_file.close()
+        except:
+            pass
+        try:
+            grid_access_file.close()
+        except:
+            pass
+
         return CoverageOutputInfo.from_dict({   "coverageType": "SPECULAR COVERAGE",
                                                 "spacecraftId": self.rx_spc._id,
                                                 "grid": self.grid.to_dict() if self.grid else None,
@@ -1360,7 +1504,7 @@ class SpecularCoverage(Entity):
                                                 "filterMidIntervalAccess": None,
                                                 "gridId": None,
                                                 "stateCartFile": self.rx_state_file,
-                                                "accessFile": out_file_access,
+                                                "accessFile": [out_file_specular, out_file_grid_access] if out_file_grid_access else out_file_specular,
                                                 "startDate": epoch_JDUT1,
                                                 "duration": duration,
                                                 "@id": None})    
@@ -1396,8 +1540,8 @@ class CoverageOutputInfo(Entity):
     :ivar stateCartFile: State file (filename with path) where the time-series of the cartesian states of the spacecraft are saved.
     :vartype stateCartFile: str
 
-    :ivar accessFile: File (filename with path) where the access data is saved.
-    :vartype accessFile: str
+    :ivar accessFile: File (filename with path) where the access data is saved. Multiple files can be indicated by a list.
+    :vartype accessFile: str (or) list, str
 
     :ivar startDate: Time start for coverage calculation in Julian Date UT1.
     :vartype startDate: float
@@ -1419,7 +1563,11 @@ class CoverageOutputInfo(Entity):
         self.usedFieldOfRegard = usedFieldOfRegard if usedFieldOfRegard is not None else None
         self.filterMidIntervalAccess = bool(filterMidIntervalAccess) if filterMidIntervalAccess is not None else None
         self.stateCartFile = str(stateCartFile) if stateCartFile is not None else None
-        self.accessFile = str(accessFile) if accessFile is not None else None
+        if accessFile is not None:
+            if isinstance(accessFile, list):
+                self.accessFile = [str(x) for x in accessFile]
+            else:
+                self.accessFile = str(accessFile)
         self.startDate = float(startDate) if startDate is not None else None
         self.duration = float(duration) if duration is not None else None
 
@@ -1476,6 +1624,7 @@ class CoverageOutputInfo(Entity):
     def __eq__(self, other):
         # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different.
         if(isinstance(self, other.__class__)):
+            # Note that the ``accessFile`` instance variable is a list in general, and a True comparison result requires the same ordering of the elements of the two input lists (which are being compared). 
             return (self.coverageType==other.coverageType) and (self.spacecraftId==other.spacecraftId) and (self.instruId==other.instruId) and (self.modeId==other.modeId) and \
                    (self.usedFieldOfRegard==other.usedFieldOfRegard) and (self.filterMidIntervalAccess == other.filterMidIntervalAccess) and (self.gridId==other.gridId) and  (self.stateCartFile==other.stateCartFile) and (self.accessFile==other.accessFile) and \
                     (self.startDate==other.startDate) and (self.duration==other.duration) 
