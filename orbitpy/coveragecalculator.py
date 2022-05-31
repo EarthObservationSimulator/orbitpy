@@ -6,7 +6,6 @@
 .. todo:: Revise to include coverage calculations of spacecrafts without sensors.
 
 """
-from turtle import Turtle
 import numpy as np
 from collections import namedtuple
 import csv
@@ -406,7 +405,7 @@ class GridCoverage(Entity):
                         `RectangularPIP` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
                         `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
                         formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
-                        if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
+                        if the target point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
                         within the sensor FOV.  
  
         :paramtype method: str
@@ -484,7 +483,7 @@ class GridCoverage(Entity):
                 raise Exception("Please input valid sensor spherical geometry shape.")
 
             sen_orien = __view_geom.orien
-            if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): # The second condition is equivalent of orienting sensor w.r.t spacecraft body if the spacecraft body is aligned to nadir-frame
+            if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): # The second condition is equivalent of orienting sensor w.r.t spacecraft body when the spacecraft body is aligned to nadir-frame
                 sensor.SetSensorBodyOffsetAngles(angle1=sen_orien.euler_angle1, angle2=sen_orien.euler_angle2, angle3=sen_orien.euler_angle3, # input angles are in degrees
                                                  seq1=sen_orien.euler_seq1, seq2=sen_orien.euler_seq2, seq3=sen_orien.euler_seq3)
             else:
@@ -904,7 +903,7 @@ class PointingOptionsWithGridCoverage(Entity):
                         `RectangularPIP` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
                         `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
                         formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
-                        if the target -point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
+                        if the target point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
                         within the sensor FOV.
 
         :return: Coverage output info.
@@ -1024,7 +1023,9 @@ class SpecularCoverage(Entity):
         In the state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source).
 
         Only a nadir-pointing & circular FOV instrument is accepted. The specular locations within the sensor FOV is calculated at each time step.
-        If a grid is specified, the set of grid-points within a specified circular region about each of the specular locations are also calculated. 
+        If a grid is specified, the set of grid-points within a specified circular region about each of the specular locations are also calculated.
+
+        The transmitter spacecraft is assumed to transmit the RF signal over it's entire visible horizon.
 
     :ivar rx_spc: Spacecraft for which the coverage calculation is performed. A nadir-pointing, circular FOV instrument is to be present on the spacecraft.
                   This spacecraft is also the receiver which processes the reflected RF signal.
@@ -1154,7 +1155,7 @@ class SpecularCoverage(Entity):
         return "SpecularCoverage.from_dict({})".format(self.to_dict())
 
     @staticmethod
-    def specular_location(S, L, max_rx_angular_region=None):
+    def specular_location(S, L):
         """  Find the location of the specular point given the position vectors of the source and receiving satellites.
              
              Reference: David Eberly, "Computing a Point of Reflection on a Sphere", Geometric Tools, 2008. 
@@ -1165,14 +1166,8 @@ class SpecularCoverage(Entity):
         :param S: Position vector of source (transmit) satellite.
         :paramtype S: list, float
 
-        :param L: Position vector of receiving (receiving) satellite.
+        :param L: Position vector of receiving satellite.
         :paramtype L: list, float
-
-        :param max_rx_angular_region: [rad] Cone angle of the receiving instrument (onboard the receiving satellite, oriented in NADIR_POINTING frame)
-                                        which characterizes the circular angular region within which specular locations can be imaged.
-                                        Specular locations outside this angular region shall not be imaged.
-                                        If ``None``, the entire horizon as seen by the receiving satellite is considered. 
-        :paramtype max_rx_angular_region: float or None
 
         :return: Normalized Cartesian coordinates of the specular point if available, else ``False``.
         :rtype: list, float
@@ -1222,21 +1217,20 @@ class SpecularCoverage(Entity):
         #print("(x_bar, y_bar)", x_bar, y_bar)
 
         # specular point N = x_bar S + y_bar L
-        N = x_bar * S + y_bar * L
+        N = x_bar * S + y_bar * L        
 
-        # check that the specular location falls within the receiving satellite's FOV
-        if max_rx_angular_region is None: # entire horizon is considered
-            return N
-        else:
-            specular_direction = -N - L
-            specular_cone_angle = np.dot(specular_direction, -L)/ (np.linalg.norm(specular_direction) * np.linalg.norm(L))
-            if specular_cone_angle <= max_rx_angular_region:
-                return N
-            else:
-                return False
+        ######## DEBUG ########
+        #specular_direction = N - L
+        #specular_cone_angle = np.arccos(np.dot(specular_direction, -L)/ (np.linalg.norm(specular_direction) * np.linalg.norm(-L)))
+        #print("specular_cone_angle", np.rad2deg(specular_cone_angle))
+        ################################
+
+        return RE*N
+
+
 
     @staticmethod
-    def check_loc_in_circle(point, center, radius):
+    def check_point_in_circle(point, center, radius):
         """ Check if the input point belong inside a circle (on the Earth's surface) of the specified center, radius.
             The radius is the distance assumed to be measured along a great circle on the Earth's surface.
 
@@ -1256,19 +1250,19 @@ class SpecularCoverage(Entity):
         RE = Constants.radiusOfEarthInKM
         eca = radius/RE
 
-        p = np.array(p)
+        point = np.array(point)
         center = np.array(center)
 
         # calculate the angle between the center and the test-point            
-        x = np.dot(p, center)/ (np.linalg.norm(p)*np.linalg.norm(center))
-        x = np.acos(x)
+        x = np.dot(point, center)/ (np.linalg.norm(point)*np.linalg.norm(center))
+        x = np.arccos(x)
         # check if the angle is less than the 1/2*eca
         if x<0.5*eca:
             return True
         else:
             return False
 
-    def execute(self, instru_id=None, mode_id=None, out_file_specular=None, specular_region_dia=None, out_file_grid_access=None):
+    def execute(self, instru_id=None, mode_id=None, out_file_specular=None, specular_region_dia=None, out_file_grid_access=None, method='DirectSphericalPIP'):
         """ Perform coverage calculation involving calculation of specular point locations. 
             The calculation is performed for a specific instrument and mode (in the receiver spacecraft). 
             If no instrument present in spacecraft the entire horizon as seen by the receiving satellite is considered for the coverage calculations (however does not work when grid based calculations are required, see the TODO below). 
@@ -1279,7 +1273,7 @@ class SpecularCoverage(Entity):
             then the grid points which are present within the specular region are found and written in the file specified by the ``out_file_grid_access`` parameter. The specular region is 
             approximated to be circular in shape with the calculated specular point as the center, and the diameter specified by the ``specular_region_dia`` input parameter.
 
-            .. note:: Only a nadir-pointing, circular FOV instrument is accepted.
+            The transmitter spacecraft is assumed to transmit the RF signal over it's entire visible horizon.
 
             .. todo:: When grid is specified, the sensor **must** be present, else a `NotImplementedError` is thrown. Modify this behaviour so 
                       that the coverage calculations with grid can be carried out considering the entire horizon to be within the satellite FOV.
@@ -1343,9 +1337,33 @@ class SpecularCoverage(Entity):
                     source id, int/str, , Source spacecraft identifier.
                     GP index, int, , Grid-point index.
                     lat [deg], float, degrees, Latitude corresponding to the GP index.
-                    lon [deg], float, degrees, Longitude corresponding to the GP index.
+                    lon [deg], float, degrees, Longitude corresponding to thetarget point GP index.
 
         :paramtype out_file_grid_access: str
+
+        :param method:  Indicate the coverage method to be used to evaluate if a specular location is within the sensor FOV or not. Additionally the same method is used to evaluate grid-based coverage.
+                        This is only relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV).
+                        Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
+                        Default method is `DirectSphericalPIP`.
+
+                        The `DirectSphericalPIP` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
+                        the `ProjectedPIP` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
+                        
+                        For details on the `DirectSphericalPIP` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
+                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.
+                        
+                        In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
+                        point-in-polygon algorithm implemented in the `propcov.GMATCustomSensor` class. 
+                        Compared to the `propcov.GMATCustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
+                        and also to be more accurate.
+
+                        `RectangularPIP` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
+                        `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
+                        formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
+                        if the target point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
+                        within the sensor FOV.  
+ 
+        :paramtype method: str
 
         :return: Coverage output info.
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
@@ -1354,8 +1372,7 @@ class SpecularCoverage(Entity):
         calc_grid_access = False
         if self.grid is not None and specular_region_dia is not None and out_file_grid_access is not None:
             calc_grid_access = True
-
-        ###### read in the propagated states and auxillary information ######               
+        ###### read in the receiver satellite propagated states and auxillary information ######               
         (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.rx_state_file)
         rx_states_df = pd.read_csv(self.rx_state_file, skiprows=4)
 
@@ -1371,113 +1388,136 @@ class SpecularCoverage(Entity):
         if out_file_grid_access:
             grid_access_file = open(out_file_grid_access, 'w', newline='')
             grid_access_writer = csv.writer(grid_access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-            grid_access_writer.writerow(["SPECULAR COVERAGE"])
+            grid_access_writer.writerow(["SPECULAR COVERAGE GRID ACCESS"])
             grid_access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
             grid_access_writer.writerow(["Step size [s] is {}".format(step_size)])
             grid_access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             grid_access_writer.writerow(['time index', 'source id', 'GP index', 'lat [deg]', 'lon [deg]'])
             
-        ###### find the FOV corresponding to the input sensor-id, mode-id  ######
-        try:
-            cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
-             #print("cov_param ", cov_param)
-            # the input instru_id, mode_id may be None, so get the sensor, mode ids.
-            instru_id = cov_param.instru_id
-            mode_id = cov_param.mode_id
-            view_geom = cov_param.scene_field_of_view
-            sen_sph_geom = view_geom.sph_geom
-            sen_orien = view_geom.orien
-            if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
-                # The below cone angle characterizes the maximum angular region of the receiver (spacecraft-instrument) within which 
-                # specular locations can be imaged. Specular locations outside this angular region shall not be imaged. 
-                max_rx_angular_region = np.deg2rad(0.5 * sen_sph_geom.diameter)
-                #print(max_rx_angular_region*180/np.pi)
-            else:
-                raise NotImplementedError # only Circular FOV shapes are supported
-            # check that the spacecraft-instrument orientation is NADIR_POINTING. Other orientations are not supported.
-            spc_orien = self.rx_spc.spacecraftBus.orientation
-            if (spc_orien.ref_frame==ReferenceFrame.NADIR_POINTING and (sen_orien.ref_frame==ReferenceFrame.SC_BODY_FIXED or sen_orien.ref_frame==ReferenceFrame.NADIR_POINTING)):
-                pass
-            else:
-                raise NotImplementedError
+        ###### build the sensor, spacecraft and the coverage-checker objects ######
+        cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
+        #print("cov_param ", cov_param)
+        # the input instru_id, mode_id may be None, so get the sensor, mode ids.
+        instru_id = cov_param.instru_id
+        mode_id = cov_param.mode_id
+        view_geom = cov_param.scene_field_of_view
 
-        except NoInstrument:
-            # no instrument present in the rx-satellite, consider the entire horizon seen by the rx-satellite
-            max_rx_angular_region = None
+        ###### form the propcov.Spacecraft object ######
+        attitude = propcov.NadirPointingAttitude()
+        interp = propcov.LagrangeInterpolator()
 
+        spc = propcov.Spacecraft(self.rx_spc.orbitState.date, self.rx_spc.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
+        # orient the spacecraft-bus
+        spc_orien = self.rx_spc.spacecraftBus.orientation
+        if spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING:            
+            spc.SetBodyNadirOffsetAngles(angle1=spc_orien.euler_angle1, angle2=spc_orien.euler_angle2, angle3=spc_orien.euler_angle3, # input angles are in degrees
+                                        seq1=spc_orien.euler_seq1, seq2=spc_orien.euler_seq2, seq3=spc_orien.euler_seq3)
+        else:
+            raise NotImplementedError # only NADIR_POINTING reference frame is supported.           
+
+        ###### build the sensor object ######
+        sen_sph_geom = view_geom.sph_geom
+        if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
+            sensor= propcov.ConicalSensor(halfAngle = 0.5*np.deg2rad(sen_sph_geom.diameter)) # input angle in radians
+        elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
+            if method=='DirectSphericalPIP':
+                sensor = propcov.DSPIPCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                                            clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   ),
+                                            contained = [0.0,0.0]  
+                                            )
+            
+            elif method=='ProjectedPIP':
+                sensor = propcov.GMATCustomSensor( coneAngleVecIn    =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.cone_angle_vec   )   )   ),  # input angle in radians  
+                                            clockAngleVecIn   =   propcov.Rvector(  np.deg2rad( np.array( sen_sph_geom.clock_angle_vec  )   )   )   
+                                            )
+            elif method=='RectangularPIP':
+                [angleHeightIn, angleWidthIn] = sen_sph_geom.get_fov_height_and_width()
+                sensor = propcov.RectangularSensor( angleHeightIn    =   np.deg2rad( angleHeightIn ) ,  # input angle in radians  
+                                                    angleWidthIn   =   np.deg2rad( angleWidthIn )   
+                                                    )
+            else:
+                raise Exception("Please specify a valid coverage method.")         
+        else:
+            raise Exception("Please input valid sensor spherical geometry shape.")
+
+        sen_orien = view_geom.orien
+        if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): # The second condition is equivalent of orienting sensor w.r.t spacecraft body when the spacecraft body is aligned to nadir-frame
+            sensor.SetSensorBodyOffsetAngles(angle1=sen_orien.euler_angle1, angle2=sen_orien.euler_angle2, angle3=sen_orien.euler_angle3, # input angles are in degrees
+                                                seq1=sen_orien.euler_seq1, seq2=sen_orien.euler_seq2, seq3=sen_orien.euler_seq3)
+        else:
+            raise NotImplementedError
+       
+        ###### attach the sensor ######
+        spc.AddSensor(sensor)
+        ###### make propcov coverage checker object if grid-based access calculation is required. ######
+        if calc_grid_access is True:                           
+            cov_checker = propcov.CoverageChecker(self.grid.point_group, spc)
+        
         ###### iterate over the each of the source satellites ######
         for idx, tx in enumerate(self.tx_spc):
+            
             tx_id = tx._id # source spacecraft id
             tx_states_df = pd.read_csv(self.tx_state_file[idx], skiprows=4) # read in the states
 
-            if calc_grid_access is True:
-                # If a grid and the specular region diameter are specified, calculate the grid-points within the specular region diameter
-                # First the grid coverage for the entire region within the sensor FOV is carried out. Then the grid-points around the 
-                # specular point and within the circular region (specified by the diameter) is filtered out and reported.
-                ###### form the propcov.Spacecraft object ######
-                attitude = propcov.NadirPointingAttitude()
-                interp = propcov.LagrangeInterpolator()
-
-                spc = propcov.Spacecraft(self.rx_spc.orbitState.date, self.rx_spc.orbitState.state, attitude, interp, 0, 0, 0, 1, 2, 3)
-                if not (spc_orien.ref_frame==ReferenceFrame.NADIR_POINTING or spc_orien.euler_angle1==0 or spc_orien.euler_angle2==0 or spc_orien.euler_angle3==0):
-                    raise NotImplementedError # Only nadir-pointing attitude configuration is allowed.         
-
-                # Build the sensor object. Only nadir-pointing, circular FOV sensor is allowed.
-                if max_rx_angular_region is None:
-                    raise NotImplementedError # TODO: Requires the sensor to be present, else shall throw an error. Modify behaviour.
-                sensor= propcov.ConicalSensor(halfAngle = max_rx_angular_region) # input angle in radians
-                sensor.SetSensorBodyOffsetAngles(angle1=0.0, angle2=0.0, angle3=0.0, # input angles are in degrees
-                                                    seq1=1, seq2=2, seq3=3)
-                if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): 
-                    if sen_orien.euler_angle1==0 and sen_orien.euler_angle2==0 and sen_orien.euler_angle3==0:
-                        pass
-                else:    
-                    raise NotImplementedError # Only nadir-pointing attitude configuration is allowed.
-                ###### attach the sensor ######
-                spc.AddSensor(sensor)
-                ###### make propcov coverage checker object ######
-                cov_checker = propcov.CoverageChecker(self.grid.point_group, spc)
-                ###### make the data object ######
-                date = propcov.AbsoluteDate()
+            ###### make the data object ######
+            date = propcov.AbsoluteDate()           
 
             ###### iterate over the propagated states ######
             for idx, rx_state in rx_states_df.iterrows():
+
+                specular_access_exists = False # flag to indicate if the specular location is present within the sensor FOV
+
                 time_index = int(rx_state['time index'])
                 jd_date = epoch_JDUT1 + time_index*step_size*DAYS_PER_SEC
+                date.SetJulianDate(jd_date)
                 
+                rx_cart_state = [rx_state['x [km]'], rx_state['y [km]'], rx_state['z [km]'], rx_state['vx [km/s]'], rx_state['vy [km/s]'], rx_state['vz [km/s]']]
+                spc.SetOrbitEpochOrbitStateCartesian(date, propcov.Rvector6(rx_cart_state))
                 rx_pos_vec= [rx_state['x [km]'], rx_state['y [km]'], rx_state['z [km]']]
 
                 tx_state = tx_states_df.iloc[idx]
                 tx_pos_vec = [tx_state['x [km]'], tx_state['y [km]'], tx_state['z [km]']]
 
-                specular_point= SpecularCoverage.specular_location(tx_pos_vec, rx_pos_vec, max_rx_angular_region) # result shall be ECI Cartesian coordinates
-
-                ###### if applicable, carry out grid-based coverage ######
-                filtered_points_geo = []
-                if calc_grid_access is True:
-                    # Obtain *all* the grid-points under the sensor FOV
-                    date.SetJulianDate(jd_date)
-                    rx_cart_state = [rx_state['x [km]'], rx_state['y [km]'], rx_state['z [km]'], rx_state['vx [km/s]'], rx_state['vy [km/s]'], rx_state['vz [km/s]']]
-                    spc.SetOrbitEpochOrbitStateCartesian(date, propcov.Rvector6(rx_cart_state))            
-                    
-                    # compute coverage
-                    points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
-                    if len(points)>0:
-                        filtered_points_index = [] # list of filtered (within the specular region) points in geo-coordinates
-                        filtered_points_geo = []
-                        for _pnt in points:
-                            coords = self.grid.get_lat_lon_from_index(_pnt)
-                            coords_cart = GeoUtilityFunctions.geo2eci([coords.latitude, coords.longitude], jd_date) # ECI Cartesian coordinates   
-                            if SpecularCoverage.check_loc_in_circle(coords_cart, specular_point, specular_region_dia) is True:
-                                filtered_points_index.append(_pnt)
-                                filtered_points_geo.append([coords.latitude, coords.longitude])
-
+                # calculate the specular location within the entire horizon (if present)
+                specular_point= SpecularCoverage.specular_location(tx_pos_vec, rx_pos_vec) # result shall be in ECI Cartesian coordinates since input vectors are expressed in the ECI frame
+                # evaluate if this specular point is within the sensor FOV
                 if specular_point is not False:
-                    # write the specular locations to the file
-                    geo_coords = GeoUtilityFunctions.eci2geo(specular_point, jd_date)
-                    specular_access_writer.writerow([time_index, tx_id, np.round(geo_coords[0],3), np.round(geo_coords[1],3)])
+                    sp_geocoods = GeoUtilityFunctions.eci2geo(specular_point, jd_date) # (lat, lon) of the specular point
 
+                    lat_rad = np.deg2rad(sp_geocoods[0])
+                    lon_rad = np.deg2rad(sp_geocoods[1])
+                    if lon_rad > np.pi:
+                        lon_rad = lon_rad - 2*np.pi # bring to the -pi to +pi range (requirement for the PointGroup class).
+
+                    sp_point_group = propcov.PointGroup() # create a point group which holds only the specular point
+                    sp_point_group.AddUserDefinedPoints([lat_rad],[lon_rad])
+                    # make the coverage checker object
+                    sp_cov_checker = propcov.CoverageChecker(sp_point_group, spc)
+                    # check coverage
+                    x = sp_cov_checker.CheckPointCoverage()
+                    if len(x)==1: # the specular point is within the sensor FOV
+                        specular_access_exists = True
+
+                #print(specular_access_exists)
+                if specular_access_exists is True:                    
+                    ###### write the specular location to the file ######
+                    specular_access_writer.writerow([time_index, tx_id, np.round(sp_geocoods[0],3), np.round(sp_geocoods[1],3)])
+
+                    ###### if applicable, carry out grid-based coverage ######
                     if calc_grid_access is True:
+                        # compute coverage over the assigned grid
+                        points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
+                        if len(points)>0:
+                            filtered_points_index = [] # list of filtered (within the specular region) points in geo-coordinates
+                            filtered_points_geo = []
+                            for _pnt in points:
+                                coords = self.grid.get_lat_lon_from_index(_pnt)
+                                coords_cart = GeoUtilityFunctions.geo2eci([coords.latitude, coords.longitude, 0], jd_date) # ECI Cartesian coordinates   
+                                if SpecularCoverage.check_point_in_circle(coords_cart, specular_point, specular_region_dia) is True: # check if the point lies within the circular perimeter around the specular location
+                                    filtered_points_index.append(_pnt)
+                                    filtered_points_geo.append([coords.latitude, coords.longitude])
+
+                        # Write the grid-points to the output file                   
                         if len(filtered_points_index)>0:
                             for index, value in enumerate(filtered_points_geo):
                                 lat = value[0]
@@ -1497,14 +1537,13 @@ class SpecularCoverage(Entity):
 
         return CoverageOutputInfo.from_dict({   "coverageType": "SPECULAR COVERAGE",
                                                 "spacecraftId": self.rx_spc._id,
-                                                "grid": self.grid.to_dict() if self.grid else None,
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
                                                 "usedFieldOfRegard": None,
                                                 "filterMidIntervalAccess": None,
-                                                "gridId": None,
+                                                "gridId": self.grid._id if self.grid is not None else None,
                                                 "stateCartFile": self.rx_state_file,
-                                                "accessFile": [out_file_specular, out_file_grid_access] if out_file_grid_access else out_file_specular,
+                                                "accessFile": [out_file_specular, out_file_grid_access],
                                                 "startDate": epoch_JDUT1,
                                                 "duration": duration,
                                                 "@id": None})    
