@@ -3,6 +3,7 @@
 ``TestSpecularCoverage`` class:
 
 * ``test_from_dict``: Check instantiation of the specular grid coverage calculator object from python dictionary.
+* ``test_to_dict``: TODO
 * ``test_execute_0``: (SKIP) Check the produced access file format. Case of receiving spacecraft without sensor. No grid specified.
 * ``test_execute_1``: Check the produced access files format. Case of receiving spacecraft with sensor. Grid specified.
 * ``test_execute_2``: Test with the source and receiving satellites as the same. The specular points would be the ground-locations of the satellites. No grid specified.
@@ -11,6 +12,7 @@
 * ``test_execute_5``: Test with the source and receiving satellites are separated by 30 deg True Anomaly on an 90 deg inclination circular orbit. The specular point would have the same or complementary longitude as that of the satellites, and latitude defined by the angular separation between the two satellites. No grid specified.
 * ``test_execute_6``: (SKIP) Test coverage calculations with and without a sensor. A 'general' scenario is simulated for which the results with the sensor are a subset of the results without the sensor.
 * ``test_execute_7``: (SKIP) Test coverage calculations with and without a sensor. A scenario where the specular points always fall close to the nadir (within the sensor FOV) is simulated. Hence both results should be equal.
+* ``test_execute_8``: Test grid access data by asserting that the distance between the calculated grid points and the specular locations is less than the radius of the specular region.
 
 """
 import json
@@ -310,7 +312,6 @@ class TestSpecularCoverage(unittest.TestCase):
         cov_results_df = pd.read_csv(out_file_grid_access, skiprows = [0,1,2,3])
         self.assertTrue(not cov_results_df.empty)
 
-        
     def test_execute_2(self):
         """ Test with the source and receiving satellites as the same. The specular points would be the ground-locations of the satellites.
             The test scenario satsifies a special condition where the cross product of the position vectors of the source and receiving satellites is the null vector.
@@ -400,7 +401,6 @@ class TestSpecularCoverage(unittest.TestCase):
 
         self.assertTrue(cov_results_df.empty)
 
-    @unittest.skip('')
     def test_execute_4(self):
         """ Test with the source and receiving satellites are separated by 30 deg True Anomaly on an equatorial circular orbit. 
             Receiving satellite has rectangular FOV geometry sensor.
@@ -416,11 +416,11 @@ class TestSpecularCoverage(unittest.TestCase):
                        "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                    }, \
                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":20, "minute":19, "second":26.748768}, \
-                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0, "inc": 0, "raan": 47.2225, "aop": 162.3608, "ta": 20.25} \
+                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.0, "inc": 0, "raan": 47.2225, "aop": 162.3608, "ta": 20.25} \
                                    }, \
                        "instrument": {"@type":"Basic Sensor", "@id":"senA", \
                                       "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
-                                      "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":90, "angleWidth": 45 }}, \
+                                      "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":125, "angleWidth": 45 }}, \
                        "@id": "satA" \
                     }'
         satA = Spacecraft.from_json(satA_json)
@@ -430,7 +430,7 @@ class TestSpecularCoverage(unittest.TestCase):
                        "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
                                    }, \
                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":20, "minute":19, "second":26.748768}, \
-                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0, "inc": 0, "raan": 47.2225, "aop": 162.3608, "ta": 50.25} \
+                                   "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.0, "inc": 0, "raan": 47.2225, "aop": 162.3608, "ta": 50.25} \
                                    }, \
                        "@id": "satB" \
                     }'
@@ -480,8 +480,7 @@ class TestSpecularCoverage(unittest.TestCase):
 
             self.assertAlmostEqual(specular_lat, 0)
             self.assertEqual(specular_lon, analyt_spec_longitude)
-
-    @unittest.skip('')
+    
     def test_execute_5(self):
         """ Test with the source and receiving satellites are separated by 30 deg True Anomaly on an 90 deg inclination circular orbit.
             The specular point always falls on the same longitude as that of the two satellite, except when the satellites are over the polar region
@@ -509,7 +508,7 @@ class TestSpecularCoverage(unittest.TestCase):
                                    }, \
                        "instrument": {"@type":"Basic Sensor", "@id":"senA", \
                                       "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
-                                      "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":90, "angleWidth": 45 }}, \
+                                      "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":135, "angleWidth": 45 }}, \
                        "@id": "satA" \
                     }'
         satA = Spacecraft.from_json(satA_json)
@@ -739,8 +738,99 @@ class TestSpecularCoverage(unittest.TestCase):
     '''
     
     def test_execute_8(self):
-        """
-        """
+        """ Test the grid access. The indicated (accessed) grid points should fall within the circular footprint around the specular point.
+            3 source (transmitter) satellites are present, of which the test is done only for the one of the source satellites.
 
+            Also the test is done using two aproaches for calculation of the distance between the specular-point and the grid-point:
+            (i) Using the great circle distance formula.
+            (ii) Converting to ECI Cartesian vectors and then evaluating the angle beween the two vectors.
 
+            The results are validated within tolerence of 0.01 km.
+
+        """
+        duration = 0.25
+        navstar79 = Spacecraft.from_json(self.navstar79_json)
+        navstar80 = Spacecraft.from_json(self.navstar80_json)
+        navstar81 = Spacecraft.from_json(self.navstar81_json)
+        testsat = Spacecraft.from_json(self.testsat_json)
+
+        # execute propagator
+        start_date = propcov.AbsoluteDate.fromGregorianDate(2022, 5, 15, 21 ,0, 0)
+        self.j2_prop.execute(spacecraft=navstar79, start_date=start_date, out_file_cart=self.navstar79_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=navstar80, start_date=start_date, out_file_cart=self.navstar80_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=navstar81, start_date=start_date, out_file_cart=self.navstar81_state_fl, duration=duration)
+        self.j2_prop.execute(spacecraft=testsat, start_date=start_date, out_file_cart=self.testsat_state_fl, duration=duration)
+
+        # set output file path
+        out_file_specular = self.out_dir+'/test_specular_access.csv'
+        out_file_grid_access = self.out_dir+'/test_grid_access.csv'
+        # run the coverage calculator
+        spec_cov = SpecularCoverage(rx_spc=testsat, rx_state_file=self.testsat_state_fl,
+                                    tx_spc=[navstar79, navstar80, navstar81], tx_state_file=[self.navstar79_state_fl, self.navstar80_state_fl, self.navstar81_state_fl],
+                                    grid=Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":-20, "lonUpper":180, "lonLower":-180, "gridRes": 0.125}))
+        spec_cov.execute(instru_id=None, mode_id=None, out_file_specular=out_file_specular, specular_region_dia=50, out_file_grid_access=out_file_grid_access) # the 1st instrument and the 1st mode is selected.
+
+        specular_df = pd.read_csv(out_file_specular, skiprows = [0,1,2,3])       
+        specular_df = specular_df[specular_df['source id'] == 'navstar81']
+        specular_df.set_index('time index', inplace=True)
+
+        grid_acc_df = pd.read_csv(out_file_grid_access, skiprows = [0,1,2,3])
+        grid_acc_df = grid_acc_df[grid_acc_df['source id'] == 'navstar81']
+        grid_acc_df.set_index('time index', inplace=True)
+
+        #### test using the great-circle formula ####
+        eps = 0.01 # tolerence in [km]
+        # iterate over each time-index
+        for time_index, new_df in grid_acc_df.groupby(level=0):
+            # get the specular point location
+            specular_geocoords = specular_df.loc[[time_index]]
+            phi_1 = np.deg2rad(specular_geocoords['lat [deg]'].values[0])
+            lambda_1 = np.deg2rad(specular_geocoords['lon [deg]'].values[0])
+
+            # iterate over the grid-points
+            for index, row in new_df.iterrows():
+
+                # get the grid point location
+                phi_2 = np.deg2rad(row['lat [deg]'])
+                lambda_2 = np.deg2rad(row['lon [deg]'])
+
+                # calculate the great-circle distance between the specular point and the grid-point
+                # https://en.wikipedia.org/wiki/Great-circle_distance
+                delta_sigma = np.arccos(np.sin(phi_1)*np.sin(phi_2) + np.cos(phi_1)*np.cos(phi_2)*np.cos(lambda_2 - lambda_1))
+                dis = 6378.137 * delta_sigma # radius of Earth times the central-angle
+                # assert dis is less than 50km/2 (the specular regaion radius)
+                self.assertLessEqual(dis, 50/2 + eps)
+
+        #### test using the Cartesian vector approach ####
+        epoch_JDUT1 = pd.read_csv(out_file_specular, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
+        epoch_JDUT1 = float(epoch_JDUT1[0][0].split()[3])
+
+        step_size = pd.read_csv(out_file_specular, skiprows = [0,1], nrows=1, header=None).astype(str) # 3rd row contains the stepsize
+        step_size = float(step_size[0][0].split()[4])
+
+        # iterate over each time-index
+        for time_index, new_df in grid_acc_df.groupby(level=0):
+
+            # get the time in Julian date UT1
+            jd_date = epoch_JDUT1 + time_index*step_size*(1.0/86400)
+
+            # get the specular point location
+            specular_geocoords = specular_df.loc[[time_index]]
+            specular_cart = GeoUtilityFunctions.geo2eci([specular_geocoords['lat [deg]'].values[0], specular_geocoords['lon [deg]'].values[0], 0], jd_date) # ECI Cartesian coordinates
+            specular_cart = np.array(specular_cart)
+
+            # iterate over the grid-points
+            for index, row in new_df.iterrows():
+
+                # get the grid point location
+                gp_cart = GeoUtilityFunctions.geo2eci([row['lat [deg]'], row['lon [deg]'], 0], jd_date) # ECI Cartesian coordinates
+                gp_cart = np.array(gp_cart)
+
+                # calculate the angle between the specular-point and the grid-point           
+                x = np.dot(specular_cart, gp_cart)/ (np.linalg.norm(specular_cart)*np.linalg.norm(gp_cart))
+                x = np.arccos(x)
+
+                dis = 6378.137 * x # radius of Earth times the central-angle
+                # assert dis is less than 50km/2 (the specular regaion radius)
+                self.assertLessEqual(dis, 50/2 + eps)
                 

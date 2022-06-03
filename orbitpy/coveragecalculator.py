@@ -27,7 +27,7 @@ class CoverageCalculatorFactory:
     
     * :class:`GridCoverage` 
     * :class:`PointingOptionsCoverage`
-    * :class:`PointingOptionsWithGridCoverage`
+    * :class:`PointingOptionsWithGridCoverage `
     * :class:`SpecularCoverage`
      
     Additional user-defined coverage calculator classes can be registered as shown below: 
@@ -1227,37 +1227,37 @@ class SpecularCoverage(Entity):
 
         return RE*N
 
-
-
     @staticmethod
-    def check_point_in_circle(point, center, radius):
-        """ Check if the input point belong inside a circle (on the Earth's surface) of the specified center, radius.
-            The radius is the distance assumed to be measured along a great circle on the Earth's surface.
+    def check_point_in_circle(point, center, diameter):
+        """ Check if the input point belong inside a circle (on the Earth's surface) of the specified center, diameter.
+            The diameter is the distance measured along a great circle on the Earth's surface.
 
-        :param point: Cartesian coordinates of the points which need to be evaluated (x [km], y [km], z [km]).
-        :paramtype point: list, (float, float, float)
+        :param point: Geo coordinates of the points which need to be evaluated (lat [deg], lon [deg]).
+        :paramtype point: list, (float, float)
 
-        :param center: Cartesian coordinates (x [km], y [km], z [km]) of the center of the circle.
-        :paramtype center: list, (float, float, float)
+        :param center: Geo coordinates of the center if the circle (lat [deg], lon [deg]).
+        :paramtype center: list, (float, float)
 
-        :param radius: Radius of the circle [km].
-        :paramtype radius: float
+        :param diameter: Diameter of the circle [km].
+        :paramtype diameter: float
 
         :return: ``True`` if the point belongs inside the circle, else ``False``.
         :rtype: bool
         
         """
         RE = Constants.radiusOfEarthInKM
-        eca = radius/RE
 
-        point = np.array(point)
-        center = np.array(center)
+        phi_1 = point[0]
+        lambda_1 = point[1]
 
-        # calculate the angle between the center and the test-point            
-        x = np.dot(point, center)/ (np.linalg.norm(point)*np.linalg.norm(center))
-        x = np.arccos(x)
-        # check if the angle is less than the 1/2*eca
-        if x<0.5*eca:
+        phi_2 = center[0]
+        lambda_2 = center[1]
+
+        delta_sigma = np.arccos(np.sin(phi_1)*np.sin(phi_2) + np.cos(phi_1)*np.cos(phi_2)*np.cos(lambda_2 - lambda_1))
+        dis = RE * delta_sigma # radius of Earth times the central-angle
+
+        # check if distance is less than the radius = 0.5*diameter of the circle
+        if dis<0.5*diameter:
             return True
         else:
             return False
@@ -1483,22 +1483,24 @@ class SpecularCoverage(Entity):
                 # evaluate if this specular point is within the sensor FOV
                 if specular_point is not False:
                     sp_geocoods = GeoUtilityFunctions.eci2geo(specular_point, jd_date) # (lat, lon) of the specular point
+                    #print("sp_geocoods", sp_geocoods)
 
-                    lat_rad = np.deg2rad(sp_geocoods[0])
-                    lon_rad = np.deg2rad(sp_geocoods[1])
-                    if lon_rad > np.pi:
-                        lon_rad = lon_rad - 2*np.pi # bring to the -pi to +pi range (requirement for the PointGroup class).
+                    sp_lat_rad = np.deg2rad(sp_geocoods[0])
+                    sp_lon_rad = np.deg2rad(sp_geocoods[1])
+                    if sp_lon_rad > np.pi:
+                        sp_lon_rad = sp_lon_rad - 2*np.pi # bring to the -pi to +pi range (requirement for the PointGroup class).
 
                     sp_point_group = propcov.PointGroup() # create a point group which holds only the specular point
-                    sp_point_group.AddUserDefinedPoints([lat_rad],[lon_rad])
+                    sp_point_group.AddUserDefinedPoints([sp_lat_rad],[sp_lon_rad])
                     # make the coverage checker object
                     sp_cov_checker = propcov.CoverageChecker(sp_point_group, spc)
                     # check coverage
                     x = sp_cov_checker.CheckPointCoverage()
+                    #print("x", x)
                     if len(x)==1: # the specular point is within the sensor FOV
                         specular_access_exists = True
 
-                #print(specular_access_exists)
+                #print("specular_access_exists", specular_access_exists)
                 if specular_access_exists is True:                    
                     ###### write the specular location to the file ######
                     specular_access_writer.writerow([time_index, tx_id, np.round(sp_geocoods[0],3), np.round(sp_geocoods[1],3)])
@@ -1507,13 +1509,15 @@ class SpecularCoverage(Entity):
                     if calc_grid_access is True:
                         # compute coverage over the assigned grid
                         points = cov_checker.CheckPointCoverage() # list of indices of the GPs accessed shall be returned
-                        if len(points)>0:
-                            filtered_points_index = [] # list of filtered (within the specular region) points in geo-coordinates
-                            filtered_points_geo = []
+                        filtered_points_index = [] # list of filtered (within the specular region) points in geo-coordinates
+                        filtered_points_geo = []
+                        if len(points)>0:                            
                             for _pnt in points:
                                 coords = self.grid.get_lat_lon_from_index(_pnt)
-                                coords_cart = GeoUtilityFunctions.geo2eci([coords.latitude, coords.longitude, 0], jd_date) # ECI Cartesian coordinates   
-                                if SpecularCoverage.check_point_in_circle(coords_cart, specular_point, specular_region_dia) is True: # check if the point lies within the circular perimeter around the specular location
+                                coords_lat_rad = np.deg2rad(coords.latitude)
+                                coords_lon_rad = np.deg2rad(coords.longitude)
+                                
+                                if SpecularCoverage.check_point_in_circle([coords_lat_rad, coords_lon_rad], [sp_lat_rad, sp_lon_rad], specular_region_dia) is True: # check if the point lies within the circular perimeter around the specular location
                                     filtered_points_index.append(_pnt)
                                     filtered_points_geo.append([coords.latitude, coords.longitude])
 
