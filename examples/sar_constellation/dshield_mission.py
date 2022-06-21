@@ -299,7 +299,7 @@ start_time = time.process_time()
 
 wdir = os.path.dirname(os.path.realpath(__file__)) + '/'
 
-epoch_dict = {"@type":"GREGORIAN_UT1", "year":2020, "month":1, "day":4, "hour":13, "minute":30, "second":0}
+epoch_dict = {"@type":"GREGORIAN_UT1", "year":2020, "month":1, "day":4, "hour":1, "minute":30, "second":0}
 epoch = OrbitState.date_from_dict(epoch_dict)
 epoch_JDUt1 = epoch.GetJulianDate()
 
@@ -343,7 +343,7 @@ if os.path.exists(sat_dir):
     shutil.rmtree(sat_dir)
 os.makedirs(sat_dir)
 
-grid = Grid.from_dict({"@type": "customGrid", "covGridFilePath": wdir+"covGrid.csv"})
+grid = Grid.from_dict({"@type": "customGrid", "covGridFilePath": wdir+"grid.csv"})
 
 propagator = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 1})
 
