@@ -108,12 +108,12 @@ int SlicedPolygon::numCrossings(AnglePair query, frametype frame)
 	for (int index : indices)
 	{
 		Edge edge = this->edgeArray[index];
-		int contained = edge.contains(cartQueryT,sphericalQueryT[1]);
+		int contained = edge.contains(cartQueryT,sphericalQueryT[1], sphericalQueryT[0]);
 
 		if (contained == -1)
 			return -1;
 
-		numCrossings += edge.contains(cartQueryT,sphericalQueryT[1]);
+		numCrossings += edge.contains(cartQueryT,sphericalQueryT[1], sphericalQueryT[0]);
 	}
 	
 	return numCrossings;
@@ -163,12 +163,12 @@ int SlicedPolygon::contains_efficient(AnglePair sphericalQueryT)
 	for (int index : indices)
 	{
 		Edge edge = this->edgeArray[index];
-		int contained = edge.contains(cartQueryT,sphericalQueryT[1]);
+		int contained = edge.contains(cartQueryT,sphericalQueryT[1], sphericalQueryT[0]);
 
 		if (contained == -1)
 			return -1;
 
-		numCrossings += edge.contains(cartQueryT,sphericalQueryT[1]);
+		numCrossings += edge.contains(cartQueryT,sphericalQueryT[1], sphericalQueryT[0]);
 	}
 
 	if (numCrossings == -1)

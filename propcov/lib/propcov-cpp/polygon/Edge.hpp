@@ -18,11 +18,11 @@ class Edge
 		~Edge();
 		
 		// Checks whether edge is crossed using necessary strike and hemisphere check
-		int contains(Rvector3 query, Real lon);
+		int contains(Rvector3 query, Real lon, Real lat);
 		// Hemisphere check
 		int crossesBoundary(Rvector3 query);
 		// Necessary strike condition
-		bool boundsPoint(Real lon);
+		int boundsPoint(Real lon, Real lat);
 
 		// Getters
 		Rvector3 getPole();
@@ -38,5 +38,8 @@ class Edge
 		Real bound1;
 		Real bound2;
 		Real shooterDotPole;
+
+		AnglePair node1;
+		AnglePair node2;
 };
 #endif /* Edge_hpp */
