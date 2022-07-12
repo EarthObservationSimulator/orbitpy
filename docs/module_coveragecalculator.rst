@@ -14,7 +14,7 @@ Users may additionally define their own coverage calculator classes adherent to 
 *GRID COVERAGE* 
 ----------------
 
-The *GRID COVERAGE* type of coverage calculation involves find the access-times of a spacecraft over a region represented by a grid. Each ``GridCoverage`` object is specific to 
+The *GRID COVERAGE* type of coverage calculation involves finding the access-times of a spacecraft over a region represented by a grid. Each ``GridCoverage`` object is specific to 
 a particular grid and spacecraft. The class instance is initialized using the grid object, spacecraft object and path to a data file containing the satellite propagated orbit-states. 
 The format of the input data file of the spacecraft states is the same as the format of the output data file of the 
 :class:`orbitpy.propagator` module (see :ref:`module_propagator`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
@@ -41,7 +41,7 @@ Three coverage methods (relevant for the case of sensor FOVs described by spheri
 specified: (1) ``DirectSphericalPIP`` or (2) ``ProjectedPIP`` or (3) ``RectangularPIP``. 
 Default method is ``DirectSphericalPIP``.
 The ``DirectSphericalPIP`` method is based on a point in spherical polygon algorithm described in the article: 
-*R. Ketzner, V. Ravindra and M. Bramble, 'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.*
+*R. Ketzner, V. Ravindra and M. Bramble, 'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, accepted.*
 
 A ``CoverageOutputInfo`` object containing meta-info about the results is returned at the end of execution of the function.
 
@@ -194,6 +194,108 @@ is to be used for the data-metrics calculation.
 
 .. warning:: The correction method is to be used only when the instrument access-duration (which is determined from the instrument FOV) is smaller 
             than the propagation time step (which is determined from the sceneFOV or FOR).
+
+*SPECULAR COVERAGE* 
+--------------------
+
+The *SPECULAR COVERAGE* type of coverage calculation involves calculation of specular points/regions of a receiver spacecraft (with reflectometer as the instrument).
+Each ``SpecularCoverage`` object is specific to a receiver spacecraft, list of source (transmitter) spacecrafts and an (optional) grid.
+Specular points at each propagation time step are calculated between the receiver spacecraft and all the source spacecrafts. 
+If a grid is specified, the set of grid points falling within a circular region (of user-specified diameter) about the specular point, is also calculated during the coverage execution.
+
+The class instance is initialized using the receiver and source (>=1) spacecraft objects and path to the data files containing the propagated orbit-states of the spacecrafts.
+The format of the input data file of the spacecraft states is the same as the format of the output data file of the 
+:class:`orbitpy.propagator` module (see :ref:`module_propagator`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
+In the state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source).
+A grid object may also be specified during the class instantiation.
+
+``SpecularCoverage.execute`` function
+.......................................
+
+The coverage calculation can be executed using the ``execute(.)`` function. The instrument (in the spacecraft) and the mode of the instrument can be specified 
+by means of their respective identifiers (in the ``instru_id``, ``mode_id`` input arguments). If not specified, the first instrument in the list of spacecraft's instruments, the first mode of the instrument (see the docs of :class:`instrupy.base.Instrument`)
+in the list of modes of the instrument shall be selected. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations.
+If no instrument present in spacecraft the entire horizon as seen by the receiving satellite is considered for the coverage calculations (however this does not work when grid based calculations are required, see the TODO below). 
+
+The transmitter spacecraft is assumed to transmit the RF signal over it's entire visible horizon.
+
+Coverage is calculated for the period over which the receiver, source spacecraft propagated states are available. 
+The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
+
+If a grid has been specified (during the instantiation by the ``grid`` instance variable), and the diameter of the specular region has been specified (through the ``specular_region_dia`` input parameter),
+then the grid points which are present within the specular region are found and written in the file specified by the ``out_file_grid_access`` parameter. The specular region is 
+approximated to be circular in shape with the calculated specular point as the center, and the diameter specified by the ``specular_region_dia`` input parameter.
+
+In case of sensor FOVs described by spherical-polygon vertices or Rectangular FOVs, a ``method`` can be specifies which specifies the method to be used to:
+
+*     evaluate if a specular location is within the sensor FOV or not and,
+*     for grid based calculations 
+
+Refer to the ``execute`` function of the ``GridCoverage`` object for description of available methods.
+
+.. todo:: When grid is specified, the sensor **must** be present, else a `NotImplementedError` is thrown. Modify this behaviour so 
+          that the coverage calculations with grid can be carried out considering the entire horizon to be within the satellite FOV.
+
+The figure below is a rough flowchart of the steps involved in the specular coverage for a receiver, source spacecraft pair:
+
+.. figure:: specular_cov_algo.png
+      :scale: 75 %
+      :align: center
+
+The ``out_file_specular`` and ``out_file_grid_access`` input arguments are used to specify the filepaths (with filename) at which the results are to be written.
+
+A ``CoverageOutputInfo`` object containing meta-info about the results is returned at the end of execution of the function.
+
+.. _specular_coverage_output_file_format:
+
+Output data file format
+.........................
+
+The output of executing the coverage calculator is a csv data file containing the specular locations and another csv file containting the grid points 
+falling within the specular region (if a grid and the specular region diameters have been specified).
+
+The csv file containing the specular locations has the following format:
+
+*  The first row contains the coverage calculation type.
+*  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+*  The third row contains the time-step size in seconds.
+*  The fourth row contains the duration (in days) for which coverage calculation is executed.
+*  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+Note that time associated with a row is: ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+Description of the coverage data is given below:
+
+.. csv-table:: Coverage data description
+      :header: Column, Data type, Units, Description
+      :widths: 10,10,10,30
+
+      time index, int, , Access time-index.
+      source id, int/str, , Source spacecraft identifier.
+      lat [deg], float, degrees, Latitude of specular point.
+      lon [deg], float, degrees, Longitude of specular point.
+
+The csv file containing the grid access information has the following format:
+
+*  The first row contains the coverage calculation type.
+*  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+*  The third row contains the time-step size in seconds. 
+*  The fourth row contains the duration (in days) for which coverage calculation is executed.
+*  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+Description of the coverage data is given below:
+
+.. csv-table:: Coverage data description
+      :header: Column, Data type, Units, Description
+      :widths: 10,10,10,30
+
+      time index, int, , Access time-index.                    
+      source id, int/str, , Source spacecraft identifier.
+      GP index, int, , Grid-point index.
+      lat [deg], float, degrees, Latitude corresponding to the GP index.
+      lon [deg], float, degrees, Longitude corresponding to the GP index.
 
 Examples
 ^^^^^^^^^
@@ -483,6 +585,7 @@ API
    orbitpy.coveragecalculator.GridCoverage
    orbitpy.coveragecalculator.PointingOptionsCoverage
    orbitpy.coveragecalculator.PointingOptionsWithGridCoverage
+   orbitpy.coveragecalculator.SpecularCoverage
 
 .. rubric:: Functions
 

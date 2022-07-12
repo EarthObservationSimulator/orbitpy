@@ -27,7 +27,7 @@ class CoverageCalculatorFactory:
     
     * :class:`GridCoverage` 
     * :class:`PointingOptionsCoverage`
-    * :class:`PointingOptionsWithGridCoverage `
+    * :class:`PointingOptionsWithGridCoverage`
     * :class:`SpecularCoverage`
      
     Additional user-defined coverage calculator classes can be registered as shown below: 
@@ -387,7 +387,7 @@ class GridCoverage(Entity):
                                 Default value is ``False``.
         :paramtype mid_access_only: bool
 
-        :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
+        :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices and Rectangular FOV).
                         Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
                         Default method is `DirectSphericalPIP`.
 
@@ -395,7 +395,7 @@ class GridCoverage(Entity):
                         the `ProjectedPIP` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
                         
                         For details on the `DirectSphericalPIP` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
-                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.
+                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, accepted.
                         
                         In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
                         point-in-polygon algorithm implemented in the `propcov.GMATCustomSensor` class. 
@@ -885,7 +885,7 @@ class PointingOptionsWithGridCoverage(Entity):
                                 Default value is ``False``.
         :paramtype mid_access_only: bool
 
-        :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV)).
+        :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices and Rectangular FOV).
                         Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
                         Default method is `DirectSphericalPIP`.
 
@@ -893,7 +893,7 @@ class PointingOptionsWithGridCoverage(Entity):
                         the `ProjectedPIP` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
                         
                         For details on the `DirectSphericalPIP` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
-                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.
+                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, accepted.
                         
                         In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
                         point-in-polygon algorithm implemented in the `propcov.GMATCustomSensor` class. 
@@ -1015,23 +1015,23 @@ class PointingOptionsWithGridCoverage(Entity):
                                                 "@id": None})
 
 class SpecularCoverage(Entity):
-    """A coverage calculator which handles coverage calculation for a spacecraft with a reflectometer (nadir-pointing & circular FOV instrument). 
+    """A coverage calculator which handles coverage calculation for a spacecraft with a reflectometer instrument. 
         Coverage calculation involves calculation of specular point locations at each propagation time step. A grid can also be specified, and the 
         coverage results shall include the set of grid-points within a predefined circular region about each specular point. 
 
-        The specifications and the state files of the receiver spacecraft/instrument and (>=1) source spacecrafts are to be provided during the object instantiation.
+        The specifications and the state files of the receiver spacecraft and source spacecrafts (>=1) are to be provided during the object instantiation.
         In the state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source).
 
-        Only a nadir-pointing & circular FOV instrument is accepted. The specular locations within the sensor FOV is calculated at each time step.
+        The specular locations within the sensor FOV is calculated at each time step.
         If a grid is specified, the set of grid-points within a specified circular region about each of the specular locations are also calculated.
 
         The transmitter spacecraft is assumed to transmit the RF signal over it's entire visible horizon.
 
-    :ivar rx_spc: Spacecraft for which the coverage calculation is performed. A nadir-pointing, circular FOV instrument is to be present on the spacecraft.
+    :ivar rx_spc: Spacecraft for which the coverage calculation is performed. An instrument may or may not be present on the spacecraft.
                   This spacecraft is also the receiver which processes the reflected RF signal.
     :vartype rx_spc: :class:`orbitpy.util.Spacecraft`
 
-    :ivar rx_state_file: File name with path of the (input) file in which the orbit states of the receiving spacecraft in CARTESIAN_EARTH_CENTERED_INERTIAL frame are available.
+    :ivar rx_state_file: File name with path of the (input) file in which the orbit states of the receiving spacecraft in ``CARTESIAN_EARTH_CENTERED_INERTIAL`` frame are available.
                          Refer to :class:`orbitpy.propagator.J2AnalyticalPropagator.execute` for description of the file data format.
     :vartype rx_state_file: str
 
@@ -1080,7 +1080,7 @@ class SpecularCoverage(Entity):
 
                                                             (2) "cartesianStateFilePath": (str) File path (with file name) to the file with the propagated (receiver) spacecraft states.
 
-                 * "source":                        (list, dict) List of sources. Each entry in the list consists of the following two keys:
+                 * "source":                        (list, dict) List of sources. Each dictionary entry in the list consists of the following two keys:
 
                                                             (1) "spacecraft": (dict) Source spacecraft specifications. Refer to :class:`orbitpy.util.Spacecraft.from_dict`
 
@@ -1170,7 +1170,7 @@ class SpecularCoverage(Entity):
         :paramtype L: list, float
 
         :return: Normalized Cartesian coordinates of the specular point if available, else ``False``.
-        :rtype: list, float
+        :rtype: list, float (or) bool
 
         """
         RE = Constants.radiusOfEarthInKM
@@ -1235,7 +1235,7 @@ class SpecularCoverage(Entity):
         :param point: Geo coordinates of the points which need to be evaluated (lat [deg], lon [deg]).
         :paramtype point: list, (float, float)
 
-        :param center: Geo coordinates of the center if the circle (lat [deg], lon [deg]).
+        :param center: Geo coordinates of the center of the circle (lat [deg], lon [deg]).
         :paramtype center: list, (float, float)
 
         :param diameter: Diameter of the circle [km].
@@ -1264,16 +1264,18 @@ class SpecularCoverage(Entity):
 
     def execute(self, instru_id=None, mode_id=None, out_file_specular=None, specular_region_dia=None, out_file_grid_access=None, method='DirectSphericalPIP'):
         """ Perform coverage calculation involving calculation of specular point locations. 
-            The calculation is performed for a specific instrument and mode (in the receiver spacecraft). 
-            If no instrument present in spacecraft the entire horizon as seen by the receiving satellite is considered for the coverage calculations (however does not work when grid based calculations are required, see the TODO below). 
+            The calculation is performed for a specific instrument and mode (in the receiver spacecraft).
+            Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations.
+            If no instrument present in spacecraft the entire horizon as seen by the receiving satellite is considered for the coverage calculations (however this does not work when grid based calculations are required, see the TODO below). 
+            
+            The transmitter spacecraft is assumed to transmit the RF signal over it's entire visible horizon.
+
             Coverage is calculated for the period over which the receiver, source spacecraft propagated states are available. 
             The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
 
-            If a grid has been specified (during the instantiation by the ``grid`` instance variable), and the diameter of the specular region has been specified (through the ``specular_region_dia`` input parameter),
+            If a grid has been specified (during the instantiation of the ``grid`` instance variable), and the diameter of the specular region has been specified (through the ``specular_region_dia`` input parameter),
             then the grid points which are present within the specular region are found and written in the file specified by the ``out_file_grid_access`` parameter. The specular region is 
             approximated to be circular in shape with the calculated specular point as the center, and the diameter specified by the ``specular_region_dia`` input parameter.
-
-            The transmitter spacecraft is assumed to transmit the RF signal over it's entire visible horizon.
 
             .. todo:: When grid is specified, the sensor **must** be present, else a `NotImplementedError` is thrown. Modify this behaviour so 
                       that the coverage calculations with grid can be carried out considering the entire horizon to be within the satellite FOV.
@@ -1337,12 +1339,12 @@ class SpecularCoverage(Entity):
                     source id, int/str, , Source spacecraft identifier.
                     GP index, int, , Grid-point index.
                     lat [deg], float, degrees, Latitude corresponding to the GP index.
-                    lon [deg], float, degrees, Longitude corresponding to thetarget point GP index.
+                    lon [deg], float, degrees, Longitude corresponding to the GP index.
 
         :paramtype out_file_grid_access: str
 
         :param method:  Indicate the coverage method to be used to evaluate if a specular location is within the sensor FOV or not. Additionally the same method is used to evaluate grid-based coverage.
-                        This is only relevant for the case of sensor FOVs described by spherical-polygon vertices (including Rectangular FOV).
+                        This is only relevant for the case of sensor FOVs described by spherical-polygon vertices and including Rectangular FOV.
                         Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
                         Default method is `DirectSphericalPIP`.
 
@@ -1350,7 +1352,7 @@ class SpecularCoverage(Entity):
                         the `ProjectedPIP` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
                         
                         For details on the `DirectSphericalPIP` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
-                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.
+                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, acccepted.
                         
                         In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
                         point-in-polygon algorithm implemented in the `propcov.GMATCustomSensor` class. 
