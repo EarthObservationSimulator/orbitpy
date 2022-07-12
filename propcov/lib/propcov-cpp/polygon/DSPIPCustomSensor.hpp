@@ -1,7 +1,7 @@
 /**
  * Definition of the DSPIPCustomSensor class. This class models a custom sensor based on the algorithm in:
  * 
- * *R. Ketzner, V. Ravindra and M. Bramble, 'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.*
+ * *R. Ketzner, V. Ravindra and M. Bramble, 'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, accepted.*
  * 
  * This is a subclass of the Sensor class. 
  * 

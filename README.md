@@ -11,10 +11,11 @@ This package contain set of modules to compute *mission-data* of satellites. It 
         ii. With consideration of sensor field-of-view (FOV) and field-of-regard (FOR).
 5. *Pointing-options Coverage:* Computation of coverage in which set of pointing-options of the satellite/instrument are specified and accessed ground-locations (intersection of the pointing-axis with the Earth's surface) is calculated.
 6. *Pointing-options with Grid Coverage*: Grid Coverage calculated for different satellite/instrument orientations.
-7. Computation of inter-satellite communication (line-of-sight) time intervals.
-8. Computation of ground-station contact time intervals.
-9. Computation of satellite eclipse time-intervals.
-10. Sensor pixel-array projection to simulated Level-2 satellite imagery.
+7. *Specular Coverage*: Calculation of specular points and grid points inside the specular regions. Several source (transmitter) satellites may be specified, and the receiver satellite/sensor orientation and FOV is taken into consideration.
+8. Computation of inter-satellite communication (line-of-sight) time intervals.
+9. Computation of ground-station contact time intervals.
+10. Computation of satellite eclipse time-intervals.
+11. (Under dev) Sensor pixel-array projection to simulated Level-2 satellite imagery.
 
 The `orbitpy` package is built on top of the `propcov` package available in the `propcov` folder. Please refer to the `README.MD` file within the `propcov` folder for description of the respective package.
 

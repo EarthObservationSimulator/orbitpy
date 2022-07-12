@@ -14,7 +14,7 @@ Users may additionally define their own coverage calculator classes adherent to 
 *GRID COVERAGE* 
 ----------------
 
-The *GRID COVERAGE* type of coverage calculation involves find the access-times of a spacecraft over a region represented by a grid. Each ``GridCoverage`` object is specific to 
+The *GRID COVERAGE* type of coverage calculation involves finding the access-times of a spacecraft over a region represented by a grid. Each ``GridCoverage`` object is specific to 
 a particular grid and spacecraft. The class instance is initialized using the grid object, spacecraft object and path to a data file containing the satellite propagated orbit-states. 
 The format of the input data file of the spacecraft states is the same as the format of the output data file of the 
 :class:`orbitpy.propagator` module (see :ref:`module_propagator`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
@@ -41,7 +41,7 @@ Three coverage methods (relevant for the case of sensor FOVs described by spheri
 specified: (1) ``DirectSphericalPIP`` or (2) ``ProjectedPIP`` or (3) ``RectangularPIP``. 
 Default method is ``DirectSphericalPIP``.
 The ``DirectSphericalPIP`` method is based on a point in spherical polygon algorithm described in the article: 
-*R. Ketzner, V. Ravindra and M. Bramble, 'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, under review.*
+*R. Ketzner, V. Ravindra and M. Bramble, 'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, accepted.*
 
 A ``CoverageOutputInfo`` object containing meta-info about the results is returned at the end of execution of the function.
 
@@ -194,6 +194,108 @@ is to be used for the data-metrics calculation.
 
 .. warning:: The correction method is to be used only when the instrument access-duration (which is determined from the instrument FOV) is smaller 
             than the propagation time step (which is determined from the sceneFOV or FOR).
+
+*SPECULAR COVERAGE* 
+--------------------
+
+The *SPECULAR COVERAGE* type of coverage calculation involves calculation of specular points/regions of a receiver spacecraft (with reflectometer as the instrument).
+Each ``SpecularCoverage`` object is specific to a receiver spacecraft, list of source (transmitter) spacecrafts and an (optional) grid.
+Specular points at each propagation time step are calculated between the receiver spacecraft and all the source spacecrafts. 
+If a grid is specified, the set of grid points falling within a circular region (of user-specified diameter) about the specular point, is also calculated during the coverage execution.
+
+The class instance is initialized using the receiver and source (>=1) spacecraft objects and path to the data files containing the propagated orbit-states of the spacecrafts.
+The format of the input data file of the spacecraft states is the same as the format of the output data file of the 
+:class:`orbitpy.propagator` module (see :ref:`module_propagator`). The states must be of the type ``CARTESIAN_EARTH_CENTERED_INERTIAL``.
+In the state files, the epoch, propagation time resolution, must be the same across all the spacecrafts (receiver and source).
+A grid object may also be specified during the class instantiation.
+
+``SpecularCoverage.execute`` function
+.......................................
+
+The coverage calculation can be executed using the ``execute(.)`` function. The instrument (in the spacecraft) and the mode of the instrument can be specified 
+by means of their respective identifiers (in the ``instru_id``, ``mode_id`` input arguments). If not specified, the first instrument in the list of spacecraft's instruments, the first mode of the instrument (see the docs of :class:`instrupy.base.Instrument`)
+in the list of modes of the instrument shall be selected. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations.
+If no instrument present in spacecraft the entire horizon as seen by the receiving satellite is considered for the coverage calculations (however this does not work when grid based calculations are required, see the TODO below). 
+
+The transmitter spacecraft is assumed to transmit the RF signal over it's entire visible horizon.
+
+Coverage is calculated for the period over which the receiver, source spacecraft propagated states are available. 
+The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
+
+If a grid has been specified (during the instantiation by the ``grid`` instance variable), and the diameter of the specular region has been specified (through the ``specular_region_dia`` input parameter),
+then the grid points which are present within the specular region are found and written in the file specified by the ``out_file_grid_access`` parameter. The specular region is 
+approximated to be circular in shape with the calculated specular point as the center, and the diameter specified by the ``specular_region_dia`` input parameter.
+
+In case of sensor FOVs described by spherical-polygon vertices or Rectangular FOVs, a ``method`` can be specifies which specifies the method to be used to:
+
+*     evaluate if a specular location is within the sensor FOV or not and,
+*     for grid based calculations 
+
+Refer to the ``execute`` function of the ``GridCoverage`` object for description of available methods.
+
+.. todo:: When grid is specified, the sensor **must** be present, else a `NotImplementedError` is thrown. Modify this behaviour so 
+          that the coverage calculations with grid can be carried out considering the entire horizon to be within the satellite FOV.
+
+The figure below is a rough flowchart of the steps involved in the specular coverage for a receiver, source spacecraft pair:
+
+.. figure:: specular_cov_algo.png
+      :scale: 75 %
+      :align: center
+
+The ``out_file_specular`` and ``out_file_grid_access`` input arguments are used to specify the filepaths (with filename) at which the results are to be written.
+
+A ``CoverageOutputInfo`` object containing meta-info about the results is returned at the end of execution of the function.
+
+.. _specular_coverage_output_file_format:
+
+Output data file format
+.........................
+
+The output of executing the coverage calculator is a csv data file containing the specular locations and another csv file containting the grid points 
+falling within the specular region (if a grid and the specular region diameters have been specified).
+
+The csv file containing the specular locations has the following format:
+
+*  The first row contains the coverage calculation type.
+*  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+*  The third row contains the time-step size in seconds.
+*  The fourth row contains the duration (in days) for which coverage calculation is executed.
+*  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+Note that time associated with a row is: ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+Description of the coverage data is given below:
+
+.. csv-table:: Coverage data description
+      :header: Column, Data type, Units, Description
+      :widths: 10,10,10,30
+
+      time index, int, , Access time-index.
+      source id, int/str, , Source spacecraft identifier.
+      lat [deg], float, degrees, Latitude of specular point.
+      lon [deg], float, degrees, Longitude of specular point.
+
+The csv file containing the grid access information has the following format:
+
+*  The first row contains the coverage calculation type.
+*  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+*  The third row contains the time-step size in seconds. 
+*  The fourth row contains the duration (in days) for which coverage calculation is executed.
+*  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+Description of the coverage data is given below:
+
+.. csv-table:: Coverage data description
+      :header: Column, Data type, Units, Description
+      :widths: 10,10,10,30
+
+      time index, int, , Access time-index.                    
+      source id, int/str, , Source spacecraft identifier.
+      GP index, int, , Grid-point index.
+      lat [deg], float, degrees, Latitude corresponding to the GP index.
+      lon [deg], float, degrees, Longitude corresponding to the GP index.
 
 Examples
 ^^^^^^^^^
@@ -466,7 +568,115 @@ Examples
             6,1,28959,-1.0,76.713
             8,0,28600,1.0,77.0
             ...
-            POINTING OPTIONS WITH GRID COVERAGE
+
+5. *SPECULAR COVERAGE example*
+   
+      The example shows calculation of specular points and also grid based access calculations involving three transmitter satellites (Navstar 79, 80 and 81),
+      and a receiver satellite equipped with a 45 deg x 45 deg rectangular FOV sensor. Two files `test_specular_access.csv` and `test_grid_access.csv` are written.
+      A 50km diameter is specified as the dimension of the specular region.
+
+      .. code-block:: python
+
+            from orbitpy.util import Spacecraft
+            from orbitpy.propagator import J2AnalyticalPropagator
+            from orbitpy.coveragecalculator import SpecularCoverage
+            from orbitpy.grid import Grid
+            import propcov
+            import os
+
+            out_dir = os.path.dirname(os.path.realpath(__file__))
+
+            # initialize J2 analytical propagator with 60 secs propagation step-size
+            j2_prop = J2AnalyticalPropagator.from_dict({"@type": 'J2 ANALYTICAL PROPAGATOR', 'stepSize':60} )
+
+            # NAVSTAR 79
+            navstar79_json = '{"name": "NAVSTAR-79", \
+                        "spacecraftBus":{ "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                          }, \
+                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":5, "minute":14, "second":35.273}, \
+                                          "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 26560.726, "ecc": 0.00211560, "inc": 55.4987, "raan": 87.6401, "aop": 178.443, "ta": 346.190} \
+                                          } , \
+                        "@id": "navstar79" \
+                        }'
+            navstar79_state_fl =   out_dir + "/navstar79_state.csv"
+            # NAVSTAR 80
+            navstar80_json = '{"name": "NAVSTAR-80", \
+                        "spacecraftBus":{ "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                          }, \
+                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":17, "minute":58, "second":15.3}, \
+                                          "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 26560.217, "ecc": 0.00185450, "inc": 54.5899, "raan": 271.4221, "aop": 184.7310, "ta": 336.981} \
+                                          } , \
+                        "@id": "navstar80" \
+                        }'
+            navstar80_state_fl =   out_dir +  "/navstar80_state.csv"
+            # NAVSTAR 81
+            navstar81_json = '{"name": "NAVSTAR-81", \
+                        "spacecraftBus":{ "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                          }, \
+                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":17, "minute":2, "second":22.300}, \
+                                          "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 26559.327, "ecc": 0.00036260, "inc": 55.1689, "raan": 32.3671, "aop": 199.0483, "ta": 117.475} \
+                                          } , \
+                        "@id": "navstar81" \
+                        }'
+            navstar81_state_fl =   out_dir +  "/navstar81_state.csv"
+
+            testsat_json = '{ "name": "testsat", \
+                  "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                    }, \
+                  "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":20, "minute":19, "second":26.748768}, \
+                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.00151280, "inc": 34.9537, "raan": 47.2225, "aop": 162.3608, "ta": 197.700} \
+                                    }, \
+                  "instrument": {"@type":"Basic Sensor", "@id":"senA", \
+                                  "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
+                                  "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":45, "angleWidth":45}}, \
+                  "@id": "testsat" \
+                  }'
+            testsat_state_fl = out_dir +  "/testsat_state.csv"
+
+            navstar79 = Spacecraft.from_json(navstar79_json)
+            navstar80 = Spacecraft.from_json(navstar80_json)
+            navstar81 = Spacecraft.from_json(navstar81_json)
+            testsat = Spacecraft.from_json(testsat_json)
+
+            # execute propagator
+            start_date = propcov.AbsoluteDate.fromGregorianDate(2022, 5, 15, 21 ,0, 0)
+            duration = 1
+            j2_prop.execute(spacecraft=navstar79, start_date=start_date, out_file_cart=navstar79_state_fl, duration=duration)
+            j2_prop.execute(spacecraft=navstar80, start_date=start_date, out_file_cart=navstar80_state_fl, duration=duration)
+            j2_prop.execute(spacecraft=navstar81, start_date=start_date, out_file_cart=navstar81_state_fl, duration=duration)
+            j2_prop.execute(spacecraft=testsat, start_date=start_date, out_file_cart=testsat_state_fl, duration=duration)
+
+            # set output file path
+            out_file_specular = out_dir+'/test_specular_access.csv'
+            out_file_grid_access = out_dir+'/test_grid_access.csv'
+            # run the coverage calculator
+            spec_cov = SpecularCoverage(rx_spc=testsat, rx_state_file=testsat_state_fl,
+                                          tx_spc=[navstar79, navstar80, navstar81], tx_state_file=[navstar79_state_fl, navstar80_state_fl, navstar81_state_fl],
+                                          grid=Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":-20, "lonUpper":180, "lonLower":-180, "gridRes": 0.125}))
+            spec_cov.execute(instru_id=None, mode_id=None, out_file_specular=out_file_specular, specular_region_dia=50, out_file_grid_access=out_file_grid_access) # the 1st instrument and the 1st mode is selected.
+
+            test_specular_access.csv
+            ---------------------------------
+            SPECULAR COVERAGE
+            Epoch [JDUT1] is 2459715.375
+            Step size [s] is 60.0
+            Mission Duration [Days] is 1.0
+            time index,source id,lat [deg],lon [deg]
+            164,navstar79,13.483,201.964
+            165,navstar79,15.202,204.583
+            166,navstar79,16.872,207.26
+
+            test_grid_access.csv
+            ---------------------------------
+            SPECULAR COVERAGE GRID ACCESS            
+            Epoch [JDUT1] is 2459715.375
+            Step size [s] is 60.0
+            Mission Duration [Days] is 1.0
+            time index,source id,GP index,lat [deg],lon [deg]
+            164,navstar79,281132,13.625,-158.135
+            164,navstar79,281133,13.625,-158.006
+            164,navstar79,281134,13.625,-157.878
+            ...
 
 API
 ^^^^^
@@ -483,6 +693,7 @@ API
    orbitpy.coveragecalculator.GridCoverage
    orbitpy.coveragecalculator.PointingOptionsCoverage
    orbitpy.coveragecalculator.PointingOptionsWithGridCoverage
+   orbitpy.coveragecalculator.SpecularCoverage
 
 .. rubric:: Functions
 
