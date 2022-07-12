@@ -568,7 +568,115 @@ Examples
             6,1,28959,-1.0,76.713
             8,0,28600,1.0,77.0
             ...
-            POINTING OPTIONS WITH GRID COVERAGE
+
+5. *SPECULAR COVERAGE example*
+   
+      The example shows calculation of specular points and also grid based access calculations involving three transmitter satellites (Navstar 79, 80 and 81),
+      and a receiver satellite equipped with a 45 deg x 45 deg rectangular FOV sensor. Two files `test_specular_access.csv` and `test_grid_access.csv` are written.
+      A 50km diameter is specified as the dimension of the specular region.
+
+      .. code-block:: python
+
+            from orbitpy.util import Spacecraft
+            from orbitpy.propagator import J2AnalyticalPropagator
+            from orbitpy.coveragecalculator import SpecularCoverage
+            from orbitpy.grid import Grid
+            import propcov
+            import os
+
+            out_dir = os.path.dirname(os.path.realpath(__file__))
+
+            # initialize J2 analytical propagator with 60 secs propagation step-size
+            j2_prop = J2AnalyticalPropagator.from_dict({"@type": 'J2 ANALYTICAL PROPAGATOR', 'stepSize':60} )
+
+            # NAVSTAR 79
+            navstar79_json = '{"name": "NAVSTAR-79", \
+                        "spacecraftBus":{ "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                          }, \
+                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":5, "minute":14, "second":35.273}, \
+                                          "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 26560.726, "ecc": 0.00211560, "inc": 55.4987, "raan": 87.6401, "aop": 178.443, "ta": 346.190} \
+                                          } , \
+                        "@id": "navstar79" \
+                        }'
+            navstar79_state_fl =   out_dir + "/navstar79_state.csv"
+            # NAVSTAR 80
+            navstar80_json = '{"name": "NAVSTAR-80", \
+                        "spacecraftBus":{ "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                          }, \
+                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":17, "minute":58, "second":15.3}, \
+                                          "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 26560.217, "ecc": 0.00185450, "inc": 54.5899, "raan": 271.4221, "aop": 184.7310, "ta": 336.981} \
+                                          } , \
+                        "@id": "navstar80" \
+                        }'
+            navstar80_state_fl =   out_dir +  "/navstar80_state.csv"
+            # NAVSTAR 81
+            navstar81_json = '{"name": "NAVSTAR-81", \
+                        "spacecraftBus":{ "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                          }, \
+                        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":17, "minute":2, "second":22.300}, \
+                                          "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 26559.327, "ecc": 0.00036260, "inc": 55.1689, "raan": 32.3671, "aop": 199.0483, "ta": 117.475} \
+                                          } , \
+                        "@id": "navstar81" \
+                        }'
+            navstar81_state_fl =   out_dir +  "/navstar81_state.csv"
+
+            testsat_json = '{ "name": "testsat", \
+                  "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"} \
+                                    }, \
+                  "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2022, "month":5, "day":15, "hour":20, "minute":19, "second":26.748768}, \
+                                    "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7078.137, "ecc": 0.00151280, "inc": 34.9537, "raan": 47.2225, "aop": 162.3608, "ta": 197.700} \
+                                    }, \
+                  "instrument": {"@type":"Basic Sensor", "@id":"senA", \
+                                  "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"}, \
+                                  "fieldOfViewGeometry": {"shape": "RECTANGULAR", "angleHeight":45, "angleWidth":45}}, \
+                  "@id": "testsat" \
+                  }'
+            testsat_state_fl = out_dir +  "/testsat_state.csv"
+
+            navstar79 = Spacecraft.from_json(navstar79_json)
+            navstar80 = Spacecraft.from_json(navstar80_json)
+            navstar81 = Spacecraft.from_json(navstar81_json)
+            testsat = Spacecraft.from_json(testsat_json)
+
+            # execute propagator
+            start_date = propcov.AbsoluteDate.fromGregorianDate(2022, 5, 15, 21 ,0, 0)
+            duration = 1
+            j2_prop.execute(spacecraft=navstar79, start_date=start_date, out_file_cart=navstar79_state_fl, duration=duration)
+            j2_prop.execute(spacecraft=navstar80, start_date=start_date, out_file_cart=navstar80_state_fl, duration=duration)
+            j2_prop.execute(spacecraft=navstar81, start_date=start_date, out_file_cart=navstar81_state_fl, duration=duration)
+            j2_prop.execute(spacecraft=testsat, start_date=start_date, out_file_cart=testsat_state_fl, duration=duration)
+
+            # set output file path
+            out_file_specular = out_dir+'/test_specular_access.csv'
+            out_file_grid_access = out_dir+'/test_grid_access.csv'
+            # run the coverage calculator
+            spec_cov = SpecularCoverage(rx_spc=testsat, rx_state_file=testsat_state_fl,
+                                          tx_spc=[navstar79, navstar80, navstar81], tx_state_file=[navstar79_state_fl, navstar80_state_fl, navstar81_state_fl],
+                                          grid=Grid.from_dict({"@type": "autogrid", "@id": 1, "latUpper":20, "latLower":-20, "lonUpper":180, "lonLower":-180, "gridRes": 0.125}))
+            spec_cov.execute(instru_id=None, mode_id=None, out_file_specular=out_file_specular, specular_region_dia=50, out_file_grid_access=out_file_grid_access) # the 1st instrument and the 1st mode is selected.
+
+            test_specular_access.csv
+            ---------------------------------
+            SPECULAR COVERAGE
+            Epoch [JDUT1] is 2459715.375
+            Step size [s] is 60.0
+            Mission Duration [Days] is 1.0
+            time index,source id,lat [deg],lon [deg]
+            164,navstar79,13.483,201.964
+            165,navstar79,15.202,204.583
+            166,navstar79,16.872,207.26
+
+            test_grid_access.csv
+            ---------------------------------
+            SPECULAR COVERAGE GRID ACCESS            
+            Epoch [JDUT1] is 2459715.375
+            Step size [s] is 60.0
+            Mission Duration [Days] is 1.0
+            time index,source id,GP index,lat [deg],lon [deg]
+            164,navstar79,281132,13.625,-158.135
+            164,navstar79,281133,13.625,-158.006
+            164,navstar79,281134,13.625,-157.878
+            ...
 
 API
 ^^^^^
