@@ -14,8 +14,11 @@
 # 
 # Romved all the content from and including the following comment onwards "Add source/header files to IDE-based project source groups".
 # 
-# Modified to include 'base' folder (containing `ExponentialAtmosphere.hpp` and `ExponentialAtmosphere.cpp`). 
-# and remove 'util/datawriter' folder in list of directories containing the source/header files, and the list of source files.
+# Modified to include 'gmatutil/base' folder (containing `ExponentialAtmosphere.hpp` and `ExponentialAtmosphere.cpp`). 
+#
+# Addition of 'gmatdefs.cpp' file in the 'gmatutil/include' folder.
+# 
+# removed 'util/datawriter' folder in list of directories containing the source/header files, and the list of source files.
 #
 # Modified from building shared to static library with flags POSITION_INDEPENDENT_CODE ON.
 # 
