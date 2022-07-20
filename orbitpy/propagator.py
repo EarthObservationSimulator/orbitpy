@@ -198,11 +198,13 @@ class J2AnalyticalPropagator(Entity):
     def execute(self, spacecraft, start_date=None, out_file_cart=None, out_file_kep=None, duration=1):
         """ Execute orbit propagation of the input spacecraft (single) and write to a csv data-file.
 
+        The computed satellite states are in the Earth Centered Inertial frame, identical to EarthMJ2000Eq used in NASA GMAT software. 
+        For more description see: `GMAT CoordinateSystem <http://gmat.sourceforge.net/docs/nightly/html/CoordinateSystem.html>`_
         
         :param spacecraft: Spacecraft whose orbit is to be propagated.
         :paramtype spacecraft: :class:`orbitpy.util.Spacecraft`
 
-        :param out_file_cart: File name with path of the file in which the orbit states in CARTESIAN_EARTH_CENTERED_INERTIAL are written.
+        :param out_file_cart: File name with path of the file in which the orbit states in ``CARTESIAN_EARTH_CENTERED_INERTIAL`` are written.
                                If ``None`` the file is not written.
 
                                *  The first row specifies if the states are in ``CARTESIAN_EARTH_CENTERED_INERTIAL`` or ``KEPLERIAN_EARTH_CENTERED_INERTIAL`` reference frame.
@@ -229,7 +231,7 @@ class J2AnalyticalPropagator(Entity):
 
         :paramtype out_file_cart: str
 
-        :param out_file_kep: File name with path of the file in which the orbit states in KEPLERIAN_EARTH_CENTERED_INERTIAL are written.
+        :param out_file_kep: File name with path of the file in which the orbit states in ``KEPLERIAN_EARTH_CENTERED_INERTIAL`` are written.
                                 If ``None`` the file is not written. The output data format is similar to the data format of the *out_file_cart*
                                 file, except the columns headers are as follows:
 

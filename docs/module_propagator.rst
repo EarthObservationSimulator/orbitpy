@@ -16,6 +16,9 @@ adherent to the same interface functions (``from_dict(.)``, ``to_dict(.)``, ``ex
 Output data file format
 -------------------------
 
+The computed satellite states are in the Earth Centered Inertial frame, identical to EarthMJ2000Eq used in NASA GMAT software. For more description see: 
+See: `GMAT CoordinateSystem <http://gmat.sourceforge.net/docs/nightly/html/CoordinateSystem.html>`_
+
 The output of executing the propagator is a csv data file containing the satellite states (Cartesian Earth centered inertial and/or Keplerian Earth centered inertial).
 
 *  The first row specifies if the states are in ``CARTESIAN_EARTH_CENTERED_INERTIAL`` or ``KEPLERIAN_EARTH_CENTERED_INERTIAL`` reference frame.
