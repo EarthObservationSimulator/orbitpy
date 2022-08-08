@@ -17,9 +17,11 @@ namespace util
 {
 	AnglePair cartesianToSpherical(const Rvector3 &cart);
 	Rvector3 sphericalToCartesian(const AnglePair &spherical);
+	std::vector<Rvector3> sphericalToCartesian(std::vector<AnglePair>);
 
 	AnglePair transformSpherical(const AnglePair &sherical, const Rmatrix33 &transform);
 	bool lonBounded(Real,Real,Real);
+	int latBounded(Real,Real,Real);
 
 	std::vector<AnglePair> csvRead(std::string filename);
 	void csvWrite(std::string filename, std::vector<bool>);

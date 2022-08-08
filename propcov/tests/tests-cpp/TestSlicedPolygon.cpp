@@ -44,13 +44,10 @@ TEST_F(Poly_01,getQI)
 {
 	/*
 	Rmatrix33 QI = grapefruit->getQI();
-
 	// Should be identity
-
 	EXPECT_NEAR(1.0,QI.GetElement(0,0),tol);
 	EXPECT_NEAR(1.0,QI.GetElement(1,1),tol);
 	EXPECT_NEAR(1.0,QI.GetElement(2,2),tol);
-
 	EXPECT_NEAR(0.0,QI.GetElement(0,1),tol);
 	EXPECT_NEAR(0.0,QI.GetElement(0,2),tol);
 	EXPECT_NEAR(0.0,QI.GetElement(1,0),tol);
@@ -102,6 +99,7 @@ TEST_F(Poly_01,Query_02_boundsPoint)
 
 	query = util::transformSpherical(query,QI);
 	Real lon = query[1];
+	Real lat = query[0];
 
 	std::vector<Edge> edgeArray = grapefruit->getEdgeArray();
 
@@ -110,17 +108,18 @@ TEST_F(Poly_01,Query_02_boundsPoint)
 	int i = 0;
 	for (Edge edge : edgeArray)
 	{
-		if (edge.boundsPoint(lon))
-			std::cerr << i;
-		numBounds += edge.boundsPoint(lon);
+		// if (edge.boundsPoint(lon,lat))
+		// 	std::cerr << i;
+		numBounds += edge.boundsPoint(lon,lat);
 		i++;
 	}
 
 	// Point should only be bounded by one edge
 	EXPECT_EQ(expectedNumBounds,numBounds);
 
-	// Point should be bounded by first edge
-	EXPECT_EQ(1,edgeArray[0].boundsPoint(lon));
+	// Point should be bounded by last edge
+	Edge last = edgeArray.back();
+	EXPECT_EQ(1,last.boundsPoint(lon,lat));
 }
 
 TEST_F(Poly_01,Query_02_numCrossings)
@@ -170,7 +169,7 @@ TEST_F(Poly_01,Query_07_numCrossings)
 
 TEST_F(Poly_01,Query_08_numCrossings)
 {
-	// Test 7: lies outside the polygon, at clock angle in the middle of a segment
+	// Test 8: lies outside the polygon, at clock angle in the middle of a segment
 	int expectedCrossings = 1;
 	AnglePair query = {1.047197551,0.897597901};
 	int crossings = grapefruit->numCrossings(query);
@@ -205,6 +204,7 @@ TEST_F(Poly_01,Query_08_boundsPoint)
 
 	query = util::transformSpherical(query,QI);
 	Real lon = query[1];
+	Real lat = query[0];
 
 	std::vector<Edge> edgeArray = grapefruit->getEdgeArray();
 
@@ -213,9 +213,9 @@ TEST_F(Poly_01,Query_08_boundsPoint)
 	int i = 0;
 	for (Edge edge : edgeArray)
 	{
-		if (edge.boundsPoint(lon))
-			std::cerr << i;
-		numBounds += edge.boundsPoint(lon);
+		// if (edge.boundsPoint(lon,lat))
+		// 	std::cerr << i;
+		numBounds += edge.boundsPoint(lon,lat);
 		i++;
 	}
 

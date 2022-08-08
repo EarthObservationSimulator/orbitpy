@@ -22,6 +22,16 @@ std::vector<AnglePair> util::csvRead(std::string filename)
 	return vertices;
 }
 
+std::vector<Rvector3> util::sphericalToCartesian(std::vector<AnglePair> spherical)
+{
+	std::vector<Rvector3> cartesian;
+
+	for (int i = 0; i < spherical.size(); i++)
+		cartesian.push_back(sphericalToCartesian(spherical[i]));
+
+	return cartesian;
+}
+
 // Write a vector of booleans to CSV
 void util::csvWrite(std::string filename, std::vector<bool> contained)
 {
@@ -67,7 +77,34 @@ bool util::lonBounded(Real bound1, Real bound2, Real lon)
 		return !((lon >= bound1) && (lon <= bound2));
 }
 
-// Transform from cartesian to spherical coordinates (cone/clock)
+// Checks whether a latitude is bounded by the minor arc defined by two other latitudes
+int util::latBounded(Real bound1, Real bound2, Real lat)
+{
+	if (bound2 > bound1)
+	{
+		// On edge
+		if (lat >= bound1 && lat <= bound2)
+			return -1;
+		// Passes edge
+		else if (lat > bound2)
+			return 2;
+		// Doesn't pass edge
+		else
+			return -2;
+	}
+	// bound1 > bound2
+	else
+	{
+		if (lat >= bound2 && lat <= bound1)
+			return -1;
+		else if (lat > bound1)
+			return 2;
+		else
+			return -2;
+	}
+}
+
+// Transform from cartesian to spherical coordinates
 AnglePair util::cartesianToSpherical(const Rvector3 &cart)
 {
 	Real x = cart[0];
