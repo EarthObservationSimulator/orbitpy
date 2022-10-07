@@ -3,7 +3,7 @@ PACKAGE := propcov
 all: bare install
 
 install:
-	pip install -e .
+	pip install .
 
 clean: 
 	@echo "Cleaning up..."
