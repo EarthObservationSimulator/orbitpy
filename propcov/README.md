@@ -87,6 +87,50 @@ To run the tests navigate to `tests/` folder and run `make all` followed by `mak
 
 Running `make all` from the `tests` directory shall trigger clean-up and build of the sources in the `extern/gmatutil` folder and the `lib/propcov-cpp` folder. The test-files in the `tests/test-cpp` folder are built and the executables written in the `tests/build` folder. The executables can be run one after another using the `make runtest` command. 
 
+## Build system
+There are two build systems within the `propcov` folder.
+
+**Build system 1**
+
+This build system is used during the normal course of the package installation. It is invoked by running `make` from the root folder. The `make` command executes the python installation (via the `setup.py` file) which in turn invokes `cmake` commands. The python package is installed, and it can be imported like any other package within a python script using the command `import propcov`.
+
+It is associated with the following files:
+
+* `./Makefile`
+* `./setup.py`
+* `./CMakeLists.txt`
+* `./pyproject.toml`
+* `./../lib/propcov-cpp/CMakeLists.txt`
+* `./../extern/gmatutil/CMakeLists.txt`
+* `./../extern/pybind11/CMakeLists.txt`
+
+The following folders (and files within) are created during the build process:
+
+* `./build/`
+* `./propcov.egg-info/`
+
+Examples of similar build systems which are meant for python bound C++ libraries using Pybind11 are as follows:
+
+* [https://github.com/sizmailov/pybind11-project-example](https://github.com/sizmailov/pybind11-project-example)
+* [https://github.com/pybind/python_example](https://github.com/pybind/python_example)
+
+**Build system 2**
+
+This build system is used to generate the object files for running standalone C++ tests. It is invokes by running `make` inside the `./tests/` folder. It creates the C++ objects files in the source directories and the test executables in the `./build/` folder. 
+
+It is associated with the following files:
+* `./tests/Makefile`
+* `./../lib/propcov-cpp/Makefile`
+* `./../extern/gmatutil/Makefile`
+
+The following files are created during the build process
+
+* `./../lib/propcov-cpp/libpropcov.a`
+* Various object files associated with the files with `.cpp` extension in the `./../lib/propcov-cpp/` folder and subfolders.
+* `./../extern/gmatutil/libgmatutil.a`
+* Various object files associated with the files with `.cpp` extension in the `./../extern/gmatutil/` folder and subfolders.
+* Object files, dependency files and executables inside the `./tests/build/` folder relating to the test programs.
+
 ## Directory structure
 
 ```
