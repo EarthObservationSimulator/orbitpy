@@ -1,10 +1,10 @@
-{  "epoch":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":19, "hour":12, "minute":0, "second":0},
+{  "epoch":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":19, "hour":12, "minute":0, "second":0},
     "duration": 0.005,
     "settings": {"coverageType": "POINTING OPTIONS COVERAGE", "propTimeResFactor": 0.5},
     "spacecraft": [{
         "@id": "skysatC1",
         "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}},
-        "orbitState": {"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":18, "hour":18, "minute":48, "second":18.3},
+        "orbitState": {"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":18, "hour":18, "minute":48, "second":18.3},
                        "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6825, "ecc": 0.00026240, "inc": 97.1886, 
                                 "raan": 307.1228, "aop": 79.4057, "ta": 280.7485}
                       },
@@ -49,7 +49,7 @@
         {
         "@id": "skysatC2",
         "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}},
-        "orbitState":{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":18, "hour":17, "minute":3, "second":54.5},
+        "orbitState":{"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":18, "hour":17, "minute":3, "second":54.5},
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6825, "ecc": 0.00011500, "inc": 97.1631, 
                                "raan": 298.5893, "aop": 111.3752, "ta": 248.7617}
                      },
@@ -94,7 +94,7 @@
         {
         "@id": "skysatC3",
         "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}},
-        "orbitState":{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":18, "hour":18, "minute":59, "second":6.6},
+        "orbitState":{"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":18, "hour":18, "minute":59, "second":6.6},
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6826, "ecc": 0.00016190, "inc": 97.1626, 
                                "raan": 298.6075, "aop": 86.2730, "ta": 273.8701}
                      },
@@ -139,7 +139,7 @@
         {
         "@id": "skysatC4",
         "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}},
-        "orbitState":{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":19, "hour":10, "minute":52, "second":36.7},
+        "orbitState":{"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":19, "hour":10, "minute":52, "second":36.7},
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6826, "ecc": 0.00016420, "inc": 97.162, 
                                "raan": 298.9593, "aop": 84.0060, "ta": 276.1374}
                      },
@@ -184,7 +184,7 @@
         {
         "@id": "skysatC5",
         "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}},
-        "orbitState":{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":19, "hour":11, "minute":43, "second":59.3},
+        "orbitState":{"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":19, "hour":11, "minute":43, "second":59.3},
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6869, "ecc": 0.00016440, "inc": 97.3088, 
                                "raan": 297.9226, "aop": 101.0264, "ta": 259.1159}
                      },
@@ -229,7 +229,7 @@
         {
         "@id": "skysatC6",
         "spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}},
-        "orbitState":{"date":{"@type":"GREGORIAN_UTC", "year":2021, "month":8, "day":18, "hour":13, "minute":34, "second":36.5},
+        "orbitState":{"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":18, "hour":13, "minute":34, "second":36.5},
                       "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6823, "ecc": 0.00021100, "inc": 97.2721, 
                                "raan": 346.8619, "aop": 127.8781, "ta": 232.2657}
                      },

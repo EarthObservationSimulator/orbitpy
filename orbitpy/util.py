@@ -142,6 +142,8 @@ class OrbitState(Entity):
                     date.SetJulianDate(jd=d["jd"])
                 except:
                     raise Exception("Something wrong in setting of Julian UT1 date object. Check that the jd key/value pair has been specified in the input dictionary.")
+            else:
+                raise Exception("Please specify correct Date Type")
         else:
             raise Exception("Please specify a date.")
         
