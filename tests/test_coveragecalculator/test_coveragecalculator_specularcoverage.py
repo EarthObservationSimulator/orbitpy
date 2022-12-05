@@ -592,6 +592,7 @@ class TestSpecularCoverage(unittest.TestCase):
                     self.assertAlmostEqual(satA_lon - 180, specular_lon, places=3)
 
     '''
+    TBD: The test functions below are commented out, until the coverage calculator is modified to accomodate spacecrafts without sensors.
     def test_execute_6(self):
         """ Test coverage calculations with and without a sensor.
             The number of specular locations from the case of coverage calculations with the instrument must be smaller 
