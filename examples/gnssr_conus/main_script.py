@@ -55,7 +55,7 @@ gs2 = GroundStation.from_dict({"@id":"CHI", "name": "chile", "latitude": -33.13,
 gs3 = GroundStation.from_dict({"@id":"AUS", "name": "australia", "latitude": -29.08, "longitude": 115.58, "altitude": 0.250 })
 
 # set the diameter of the specular location (to be used for grid-based coverage)
-specular_pnt_dia = 10 # km (Size of the area of influence around the specular point)
+specular_pnt_dia = 25 # km (Size of the area of influence around the specular point)
 # cygnss instrument
 # https://www.eoportal.org/satellite-missions/cygnss#mission-capabilities Says the swath is 1480km
 cyg_instru = Instrument.from_dict({"@type":"Basic Sensor", "@id":"CygSen", \
@@ -87,7 +87,8 @@ gps_sats = load.tle_file(dir_path+'/GPS.txt')
 galileo_sats = load.tle_file(dir_path+'/Galelio.txt')
 beidou_sats = load.tle_file(dir_path+'/Beidou.txt')
 
-gnss_sats = gps_sats + galileo_sats + beidou_sats
+gnss_sats = gps_sats + galileo_sats #+ beidou_sats
+
 #print(gnss_sats)
 cygnss_sats = load.tle_file(dir_path+'/CYGNSS.txt')
 cygnss_sats = [cygnss_sats[2]] # select only one of the cgynss satellites as test
@@ -181,7 +182,8 @@ for idx, spc in enumerate(spc_cygnss):
     spec_cov = SpecularCoverage(rx_spc=spc_cygnss[idx], rx_state_file=cyg_state_fl[idx],
                                 tx_spc=spc_gnss, tx_state_file=gnss_state_fl,
                                 grid=grid)
-    spec_cov.execute(instru_id=None, mode_id=None, out_file_specular=out_file_specular[idx], specular_region_dia=specular_pnt_dia, out_file_grid_access=out_file_grid_access[idx]) # the 1st instrument and the 1st mode is selected.
+    spec_cov.execute(instru_id=None, mode_id=None, out_file_specular=out_file_specular[idx], specular_region_dia=specular_pnt_dia, out_file_grid_access=out_file_grid_access[idx], mid_access_only=True) # Only the mid-access times are retained.
+    print(idx, " Execution time: ", time.time() - start_time, "seconds")
 
 end_time = time.time()
-print("Execution time: ", end_time - start_time, "seconds")
+print("Total execution time: ", end_time - start_time, "seconds")

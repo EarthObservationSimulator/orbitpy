@@ -29,7 +29,7 @@ in the list of modes of the instrument shall be selected.
 Coverage is calculated for the period over which the input spacecraft propagated states are available. The time-resolution of the coverage calculation is the same as the time resolution at which the spacecraft states are available.
 Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations unless it has been specified to use the field-of-regard (using the ``use_field_of_regard`` input argument).
 
-The ``mid_access_only`` input argument can be used to specify if the access times only at the middle of an continuous access-interval. 
+The ``mid_access_only`` input argument allows you to specify whether you want to keep only the access times that occur in the middle of a continuous access interval.
 E.g. If the access takes place at time-indices 450, 451, 452, 453, 454, and if the ``mid_access_only`` flag is specified to be true, then only the access time-index = 452 is written
 in the results.
 Please see :ref:`correction_of_access_files` for situations when the ``mid_access_only`` flag would need to be set true.
@@ -225,6 +225,8 @@ The time-resolution of the coverage calculation is the same as the time resoluti
 If a grid has been specified (during the instantiation by the ``grid`` instance variable), and the diameter of the specular region has been specified (through the ``specular_region_dia`` input parameter),
 then the grid points which are present within the specular region are found and written in the file specified by the ``out_file_grid_access`` parameter. The specular region is 
 approximated to be circular in shape with the calculated specular point as the center, and the diameter specified by the ``specular_region_dia`` input parameter.
+
+The ``mid_access_only`` input argument allows you to specify whether you want to keep only the access times that occur in the middle of a continuous access interval.
 
 In case of sensor FOVs described by spherical-polygon vertices or Rectangular FOVs, a ``method`` can be specifies which specifies the method to be used to:
 
@@ -511,8 +513,8 @@ Examples
 4. *POINTING OPTIONS WITH GRID COVERAGE example*
    
       In the below snippet, the satellite is equipped with two instruments. The second instrument with the pointing-options specifications is chosen for
-      coverage calculations.  The ``mid_access_only`` flag is set to ``True`` to have only the access-times at the middle of access-intervals. The output csv file
-      shows the grid-points accessed (if any) for each of the pointing-options at every time-step.
+      coverage calculations.  The ``mid_access_only`` input argument allows you to specify whether you want to keep only the access times that occur in the middle of a continuous access interval.
+      The output csv file shows the grid-points accessed (if any) for each of the pointing-options at every time-step.
    
       .. code-block:: python
 

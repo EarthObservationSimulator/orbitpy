@@ -6,7 +6,7 @@
 * ``test_execute_1``: Test PointingOptionsWithGridCoverage output with separate runs of GridCoverage calculator. 
 
 TODO: tests to check behavior with multiple sensors, modes
-
+TODO: Add tests which checks the filters mid-interval access functionality.
 
 """
 
