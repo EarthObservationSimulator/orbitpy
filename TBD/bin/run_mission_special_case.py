@@ -160,7 +160,7 @@ def assign_pointing_bins(obsmetrics_fp, swath_width, spc_acc_fp):
     spc_df = spc_df.loc[spc_df['pOpts'].apply(len)>0] 
 
     with open(spc_acc_fp, 'w') as f2:
-                spc_df.to_csv(f2, index=False, header=True, line_terminator='\n') 
+                spc_df.to_csv(f2, index=False, header=True, lineterminator='\n') 
 
 def main(user_dir):
     ''' This module is executes mission with sidelooking instruments modeled as Basic Sensor type. 

@@ -291,7 +291,7 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
                 if head:
                     for k in range(0,len(head)):
                         f2.write(str(head[k]))
-                out_df.to_csv(f2, index=False, header=True, line_terminator='\n')
+                out_df.to_csv(f2, index=False, header=True, lineterminator='\n')
 
         return out_df
 
