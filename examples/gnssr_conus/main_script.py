@@ -26,15 +26,7 @@ start_time = time.time()
 #                               Configuration
 ############################################################################################
 # Set mission epoch (GREGORIAN UT1) and duration. Make sure the epoch is around the TLE epochs.
-""" Epoch close to the TLEs below.
-year = 2022
-month = 12
-day = 5
-hour = 12 # add offset to go to the time-period in which there is coverage over the US
-minute = 0
-second = 0
-"""
-# The below epoch is **not** close to the TLE epoch. TODO: Revise. 
+# The TLE epochs are close to and before the below date. 
 year = 2020
 month = 8
 day = 1
@@ -66,7 +58,7 @@ cyg_bus = SpacecraftBus.from_dict({"orientation":{"referenceFrame": "NADIR_POINT
 
 # Create new working directory to store output
 dir_path = os.path.dirname(os.path.realpath(__file__))
-out_dir = os.path.join(dir_path, 'temp')
+out_dir = os.path.join(dir_path, 'results')
 if os.path.exists(out_dir):
     shutil.rmtree(out_dir)
 os.makedirs(out_dir)
@@ -74,7 +66,7 @@ os.makedirs(out_dir)
 ############################################################################################
 #                      Load TLEs and make Skyfield Satellite objects 
 ############################################################################################
-# TODO: TLEs below are for Dec 2022, and not for the simulation period of Aug 2020
+# TLEs close to and before the simulation period of Aug 2020.
 
 # To get latest TLE by Celestrak use the URL: celestrak.com/cgi-bin/TLE.pl?CATNR=40052
 # Alternatively the entire list of GPS, Galelio, CYGNSS can be obtained from the urls: 
@@ -85,13 +77,13 @@ os.makedirs(out_dir)
 
 gps_sats = load.tle_file(dir_path+'/GPS.txt')
 galileo_sats = load.tle_file(dir_path+'/Galelio.txt')
-beidou_sats = load.tle_file(dir_path+'/Beidou.txt')
+#beidou_sats = load.tle_file(dir_path+'/Beidou.txt')
 
 gnss_sats = gps_sats + galileo_sats #+ beidou_sats
 
 #print(gnss_sats)
 cygnss_sats = load.tle_file(dir_path+'/CYGNSS.txt')
-cygnss_sats = [cygnss_sats[2]] # select only one of the cgynss satellites as test
+#cygnss_sats = [cygnss_sats[1]] # select only one of the cgynss satellites as test
 #print(cygnss_sats)
 
 ############################################################################################
@@ -107,6 +99,7 @@ spc_gnss = [] # list of GNSS propcov.Spacecraft objects
 gnss_state_fl = [] # list of GNSS propagation state data files
 
 for sat in gnss_sats:
+    print(sat)
     geocentric = sat.at(eph) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy
     pos = geocentric.position.km
     vel = geocentric.velocity.km_per_s
@@ -119,6 +112,7 @@ for sat in gnss_sats:
 
     spc_gnss.append(Spacecraft(orbitState=orbit, _id= str(sat.model.satnum)))
     gnss_state_fl.append(out_dir + "/GNSS" + str(sat.model.satnum) + "_state.csv")
+    
 
 spc_cygnss = [] # list of CYGNSS propcov.Spacecraft objects
 cyg_state_fl = [] # list of CYGNSS propagation state data files
@@ -129,6 +123,7 @@ cyg_gs3_contact_fl = [] # List of CYGNSS contact files with Ground Station 3
 out_file_specular = [] # list of coverage (specular points) files
 out_file_grid_access = [] # list of coverage (grid) files
 for sat in cygnss_sats:
+    print(sat)
     geocentric = sat.at(eph) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy
     pos = geocentric.position.km
     vel = geocentric.velocity.km_per_s
