@@ -143,7 +143,9 @@ import copy
 import sys
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-helper_dir = os.path.join(dir_path, '../../util/')
+
+helper_dir = os.path.join(dir_path, '../util')
+
 sys.path.append(helper_dir)
 
 from orbitpy.propagator import PropagatorFactory
@@ -153,6 +155,7 @@ from orbitpy.grid import Grid
 from orbitpy.coveragecalculator import GridCoverage
 
 sys.path.append('../')
+
 from util.coverage import Coverage
 
 # method used in coverage calculation involving rectangular sensors. Tests are carried out for each method seperately.
@@ -297,7 +300,8 @@ class TestOrbitPropCovGrid(unittest.TestCase):
     
         result = m1 <= self.m1 and m2 <= self.m2 and m3 <= self.m3 and m4 <= self.m4
         self.assertTrue(result)
-    #@unittest.skip("skip test_run_1")    
+
+    #@unittest.skip("skip test_run_2")    
     def test_run_2(self):
         """Test an equatorial orbit on a global grid with a 30 deg AT, 20 deg CT sensor."""
         print('running test_run_2')

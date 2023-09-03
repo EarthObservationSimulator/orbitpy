@@ -26,7 +26,6 @@ class Coverage:
             self.computeAccesses()
         else:
             self.accesses = accesses
-
         self.sphericalToCartesian()
     
     @classmethod
