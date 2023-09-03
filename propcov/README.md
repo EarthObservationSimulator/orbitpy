@@ -56,6 +56,8 @@ In case of MacOS, there may arise a errors due to wrong compiler selection. This
 
 Instead of Clang compiler, GCC needs to be used.  For more details please refer to: https://stackoverflow.com/questions/24380456/how-can-i-make-cmake-use-gcc-instead-of-clang-on-mac-os-x 
 
+`gcc-11` is known to work.
+
 Possible solutions
 
 1. Try the below line (in the Mac terminal) before running the installation:

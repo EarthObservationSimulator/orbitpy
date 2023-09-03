@@ -21,7 +21,7 @@ The `orbitpy` package is built on top of the `propcov` package available in the 
 
 ## Install
 
-Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc`, `make`, `cmake`
+Requires: Unix-like operating system, `python 3.8`, `pip`, `gcc-11`, `make`, `cmake`
 
 It is recommended to carry out the installation in a `conda` environment. Instructions are available in the README file of the InstruPy package.
 
