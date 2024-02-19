@@ -14,6 +14,8 @@
 * ``test_execute_7``: (SKIP) Test coverage calculations with and without a sensor. A scenario where the specular points always fall close to the nadir (within the sensor FOV) is simulated. Hence both results should be equal.
 * ``test_execute_8``: Test grid access data by asserting that the distance between the calculated grid points and the specular locations is less than the radius of the specular region.
 
+TODO: Add tests which checks the filters mid-interval access functionality.
+
 """
 import json
 import os, shutil
@@ -180,6 +182,7 @@ class TestSpecularCoverage(unittest.TestCase):
     '''
     def test_execute_0(self):
         """ Check the produced access file format. Case of receiving spacecraft without sensor. No grid specified.
+        The test functions below are commented out, until the coverage calculator is modified to accomodate spacecrafts without sensors.
         """        
         # setup spacecraft with some parameters setup randomly     
         duration=1
@@ -592,6 +595,7 @@ class TestSpecularCoverage(unittest.TestCase):
                     self.assertAlmostEqual(satA_lon - 180, specular_lon, places=3)
 
     '''
+    TBD: The test functions below are commented out, until the coverage calculator is modified to accomodate spacecrafts without sensors.
     def test_execute_6(self):
         """ Test coverage calculations with and without a sensor.
             The number of specular locations from the case of coverage calculations with the instrument must be smaller 

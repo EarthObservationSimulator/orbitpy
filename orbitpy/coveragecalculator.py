@@ -156,9 +156,10 @@ def find_in_cov_params_list(cov_param_list, instru_id=None, mode_id=None):
 
 
 def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None):
-        """ Extract the access times at middle of access intervals. The input can be a path to a file or a dataframe. 
+        """ Extract the access times at middle of access intervals. The input can be a path to a file or a dataframe.
 
-        This function can be used for "correction" of access files for purely side-looking instruments with narrow along-track FOV as described below:
+        Application of this function can be regarded as "correction" of access files for purely side-looking instruments with 
+        narrow along-track FOV as described below:
 
         In case of purely side-looking instruments with narrow-FOV (eg: SARs executing Stripmap operation mode), the access to a grid-point takes place
         when the grid-point is seen with no squint angle and the access is almost instantaneous (i.e. access duration is very small). 
@@ -172,11 +173,11 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
         interpreted in the same manner, it would be erroneous.
 
         Thus the generated access files are then *corrected* to show access only at approximately (to the nearest propagation time-step) 
-        the middle of the access interval. 
-        This should be coupled with the required scene-scan-duration (from scene-field-of-view) to get complete information about the access. 
+        the middle of the access interval.
+        This should be coupled with the required scene-scan-duration (from scene-field-of-view) to get complete information about the access.
 
         .. warning:: The correction method is to be used only when the instrument access-duration (determined from the instrument FOV) is smaller 
-                     than the propagation time step (determined from the FOR or sceneFOV). 
+                     than the propagation time step (determined from the FOR or sceneFOV).
 
         :ivar inp_acc_df: Dataframe with the access data which needs to be filtered. The rows correspond to pairs of 
                           access time and corresponding ground-point index. The columns are to be named as: ``time index``, ``GP index``, ``lat [deg]``, ``lon [deg]``.
@@ -228,6 +229,31 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
             out_df = pd.DataFrame(data = data, columns = ['time index', 'pnt-opt index', 'GP index',  'lat [deg]', 'lon [deg]'])
             out_df = out_df.astype({"time index": int, 'pnt-opt index': int, "GP index": int, "lat [deg]": float, "lon [deg]": float})
 
+        elif 'source id' in df: # specular grid coverage (several sources possible)
+            
+            for source, df_per_source in df.groupby('source id'): # iterate over each source-id
+
+                # iterate over all the groups (ground-point indices)                
+                for name, group in df_per_source.groupby('GP index'):
+                    x = (group['time index'].shift(periods=1) - group['time index']) < -1
+                    _intv = np.where(x == True)[0]            
+                    interval_indices = [0] # add the very first interval start index
+                    interval_indices.extend(_intv)
+                    interval_indices.extend((_intv - 1).tolist())
+                    interval_indices.append(len(group)-1) # add the very last interval end index
+                    interval_indices.sort()
+                    mid_points = [(a + b) / 2 for a, b in zip(interval_indices[::2], interval_indices[1::2])]
+                    mid_points = [int(np.round(x)) for x in mid_points]
+                    _data = group.iloc[mid_points].to_numpy()
+                    m = _data.shape[0]
+                    data[data_indx:data_indx+m,:] = _data
+                    data_indx = data_indx + m
+            
+            data = data[0:data_indx] # remove unnecessary rows
+        
+            out_df = pd.DataFrame(data = data, columns = ['time index', 'source id', 'GP index',  'lat [deg]', 'lon [deg]'])
+            out_df = out_df.astype({"time index": int, 'source id': int, "GP index": int, "lat [deg]": float, "lon [deg]": float})
+
         else: # grid coverage access file
 
             # iterate over all the groups (ground-point indices)            
@@ -265,7 +291,7 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
                 if head:
                     for k in range(0,len(head)):
                         f2.write(str(head[k]))
-                out_df.to_csv(f2, index=False, header=True, line_terminator='\n')
+                out_df.to_csv(f2, index=False, header=True)
 
         return out_df
 
@@ -1262,7 +1288,7 @@ class SpecularCoverage(Entity):
         else:
             return False
 
-    def execute(self, instru_id=None, mode_id=None, out_file_specular=None, specular_region_dia=None, out_file_grid_access=None, method='DirectSphericalPIP'):
+    def execute(self, instru_id=None, mode_id=None, out_file_specular=None, specular_region_dia=None, out_file_grid_access=None, method='DirectSphericalPIP', mid_access_only=False):
         """ Perform coverage calculation involving calculation of specular point locations. 
             The calculation is performed for a specific instrument and mode (in the receiver spacecraft).
             Note that the sceneFOV of an instrument (which may be the same as the instrument FOV) is used for coverage calculations.
@@ -1366,6 +1392,10 @@ class SpecularCoverage(Entity):
                         within the sensor FOV.  
  
         :paramtype method: str
+
+        :param mid_access_only: Flag to indicate if the specular grid coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
+                                Default value is ``False``.
+        :paramtype mid_access_only: bool
 
         :return: Coverage output info.
         :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
@@ -1531,6 +1561,14 @@ class SpecularCoverage(Entity):
                                 gp_index = filtered_points_index[index]
                                 grid_access_writer.writerow([time_index, tx_id, gp_index, round(lat, 3), round(lon,3)])                        
 
+        ##### filter mid-interval access data if necessary #####
+        try:
+            grid_access_file.close()
+            if mid_access_only is True:
+                filter_mid_interval_access(inp_acc_fl=out_file_grid_access, out_acc_fl=out_file_grid_access)
+        except:
+            pass
+
         ##### Close file ##### 
         try:               
             specular_access_file.close()
@@ -1546,7 +1584,7 @@ class SpecularCoverage(Entity):
                                                 "instruId": instru_id,
                                                 "modeId": mode_id,
                                                 "usedFieldOfRegard": None,
-                                                "filterMidIntervalAccess": None,
+                                                "filterMidIntervalAccess": mid_access_only,
                                                 "gridId": self.grid._id if self.grid is not None else None,
                                                 "stateCartFile": self.rx_state_file,
                                                 "accessFile": [out_file_specular, out_file_grid_access],

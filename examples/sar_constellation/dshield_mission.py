@@ -9,7 +9,7 @@
     *   Each satellite equipped with L and P band SAR, pointing at same the direction (direction can be varied, but both instruments point at the same direction).
     *   Grid used for coverage analysis is the SMAP L4 9 km EASE-Grid 
         (Earth-fixed, global, cylindrical 9 km Equal-Area Scalable Earth Grid, Version 2.0 (EASE-Grid 2.0) projection)
-        Grid points corresponding to the Ocean and the following IGBP classses: 11:Wetlands, 13:Urban, 15:Frozen are **removed**,
+        Grid points corresponding to the water and the following IGBP classses: 11:Wetlands, 13:Urban, 15:Frozen are **removed**,
         since the region of interest is land area with soil.
         Grid data is in `covGrid.csv`.
     

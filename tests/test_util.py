@@ -21,6 +21,10 @@ class TestOrbitState(unittest.TestCase):
         y = OrbitState.date_from_dict({"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0})
         self.assertIsInstance(y, propcov.AbsoluteDate)
 
+        with self.assertRaises(Exception): # Invalid Date Type shall raise Exception
+            OrbitState.date_from_dict({"@type":"GREGORIAN_UTC", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0})
+        
+
         self.assertEqual(x, y)
 
     def test_state_from_dict(self):

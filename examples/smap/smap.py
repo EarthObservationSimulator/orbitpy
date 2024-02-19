@@ -13,6 +13,8 @@ from orbitpy.grid import Grid
 """
 Find SMAP coverage over the mission-interval. Approximate sensor-FOV geometry specification for SMAP.
 
+The path to the working directory and the grid file needs to be provided.
+
 Epoch: 2020-03-01 12:00:00, Intervals 6hrs, 12hrs, 18hrs, 24hrs.
 
 Use in EXCEL: =SUM(IF(FREQUENCY(B6:B10, B6:B10)>0,1)) to count # unique GPs in an access interval
@@ -21,15 +23,18 @@ Use in EXCEL: =SUM(IF(FREQUENCY(B6:B10, B6:B10)>0,1)) to count # unique GPs in a
 
 start_time = time.process_time()    
 
-wdir = os.path.dirname(os.path.realpath(__file__)) + "/../examples/20211111_SMAP/"
+# Provide the path to the grid file ('covGrid.csv') appropriately.
+wdir = os.path.dirname(os.path.realpath(__file__)) + "/../../../wdir/orbitpy_smap/"
+grid = Grid.from_dict({"@type": "customGrid", "covGridFilePath": wdir+"covGrid.csv"})
 
-epoch_dict = {"@type":"GREGORIAN_UTC", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0}
+
+epoch_dict = {"@type":"GREGORIAN_UT1", "year":2020, "month":1, "day":1, "hour":12, "minute":0, "second":0}
 epoch = OrbitState.date_from_dict(epoch_dict)
 epoch_JDUt1 = epoch.GetJulianDate()
 
 sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
                                             },
-                             "orbitState": {"date": {"@type":"GREGORIAN_UTC", "year":2019, "month":12, "day":31, "hour":18, "minute":32, "second":15.461952},
+                             "orbitState": {"date": {"@type":"GREGORIAN_UT1", "year":2019, "month":12, "day":31, "hour":18, "minute":32, "second":15.461952},
                                             "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 7060.468, "ecc": 0.00016890, "inc": 98.1228, "raan": 9.7929, "aop": 109.2526, "ta": 250.8855}
                                         },
                              "instrument": { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"},
@@ -37,7 +42,6 @@ sat = Spacecraft.from_dict({"spacecraftBus":{"orientation":{"referenceFrame": "N
                                             "@id":"smap", "name": "SMAP", "@type":"Basic Sensor"}
                                     })
 
-grid = Grid.from_dict({"@type": "customGrid", "covGridFilePath": wdir+"covGrid.csv"})
 
 propagator = J2AnalyticalPropagator.from_dict({"@type": "J2 ANALYTICAL PROPAGATOR", "stepSize": 1})
 

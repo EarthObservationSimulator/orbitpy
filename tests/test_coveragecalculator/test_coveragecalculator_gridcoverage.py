@@ -16,6 +16,8 @@ In case of rectangular sensors, both the methods to evaluate point in spherical 
 * ``test_execute_8``: Test FOV vs FOR coverage. Coverage of FOR >= Coverage of FOV.
 * ``test_execute_9``:  Test coverage with DOUBLE_ROLL_ONLY maneuver will which result in 2 ``ViewGeometry`` objects for the field-of-regard.
 
+TODO: Add tests which checks the filters mid-interval access functionality.
+
 """
 
 import json
