@@ -10,6 +10,8 @@ import uuid
 from collections import namedtuple
 import pandas as pd
 
+from skyfield.api import EarthSatellite, load # Skyfield package is used to convert the TLEs to ECI coords at a specified epoch.
+
 import propcov
 from instrupy.util import Entity, EnumEntity, Constants, Orientation
 from instrupy.base import Instrument
@@ -24,6 +26,7 @@ class StateType(EnumEntity):
     KEPLERIAN_EARTH_CENTERED_INERTIAL = "KEPLERIAN_EARTH_CENTERED_INERTIAL"
     CARTESIAN_EARTH_CENTERED_INERTIAL = "CARTESIAN_EARTH_CENTERED_INERTIAL"
     CARTESIAN_EARTH_FIXED = "CARTESIAN_EARTH_FIXED"
+    TLE = "TLE"
 
 class DateType(EnumEntity):
     GREGORIAN_UT1 = "GREGORIAN_UT1"
@@ -63,8 +66,11 @@ class OrbitState(Entity):
         :rtype: :class:`orbitpy.util.OrbitState`
 
         """
-        date = OrbitState.date_from_dict(d.get("date", None))
-        state = OrbitState.state_from_dict(d.get("state", None))
+        if "tle" in d:
+            (date, state) = OrbitState.from_tle(d.get("tle"))
+        else:
+            date = OrbitState.date_from_dict(d.get("date", None))
+            state = OrbitState.state_from_dict(d.get("state", None))
 
         return OrbitState(date=date, state=state, _id=d.get("@id", None))
 
@@ -112,6 +118,55 @@ class OrbitState(Entity):
 
     def __repr__(self):
         return "OrbitState.from_dict({})".format(self.to_dict())
+
+    @staticmethod
+    def from_tle(tle_string):
+        """ Get the ``propcov.AbsoluteDate`` object from the input dictionary.
+
+        :param d: Dictionary with the date description. 
+            
+            In case of ``GREGORIAN_UT1`` date type the following keys apply: year (int), month (int), day (int), hour (int), minute (int) and second (float).
+
+            In case of ``JULIAN_DATE_UT1`` date type the following keys apply: jd (float)
+
+        :paramtype d: dict
+
+        :returns: ``propcov`` date object.
+        :rtype: :class:`propcov.AbsoluteDate`
+
+        """
+        date = propcov.AbsoluteDate()
+        state = propcov.OrbitState()
+        try:                 
+            # Use Skyfield library
+            ts = load.timescale()
+
+            # Parse TLE string
+            lines = tle_string.strip().splitlines()
+            satellite = EarthSatellite(lines[1], lines[2], lines[0], ts)
+
+            print(satellite)
+            
+            # TODO: verify that the obtained Julian date from TLE is in Julian Date UTC. 
+            tle_epoch = satellite.epoch
+            tle_geocentric = satellite.at(tle_epoch) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy
+
+            pos = tle_geocentric.position.km
+            vel = tle_geocentric.velocity.km_per_s
+
+            print(tle_epoch.ut1)
+            print(satellite.epoch.utc_jpl())
+            print(pos)
+            print(vel)
+            
+            date.SetJulianDate(jd=tle_epoch.ut1)
+            state.SetCartesianState(propcov.Rvector6([pos[0], pos[1], pos[2], vel[0], vel[1], vel[2]]))
+
+        except:
+            raise Exception("Error while setting the orbit state from TLE")
+        
+        return (date, state)
+        
 
     @staticmethod
     def date_from_dict(d):

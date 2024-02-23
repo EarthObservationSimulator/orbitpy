@@ -37,7 +37,7 @@ class TestOrbitState(unittest.TestCase):
         self.assertIsInstance(y, propcov.OrbitState) 
 
         self.assertEqual(x, y)
-
+ 
     def test_date_to_dict(self): #@TODO
         pass
 
@@ -72,6 +72,29 @@ class TestOrbitState(unittest.TestCase):
         self.assertEqual(o.date, propcov.AbsoluteDate.fromGregorianDate(2021, 2, 25, 6 ,0, 0))
         self.assertEqual(o.state, propcov.OrbitState.fromKeplerianState(6878.137, 0.001, np.deg2rad(45), np.deg2rad(35), np.deg2rad(145), np.deg2rad(-25)))
     
+    def test_state_from_dict_tle(self):
+  
+        d = {"tle": '''AQUA\n1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991\n2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754''',
+             "@id": 123}
+        
+        o = OrbitState.from_dict(d)
+        self.assertIsInstance(o, OrbitState)
+
+        self.assertEqual(o._id, 123)
+        self.assertAlmostEqual(o.get_julian_date(), 2460362.365686, places=6)
+        state_dict = OrbitState.state_to_dict(o.state, state_type='CARTESIAN_EARTH_CENTERED_INERTIAL')
+
+        self.assertAlmostEqual(state_dict["x"], 3417.50458485)
+        self.assertAlmostEqual(state_dict["y"], -802.52409303)
+        self.assertAlmostEqual(state_dict["z"], 6134.36342655)
+        self.assertAlmostEqual(state_dict["vx"], -6.5733887)
+        self.assertAlmostEqual(state_dict["vy"], -0.70421461)
+        self.assertAlmostEqual(state_dict["vz"], 3.56159903)
+        
+        # TODO: compare with orbit-states dervied from another source (truth data)
+
+       
+
     def test_to_dict(self): #@TODO test Keplerian state output
         # Input: Julian date, Cartesian state
         o = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75}, 
