@@ -120,55 +120,6 @@ class OrbitState(Entity):
         return "OrbitState.from_dict({})".format(self.to_dict())
 
     @staticmethod
-    def from_tle(tle_string):
-        """ Get the ``propcov.AbsoluteDate`` object from the input dictionary.
-
-        :param d: Dictionary with the date description. 
-            
-            In case of ``GREGORIAN_UT1`` date type the following keys apply: year (int), month (int), day (int), hour (int), minute (int) and second (float).
-
-            In case of ``JULIAN_DATE_UT1`` date type the following keys apply: jd (float)
-
-        :paramtype d: dict
-
-        :returns: ``propcov`` date object.
-        :rtype: :class:`propcov.AbsoluteDate`
-
-        """
-        date = propcov.AbsoluteDate()
-        state = propcov.OrbitState()
-        try:                 
-            # Use Skyfield library
-            ts = load.timescale()
-
-            # Parse TLE string
-            lines = tle_string.strip().splitlines()
-            satellite = EarthSatellite(lines[1], lines[2], lines[0], ts)
-
-            print(satellite)
-            
-            # TODO: verify that the obtained Julian date from TLE is in Julian Date UTC. 
-            tle_epoch = satellite.epoch
-            tle_geocentric = satellite.at(tle_epoch) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy
-
-            pos = tle_geocentric.position.km
-            vel = tle_geocentric.velocity.km_per_s
-
-            print(tle_epoch.ut1)
-            print(satellite.epoch.utc_jpl())
-            print(pos)
-            print(vel)
-            
-            date.SetJulianDate(jd=tle_epoch.ut1)
-            state.SetCartesianState(propcov.Rvector6([pos[0], pos[1], pos[2], vel[0], vel[1], vel[2]]))
-
-        except:
-            raise Exception("Error while setting the orbit state from TLE")
-        
-        return (date, state)
-        
-
-    @staticmethod
     def date_from_dict(d):
         """ Get the ``propcov.AbsoluteDate`` object from the input dictionary.
 
@@ -256,6 +207,61 @@ class OrbitState(Entity):
             raise Exception("Please enter a state-type (@type) specification.")
 
         return state
+    
+    @staticmethod
+    def from_tle(tle_string):
+        """ Get the ``propcov.AbsoluteDate`` and ``propcov.OrbitState`` objects from an input Two Line Element (TLE)
+
+        :param d: Dictionary with the TLE.
+            
+            The following keys apply:
+
+            * tle : (str) TLE string. The first line contains the satellite name, and the next two lines are the two line elements.
+            * @id : (str) Unique identifier.
+
+            e.g., {"tle": '''AQUA\n1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991\n2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754''',
+                   "@id": 123}
+
+        :paramtype d: dict
+
+        :returns: ``propcov`` date object and state objects.
+        :rtype: :class:`propcov.AbsoluteDate`, :class:`propcov.OrbitState`
+
+        """
+        date = propcov.AbsoluteDate()
+        state = propcov.OrbitState()
+        try:                 
+            # Use Skyfield library
+            ts = load.timescale()
+
+            # Parse TLE string
+            lines = tle_string.strip().splitlines()
+            satellite = EarthSatellite(lines[1], lines[2], lines[0], ts)
+
+            #print(satellite)
+            
+            # What is the time scale in the time indicated in the TLE?
+            # "time is either in UTC or UT1, and conclude that the difference does not really matter because SGP4 just isn't accurate enough in predicting satellite positions for <1 second to matter."
+            # Refer to the paper here: https://celestrak.org/publications/AIAA/2006-6753/
+            # https://space.stackexchange.com/questions/13825/how-to-obtain-utc-of-the-epoch-time-in-a-satellite-tle-two-line-element
+            tle_epoch = satellite.epoch
+            tle_geocentric = satellite.at(tle_epoch) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy
+
+            pos = tle_geocentric.position.km
+            vel = tle_geocentric.velocity.km_per_s
+
+            #print(tle_epoch.ut1)
+            #print(satellite.epoch.utc_jpl())
+            #print(pos)
+            #print(vel)
+            
+            date.SetJulianDate(jd=tle_epoch.ut1)
+            state.SetCartesianState(propcov.Rvector6([pos[0], pos[1], pos[2], vel[0], vel[1], vel[2]]))
+
+        except:
+            raise Exception("Error while setting the orbit state from TLE")
+        
+        return (date, state)
     
     @staticmethod
     def date_to_dict(date):

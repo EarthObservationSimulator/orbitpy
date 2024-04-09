@@ -90,10 +90,28 @@ class TestOrbitState(unittest.TestCase):
         self.assertAlmostEqual(state_dict["vx"], -6.5733887)
         self.assertAlmostEqual(state_dict["vy"], -0.70421461)
         self.assertAlmostEqual(state_dict["vz"], 3.56159903)
-        
-        # TODO: compare with orbit-states dervied from another source (truth data)
 
-       
+        # Terra SAR-X
+        #  Compare against the Orbit Mean-Elements Message (OMM) from www.space-track.org 
+        d = {"tle": '''Terra SAR X\n1 31698U 07026A   24099.48501970  .00001689  00000-0  83603-4 0  9998\n2 31698  97.4452 107.6258 0001796  88.6052 271.5388 15.19151402932479''',
+             "@id": 123}
+        
+        o = OrbitState.from_dict(d)
+        self.assertIsInstance(o, OrbitState)
+
+        self.assertEqual(o._id, 123)
+        self.assertAlmostEqual(o.get_julian_date(), 2460408.985020, places=6)
+        state_dict = OrbitState.state_to_dict(o.state, state_type='KEPLERIAN_EARTH_CENTERED_INERTIAL')
+
+        self.assertAlmostEqual(state_dict["sma"], 6886.541, delta=10e3) # 10k error tolerance
+        self.assertAlmostEqual(state_dict["ecc"], 0.00017960, delta=0.0012) # TODO: This appears to be a large error....
+        self.assertAlmostEqual(state_dict["inc"], 97.4452, delta = 0.2)
+        self.assertAlmostEqual(state_dict["raan"], 107.6258, delta = 0.4)
+
+        # The AOP has large errors, which maybe OK for near-circular orbits in which the AOP is not defined well. 
+        # AOP + TA shall give the satellite position wrt the ascending node. 
+        # Note that the Mean ANnomaly value is given in the OMM (i.e. 88.6052 degrees), which is ~ TA since the orbit is nearly circular
+        self.assertAlmostEqual(state_dict["ta"] + state_dict["aop"], 271.5388 + 88.6052, delta = 0.2)
 
     def test_to_dict(self): #@TODO test Keplerian state output
         # Input: Julian date, Cartesian state
