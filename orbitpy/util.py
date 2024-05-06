@@ -30,6 +30,7 @@ class StateType(EnumEntity):
     CARTESIAN_EARTH_CENTERED_INERTIAL = "CARTESIAN_EARTH_CENTERED_INERTIAL"
     CARTESIAN_EARTH_FIXED = "CARTESIAN_EARTH_FIXED"
     TLE = "TLE"
+    OMM = "OMM"
 
 class DateType(EnumEntity):
     GREGORIAN_UT1 = "GREGORIAN_UT1"
@@ -69,8 +70,15 @@ class OrbitState(Entity):
         :rtype: :class:`orbitpy.util.OrbitState`
 
         """
-        if "tle" in d:
-            (date, state) = OrbitState.from_tle(d.get("tle"))
+        if "@type" in d: # the orbit-state and date are together in the format of TLE or OMM.
+            stateType = d.get('@type', None)
+            state_type = StateType.get(stateType) if stateType is not None else None
+            if state_type == StateType.TLE:
+                (date, state) = OrbitState.from_tle(d)
+            elif state_type == StateType.OMM:
+                (date, state) = OrbitState.from_omm(d.get("omm"))
+            else:
+                raise Exception("Unrecognized type in the 'orbitstate' dictionary key.")
         else:
             date = OrbitState.date_from_dict(d.get("date", None))
             state = OrbitState.state_from_dict(d.get("state", None))
@@ -210,59 +218,27 @@ class OrbitState(Entity):
             raise Exception("Please enter a state-type (@type) specification.")
 
         return state
-    
-    @staticmethod
-    def from_omm(omm_dict):
-        """ Process orbital data from the Orbit Mean-Elements Message (OMM) format.
-        
-            Space-Track.org and Celestrak.com recommend that developers migrate their software to use the OMM standard 
-            (displayed in /class/gp/ as the /format/xml/) for all GP ephemerides because, again, legacy fixed-width TLE 
-            or 3LE format lacks support for numbers above 99,999.
-
-            For an example run this query on a browser: https://www.space-track.org/basicspacedata/query/class/gp/norad_cat_id/25544/format/json
-
-            :param d: Dictionary with the TLE.
-            
-            The following keys apply:
-
-            * omm : (dict) Dictionary with the orbit elements in the OMM format (as followed by Space-Track.org). 
-            * @id : (str) Unique identifier.
-
-            e.g., {"tle": '''AQUA\n1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991\n2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754''',
-                   "@id": 123}
-
-            :paramtype d: dict
-
-            :returns: ``propcov`` date object and state objects.
-            :rtype: :class:`propcov.AbsoluteDate`, :class:`propcov.OrbitState`
-
-        """
-        date = propcov.AbsoluteDate()
-        state = propcov.OrbitState()
-
-        date.SetJulianDate(jd=tle_epoch.ut1)
-        state.SetCartesianState(propcov.Rvector6([pos[0], pos[1], pos[2], vel[0], vel[1], vel[2]]))
-
-        # https://www.space-track.org/basicspacedata/query/class/gp_history/NORAD_CAT_ID/25544/EPOCH/%3C2024-04-09T19%3A49%3A51.075840/EPOCH/%3E2024-04-08T19%3A49%3A51.075840/orderby/CCSDS_OMM_VERS%20desc/emptyresult/show
-
-
-
 
     @staticmethod
-    def from_tle(tle_string):
+    def from_tle(tle_dict):
         """ Get the ``propcov.AbsoluteDate`` and ``propcov.OrbitState`` objects from an input Two Line Element (TLE)
 
-        :param d: Dictionary with the TLE.
+        :param tle_dict: Dictionary with the TLE.
             
             The following keys apply:
 
-            * tle : (str) TLE string. The first line contains the satellite name, and the next two lines are the two line elements.
-            * @id : (str) Unique identifier.
+            * tle_line0 : (str) TLE line 0 string. The first line contains the satellite name, and the next two lines are the two line elements.
+            * tle_line1 : (str) TLE line 1 string. 
+            * tle_line2 : (str) TLE line 2 string. 
 
-            e.g., {"tle": '''AQUA\n1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991\n2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754''',
-                   "@id": 123}
+            e.g., 
+                {
+                    "tle_line0": "AQUA",
+                    "tle_line1": "27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991",
+                    "tle_line2": "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754"
+                }
 
-        :paramtype d: dict
+        :paramtype tle_dict: dict
 
         :returns: ``propcov`` date object and state objects.
         :rtype: :class:`propcov.AbsoluteDate`, :class:`propcov.OrbitState`
@@ -275,8 +251,7 @@ class OrbitState(Entity):
             ts = load.timescale()
 
             # Parse TLE string
-            lines = tle_string.strip().splitlines()
-            satellite = EarthSatellite(lines[1], lines[2], lines[0], ts)
+            satellite = EarthSatellite(tle_dict["tle_line1"], tle_dict["tle_line2"], tle_dict["tle_line0"], ts)
 
             #print(satellite)
             
@@ -303,6 +278,33 @@ class OrbitState(Entity):
             raise Exception("Error while setting the orbit state from TLE")
         
         return (date, state)
+    
+    @staticmethod
+    def from_omm(omm_dict):
+        """ Process orbital data from the Orbit Mean-Elements Message (OMM) format.
+            Processing is carried out by extracting the TLEs from the OMM, and then using the ``from_tle()`` function.
+        
+            Space-Track.org and Celestrak.com recommend that developers migrate their software to use the OMM standard 
+            (displayed in /class/gp/ as the /format/xml/) for all GP ephemerides because, again, legacy fixed-width TLE 
+            or 3LE format lacks support for numbers above 99,999.
+
+            :param omm_dict: Keplerian element set in Orbit Mean-Elements Message (OMM) that complies with CCSDS Recommended Standard 502.0-B-3.    
+                             For an example run this query on a browser: https://www.space-track.org/basicspacedata/query/class/gp/norad_cat_id/25544/format/json
+            :paramtype omm_dict: dict
+
+            :returns: ``propcov`` date object and state objects.
+            :rtype: :class:`propcov.AbsoluteDate`, :class:`propcov.OrbitState`
+
+        """
+        tle_dict = {
+                    "tle_line0": omm_dict["TLE_LINE0"],
+                    "tle_line1": omm_dict["TLE_LINE1"],
+                    "tle_line2": omm_dict["TLE_LINE2"]
+                }
+        (date, state) = OrbitState.from_tle(tle_dict)
+        return (date, state)
+
+
     
     @staticmethod
     def date_to_dict(date):

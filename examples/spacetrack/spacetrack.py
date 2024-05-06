@@ -22,10 +22,11 @@ space_track_api = SpaceTrackAPI(os.path.join(file_dir, 'credentials.json'))
 space_track_api.login()
 
 # Specify the 'norad_id' of the satellite you want to retrieve data for
-norad_id = "41886"  # Example: CYGNSS CYGFM06
+#norad_id = "41886"  # Example: CYGNSS CYGFM06
+norad_id = "31698" # Example TerraSARX
 
 # Specify the target date and time to find the closest OMM (format: YYYY-MM-DDTHH:MM:SS)
-target_datetime = "2024-04-15T12:00:00"
+target_datetime = "2024-04-09T01:00:00"
 
 # Retrieve the closest OMM for the specified satellite closest to the target date and time
 space_track_api.get_closest_omm(norad_id, target_datetime)
