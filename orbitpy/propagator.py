@@ -14,6 +14,10 @@ from instrupy.util import Entity, Constants
 from orbitpy.util import OutputInfoUtility
 import orbitpy.util
 
+from skyfield.api import EarthSatellite, load
+from sgp4.api import Satrec, WGS72
+from skyfield.elementslib import osculating_elements_of
+
 def compute_time_step(spacecraft, time_res_fac):
     """ Compute time step to be used for orbit propagation based on list of input spacecrafts (considering the orbit sma and the sensor field-of-regard.)
     
@@ -40,7 +44,6 @@ def compute_time_step(spacecraft, time_res_fac):
     """
     RE = Constants.radiusOfEarthInKM
     GMe = Constants.GMe
-
 
     params = orbitpy.util.helper_extract_spacecraft_params(spacecraft) # obtain list of tuples of relevant spacecraft parameters
 
@@ -103,6 +106,7 @@ class PropagatorFactory:
     def __init__(self):
         self._creators = {}
         self.register_propagator('J2 ANALYTICAL PROPAGATOR', J2AnalyticalPropagator)
+        self.register_propagator('SGP4 PROPAGATOR', SGP4Propagator)
 
     def register_propagator(self, _type, creator):
         """ Function to register propagators.
@@ -136,6 +140,157 @@ class PropagatorFactory:
         if not creator:
             raise ValueError(_type)
         return creator.from_dict(specs)
+
+class SGP4Propagator(Entity):
+    """A Simplified General Perturbations 4 (SGP4) orbit propagator class.
+    THe implementation of this class is basically a wrapper around the Skyfield SGP4 orbit propagator.
+
+    The instance variable(s) correspond to the propagator setting(s). 
+
+    :ivar stepSize: Orbit propagation time-step.
+    :vartype stepSize: float or None
+
+    :ivar _id: Unique identifier.
+    :vartype _id: str
+
+    """
+    def __init__(self, stepSize=None, _id=None):
+        self.stepSize = float(stepSize) if stepSize is not None else None
+        super(SGP4Propagator, self).__init__(_id, "SGP4 PROPAGATOR")
+    
+    @staticmethod
+    def from_dict(d):
+        """ Parses an SGP4Propagator object from a normalized JSON dictionary.
+        
+        :param d: Dictionary with the SGP4 PROPAGATOR specifications.
+
+                Following keys are to be specified.
+                
+                * "stepSize": (float) Step size in seconds. Default value is 60s.
+                * "@id": (str) Propagator identifier (unique). Default: A random string.
+
+        :paramtype d: dict
+
+        :return: ``SGP4Propagator`` object.
+        :rtype: :class:`orbitpy.propagate.SGP4Propagator`
+
+        """ 
+        return SGP4Propagator(stepSize = d.get('stepSize', None), 
+                                _id = d.get('@id', None))
+
+    def to_dict(self):
+        """ Translate the SGP4Propagator object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
+        
+        :return: ``SGP4Propagator`` object as python dictionary
+        :rtype: dict
+        
+        """
+        return dict({"@type": "SGP4 PROPAGATOR",
+                     "stepSize": self.stepSize,
+                     "@id": self._id})
+
+    def __repr__(self):
+        return "SGP4Propagator.from_dict({})".format(self.to_dict())
+
+    def __eq__(self, other):
+        # Equality test is simple one which compares the data attributes. Note that _id data attribute may be different
+        if(isinstance(self, other.__class__)):
+            return (self.stepSize == other.stepSize)                
+        else:
+            return NotImplemented
+    
+    def execute(self, spacecraft, start_date=None, out_file_cart=None, out_file_kep=None, duration=1):
+        """ Execute orbit propagation of the input spacecraft (single) and write to a csv data-file."""
+
+        #### Get the mission start date ####
+        if(start_date is None):
+            start_date = spacecraft.orbitState.date       
+        _start_date = start_date.GetJulianDate() # Get the Julian Date from the ``propcov.AbsoluteDate`` object 
+
+        #### Build a Skyfield satellite object from orbital elements ####
+        ''' Stick to using WGS72 based on the following discussion: https://github.com/dnwrnr/sgp4/issues/15
+            Quote: " Note that the Python SGP4 implementation - which is an extremely close port of the official C++ version - strongly recommends 
+                  sticking with WGS72 instead of WGS84, see https://pypi.org/project/sgp4/#gravity "
+        '''
+        satrec = Satrec()
+        satrec.sgp4init(
+            WGS72,           # gravity model
+            'i',             # 'a' = old AFSPC mode, 'i' = improved mode
+            5,               # satnum: Satellite number
+            18441.785,       # epoch: days since 1949 December 31 00:00 UT
+            2.8098e-05,      # bstar: drag coefficient (/earth radii)
+            6.969196665e-13, # ndot: ballistic coefficient (radians/minute^2)
+            0.0,             # nddot: second derivative of mean motion (radians/minute^3)
+            0.1859667,       # ecco: eccentricity
+            5.7904160274885, # argpo: argument of perigee (radians)
+            0.5980929187319, # inclo: inclination (radians)
+            0.3373093125574, # mo: mean anomaly (radians)
+            0.0472294454407, # no_kozai: mean motion (radians/minute)
+            6.0863854713832, # nodeo: right ascension of ascending node (radians)
+        )
+        ts = load.timescale()
+        sat = EarthSatellite.from_satrec(satrec, ts) # wrap into a Skyfield object
+        print('Satellite number:', sat.model.satnum)
+        print('Epoch:', sat.epoch.utc_jpl())
+
+        # Prepare output files in which results shall be written
+        if out_file_cart:
+            cart_file = open(out_file_cart, 'w', newline='')
+            cart_writer = csv.writer(cart_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            cart_writer.writerow(["Satellite states are in CARTESIAN_EARTH_CENTERED_INERTIAL (equatorial-plane) frame."])
+            cart_writer.writerow(["Epoch [JDUT1] is {}".format(_start_date)])
+            cart_writer.writerow(["Step size [s] is {}".format(self.stepSize)])
+            cart_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+            cart_writer.writerow(['time index','x [km]','y [km]','z [km]','vx [km/s]','vy [km/s]','vz [km/s]'])
+
+        if out_file_kep:
+            kep_file = open(out_file_kep, 'w', newline='')
+            kep_writer = csv.writer(kep_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            kep_writer.writerow(["Satellite states as KEPLERIAN_EARTH_CENTERED_INERTIAL elements."])
+            kep_writer.writerow(["Epoch [JDUT1] is {}".format(_start_date)])
+            kep_writer.writerow(["Step size [s] is {}".format(self.stepSize)])
+            kep_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+            kep_writer.writerow(['time index','sma [km]','ecc','inc [deg]','raan [deg]','aop [deg]','ta [deg]'])
+        
+        #propagate_time = ts.ut1_jd(_start_date) # mission epoch (which could be different from the date at which the spacecraft state is defined.)
+        # print("\n Mission epoch in UTC is: ", propagate_time.utc_jpl())
+
+        # Propagate at time-resolution = stepSize. 
+        # Take into advantage the vectorized nature of Skyfield's functions
+        _seconds = np.arange(0, duration*86400.0, self.stepSize)
+        indices = np.arange(len(_seconds))
+
+        propagate_time =  ts.ut1_jd(_start_date + _seconds) 
+        
+        geocentric = sat.at(propagate_time) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy
+
+        # write state            
+        if out_file_cart:
+            pos = geocentric.position.km
+            vel = geocentric.velocity.km_per_s
+
+            # Transpose the arrays to get rows of data
+            data = np.vstack((indices, pos[0], pos[1], pos[2], vel[0], vel[1], vel[2])).T
+            cart_writer.writerows(data)
+
+        if out_file_kep:
+            osc_elements = osculating_elements_of(geocentric)
+            sma = osc_elements.semi_major_axis.km
+            ecc = osc_elements.eccentricity
+            inc = osc_elements.inclination.degrees
+            raan = osc_elements.longitude_of_ascending_node.degrees
+            aop = osc_elements.argument_of_periapsis.degrees
+            ta = osc_elements.true_anomaly.degrees
+
+            # Transpose the arrays to get rows of data
+            data = np.vstack((indices, sma, ecc, inc, raan, aop, ta)).T
+            cart_writer.writerows(data)
+        
+        if out_file_cart:
+            cart_file.close()
+        if out_file_kep:
+            kep_file.close()
+
 
 class J2AnalyticalPropagator(Entity):
     """A J2 ANALYTICAL PROPAGATOR class.
