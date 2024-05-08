@@ -105,9 +105,9 @@ Please contact Vinay (vinay.ravindra@nasa.gov)
 ## Developer Tasks
 
 ### OrbitPy
+- [ ] SGP4 Propagator validation tests with STK  (or another s/w)
 - [ ] Incorporate artificial image synthesis involving the propcov classes `DiscretizedSensor`, `Projector` and the orbitpy `SensorPixelProjection` module. Add python-tests.
 - [ ] Search for ‘Vinay’ and ‘TODO’ over all the files
-
 
 ### Propcov-cpp
 

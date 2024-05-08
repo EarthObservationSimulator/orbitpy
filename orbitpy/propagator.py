@@ -17,6 +17,12 @@ import orbitpy.util
 from skyfield.api import EarthSatellite, load
 from sgp4.api import Satrec, WGS72
 from skyfield.elementslib import osculating_elements_of
+from skyfield.positionlib import ICRF
+from skyfield.framelib import ICRS
+from skyfield.sgp4lib import TEME
+from skyfield.api import Distance, Velocity
+
+from sgp4.ext import rv2coe
 
 def compute_time_step(spacecraft, time_res_fac):
     """ Compute time step to be used for orbit propagation based on list of input spacecrafts (considering the orbit sma and the sensor field-of-regard.)
@@ -212,7 +218,44 @@ class SGP4Propagator(Entity):
             Quote: " Note that the Python SGP4 implementation - which is an extremely close port of the official C++ version - strongly recommends 
                   sticking with WGS72 instead of WGS84, see https://pypi.org/project/sgp4/#gravity "
         '''
+        # Get the instantaneous Cartesian elements (in CARTESIAN_EARTH_CENTERED_INERTIAL (J2000) frame) of the spacecraft
+        sat_epoch_state = spacecraft.orbitState.to_dict()
+        _state = sat_epoch_state['state']
+        _epoch = sat_epoch_state['date']
+
+        _pos = np.array([_state['x'], _state['y'], _state['z']])
+        _pos = Distance(km = _pos) # convert to Skyfield object
+        _vel = np.array([_state['vx'], _state['vy'], _state['vz']])
+        _vel = Velocity(km_per_s = _vel) # convert to Skyfield object
+        ts_epoch = load.timescale()
+        epoch = ts_epoch.ut1_jd(_epoch['jd']) #  satellite epoch (which could be different from the mission epoch)
+        # print("\n Satellite epoch in UTC is: ", propagate_time.utc_jpl())
+
+        #### get the orbit state in TEME frame using SkyField ####
+        # reference: https://rhodesmill.org/skyfield/positions.html#coordinates-in-other-reference-frames
+        # https://rhodesmill.org/skyfield/api-position.html#skyfield.positionlib.ICRF.from_time_and_frame_vectors
+        # build the Skyfield Position object 
+        # ICRF frame ~ J2000, see: https://rhodesmill.org/skyfield/positions.html#the-icrs-reference-system-and-j2000
+
+        # https://space.stackexchange.com/questions/25988/sgp4-teme-frame-to-j2000-conversion
+        # https://github.com/skyfielders/python-skyfield/blob/6fa3f4654c1c552c1522d61246267d032f25ea2e/skyfield/sgp4lib.py (TEME reference frame)
+        # https://github.com/skyfielders/python-skyfield/blob/6fa3f4654c1c552c1522d61246267d032f25ea2e/skyfield/framelib.py (Reference frames)
+        # https://rhodesmill.org/skyfield/api.html#reference-frames        
+        # https://github.com/skyfielders/python-skyfield/issues/384
+
+        # get the satellite state in TEME frame
+        skyfield_icrs_position =   ICRF.from_time_and_frame_vectors(epoch, ICRS, _pos, _vel)
+        print(skyfield_icrs_position.frame_xyz_and_velocity(ICRS))
+        print(skyfield_icrs_position.frame_xyz_and_velocity(TEME))
+        (skyfield_teme_pos, skyfield_teme_vel) = skyfield_icrs_position.frame_xyz_and_velocity(TEME)
+        
+        # get the mean Keplerian elements from the instantaneous TEME Cartesian coordinates
+        MU_Earth = 3.98600e5 # gravitational parameter  km3 / s2
+        (_p, _a, _ecc, _incl, _omega, _argp, _nu, _m, _arglat, _truelon, _lonper) = rv2coe(skyfield_teme_pos.km, skyfield_teme_vel.km_per_s, MU_Earth) # note that the angles are in radians
+        _mean_motion = 60.0 * np.sqrt(MU_Earth/ (_a*_a*_a)) # semimajor axis (_a) units are in km. Obtained mean motion is in rad per minute.
+
         satrec = Satrec()
+        # TODO: The second derivative of mean motion needs to be calculated.
         satrec.sgp4init(
             WGS72,           # gravity model
             'i',             # 'a' = old AFSPC mode, 'i' = improved mode
@@ -221,12 +264,12 @@ class SGP4Propagator(Entity):
             2.8098e-05,      # bstar: drag coefficient (/earth radii)
             6.969196665e-13, # ndot: ballistic coefficient (radians/minute^2)
             0.0,             # nddot: second derivative of mean motion (radians/minute^3)
-            0.1859667,       # ecco: eccentricity
-            5.7904160274885, # argpo: argument of perigee (radians)
-            0.5980929187319, # inclo: inclination (radians)
-            0.3373093125574, # mo: mean anomaly (radians)
-            0.0472294454407, # no_kozai: mean motion (radians/minute)
-            6.0863854713832, # nodeo: right ascension of ascending node (radians)
+            _ecc,       # ecco: eccentricity
+            _argp, # argpo: argument of perigee (radians)
+            _incl, # inclo: inclination (radians)
+            _m, # mo: mean anomaly (radians)
+            _mean_motion, # no_kozai: mean motion (radians/minute)
+            _omega, # nodeo: right ascension of ascending node (radians)
         )
         ts = load.timescale()
         sat = EarthSatellite.from_satrec(satrec, ts) # wrap into a Skyfield object
@@ -252,8 +295,7 @@ class SGP4Propagator(Entity):
             kep_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             kep_writer.writerow(['time index','sma [km]','ecc','inc [deg]','raan [deg]','aop [deg]','ta [deg]'])
         
-        #propagate_time = ts.ut1_jd(_start_date) # mission epoch (which could be different from the date at which the spacecraft state is defined.)
-        # print("\n Mission epoch in UTC is: ", propagate_time.utc_jpl())
+
 
         # Propagate at time-resolution = stepSize. 
         # Take into advantage the vectorized nature of Skyfield's functions
@@ -262,7 +304,7 @@ class SGP4Propagator(Entity):
 
         propagate_time =  ts.ut1_jd(_start_date + _seconds) 
         
-        geocentric = sat.at(propagate_time) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy
+        geocentric = sat.at(propagate_time) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy See: https://rhodesmill.org/skyfield/earth-satellites.html#generating-a-satellite-position
 
         # write state            
         if out_file_cart:
@@ -274,7 +316,7 @@ class SGP4Propagator(Entity):
             cart_writer.writerows(data)
 
         if out_file_kep:
-            osc_elements = osculating_elements_of(geocentric)
+            osc_elements = osculating_elements_of(geocentric) # TODO: Verify that the produced elements are in the same reference frame as the reference frame of the position object. (It is likely this is true.)
             sma = osc_elements.semi_major_axis.km
             ecc = osc_elements.eccentricity
             inc = osc_elements.inclination.degrees
@@ -284,7 +326,7 @@ class SGP4Propagator(Entity):
 
             # Transpose the arrays to get rows of data
             data = np.vstack((indices, sma, ecc, inc, raan, aop, ta)).T
-            cart_writer.writerows(data)
+            kep_writer.writerows(data)
         
         if out_file_cart:
             cart_file.close()
