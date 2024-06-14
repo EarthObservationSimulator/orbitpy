@@ -9,8 +9,7 @@ from orbitpy.grid import Grid
 
 from instrupy import Instrument
 
-from skyfield.api import EarthSatellite, load, wgs84
-from skyfield.framelib import itrs
+from skyfield.api import load
 
 ######## User Configuration ########
 # Set mission epoch (GREGORIAN UT1) and duration. Make sure the epoch is around the TLE epochs.
