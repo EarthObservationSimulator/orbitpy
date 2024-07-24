@@ -149,7 +149,7 @@ class PropagatorFactory:
 
 class SGP4Propagator(Entity):
     """A Simplified General Perturbations 4 (SGP4) orbit propagator class.
-    THe implementation of this class is basically a wrapper around the Skyfield SGP4 orbit propagator.
+    THe implementation of this class is a wrapper around the Skyfield SGP4 orbit propagator.
 
     The instance variable(s) correspond to the propagator setting(s). 
 
@@ -254,8 +254,9 @@ class SGP4Propagator(Entity):
         (_p, _a, _ecc, _incl, _omega, _argp, _nu, _m, _arglat, _truelon, _lonper) = rv2coe(skyfield_teme_pos.km, skyfield_teme_vel.km_per_s, MU_Earth) # note that the angles are in radians
         _mean_motion = 60.0 * np.sqrt(MU_Earth/ (_a*_a*_a)) # semimajor axis (_a) units are in km. Obtained mean motion is in rad per minute.
 
+        # Initialize the sgp4 satellite object using the mean Keplerian elements
         satrec = Satrec()
-        # TODO: The second derivative of mean motion needs to be calculated.
+        # TODO: The second derivative of mean motion may need to be calculated.
         satrec.sgp4init(
             WGS72,           # gravity model
             'i',             # 'a' = old AFSPC mode, 'i' = improved mode
@@ -295,14 +296,12 @@ class SGP4Propagator(Entity):
             kep_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
             kep_writer.writerow(['time index','sma [km]','ecc','inc [deg]','raan [deg]','aop [deg]','ta [deg]'])
         
-
-
         # Propagate at time-resolution = stepSize. 
         # Take into advantage the vectorized nature of Skyfield's functions
         _seconds = np.arange(0, duration*86400.0, self.stepSize)
         indices = np.arange(len(_seconds))
 
-        propagate_time =  ts.ut1_jd(_start_date + _seconds) 
+        propagate_time =  ts.ut1_jd(_start_date + _seconds/86400.0) 
         
         geocentric = sat.at(propagate_time) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy See: https://rhodesmill.org/skyfield/earth-satellites.html#generating-a-satellite-position
 
@@ -313,7 +312,11 @@ class SGP4Propagator(Entity):
 
             # Transpose the arrays to get rows of data
             data = np.vstack((indices, pos[0], pos[1], pos[2], vel[0], vel[1], vel[2])).T
-            cart_writer.writerows(data)
+            # Convert the data to a list of lists, ensuring indices are integers
+            data_list = data.tolist()
+            for row in data_list:
+                row[0] = int(row[0])  # Ensure the first element (index) is an integer
+            cart_writer.writerows(data_list)
 
         if out_file_kep:
             osc_elements = osculating_elements_of(geocentric) # TODO: Verify that the produced elements are in the same reference frame as the reference frame of the position object. (It is likely this is true.)
@@ -326,7 +329,11 @@ class SGP4Propagator(Entity):
 
             # Transpose the arrays to get rows of data
             data = np.vstack((indices, sma, ecc, inc, raan, aop, ta)).T
-            kep_writer.writerows(data)
+            # Convert the data to a list of lists, ensuring indices are integers
+            data_list = data.tolist()
+            for row in data_list:
+                row[0] = int(row[0])  # Ensure the first element (index) is an integer
+            kep_writer.writerows(data_list)
         
         if out_file_cart:
             cart_file.close()

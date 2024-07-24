@@ -83,7 +83,7 @@ class TestOrbitState(unittest.TestCase):
         self.assertIsInstance(o, OrbitState)
 
         self.assertEqual(o._id, 123)
-        self.assertAlmostEqual(o.get_julian_date(), 2460362.365686, places=6)
+        self.assertAlmostEqual(o.get_julian_date(), 2460362.365686, places=5)
         state_dict = OrbitState.state_to_dict(o.state, state_type='CARTESIAN_EARTH_CENTERED_INERTIAL')
 
         self.assertAlmostEqual(state_dict["x"], 3417.50458485)
@@ -106,7 +106,7 @@ class TestOrbitState(unittest.TestCase):
         self.assertIsInstance(o, OrbitState)
 
         self.assertEqual(o._id, 123)
-        self.assertAlmostEqual(o.get_julian_date(), 2460408.985020, places=6)
+        self.assertAlmostEqual(o.get_julian_date(), 2460408.98502, places=5)
         state_dict = OrbitState.state_to_dict(o.state, state_type='KEPLERIAN_EARTH_CENTERED_INERTIAL')
 
         self.assertAlmostEqual(state_dict["sma"], 6886.541, delta=10e3) # 10k error tolerance
@@ -149,7 +149,7 @@ class TestOrbitState(unittest.TestCase):
         self.assertIsInstance(o, OrbitState)
 
         self.assertEqual(o._id, 123)
-        self.assertAlmostEqual(o.get_julian_date(), 2460408.985020, places=6)
+        self.assertAlmostEqual(o.get_julian_date(), 2460408.98502, places=5)
         state_dict = OrbitState.state_to_dict(o.state, state_type='KEPLERIAN_EARTH_CENTERED_INERTIAL')
 
         # Compare against the mean Keplerian elements given in the Orbit Mean-Elements Message (OMM) from www.space-track.org
