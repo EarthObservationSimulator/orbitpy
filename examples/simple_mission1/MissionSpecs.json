@@ -1,5 +1,5 @@
 {   
-    "epoch":{"@type":"GREGORIAN_UT1", "year":2021, "month":8, "day":19, "hour":12, "minute":0, "second":0},
+    "epoch":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0},
     "duration": 0.25,
     "spacecraft": [{
         "@id": "sp1", "name": "Mars",
@@ -18,5 +18,6 @@
     ],
     "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, 
              {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180, "gridRes": 1}],
+    "propagator": {"@type": "SGP4 PROPAGATOR", "stepSize": 5},
     "settings": {"coverageType": "GRID COVERAGE"}
 }
