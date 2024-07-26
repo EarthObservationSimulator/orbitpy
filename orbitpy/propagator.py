@@ -219,10 +219,11 @@ class SGP4Propagator(Entity):
         sat_epoch_state = spacecraft.orbitState.to_dict()
         _state = sat_epoch_state['state']
         _epoch = sat_epoch_state['date']
+        print("propcov satellite epoch: ", _epoch)
 
         # DEBUG: Display the Keplerian state of the satellite
-        #sat_kep_state = spacecraft.orbitState.to_dict(state_type='KEPLERIAN_EARTH_CENTERED_INERTIAL')['state']
-        #print('sat Keplerian state: ',  sat_kep_state['sma'], sat_kep_state['ecc'], sat_kep_state['inc'], sat_kep_state['raan'], sat_kep_state['aop'], sat_kep_state['ta'])
+        sat_kep_state = spacecraft.orbitState.to_dict(state_type='KEPLERIAN_EARTH_CENTERED_INERTIAL')['state']
+        print('sat Keplerian state: ',  sat_kep_state['sma'], sat_kep_state['ecc'], sat_kep_state['inc'], sat_kep_state['raan'], sat_kep_state['aop'], sat_kep_state['ta'])
 
         _pos = np.array([_state['x'], _state['y'], _state['z']])
         print('_pos', _pos)
@@ -232,6 +233,7 @@ class SGP4Propagator(Entity):
         _vel = Velocity(km_per_s = _vel) # convert to Skyfield object
         ts_epoch = load.timescale()
         epoch = ts_epoch.ut1_jd(_epoch['jd']) #  satellite epoch (which could be different from the mission epoch)
+        
 
         #### get the orbit state in TEME frame using SkyField ####
         # reference: https://rhodesmill.org/skyfield/positions.html#coordinates-in-other-reference-frames
@@ -258,14 +260,24 @@ class SGP4Propagator(Entity):
         _mean_motion = 60.0 * np.sqrt(MU_Earth/ (_a*_a*_a)) # semimajor axis (_a) units are in km. Obtained mean motion is in rad per minute.
 
         # Initialize the sgp4 satellite object using the mean Keplerian elements
-        """ Stick to using WGS72 gravity model based on the following discussion: https://github.com/dnwrnr/sgp4/issues/15
+        """ References and notes:
+            https://rhodesmill.org/skyfield/earth-satellites.html
+            https://pypi.org/project/sgp4/#providing-your-own-elements
+                - Note that ndot and nddot are ignored by the SGP4 propagator, so you can leave them 0.0 without any effect on the resulting satellite positions.
+            
+            Stick to using WGS72 gravity model based on the following discussion: https://github.com/dnwrnr/sgp4/issues/15
             Quote: " Note that the Python SGP4 implementation - which is an extremely close port of the official C++ version - strongly recommends 
                   sticking with WGS72 instead of WGS84, see https://pypi.org/project/sgp4/#gravity "
-            
-            TODO: The second derivative of mean motion may need to be calculated.
         """
         satrec = Satrec()
         time_ref = 2433281.500000 # 1949 December 31 00:00 UT
+
+        print('satellite TEME Keplerian elements')
+        print('eccentricity: ', _ecc)
+        print('AOP [deg]: ', np.rad2deg(_argp))
+        print('inclination [deg]: ', np.rad2deg(_incl))
+        print('mean anomaly [deg]', np.rad2deg(_m))
+        print('RAAN [deg]', np.rad2deg(_omega))
         
         satrec.sgp4init(
             WGS72,           # gravity model
@@ -273,7 +285,7 @@ class SGP4Propagator(Entity):
             5,               # satnum: Satellite number
             _epoch['jd'] - time_ref,       # epoch: days since 1949 December 31 00:00 UT
             2.8098e-05,      # bstar: drag coefficient (/earth radii)
-            6.969196665e-13, # ndot: ballistic coefficient (radians/minute^2)
+            0.0, # ndot: ballistic coefficient (radians/minute^2)
             0.0,             # nddot: second derivative of mean motion (radians/minute^3)
             _ecc,       # ecco: eccentricity
             _argp, # argpo: argument of perigee (radians)
@@ -285,12 +297,8 @@ class SGP4Propagator(Entity):
         ts = load.timescale()
         sat = EarthSatellite.from_satrec(satrec, ts) # wrap into a Skyfield object
         print('Satellite number:', sat.model.satnum)
-        print('Epoch:', sat.epoch.utc_jpl())
-        print('eccentricity: ', _ecc)
-        print('AOP [deg]: ', np.rad2deg(_argp))
-        print('inclination [deg]: ', np.rad2deg(_incl))
-        print('mean anomaly [deg]', np.rad2deg(_m))
-        print('RAAN [deg]', np.rad2deg(_omega))
+        print('Skyfield satellite epoch:', sat.epoch.utc_jpl())
+        
 
         # Prepare output files in which results shall be written
         if out_file_cart:

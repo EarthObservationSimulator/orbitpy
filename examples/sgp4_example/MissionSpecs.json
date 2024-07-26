@@ -1,0 +1,25 @@
+{   
+    "epoch":{"@type":"GREGORIAN_UT1", "year":2024, "month":2, "day":21, "hour":20, "minute":46, "second":35.290},
+    "duration": 0.25,
+    "spacecraft": [{
+        "@id": "sp1", "name": "Mars",
+        "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5,
+                        "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
+                        },
+        "instrument": {"name": "Alpha", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12,
+                        "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"},
+                        "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 },
+                        "maneuver":{"maneuverType": "CIRCULAR", "diameter":10},
+                        "@id":"bs1", "@type":"Basic Sensor"},
+        "orbitState": { "@type": "TLE",
+                        "tle_line0": "AQUA",
+                        "tle_line1": "1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991",
+                        "tle_line2": "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754"
+                        } 
+        }        
+    ],
+    "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, 
+             {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180, "gridRes": 1}],
+    "propagator": {"@type": "SGP4 PROPAGATOR", "stepSize": 5},
+    "settings": {"coverageType": "GRID COVERAGE"}
+}
