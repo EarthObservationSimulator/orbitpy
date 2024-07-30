@@ -36,11 +36,14 @@ class TestOrbitState(unittest.TestCase):
         self.assertIsInstance(y, propcov.OrbitState) 
 
         self.assertEqual(x, y)
- 
+
     def test_date_to_dict(self): #@TODO
         pass
 
     def test_state_to_dict(self): #@TODO
+        pass
+
+    def test_tle_to_dict(self): #@TODO
         pass
     
     def test_get_julian_date(self): #@TODO
@@ -56,11 +59,13 @@ class TestOrbitState(unittest.TestCase):
         # Julian date, Cartesian state
         o = OrbitState.from_dict({"date":{"@type":"JULIAN_DATE_UT1", "jd":2459270.75}, 
                                   "state":{"@type": "CARTESIAN_EARTH_CENTERED_INERTIAL", "x": 6878.137, "y": 0, "z": 0, "vx": 0, "vy": 7.6126, "vz": 0},
+                                  "tle": None,
                                   "@id": 123})
         self.assertIsInstance(o, OrbitState)
         self.assertEqual(o._id, 123)
         self.assertEqual(o.date, propcov.AbsoluteDate.fromJulianDate(2459270.75))
         self.assertEqual(o.state, propcov.OrbitState.fromCartesianState(propcov.Rvector6([6878.137,0,0,0,7.6126,0])))
+        self.assertIsNone(o.tle)
 
         # Gregorian date, Keplerian state
         o = OrbitState.from_dict({"date":{"@type":"GREGORIAN_UT1", "year":2021, "month":2, "day":25, "hour":6, "minute":0, "second":0}, 
@@ -70,13 +75,34 @@ class TestOrbitState(unittest.TestCase):
         self.assertIsNone(o._id)
         self.assertEqual(o.date, propcov.AbsoluteDate.fromGregorianDate(2021, 2, 25, 6 ,0, 0))
         self.assertEqual(o.state, propcov.OrbitState.fromKeplerianState(6878.137, 0.001, np.deg2rad(45), np.deg2rad(35), np.deg2rad(145), np.deg2rad(-25)))
+        self.assertIsNone(o.tle)
+
+        # TLE
+        o = OrbitState.from_dict({"tle": {
+                                    "tle_line0": "AQUA",
+                                    "tle_line1": "1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991",
+                                    "tle_line2": "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754"}})
+        self.assertIsInstance(o, OrbitState)
+        self.assertIsNone(o._id)
+        self.assertAlmostEqual(o.get_julian_date(), 2460362.365686, places=5)
+        state_dict = OrbitState.state_to_dict(o.state, state_type='CARTESIAN_EARTH_CENTERED_INERTIAL')
+        self.assertAlmostEqual(state_dict["x"], 3417.50458485)
+        self.assertAlmostEqual(state_dict["y"], -802.52409303)
+        self.assertAlmostEqual(state_dict["z"], 6134.36342655)
+        self.assertAlmostEqual(state_dict["vx"], -6.5733887)
+        self.assertAlmostEqual(state_dict["vy"], -0.70421461)
+        self.assertAlmostEqual(state_dict["vz"], 3.56159903)
+
+        # TODO: OMM 
+
     
-    def test_state_from_dict_tle(self):
+    def test_state_from_tle_dict(self):
   
-        d = {   "@type": "TLE",
-                "tle_line0": "AQUA",
-                "tle_line1": "1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991",
-                "tle_line2": "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754",
+        d = {   "tle": {
+                    "tle_line0": "AQUA",
+                    "tle_line1": "1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991",
+                    "tle_line2": "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754"
+                },            
                 "@id": 123}
         
         o = OrbitState.from_dict(d)
@@ -96,11 +122,12 @@ class TestOrbitState(unittest.TestCase):
         # Terra SAR-X
         # Compare against the mean Keplerian elements given in the Orbit Mean-Elements Message (OMM) from www.space-track.org. 
         # Note that the TLE info is also sourced from the same OMM. 
-        d = {"@type": "TLE",
-             "tle_line0": "Terra SAR X",
-             "tle_line1":   "1 31698U 07026A   24099.48501970  .00001689  00000-0  83603-4 0  9998",
-             "tle_line2":   "2 31698  97.4452 107.6258 0001796  88.6052 271.5388 15.19151402932479",
-             "@id": 123}
+        d = {   "tle": {
+                    "tle_line0": "Terra SAR X",
+                    "tle_line1":   "1 31698U 07026A   24099.48501970  .00001689  00000-0  83603-4 0  9998",
+                    "tle_line2":   "2 31698  97.4452 107.6258 0001796  88.6052 271.5388 15.19151402932479"
+                },
+                "@id": 123}
         
         o = OrbitState.from_dict(d)
         self.assertIsInstance(o, OrbitState)
@@ -122,8 +149,7 @@ class TestOrbitState(unittest.TestCase):
     def test_state_from_dict_omm(self):
 
         # Terra SAR-X
-        d = {"@type": "OMM",
-             "omm": {
+        d = {   "omm": {
                         "CCSDS_OMM_VERS": "2.0", "COMMENT": "GENERATED VIA SPACE-TRACK.ORG API",
                         "CREATION_DATE": "2024-04-08T19:28:18", "ORIGINATOR": "18 SPCS",
                         "OBJECT_NAME": "TERRA SAR X", "OBJECT_ID": "2007-026A",
@@ -143,7 +169,7 @@ class TestOrbitState(unittest.TestCase):
                         "SEMIMAJOR_AXIS": "6886.541", "PERIOD": "94.790", "APOAPSIS": "509.643", "PERIAPSIS": "507.169",
                         "OBJECT_TYPE": "PAYLOAD", "DECAYED": "0"
                     },
-             "@id": 123}
+                "@id": 123}
         
         o = OrbitState.from_dict(d)
         self.assertIsInstance(o, OrbitState)
@@ -179,6 +205,7 @@ class TestOrbitState(unittest.TestCase):
         self.assertEqual(d["state"]["vx"], 0)
         self.assertEqual(d["state"]["vy"], 7.6126)
         self.assertEqual(d["state"]["vz"], 0)
+        self.assertIsNone(d["tle"])
         self.assertIsNone(d["@id"])
 
         # Input: Gregorian date, Keplerian state
@@ -197,7 +224,30 @@ class TestOrbitState(unittest.TestCase):
         self.assertEqual(d["state"]["vx"], state[3])
         self.assertEqual(d["state"]["vy"], state[4])
         self.assertEqual(d["state"]["vz"], state[5])
+        self.assertIsNone(d["tle"])
         self.assertEqual(d["@id"], "123")
+
+        # Input: TLE
+        o = OrbitState.from_dict({"tle": {
+                                    "tle_line0": "AQUA",
+                                    "tle_line1": "1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991",
+                                    "tle_line2": "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754"}})
+        d = o.to_dict()
+        self.assertEqual(d["tle"]["tle_line0"], "AQUA")
+        self.assertEqual(d["tle"]["tle_line1"], "1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991")
+        self.assertEqual(d["tle"]["tle_line2"], "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754")
+        date = o.get_julian_date()
+        state = o.get_cartesian_earth_centered_inertial_state()
+        self.assertEqual(d["date"]["@type"], "JULIAN_DATE_UT1")
+        self.assertEqual(d["date"]["jd"], date)
+        self.assertEqual(d["state"]["@type"], "CARTESIAN_EARTH_CENTERED_INERTIAL")
+        self.assertAlmostEqual(d["state"]["x"], state[0])
+        self.assertEqual(d["state"]["y"], state[1])
+        self.assertEqual(d["state"]["z"], state[2])
+        self.assertEqual(d["state"]["vx"], state[3])
+        self.assertEqual(d["state"]["vy"], state[4])
+        self.assertEqual(d["state"]["vz"], state[5])
+
 
 class TestSpacecraftBus(unittest.TestCase):
 

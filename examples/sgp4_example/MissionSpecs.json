@@ -11,11 +11,12 @@
                         "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 },
                         "maneuver":{"maneuverType": "CIRCULAR", "diameter":10},
                         "@id":"bs1", "@type":"Basic Sensor"},
-        "orbitState": { "@type": "TLE",
-                        "tle_line0": "AQUA",
-                        "tle_line1": "1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991",
-                        "tle_line2": "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754"
-                        } 
+        "orbitState": { "tle": {
+                            "tle_line0": "AQUA",
+                            "tle_line1": "1 27424U 02022A   24052.86568623  .00001525  00000-0  33557-3 0  9991",
+                            "tle_line2": "2 27424  98.3176   1.9284 0001998  92.8813 328.6214 14.58896689159754"
+                        }
+                    }
         }        
     ],
     "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, 
