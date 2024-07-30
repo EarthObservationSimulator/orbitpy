@@ -205,17 +205,14 @@ class SGP4Propagator(Entity):
         else:
             return NotImplemented
     
-    def execute(self, spacecraft, start_date=None, out_file_cart=None, out_file_kep=None, duration=1):
-        """ Execute orbit propagation of the input spacecraft (single) and write to a csv data-file."""
+    @staticmethod
+    def get_Satrec_object(spacecraft):
+        """ Build a SGP4 Satrec object from orbital elements.
+        
+            TODO: Function requires validation.
+        """
 
-        #### Get the mission start date ####
-        if(start_date is None):
-            start_date = spacecraft.orbitState.date       
-        _start_date = start_date.GetJulianDate() # Get the Julian Date from the ``propcov.AbsoluteDate`` object 
-
-        #### Build a Skyfield satellite object from orbital elements ####
-
-        # Get the instantaneous Cartesian elements (in CARTESIAN_EARTH_CENTERED_INERTIAL (J2000) frame) of the spacecraft
+        #### Get the instantaneous Cartesian elements (in CARTESIAN_EARTH_CENTERED_INERTIAL (J2000) frame) of the spacecraft ####
         sat_epoch_state = spacecraft.orbitState.to_dict()
         _state = sat_epoch_state['state']
         _epoch = sat_epoch_state['date']
@@ -234,7 +231,7 @@ class SGP4Propagator(Entity):
         ts_epoch = load.timescale()
         epoch = ts_epoch.ut1_jd(_epoch['jd']) #  satellite epoch (which could be different from the mission epoch)
         
-
+        
         #### get the orbit state in TEME frame using SkyField ####
         # reference: https://rhodesmill.org/skyfield/positions.html#coordinates-in-other-reference-frames
         # https://rhodesmill.org/skyfield/api-position.html#skyfield.positionlib.ICRF.from_time_and_frame_vectors
@@ -269,7 +266,7 @@ class SGP4Propagator(Entity):
             Quote: " Note that the Python SGP4 implementation - which is an extremely close port of the official C++ version - strongly recommends 
                   sticking with WGS72 instead of WGS84, see https://pypi.org/project/sgp4/#gravity "
         """
-        satrec = Satrec()
+        satrec = Satrec(spacecraft)
         time_ref = 2433281.500000 # 1949 December 31 00:00 UT
 
         print('satellite TEME Keplerian elements')
@@ -294,10 +291,29 @@ class SGP4Propagator(Entity):
             _mean_motion, # no_kozai: mean motion (radians/minute)
             _omega, # nodeo: right ascension of ascending node (radians)
         )
+
+        return satrec
+
+    def execute(self, spacecraft, start_date=None, out_file_cart=None, out_file_kep=None, duration=1):
+        """ Execute orbit propagation of the input spacecraft (single) and write to a csv data-file."""
+
+        #### Get the mission start date ####
+        if(start_date is None):
+            start_date = spacecraft.orbitState.date       
+        _start_date = start_date.GetJulianDate() # Get the Julian Date from the ``propcov.AbsoluteDate`` object 
+
+        
         ts = load.timescale()
-        sat = EarthSatellite.from_satrec(satrec, ts) # wrap into a Skyfield object
-        print('Satellite number:', sat.model.satnum)
-        print('Skyfield satellite epoch:', sat.epoch.utc_jpl())
+
+        # If TLE is available, use it to instantiate the Skyfield satellite object, else instantiate the Skyfiled object using the Satrec (sgp4) object. 
+        if spacecraft.orbitState.tle is not None:
+            tle = spacecraft.orbitState.tle
+            skyfield_sat = EarthSatellite(tle["tle_line1"], tle["tle_line2"], tle["tle_line0"], ts)
+        else:
+            satrec = SGP4Propagator.get_Satrec_object()
+            skyfield_sat = EarthSatellite.from_satrec(satrec, ts) # wrap into a Skyfield object
+            #print('Satellite number:', skyfield_sat.model.satnum)
+            #print('Skyfield satellite epoch:', skyfield_sat.epoch.utc_jpl())
         
 
         # Prepare output files in which results shall be written
@@ -326,7 +342,7 @@ class SGP4Propagator(Entity):
 
         propagate_time =  ts.ut1_jd(_start_date + _seconds/86400.0) 
         
-        geocentric = sat.at(propagate_time) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy See: https://rhodesmill.org/skyfield/earth-satellites.html#generating-a-satellite-position
+        geocentric = skyfield_sat.at(propagate_time) # in GCRS (ECI) coordinates. GCRS ~ J2000, and is treated as the same in OrbitPy See: https://rhodesmill.org/skyfield/earth-satellites.html#generating-a-satellite-position
 
         # write state            
         if out_file_cart:
