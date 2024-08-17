@@ -18,6 +18,9 @@ from orbitpy.util import Spacecraft, OutputInfoUtility
 import orbitpy.util
 from instrupy.util import ReferenceFrame, SphericalGeometry, GeoUtilityFunctions, Constants
 
+import kcl
+import GeometricTools as gte
+
 DAYS_PER_SEC = 1.1574074074074074074074074074074e-5
 
 class CoverageCalculatorFactory:
@@ -293,7 +296,7 @@ def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None
                         f2.write(str(head[k]))
                 out_df.to_csv(f2, index=False, header=True)
 
-        return out_df
+        return out_df    
 
 class GridCoverage(Entity):
     """A coverage calculator class which handles coverage calculation for a spacecraft over a grid. Each ``GridCoverage`` object is specific to 
@@ -555,7 +558,232 @@ class GridCoverage(Entity):
                                                 "startDate": epoch_JDUT1,
                                                 "duration": duration,
                                                 "@id": None})
+
+class NewGridCoverage(GridCoverage): 
+
+    def execute(self, instru_id=None, mode_id=None, use_field_of_regard=False, out_file_access=None, mid_access_only=False, method='RectangularPIP', buff_size = 100):
+        """ Perform orbit coverage calculation for a specific instrument and mode of the instrument in the object instance. Coverage is calculated for the period over which the 
+            input spacecraft propagated states are available. The time-resolution of the coverage calculation is the 
+            same as the time resolution at which the spacecraft states are available. Note that the sceneFOV of an instrument (which may be the same as the instrument FOV)
+            is used for coverage calculations unless it has been specified to use the field-of-regard.
+
+        :param instru_id: Instrument identifier (must be present in the input spacecraft). If ``None``, the first instrument in the spacecraft's list of instruments is considered.
+        :paramtype instru_id: str (or) int
+
+        :param mode_id: Mode identifier (corresponding to the input instrument (id)). If ``None``, the first mode of the instrument is considered.
+        :paramtype mode_id: str (or) int
+
+        :param use_field_of_regard: This is a boolean flag to specify if the the field-of-regard is to be considered for the coverage calculations. 
+                                    Default value is ``False`` (i.e. the scene-field-of-view will be considered in the coverage calculations).
+        :paramtype use_field_of_regard: bool
+
+        :param out_file_access: File name with path of the file in which the access data is written.
+                
+                The file format is as follows:
+
+                *  The first row contains the coverage calculation type.
+                *  The second row containing the mission epoch in Julian Day UT1. The time (index) in the state data is referenced to this epoch.
+                *  The third row contains the time-step size in seconds. 
+                *  The fourth row contains the duration (in days) for which coverage calculation is executed.
+                *  The fifth row contains the columns headers and the sixth row onwards contains the corresponding data. 
+
+                Note that time associated with a row is:  ``time = epoch (in JDUT1) + time-index * time-step-size (in secs) * (1/86400)`` 
+
+                Description of the coverage data is given below:
+
+                .. csv-table:: Coverage data description
+                    :header: Column, Data type, Units, Description
+                    :widths: 10,10,10,30
+
+                    time index, int, , Access time-index.
+                    GP index, int, , Grid-point index.
+                    lat [deg], float, degrees, Latitude corresponding to the GP index.
+                    lon [deg], float, degrees, Longitude corresponding to the GP index.
+
+        :paramtype out_file_access: str
+
+        :param mid_access_only: Flag to indicate if the coverage data is to be processed to indicate only the access at the middle of an (continuous) access-interval. 
+                                Default value is ``False``.
+        :paramtype mid_access_only: bool
+
+        :param method:  Indicate the coverage method (relevant for the case of sensor FOVs described by spherical-polygon vertices and Rectangular FOV).
+                        Only entries `DirectSphericalPIP` or `ProjectedPIP` or `RectangularPIP` are allowed. 
+                        Default method is `DirectSphericalPIP`.
+
+                        The `DirectSphericalPIP` method corresponds to implementation of the `propcov.DSPIPCustomSensor` class, while
+                        the `ProjectedPIP` corresponds to the implementation of the `propcov.GMATCustomSensor` class.                        
+                        
+                        For details on the `DirectSphericalPIP` method please refer to the article: R. Ketzner, V. Ravindra and M. Bramble, 
+                        'A Robust, Fast, and Accurate Algorithm for Point in Spherical Polygon Classification with Applications in Geoscience and Remote Sensing', Computers and Geosciences, accepted.
+                        
+                        In the above article, the algorithm is described and compared to the ‘GMAT CustomSensor’ algorithm which is the same as the 
+                        point-in-polygon algorithm implemented in the `propcov.GMATCustomSensor` class. 
+                        Compared to the `propcov.GMATCustomSensor` class, the `propcov.DSPIPCustomSensor` has been shown to yield improvement in runtime 
+                        and also to be more accurate.
+
+                        `RectangularPIP` method is applicable only for RECTANGULAR spherical geometry shapes. It is based on the
+                        `propcov.RectangularSensor` class. The class evaluates the dot product between the target point and the normal of the hemispherical-planes
+                        formed by the 4 edges of the rectangle shape (on spherical surface). The corners of the rectangle are arranged in anti-clockwise manner about the center on the spherical surface,
+                        if the target point is in the Northern hemisphere corresponding to 4 hemispherical planes formed by the edges of the rectangle, then the target falls
+                        within the sensor FOV.  
+ 
+        :paramtype method: str
+
+        :return: Coverage output info.
+        :rtype: :class:`orbitpy.coveragecalculator.CoverageOutputInfo`
+
+        """
+        ###### read in the propagated states and auxillary information ######               
+        (epoch_JDUT1, step_size, duration) = orbitpy.util.extract_auxillary_info_from_state_file(self.state_cart_file)
+
+        ###### Prepare output file in which results shall be written ######
+        access_file = open(out_file_access, 'w', newline='')
+        access_writer = csv.writer(access_file, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        access_writer.writerow(["GRID COVERAGE"])
+        access_writer.writerow(["Epoch [JDUT1] is {}".format(epoch_JDUT1)])
+        access_writer.writerow(["Step size [s] is {}".format(step_size)])
+        access_writer.writerow(["Mission Duration [Days] is {}".format(duration)])
+        access_writer.writerow(['time index','GP index', 'lat [deg]', 'lon [deg]'])
+        access_file.close()
+        
+        ###### find the FOV/ FOR corresponding to the input sensor-id, mode-id  ######
+        cov_param= find_in_cov_params_list(self.cov_params, instru_id, mode_id)
+        # the input instru_id, mode_id may be None, so get the sensor, mode ids.
+        instru_id = cov_param.instru_id
+        mode_id = cov_param.mode_id
+
+        if use_field_of_regard is True:
+            raise NotImplementedError
+        else:
+            __view_geom = cov_param.scene_field_of_view 
+                    
+        # orient the spacecraft-bus
+        spc_orien = self.spacecraft.spacecraftBus.orientation
+        if spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING:
             
+            # Change to radians
+            angle1 = np.deg2rad(spc_orien.euler_angle1)
+            angle2 = np.deg2rad(spc_orien.euler_angle2)
+            angle3 = np.deg2rad(spc_orien.euler_angle3)
+            # Switch order of rotations since GTE uses extrinsic sequence
+            euler_angles = gte.EulerAnglesd(spc_orien.euler_seq3-1,spc_orien.euler_seq2-1,spc_orien.euler_seq1-1,
+                                            angle3,angle2,angle1)
+            NADIR_B = gte.Transpose(gte.Rotationd(euler_angles).to_matrix())           
+        else:
+            raise NotImplementedError # only NADIR_POINTING reference frame is supported.           
+
+        ###### build the sensor object ######
+        skip_rows = 5
+        skip_cols = 1
+        states_I_list = kcl.read_to_vector_Vector6d(self.state_cart_file, skip_rows, skip_cols)
+        states_I_source = kcl.ListSourceVector6d(states_I_list)
+        pos_I_source = kcl.SlicedVector3dSource_6_0(states_I_source,buff_size)
+        vel_I_source = kcl.SlicedVector3dSource_6_3(states_I_source,buff_size)
+
+        jd_source = kcl.FixedJdSource(epoch_JDUT1,step_size*DAYS_PER_SEC,buff_size)
+        ECEF_I_source = kcl.ECEFIMatrix3x3Source(jd_source,buff_size)
+        pos_ECEF_source = kcl.TransformedVector3dSource(pos_I_source,ECEF_I_source,buff_size)
+        vel_ECEF_source = kcl.TransformedVector3dSource(vel_I_source,ECEF_I_source,buff_size)
+
+        
+        ECEF_NADIR_source = kcl.NadirMatrix3x3Source(pos_ECEF_source,vel_ECEF_source,buff_size)
+        
+        
+        sen_orien = __view_geom.orien
+        if (sen_orien.ref_frame == ReferenceFrame.SC_BODY_FIXED) or (sen_orien.ref_frame == ReferenceFrame.NADIR_POINTING and spc_orien.ref_frame == ReferenceFrame.NADIR_POINTING): # The second condition is equivalent of orienting sensor w.r.t spacecraft body when the spacecraft body is aligned to nadir-frame
+            
+            # Change to radians
+            angle1 = np.deg2rad(sen_orien.euler_angle1)
+            angle2 = np.deg2rad(sen_orien.euler_angle2)
+            angle3 = np.deg2rad(sen_orien.euler_angle3)
+            # Switch order of rotations since GTE uses extrinsic sequence
+            euler_angles = gte.EulerAnglesd(sen_orien.euler_seq3-1,sen_orien.euler_seq2-1,sen_orien.euler_seq1-1,
+                                            angle3,angle2,angle1)
+            B_S = gte.Transpose(gte.Rotationd(euler_angles).to_matrix())
+            NADIR_S = NADIR_B*B_S;
+            NADIR_S_source = kcl.ConstantSourceMatrix3x3d(NADIR_S) # need binding, done
+        else:
+            raise NotImplementedError
+            
+        ECEF_S_source = kcl.ChainedMatrixSource([ECEF_NADIR_source,NADIR_S_source],buff_size)
+        
+        sen_sph_geom = __view_geom.sph_geom
+        if(sen_sph_geom.shape == SphericalGeometry.Shape.CIRCULAR):
+            half_angle = .5*np.deg2rad(sen_sph_geom.diameter)
+            angle_source = kcl.ConstantSourced(half_angle)
+            fov_source = kcl.DefaultConeSource(pos_ECEF_source, ECEF_S_source, angle_source, buff_size)
+            fov_viewer = kcl.ViewerCone3d(fov_source)
+        elif(sen_sph_geom.shape == SphericalGeometry.Shape.RECTANGULAR or sen_sph_geom.shape == SphericalGeometry.Shape.CUSTOM):
+            if method=='DirectSphericalPIP':
+                raise NotImplementedError
+            
+            elif method=='ProjectedPIP':
+                raise NotImplementedError
+                
+            elif method=='RectangularPIP':
+                [angleHeightIn, angleWidthIn] = sen_sph_geom.get_fov_height_and_width()
+                angleHeightIn = np.deg2rad(angleHeightIn)
+                angleWidthIn = np.deg2rad(angleWidthIn)
+                h_angle_source = kcl.ConstantSourced(angleWidthIn)
+                w_angle_source = kcl.ConstantSourced(angleHeightIn)
+                fov_source = kcl.DefaultRectViewSource(pos_ECEF_source, ECEF_S_source,
+                                                       h_angle_source, w_angle_source, buff_size)
+                fov_viewer = kcl.ViewerRectView3d(fov_source)
+            else:
+                raise Exception("Please specify a valid coverage method.")         
+        else:
+            raise Exception("Please input valid sensor spherical geometry shape.")
+
+        # Setup horizon
+        
+        earth_sphere = gte.Sphere3d(gte.Vector3d.Zero(), 6.3781363e+03)
+        sphere_source = kcl.ConstantSourceSphere3d(earth_sphere)
+        horizon_source = kcl.PolarHalfspaceSource(sphere_source, pos_ECEF_source, buff_size)
+        
+        # Setup Viewers
+        horizon_viewer = kcl.ViewerHalfspace3d(horizon_source)
+        total_view = kcl.Intersection([horizon_viewer,fov_viewer])
+        
+        # Setup grid
+        grid_pts = [gte.Vector3d(self.grid.point_group.GetPointPositionVector(i).GetRealArray()) for i in range(0,self.grid.num_points)]
+        grid_source = kcl.ConstantSourceListVector3d(grid_pts)
+        
+        cov_source = kcl.CovSource(grid_source,None,total_view,buff_size)
+        
+        # IO
+        formatter = kcl.OrbitPyCoverageFormatter(grid_source)
+        append = True
+        writer = kcl.DefaultWriterListuint(cov_source,formatter,out_file_access,buff_size,append)
+        writers = [writer]
+        
+        # Drive coverage
+        variables = [pos_I_source, vel_I_source, jd_source, ECEF_I_source, pos_ECEF_source, vel_ECEF_source,
+                      ECEF_NADIR_source, ECEF_S_source, fov_source, horizon_source, cov_source, writer]
+        driver = kcl.VarDriver(variables)
+        start_time = 0
+        stop_time = len(states_I_list) - 1
+        kcl.driveCoverage(buff_size,start_time,stop_time,driver,writers)
+                          
+        
+
+        ##### filter mid-interval access data if necessary #####
+        if mid_access_only is True:
+            filter_mid_interval_access(inp_acc_fl=out_file_access, out_acc_fl=out_file_access)        
+        
+        return CoverageOutputInfo.from_dict({   "coverageType": "GRID COVERAGE",
+                                                "spacecraftId": self.spacecraft._id,
+                                                "instruId": instru_id,
+                                                "modeId": mode_id,
+                                                "usedFieldOfRegard": use_field_of_regard,
+                                                "filterMidIntervalAccess": mid_access_only,
+                                                "gridId": self.grid._id,
+                                                "stateCartFile": self.state_cart_file,
+                                                "accessFile": out_file_access,
+                                                "startDate": epoch_JDUT1,
+                                                "duration": duration,
+                                                "@id": None})
+    
+    
 class PointingOptionsCoverage(Entity):
     """A coverage calculator which handles coverage calculation for an instrument (on a spacecraft) with a set of pointing-options.
        A pointing-option refers to orientation of the instrument in the NADIR_POINTING frame. The set of pointing-options 
