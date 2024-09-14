@@ -25,12 +25,11 @@ class OrbitPyDefaults(object):
     """
     grid_res_fac = 0.9
     time_res_fac = 0.25
+
 class StateType(EnumEntity):
     KEPLERIAN_EARTH_CENTERED_INERTIAL = "KEPLERIAN_EARTH_CENTERED_INERTIAL"
     CARTESIAN_EARTH_CENTERED_INERTIAL = "CARTESIAN_EARTH_CENTERED_INERTIAL"
     CARTESIAN_EARTH_FIXED = "CARTESIAN_EARTH_FIXED"
-    TLE = "TLE"
-    OMM = "OMM"
 
 class DateType(EnumEntity):
     GREGORIAN_UT1 = "GREGORIAN_UT1"
@@ -42,48 +41,60 @@ class OrbitState(Entity):
         date and state respectively. Note that :class:`propcov.OrbitState` and :class:`orbitpy.util.OrbitState`
         classes are different. The class also provides several staticmethods to convert propcov-class representations 
         to/from inbuilt python datatypes.
+        
+        The class also supports initialization with TLE or OMM. It maintains a ``tle`` instance member.
+        The ``tle`` instance member is valid only if the instantiation was done using a TLE.
+        The class does *not* support obtaining a TLE if the instantiation was done using Cartesian or Keplerian elements.
 
-    :ivar date: Date at which the orbit state is defined.
+    :ivar date: Date at which the orbit state is defined (epoch).
     :vartype date: :class:`propcov.AbsoluteDate`
 
-    :ivar state: Orbit state (satellite position, velocity).
+    :ivar state: Satellite state (satellite position, velocity).
     :vartype state: :class:`propcov.OrbitState`
+
+    :ivar tle: Orbit state (epoch, satellite position, velocity) in Two Line Element format. 
+                Dictionary with the following keys:
+
+                * tle_line0 : (str) TLE line 0 string. The first line contains the satellite name, and the next two lines are the two line elements.
+                * tle_line1 : (str) TLE line 1 string. 
+                * tle_line2 : (str) TLE line 2 string. 
+
+    :vartype tle: dict
 
     :ivar _id: Unique identifier.
     :vartype _id: str
     
     """
-    def __init__(self, date=None, state=None, _id=None):
+    def __init__(self, date=None, state=None, tle=None, _id=None):
 
         self.date = date if date is not None and isinstance(date, propcov.AbsoluteDate) else None
         self.state = state if state is not None and isinstance(state, propcov.OrbitState) else None
+        self.tle = tle if tle is not None and isinstance(tle, dict) and len(tle) == 3 and all(isinstance(key, str) for key in tle) else None
         super(OrbitState, self).__init__(_id, "OrbitState")   
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(d): 
         """ Parses orbit state from a dictionary.
 
-        :param d: Dictionary with the date and state description. Refer to the ``date_from_dict`` and ``state_from_dict``
+        :param d: Dictionary with the date and state description. Refer to the ``date_from_dict`` and ``state_from_dict`` and ``from_tle``
                   for description of the expected dictionary key/value pairs.
         
         :return: Parsed python object. 
         :rtype: :class:`orbitpy.util.OrbitState`
 
         """
-        if "@type" in d: # the orbit-state and date are together in the format of TLE or OMM.
-            stateType = d.get('@type', None)
-            state_type = StateType.get(stateType) if stateType is not None else None
-            if state_type == StateType.TLE:
-                (date, state) = OrbitState.from_tle(d)
-            elif state_type == StateType.OMM:
-                (date, state) = OrbitState.from_omm(d.get("omm"))
-            else:
-                raise Exception("Unrecognized type in the 'orbitstate' dictionary key.")
+        date = None
+        state = None
+        tle = None
+        if d.get('tle') is not None:
+            (date, state, tle) = OrbitState.from_tle(d.get("tle"))
+        elif d.get('omm') is not None:
+            (date, state, tle) = OrbitState.from_omm(d.get("omm"))
         else:
             date = OrbitState.date_from_dict(d.get("date", None))
             state = OrbitState.state_from_dict(d.get("state", None))
 
-        return OrbitState(date=date, state=state, _id=d.get("@id", None))
+        return OrbitState(date=date, state=state, tle=tle, _id=d.get("@id", None))
 
     def to_dict(self, state_type=None):
         """ Translate the OrbitState object to a Python dictionary such that it can be uniquely reconstructed back from the dictionary.
@@ -97,6 +108,7 @@ class OrbitState(Entity):
         """        
         return dict({"date": OrbitState.date_to_dict(self.date), 
                      "state": OrbitState.state_to_dict(self.state, state_type), 
+                     "tle": OrbitState.tle_to_dict(self.tle),
                      "@id": self._id})
     
     def get_cartesian_earth_centered_inertial_state(self):
@@ -123,7 +135,7 @@ class OrbitState(Entity):
         """ Simple equality check. Returns True if the class attributes are equal, else returns False.
         """
         if(isinstance(self, other.__class__)):
-            return (self.date == other.date and self.state == other.state)
+            return (self.date == other.date and self.state == other.state and self.tle==other.tle)
         else:
             return NotImplemented
 
@@ -277,7 +289,7 @@ class OrbitState(Entity):
         except:
             raise Exception("Error while setting the orbit state from TLE")
         
-        return (date, state)
+        return (date, state, tle_dict)
     
     @staticmethod
     def from_omm(omm_dict):
@@ -301,11 +313,27 @@ class OrbitState(Entity):
                     "tle_line1": omm_dict["TLE_LINE1"],
                     "tle_line2": omm_dict["TLE_LINE2"]
                 }
-        (date, state) = OrbitState.from_tle(tle_dict)
-        return (date, state)
+        (date, state, tle) = OrbitState.from_tle(tle_dict)
+        return (date, state, tle)
 
+    def tle_to_dict(tle_dict):
+       """ Get a Python dictionary representation of the input ``tle`` dict.
 
-    
+        :param tle: Orbit state (epoch, satellite position, velocity) in Two Line Element format. 
+                Dictionary with the following keys:
+
+                * tle_line0 : (str) TLE line 0 string. The first line contains the satellite name, and the next two lines are the two line elements.
+                * tle_line1 : (str) TLE line 1 string. 
+                * tle_line2 : (str) TLE line 2 string. 
+
+        :paramtype tle: dict
+
+        :returns: Python dictionary representation of the input tle. 
+        :rtype: dict
+
+       """
+       return tle_dict 
+
     @staticmethod
     def date_to_dict(date):
         """ Get a Python dictionary representation of the input ``propcov`` date object. 

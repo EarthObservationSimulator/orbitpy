@@ -1,0 +1,40 @@
+{   
+    "epoch":{"@type":"GREGORIAN_UT1", "year":2024, "month":4, "day":8, "hour":11, "minute":38, "second":25.702080},
+    "duration": 0.25,
+    "spacecraft": [{
+        "@id": "sp1", "name": "Mars",
+        "spacecraftBus":{"name": "BlueCanyon", "mass": 20, "volume": 0.5,
+                        "orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}
+                        },
+        "instrument": {"name": "Alpha", "mass":10, "volume":12.45, "dataRate": 40, "bitsPerPixel": 8, "power": 12,
+                        "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention": "REF_FRAME_ALIGNED"},
+                        "fieldOfViewGeometry": {"shape": "CIRCULAR", "diameter":5 },
+                        "maneuver":{"maneuverType": "CIRCULAR", "diameter":10},
+                        "@id":"bs1", "@type":"Basic Sensor"},
+        "orbitState":   { "omm": {
+                            "CCSDS_OMM_VERS": "2.0", "COMMENT": "GENERATED VIA SPACE-TRACK.ORG API",
+                            "CREATION_DATE": "2024-04-08T19:28:18", "ORIGINATOR": "18 SPCS",
+                            "OBJECT_NAME": "TERRA SAR X", "OBJECT_ID": "2007-026A",
+                            "CENTER_NAME": "EARTH", "REF_FRAME": "TEME",
+                            "TIME_SYSTEM": "UTC", "MEAN_ELEMENT_THEORY": "SGP4",
+                            "EPOCH": "2024-04-08T11:38:25.702080", "MEAN_MOTION": "15.19151402",
+                            "ECCENTRICITY": "0.0001796", "INCLINATION": "97.4452",
+                            "RA_OF_ASC_NODE": "107.6258", "ARG_OF_PERICENTER": "88.6052",
+                            "MEAN_ANOMALY": "271.5388", "EPHEMERIS_TYPE": "0",
+                            "CLASSIFICATION_TYPE": "U", "NORAD_CAT_ID": "31698",
+                            "ELEMENT_SET_NO": "999", "REV_AT_EPOCH": "93181",
+                            "BSTAR": "0.000083603", "MEAN_MOTION_DOT": "0.00001689",
+                            "MEAN_MOTION_DDOT": "0",
+                            "TLE_LINE0": "0 TERRA SAR X",
+                            "TLE_LINE1": "1 31698U 07026A   24099.48501970  .00001689  00000-0  83603-4 0  9998",
+                            "TLE_LINE2": "2 31698  97.4452 107.6258 0001796  88.6052 271.5388 15.19151402931816",
+                            "SEMIMAJOR_AXIS": "6886.541", "PERIOD": "94.790", "APOAPSIS": "509.643", "PERIAPSIS": "507.169",
+                            "OBJECT_TYPE": "PAYLOAD", "DECAYED": "0"
+                            }
+                        }
+        }],
+    "grid": [{"@type": "autogrid", "@id": 1, "latUpper":2, "latLower":0, "lonUpper":180, "lonLower":-180, "gridRes": 1}, 
+             {"@type": "autogrid", "@id": 2, "latUpper":22, "latLower":20, "lonUpper":180, "lonLower":-180, "gridRes": 1}],
+    "propagator": {"@type": "SGP4 PROPAGATOR", "stepSize": 5},
+    "settings": {"coverageType": "GRID COVERAGE"}
+}
