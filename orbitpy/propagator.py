@@ -153,7 +153,7 @@ class SGP4Propagator(Entity):
 
     The instance variable(s) correspond to the propagator setting(s). 
 
-    :ivar stepSize: Orbit propagation time-step.
+    :ivar stepSize: Orbit propagation time-step in seconds.
     :vartype stepSize: float or None
 
     :ivar _id: Unique identifier.
@@ -305,7 +305,7 @@ class SGP4Propagator(Entity):
         
         ts = load.timescale()
 
-        # If TLE is available, use it to instantiate the Skyfield satellite object, else instantiate the Skyfiled object using the Satrec (sgp4) object. 
+        # If TLE is available, use it to instantiate the Skyfield satellite object, else instantiate the Skyfield object using the Satrec (sgp4) object. 
         if spacecraft.orbitState.tle is not None:
             tle = spacecraft.orbitState.tle
             skyfield_sat = EarthSatellite(tle["tle_line1"], tle["tle_line2"], tle["tle_line0"], ts)

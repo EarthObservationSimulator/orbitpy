@@ -20,6 +20,7 @@ from instrupy.util import ReferenceFrame, SphericalGeometry, GeoUtilityFunctions
 
 DAYS_PER_SEC = 1.1574074074074074074074074074074e-5
 
+
 class CoverageCalculatorFactory:
     """ Factory class which allows to register and invoke the appropriate coverage calculator class. 
     
@@ -153,7 +154,33 @@ def find_in_cov_params_list(cov_param_list, instru_id=None, mode_id=None):
     else:
         raise NoInstrument('cov_param_list input argument is empty.')
 
+def find_access_intervals(inp_acc_fl):
+    """ Read in the access file which contains GP access data for each time index, and return interval data. 
 
+    """
+    # Group by 'GP index' and find continuous access intervals
+    df = pd.read_csv(inp_acc_fl, skiprows=4)   
+    intervals = []
+    for gp, group in df.groupby('GP index'):
+        group = group.sort_values('time index')
+        start_idx = None
+        prev_idx = None
+        for time_idx in group['time index']:
+            if start_idx is None:  # Start of a new interval
+                start_idx = time_idx
+            elif time_idx != prev_idx + 1:  # End of the current interval
+                intervals.append((gp, start_idx, prev_idx - start_idx + 1))  # (GP index, start time, duration)
+                start_idx = time_idx
+            prev_idx = time_idx
+        if start_idx is not None:  # Catch the last interval
+            intervals.append((gp, start_idx, prev_idx - start_idx + 1))
+    
+    # Output the intervals in a readable format
+    #for gp, start, duration in intervals:
+        #print(f"GP index: {gp}, Start time index: {start}, Duration: {duration} time steps")
+    intervals_df = pd.DataFrame(intervals, columns=['GP index', 'Start time index', 'Duration'])
+
+    return intervals_df
 
 def filter_mid_interval_access(inp_acc_df=None, inp_acc_fl=None, out_acc_fl=None):
         """ Extract the access times at middle of access intervals. The input can be a path to a file or a dataframe.
