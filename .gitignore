@@ -50,4 +50,6 @@ TBD/examples/20201024_adcs_paper/*
 TBD/examples/exampleTest/*
 TBD/examples/20201102_500kmSAR/*
 
+# Exceptions to the above rules
 !tests/test_data/*
+!examples/gnssr_conus/Grid_WLFP_Day_1_Aug_1_2020.csv
