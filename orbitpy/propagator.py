@@ -310,7 +310,7 @@ class SGP4Propagator(Entity):
             tle = spacecraft.orbitState.tle
             skyfield_sat = EarthSatellite(tle["tle_line1"], tle["tle_line2"], tle["tle_line0"], ts)
         else:
-            satrec = SGP4Propagator.get_Satrec_object()
+            satrec = SGP4Propagator.get_Satrec_object(spacecraft)
             skyfield_sat = EarthSatellite.from_satrec(satrec, ts) # wrap into a Skyfield object
             #print('Satellite number:', skyfield_sat.model.satnum)
             #print('Skyfield satellite epoch:', skyfield_sat.epoch.utc_jpl())
