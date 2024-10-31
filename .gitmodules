@@ -1,3 +1,3 @@
 [submodule "CoverageKinematics"]
 	path = CoverageKinematics
-	url = git@github.com:EarthObservationSimulator/CoverageKinematics.git
+	url = https://github.com/EarthObservationSimulator/CoverageKinematics.git
