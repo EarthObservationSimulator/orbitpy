@@ -104,6 +104,15 @@ Please contact Vinay (vinay.ravindra@nasa.gov)
 
 ## Developer Tasks
 
+### Restructuring notes
+
+- Need to account for spacecraft bus orientation in coverage calculations 
+- Use datetime module for storing time and time-delta
+- Think about how to represent large volumes of output data (propagation, coverage). Currently it is in the form of files, and file I/O operations are performed. Should we also offer other options?
+- Tag grid points with 'target ids' (similar to indices) 
+- How to ensure unique identifiers for satellties, instruments, grid points, etc?
+- Using Quaternion to represent orientation instead of Euler angles.
+
 ### OrbitPy
 - [ ] SGP4 Propagator validation tests with STK  (or another s/w)
 - [ ] Incorporate artificial image synthesis involving the propcov classes `DiscretizedSensor`, `Projector` and the orbitpy `SensorPixelProjection` module. Add python-tests.
@@ -120,3 +129,4 @@ Please contact Vinay (vinay.ravindra@nasa.gov)
 
 ### Debug Tips
 Errors in the propcov-cpp classes are sometime not visible (i.e. not displayed) when the propcov package is installed. The package installation can happen, but import will not work. In such cases run `make` from propcov-cpp -> tests, and debug any errors.
+
