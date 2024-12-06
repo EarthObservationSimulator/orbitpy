@@ -28,7 +28,7 @@ norad_id = "31698" # Example TerraSARX
 # Specify the target date and time to find the closest OMM (format: YYYY-MM-DDTHH:MM:SS)
 target_datetime = "2024-04-09T01:00:00"
 
-# Retrieve the closest OMM for the specified satellite closest to the target date and time
+# Retrieve the closest OMM for the specified satellite before and closest to the target date and time
 space_track_api.get_closest_omm(norad_id, target_datetime)
 
 # Logout
