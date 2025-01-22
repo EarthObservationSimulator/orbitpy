@@ -250,7 +250,7 @@ class SGP4Propagator(Entity):
         print(skyfield_icrs_position.frame_xyz_and_velocity(TEME)[0].km, skyfield_icrs_position.frame_xyz_and_velocity(TEME)[1].km_per_s)
         (skyfield_teme_pos, skyfield_teme_vel) = skyfield_icrs_position.frame_xyz_and_velocity(TEME)
         
-        # get the mean Keplerian elements from the instantaneous TEME Cartesian coordinates
+        # get the classical orbital elements from the instantaneous TEME Cartesian coordinates
         # https://github.com/brandon-rhodes/python-sgp4/blob/master/sgp4/ext.py
         MU_Earth = 3.986004418e5 # gravitational parameter  km3 / s2
         (_p, _a, _ecc, _incl, _omega, _argp, _nu, _m, _arglat, _truelon, _lonper) = rv2coe(skyfield_teme_pos.km, skyfield_teme_vel.km_per_s, MU_Earth) # note that the angles are in radians
@@ -266,7 +266,7 @@ class SGP4Propagator(Entity):
             Quote: " Note that the Python SGP4 implementation - which is an extremely close port of the official C++ version - strongly recommends 
                   sticking with WGS72 instead of WGS84, see https://pypi.org/project/sgp4/#gravity "
         """
-        satrec = Satrec(spacecraft)
+        satrec = Satrec()
         time_ref = 2433281.500000 # 1949 December 31 00:00 UT
 
         print('satellite TEME Keplerian elements')

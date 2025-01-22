@@ -1063,7 +1063,7 @@ class SpaceTrackAPI:
             print("Session not initialized. Please login first.")
             return
 
-        # URL to retrieve the closest availalble OMM (see the CREATION_DATE and not the EPOCH_DATE) for the specified satellite closest to the target datetime
+        # URL to retrieve the closest available OMM (see the CREATION_DATE and not the EPOCH_DATE) for the specified satellite before and closest to the target datetime
         omm_url = f"https://www.space-track.org/basicspacedata/query/class/omm/NORAD_CAT_ID/{norad_id}/CREATION_DATE/<{target_datetime}/orderby/EPOCH%20desc/limit/1/format/json"
 
         # Send a GET request to retrieve the closest OMM data
@@ -1071,14 +1071,15 @@ class SpaceTrackAPI:
 
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
-            print(f"Closest *available* OMM data for satellite with NORAD ID {norad_id} *at* {target_datetime}:")
             closest_omm = response.json()
             if closest_omm:
-                print(json.dumps(closest_omm, indent=4))
+                #print(f"Closest *available* OMM data for satellite with NORAD ID {norad_id} *at* {target_datetime}:")
+                #print(json.dumps(closest_omm, indent=4))
+                return closest_omm[0] # dictionary in a list is returned
             else:
-                print("No OMM found")
+                print(f"No OMM found for satellite with NORAD ID {norad_id}. It is possible the satellite has been launched after the specified target date-time.")
         else:
-            print(f"Failed to retrieve closest OMM data for satellite with NORAD ID {norad_id}")
+            print(f"Failed to retrieve OMM data for satellite with NORAD ID {norad_id}")
 
     def logout(self):
         if not self.session:
