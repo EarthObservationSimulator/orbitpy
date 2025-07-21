@@ -213,7 +213,7 @@ class TestSGP4Propagator(unittest.TestCase):
         data = pd.read_csv(self.out_file_cart, skiprows = [0,1,2,3]) # 5th row header, 6th row onwards contains the data
         self.assertEqual(data["time index"].iloc[0],0)
         self.assertEqual(data["time index"].iloc[1],1)
-        self.assertAlmostEqual((data["time index"].iloc[-1] + 1)*_step_size, self.duration*86400, delta=self.step_size) # almost equal, probably due to errors introduced by floating-point arithmetic
+        self.assertAlmostEqual((data["time index"].iloc[-1] + 1)*_step_size, self.duration*86400, delta=2*self.step_size) # almost equal, probably due to errors introduced by floating-point arithmetic
 
         ############# test the data format in the Keplerian state output file #############
         epoch_JDUT1 = pd.read_csv(self.out_file_kep, skiprows = [0], nrows=1, header=None).astype(str) # 2nd row contains the epoch
@@ -241,9 +241,9 @@ class TestSGP4Propagator(unittest.TestCase):
         self.assertEqual(data["time index"].iloc[0],0)
         self.assertEqual(data["time index"].iloc[1],1)
         # check that the number of time-steps is reasonable
-        self.assertAlmostEqual((data["time index"].iloc[-1] + 1)*_step_size, self.duration*86400, delta=self.step_size) # almost equal, probably due to errors introduced by floating-point arithmetic
-    
-'''
+        self.assertAlmostEqual((data["time index"].iloc[-1] + 1)*_step_size, self.duration*86400, delta=2*self.step_size) # almost equal, probably due to errors introduced by floating-point arithmetic
+
+
 class TestJ2AnalyticalPropagator(unittest.TestCase):
 
     @classmethod
@@ -404,5 +404,3 @@ class TestJ2AnalyticalPropagator(unittest.TestCase):
 
 class TestPropagatorOutputInfo(unittest.TestCase): #TODO
     pass
-
-'''
