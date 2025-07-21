@@ -288,7 +288,7 @@ class WalkerDeltaConstellation(Entity):
                 state_dict = {"@type":"KEPLERIAN_EARTH_CENTERED_INERTIAL",  "sma": sma, "ecc": ecc, "inc": inc, "raan": raan, "aop": aop, "ta": ta}
                 state = OrbitState.state_from_dict(state_dict)
                 # append to list of orbits
-                orbits.append(OrbitState(date, state, orb_id))
+                orbits.append(OrbitState(date=date, state=state, tle=None, _id=orb_id))
                 print('{orb_id}, {sma}, {ecc}, {inc}, {raan}, {aop}, {ta}'.format(orb_id=orb_id, sma=sma, ecc=ecc, inc=inc, raan=raan, aop=aop, ta=ta))
         print(".......Done.......")
         return orbits
