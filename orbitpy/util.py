@@ -9,6 +9,7 @@ import numpy as np
 import uuid
 from collections import namedtuple
 import pandas as pd
+from datetime import datetime
 
 import requests
 import json
@@ -1058,14 +1059,22 @@ class SpaceTrackAPI:
         else:
             print("Login failed")
 
-    def get_closest_omm(self, norad_id, target_datetime):
+    def get_closest_omm(self, norad_id, target_date_time):
         if not self.session:
             print("Session not initialized. Please login first.")
             return
 
+        # Validate that target_date_time is a string in the format %Y-%m-%dT%H:%M:%S
+        try:
+            tdt_datetime = datetime.strptime(target_date_time, "%Y-%m-%dT%H:%M:%S") # datetime object
+            tdt = tdt_datetime.strftime("%Y-%m-%dT%H:%M:%S") #ensure the format is correct
+        except ValueError:
+            print("Invalid target_date_time format. It should be a string in the format '%Y-%m-%dT%H:%M:%S'. E.g., 2024-04-09T01:00:00")
+            return
+        
         # URL to retrieve the closest available OMM (see the CREATION_DATE and not the EPOCH_DATE) for the specified satellite before and closest to the target datetime
-        omm_url = f"https://www.space-track.org/basicspacedata/query/class/omm/NORAD_CAT_ID/{norad_id}/CREATION_DATE/<{target_datetime}/orderby/EPOCH%20desc/limit/1/format/json"
-
+        omm_url = f"https://www.space-track.org/basicspacedata/query/class/omm/NORAD_CAT_ID/{norad_id}/CREATION_DATE/<{tdt}/orderby/EPOCH%20desc/limit/1/format/json"
+        
         # Send a GET request to retrieve the closest OMM data
         response = self.session.get(omm_url)
 
@@ -1073,8 +1082,19 @@ class SpaceTrackAPI:
         if response.status_code == 200:
             closest_omm = response.json()
             if closest_omm:
-                #print(f"Closest *available* OMM data for satellite with NORAD ID {norad_id} *at* {target_datetime}:")
+                #print(f"Closest *available* OMM data for satellite with NORAD ID {norad_id} *at* {tdt}:")
                 #print(json.dumps(closest_omm, indent=4))
+                result_omm = closest_omm[0]
+                retrieved_CD = result_omm['CREATION_DATE']
+                retrieved_CD_datetime = datetime.strptime(retrieved_CD, "%Y-%m-%dT%H:%M:%S") # convert to datetime object
+                # Make sure that the retrieved CREATION_DATE is before the target date-time
+                if retrieved_CD_datetime > tdt_datetime:
+                    raise ValueError(f"The retrieved OMM CREATION_DATE {retrieved_CD} is after the target date-time {tdt}. Something wrong.")
+                # Check if the retrieved CREATION_DATE is more than 1 day before the target date-time
+                if (tdt_datetime - retrieved_CD_datetime).days > 1:
+                    raise ValueError(f"The retrieved OMM CREATION_DATE {retrieved_CD} is not within 1 day before the target date-time {tdt}. Something wrong.")
+
+                #print(f"Closest *available* OMM data for satellite with NORAD ID {norad_id} *at* {tdt} (CREATION_DATE: {retrieved_CD}):")
                 return closest_omm[0] # dictionary in a list is returned
             else:
                 print(f"No OMM found for satellite with NORAD ID {norad_id}. It is possible the satellite has been launched after the specified target date-time.")
