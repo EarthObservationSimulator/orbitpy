@@ -106,12 +106,13 @@ import pandas as pd
 import csv
 import time
 
-from orbitpy.util import OrbitState, Spacecraft
+from orbitpy.util import GroundStation, OrbitState, Spacecraft
 from orbitpy.propagator import J2AnalyticalPropagator
 from orbitpy.coveragecalculator import GridCoverage
 from orbitpy.datametricscalculator import DataMetricsCalculator, AccessFileInfo
 from orbitpy.eclipsefinder import EclipseFinder
 from orbitpy.grid import Grid
+from orbitpy.contactfinder import ContactFinder
 
 SAT_SELECTION = 3
 
@@ -310,11 +311,31 @@ instru_dict = { "orientation": {"referenceFrame": "SC_BODY_FIXED", "convention":
 
 spacecraft_bus_dict = {"orientation":{"referenceFrame": "NADIR_POINTING", "convention": "REF_FRAME_ALIGNED"}}
 
+# source: https://explorers.larc.nasa.gov/2023ESE/pdf_files/NENUG%20Rev4.pdf
+ground_station_list = [
+                GroundStation.from_dict({"@id":"gs1", "name": "FairbanksAlaska", "latitude": 64.8587, "longitude": -147.8576, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs2", "name": "NorthPoleAlaska", "latitude": 64.8042, "longitude": -147.5002, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs3", "name": "Florida", "latitude": 28.542064, "longitude": -80.642953, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs4", "name": "HartebeesthoekSouthAfrica", "latitude": -25.8870, "longitude": 27.7120, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs5", "name": "SouthPointHawaii", "latitude": 19.0140, "longitude": -155.6633, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs6", "name": "DongaraAustralia", "latitude": -29.0457, "longitude": 115.3487, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs7", "name": "KirunaSweden", "latitude": 67.8896, "longitude": 21.0657, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs8", "name": "AntarcticaMcMurdo", "latitude": -77.8391, "longitude": 166.6671, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs9", "name": "AntarcticaKSAT", "latitude": -72.0022, "longitude": 2.0575, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs10", "name": "NorwayKSAT", "latitude": 78.2310, "longitude": 15.3890, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs11", "name": "SantiagoChile", "latitude": -33.1511, "longitude": -70.6664, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs12", "name": "Singapore", "latitude": 1.3962, "longitude": 103.8343, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs13", "name": "WallopsIslandVirginia", "latitude": 37.9249, "longitude": -75.4765, "altitude": 0.0}),
+                GroundStation.from_dict({"@id":"gs14", "name": "WhiteSandsNewMexico", "latitude": 32.5047, "longitude": -106.6108, "altitude": 0.0})
+            ]
+
+
 sat = None
 sat_dir = None
 
 if SAT_SELECTION==1:
-    sat = Spacecraft.from_dict({"spacecraftBus": spacecraft_bus_dict,
+    sat = Spacecraft.from_dict({"@id": "sat1", 
+                                "spacecraftBus": spacecraft_bus_dict,
                                 "orbitState": {"date": epoch_dict,
                                                 "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 0}
                                             },
@@ -322,7 +343,8 @@ if SAT_SELECTION==1:
                                 })
     sat_dir = wdir + '/sat1/'
 elif SAT_SELECTION==2:
-    sat = Spacecraft.from_dict({"spacecraftBus": spacecraft_bus_dict,
+    sat = Spacecraft.from_dict({"@id": "sat2",
+                                "spacecraftBus": spacecraft_bus_dict,
                                 "orbitState": {"date": epoch_dict,
                                                 "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 120}
                                             },
@@ -331,7 +353,8 @@ elif SAT_SELECTION==2:
     sat_dir = wdir + '/sat2/'
 
 elif SAT_SELECTION==3:
-    sat = Spacecraft.from_dict({"spacecraftBus": spacecraft_bus_dict,
+    sat = Spacecraft.from_dict({"@id": "sat3",
+                                "spacecraftBus": spacecraft_bus_dict,
                                 "orbitState": {"date": epoch_dict,
                                                 "state":{"@type": "KEPLERIAN_EARTH_CENTERED_INERTIAL", "sma": 6878.1369999999997162, "ecc": 0.0, "inc": 89, "raan": 0, "aop": 0, "ta": 240}
                                             },
@@ -351,7 +374,7 @@ instru_id = sat.instrument[0]._id
 mode_id = sat.instrument[0].mode[0]._id
 
 # Since amount of data produced is large, the simulation and the resulting data files are split into 6hr chunks.
-for k in range(0,8):
+for k in range(0,12):
 
     print('processing for {} hrs'.format(k*6))
 
@@ -376,6 +399,17 @@ for k in range(0,8):
     out_info.append(x) 
     print('finished eclipse finder, time until now: {}s'.format(time.process_time() - start_time))
 
+    print("start ground station contact")
+    dates_list = ['20200104T013000Z','20200104T073000Z' , '20200104T133000Z' , '20200104T193000Z',
+                    '20200105T073000Z','20200105T133000Z', '20200105T193000Z', '20200105T013000Z',
+                    '20200106T133000Z','20200106T193000Z', '20200106T013000Z', '20200106T073000Z']
+    for gs in ground_station_list:
+        print('contact finder for ground station: {}'.format(gs._id))
+        contact_filename = 'contact_' + gs._id + '_' + str(6*k) + 'hrs' +'.csv'
+        #contact_filename = 'contact_' + gs._id + '_' + dates_list[k] +'.csv'
+        x = ContactFinder.execute(sat, gs, sat_dir, state_cart_file, None, contact_filename, ContactFinder.OutType.INTERVAL, 0)
+        out_info.append(x) 
+    print('finished ground station contact finder, time until now: {}s'.format(time.process_time() - start_time))
     
     print("start coverage")
     acc_fl = sat_dir + 'access_instru_sar_' + str(6*k) + 'hrs.csv'
@@ -399,6 +433,8 @@ for k in range(0,8):
     assign_pointing_bins(dm_file, 25, lsar_acc_fp) 
     assign_pointing_bins(dm_file, 50, psar_acc_fp) 
     print('stop binning, time until now: {}s'.format(time.process_time() - start_time))
+    
+    
     
 
 
